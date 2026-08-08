@@ -4,7 +4,7 @@ Working guide for AI agents (and humans) contributing to **SMP Dashboard**. Read
 
 ## Project overview
 
-SMP Dashboard is a school-management web app for Latin American institutions. It is a **vanilla JavaScript (ES modules) multi-page app built with Vite** — there is **no frontend framework** (no React/Vue). Data comes from **Supabase** (Postgres, RLS, Auth, Realtime) and it deploys on **Vercel**.
+SMP Dashboard is a school-management web app for Costa Rican schools. It is a **vanilla JavaScript (ES modules) multi-page app built with Vite** — there is **no frontend framework** (no React/Vue). Data comes from **Supabase** (Postgres, RLS, Auth, Realtime) and it deploys on **Vercel**.
 
 Four HTML entry points, each with its own controller in `src/js/`:
 

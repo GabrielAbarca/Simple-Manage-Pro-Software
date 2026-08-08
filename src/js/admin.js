@@ -567,10 +567,12 @@ function optionsFrom(list, labelFn, valueKey = "id") {
 const fmtDate = (value) => (value ? formatDate(value) : "—");
 
 // ── School profile (name + per-school ID label) ────────────────
-// The national-ID field is called something different in every country
-// ("Cédula", "DUI", "Carné"), so its label comes from school_settings with
-// the translated default as the fallback. Deliberately NOT a general
-// custom-fields system — one configurable label, nothing more.
+// The default is "Cédula", but Costa Rican schools don't all put the same
+// number in that column: private colegios with foreign families ask for the
+// DIMEX, and some register students by carné until a cédula exists. So the
+// label comes from school_settings with the translated default as the
+// fallback. Deliberately NOT a general custom-fields system — one
+// configurable label, nothing more.
 
 /** True once the settings row has been read (or found unavailable). */
 let schoolLoaded = false;

@@ -2,8 +2,9 @@
 --  incremental_school_settings.sql
 --
 --  One row per school project holding its identity and the few labels
---  that differ between countries: what the national-ID field is called
---  ("Cédula" in Costa Rica, "DUI" in El Salvador, or just "School ID").
+--  that differ between schools: what the national-ID field is called
+--  ("Cédula" by default, "DIMEX" where foreign students are the norm,
+--  or a school-issued "Carné").
 --
 --  Deliberately NOT a general custom-fields system. It is a single row
 --  (`check (id = 1)`), which keeps it compatible with the admin console's

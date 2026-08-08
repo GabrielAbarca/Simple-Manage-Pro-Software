@@ -33,8 +33,9 @@ create table public.app_config (
   value text not null
 );
 
--- Single-row school identity + per-country terminology (what the national-ID
--- field is called here). Not a general custom-fields system; `check (id = 1)`
+-- Single-row school identity + per-school terminology (what the national-ID
+-- field is called here — "Cédula", "DIMEX", a school-issued "Carné").
+-- Not a general custom-fields system; `check (id = 1)`
 -- keeps it compatible with the console's id-keyed table gateway.
 create table public.school_settings (
   id integer primary key default 1 check (id = 1),

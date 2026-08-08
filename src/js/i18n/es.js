@@ -559,7 +559,7 @@ export default {
       photoUrl: "URL de foto",
       class: "Clase",
       status: "Estado",
-      nationalIdFull: "Identificación (cédula/DUI)",
+      nationalIdFull: "Cédula",
       nationalIdHelp: "Gestionado por la administración: solo lectura aquí.",
       enrollmentPlaceholder: "p. ej. 2024-001",
       name: "Nombre",
@@ -715,7 +715,7 @@ export default {
       namePlaceholder: "Colegio San José",
       idLabel: "Etiqueta del campo de identificación",
       idLabelHelp:
-        'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DUI", "Carné"). Déjalo en blanco para usar el predeterminado.',
+        'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DIMEX", "Carné"). Déjalo en blanco para usar el predeterminado.',
       saved: "Perfil de la escuela guardado.",
       unavailable:
         "El almacenamiento del perfil de la escuela aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",

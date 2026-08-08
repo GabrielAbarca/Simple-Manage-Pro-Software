@@ -6,10 +6,14 @@
 //  admin console (inline, before a write) and — for the dates — again by
 //  a database trigger (supabase/schema/incremental_grading_period_bounds.sql).
 //
-//  Weights are stored as numeric(5,2), and a real three-period year is
-//  33.33 / 33.33 / 33.34. Summing those as floats yields 99.99999999…,
-//  so every total is rounded to two decimals before being compared to
-//  100 — otherwise a correctly weighted year would be rejected.
+//  How many periods a year has is up to the school: Costa Rica's MEP
+//  calendar runs two periodos at 50/50, while a colegio on three
+//  trimestres splits 33.33 / 33.33 / 33.34. Nothing here assumes a count.
+//
+//  The three-period split is why rounding matters: weights are stored as
+//  numeric(5,2), and summing 33.33 / 33.33 / 33.34 as floats yields
+//  99.99999999…, so every total is rounded to two decimals before being
+//  compared to 100 — otherwise a correctly weighted year would be rejected.
 // ─────────────────────────────────────────────────────────────────
 
 /** Column precision of grading_periods.weight — numeric(5,2). */
@@ -48,6 +52,19 @@ export function totalWeight(periods, opts = {}) {
     sum += Number(extraWeight);
   }
   return roundWeight(sum);
+}
+
+/**
+ * How much weight a year still has unclaimed — what a new period should take
+ * to land the year on exactly 100%. Clamped at 0 so an already-overweight year
+ * can't suggest a negative default.
+ * @param {Array<{ id?: number, weight?: number|string|null }>} periods
+ * @param {{ excludeId?: number|null }} [opts] drop the row being edited
+ * @returns {number} rounded to two decimals
+ */
+export function remainingWeight(periods, opts = {}) {
+  const used = totalWeight(periods, { excludeId: opts.excludeId ?? null });
+  return roundWeight(Math.max(0, TARGET_WEIGHT - used));
 }
 
 /**

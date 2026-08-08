@@ -267,11 +267,10 @@
             <h2 data-i18n="student.dash.gradeOverview">Grade Overview</h2>
             <table id="dashboard-grade-table">
               <thead>
-                <tr>
+                <!-- Columns are one per grading period + Average, filled in by
+                     main.js once the year's periods load. -->
+                <tr id="dashboard-grade-head">
                   <th data-i18n="student.dash.subject">Subject</th>
-                  <th data-i18n="student.dash.term1">Term 1</th>
-                  <th data-i18n="student.dash.term2">Term 2</th>
-                  <th data-i18n="student.dash.term3">Term 3</th>
                   <th data-i18n="student.dash.average">Average</th>
                 </tr>
               </thead>

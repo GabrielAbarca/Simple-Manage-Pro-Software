@@ -202,8 +202,14 @@ if (teacherPortalLink) {
 }
 
 // Where each view's failure notice goes, and whether it has to be a table row.
+// The dashboard's colspan is a function: its table is subject + one column per
+// grading period + Average, so the width isn't known until the periods load
+// (and a failure before that falls back to the markup's two static columns).
 const VIEW_ERROR_TARGETS = {
-  dashboard: { selector: "#dashboard-grades-body", colspan: 5 },
+  dashboard: {
+    selector: "#dashboard-grades-body",
+    colspan: () => PERIODS.length + 2,
+  },
   grades: { selector: "#grades-body", colspan: 6 },
   attendance: { selector: "#attendance-body", colspan: 5 },
   schedule: { selector: "#schedule-grid" },
@@ -221,8 +227,10 @@ function renderViewError(page) {
 
   const message = t("common.loadError");
   const retry = t("common.retry");
-  host.innerHTML = target.colspan
-    ? errorRow(target.colspan, message, retry)
+  const colspan =
+    typeof target.colspan === "function" ? target.colspan() : target.colspan;
+  host.innerHTML = colspan
+    ? errorRow(colspan, message, retry)
     : errorState(message, retry);
 
   host.querySelector("[data-retry]")?.addEventListener("click", () => {
@@ -282,6 +290,20 @@ function getEvents() {
   return eventsPromise;
 }
 
+// The year's grading periods, shared by the dashboard's Grade Overview columns
+// and the Grades view's period picker. Memoized for the same reason as events:
+// both callers want the same rows, and neither should re-fetch them. How many
+// there are is a property of the school year — Costa Rica's MEP calendar runs
+// two periodos — so nothing downstream may assume a count.
+let periodsPromise = null;
+function getGradingPeriods() {
+  if (!periodsPromise) periodsPromise = fetchGradingPeriods(schoolYearId);
+  return periodsPromise;
+}
+
+/** Periods in display order, resolved. Empty until the fetch lands. */
+let PERIODS = [];
+
 async function initDashboard() {
   // Warm the events request now so it overlaps the profile + stats fetches
   // below; renderUpcomingEvents() awaits this same in-flight promise.
@@ -298,6 +320,10 @@ async function initDashboard() {
   const cls = studentProfile.classes;
   schoolYearId = cls?.school_years?.id;
   classId = cls?.id;
+
+  // Needed before the Grade Overview table renders — its columns are one per
+  // period. Warmed here, after schoolYearId is known and before the stats await.
+  PERIODS = await getGradingPeriods();
 
   document.getElementById("student-name").textContent =
     `${studentProfile.first_name} ${studentProfile.last_name}`;
@@ -351,11 +377,36 @@ async function initDashboard() {
   renderSubjectAnalytics(stats.allGrades);
 }
 
+// Subject × period header for the Grade Overview: the year's periods by their
+// own names, then Average. Called before the body so an empty-state colspan
+// still matches the column count.
+function renderDashboardGradeHead() {
+  const head = document.getElementById("dashboard-grade-head");
+  if (!head) return;
+  // Built as nodes rather than innerHTML: period names come from the database,
+  // and textContent escapes them without main.js needing an escapeHtml of its
+  // own (the helper is private to admin.js/teacher.js).
+  head.replaceChildren(
+    ...[
+      t("student.dash.subject"),
+      ...PERIODS.map((p) => p.name),
+      t("student.dash.average"),
+    ].map((label) => {
+      const th = document.createElement("th");
+      th.textContent = label;
+      return th;
+    }),
+  );
+}
+
 function renderDashboardGradeTable(grades) {
   const tbody = document.getElementById("dashboard-grades-body");
 
+  renderDashboardGradeHead();
+  const cols = PERIODS.length + 2;
+
   if (!grades || grades.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="loading-cell">${t("student.grades.dashEmpty")}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${cols}" class="loading-cell">${t("student.grades.dashEmpty")}</td></tr>`;
     return;
   }
 
@@ -379,10 +430,9 @@ function renderDashboardGradeTable(grades) {
 
   tbody.innerHTML = Object.values(bySubject)
     .map((subj) => {
-      const p1 = subj.periods[1];
-      const p2 = subj.periods[2];
-      const p3 = subj.periods[3];
-      const scores = [p1, p2, p3].filter((s) => s !== undefined);
+      const scores = PERIODS.map((p) => subj.periods[p.period_order]).filter(
+        (s) => s !== undefined,
+      );
       const avg =
         scores.length > 0
           ? Math.round(
@@ -394,9 +444,10 @@ function renderDashboardGradeTable(grades) {
       <td style="text-align:left;">
         <span class="subject-dot" style="background:${subj.color}"></span>${subj.name}
       </td>
-      <td>${p1 !== undefined ? scoreHtml(p1) : "—"}</td>
-      <td>${p2 !== undefined ? scoreHtml(p2) : "—"}</td>
-      <td>${p3 !== undefined ? scoreHtml(p3) : "—"}</td>
+      ${PERIODS.map((p) => {
+        const score = subj.periods[p.period_order];
+        return `<td>${score !== undefined ? scoreHtml(score) : "—"}</td>`;
+      }).join("")}
       <td>${avg !== null ? scoreHtml(avg) : "—"}</td>
     </tr>`;
     })
@@ -409,7 +460,7 @@ async function initGrades() {
     schoolYearId = profile?.classes?.school_years?.id;
   }
 
-  const periods = await fetchGradingPeriods(schoolYearId);
+  const periods = await getGradingPeriods();
   const select = document.getElementById("period-select");
   periods.forEach((p) => {
     const opt = document.createElement("option");

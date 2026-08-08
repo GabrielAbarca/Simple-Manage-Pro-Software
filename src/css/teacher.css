@@ -1054,7 +1054,13 @@
   .roster-row-cells {
     flex: 1;
     display: grid;
-    grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
+    /* --roster-cols = one column per grading period + Overall, set on
+       #roster-list from the loaded periods (teacher.js → rosterColsStyle).
+       The fallback keeps the grid sane if the periods haven't loaded yet. */
+    grid-template-columns: minmax(0, 2fr) repeat(
+        var(--roster-cols, 3),
+        minmax(0, 1fr)
+      );
     align-items: center;
     gap: 0.8rem;
     padding: 1rem;

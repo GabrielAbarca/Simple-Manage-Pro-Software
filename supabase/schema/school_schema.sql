@@ -184,7 +184,7 @@ create table public.grading_periods (
   name character varying(50) not null,
   start_date date not null,
   end_date date not null,
-  weight numeric(5,2) default 33.33,
+  weight numeric(5,2) default 50.00,
   period_order integer not null,
   unique (school_year_id, period_order)
 );

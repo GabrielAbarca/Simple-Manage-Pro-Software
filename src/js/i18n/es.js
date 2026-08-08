@@ -271,9 +271,6 @@ export default {
     dash: {
       gradeOverview: "Resumen de calificaciones",
       subject: "Materia",
-      term1: "I Período",
-      term2: "II Período",
-      term3: "III Período",
       average: "Promedio",
     },
     grades: {
@@ -368,9 +365,6 @@ export default {
       searchPlaceholder: "Buscar en esta lista…",
       addStudent: "Agregar estudiante",
       name: "Nombre",
-      p1: "Nota P1",
-      p2: "Nota P2",
-      p3: "Nota P3",
       overall: "Nota general",
       empty: "No hay estudiantes en esta sección.",
     },
@@ -712,7 +706,7 @@ export default {
       title: "Perfil de la escuela",
       subtitle: "Identidad y terminología que usa la consola.",
       name: "Nombre de la escuela",
-      namePlaceholder: "Colegio San José",
+      namePlaceholder: "Nombre del colegio",
       idLabel: "Etiqueta del campo de identificación",
       idLabelHelp:
         'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DIMEX", "Carné"). Déjalo en blanco para usar el predeterminado.',

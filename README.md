@@ -1,7 +1,7 @@
 <div align="center">
   <img width="715" height="206" alt="SMP-dashboard-logo" src="https://github.com/user-attachments/assets/f16f1a37-397e-4341-ae79-e2bc69ba6c7a" />
   <h1>SMP Dashboard</h1>
-  <p><strong>A full-featured school management dashboard for Latin American institutions —<br/>built on a 18-table PostgreSQL schema with real-time data via Supabase.</strong></p>
+  <p><strong>A full-featured school management dashboard for Costa Rican schools —<br/>built on a 27-table PostgreSQL schema with real-time data via Supabase.</strong></p>
 
   <br/>
 
@@ -31,9 +31,9 @@
 
 ## 🧩 What is SMP?
 
-SMP Dashboard is a web-based school management platform designed around the operational structure of Latin American high schools. It gives administrators and staff a centralized view of everything happening across an institution. From class schedules and teacher assignments to student grades, attendance records, and upcoming events.
+SMP Dashboard is a web-based school management platform designed around the operational structure of Costa Rican secondary schools (colegios). It gives administrators and staff a centralized view of everything happening across an institution. From class schedules and teacher assignments to student grades, attendance records, and upcoming events.
 
-The project targets real data complexity: the underlying PostgreSQL schema spans **18 tables** to model academic periods, course sections and enrollment. All served in real time through Supabase.
+The project targets real data complexity: the underlying PostgreSQL schema spans **27 tables** to model grading periods, course sections and enrollment. All served in real time through Supabase.
 
 ---
 
@@ -70,21 +70,21 @@ The project targets real data complexity: the underlying PostgreSQL schema spans
 
 ## 🗄️ Database Architecture
 
-The schema is designed around the structure of a Latin American school system, separating concerns across academic, administrative, and scheduling domains.
+The schema is designed around the structure of the Costa Rican school system — a February-to-December _curso lectivo_ split into two _periodos_ — separating concerns across academic, administrative, and scheduling domains.
 
 ```
 Core entities (partial):
-├── institutions
-├── academic_periods
+├── school_years           ← the curso lectivo
+├── grading_periods        ← two periodos per year
 ├── grade_levels
-├── sections
+├── classes                ← a grade level's sections
 ├── subjects
-├── enrollments          ← students ↔ sections
-├── teacher_assignments  ← teachers ↔ subjects ↔ sections
-├── attendance_records
-├── grade_records
+├── students               ← enrolled into a class
+├── class_subject_teachers ← teachers ↔ subjects ↔ classes
+├── attendance
+├── student_grades
 ├── events
-└── ... (18 tables total)
+└── ... (27 tables total)
 ```
 
 > 💡 **Design decision:** Row Level Security (RLS) policies are enforced at the database level — not just the application layer — so each role (admin, teacher, student) can only read and write the rows they own, regardless of how the frontend queries Supabase.
@@ -158,7 +158,7 @@ The end-to-end suite is fully self-contained: it boots the app with placeholder 
 
 - **RLS policy conflicts** — early schema versions had overlapping policies causing silent read failures; resolved by auditing policy targets per role and table combination
 - **IPv6 connection errors on Vercel** — Supabase's direct connection doesn't support IPv6; fixed by switching to the Session Mode pooler URL
-- **18-table relational schema** — modeling Latin American school structures (multi-period, multi-section, multi-role) without redundant data required several rounds of table-structuring before the schema stabilized
+- **27-table relational schema** — modeling Costa Rican school structures (multi-period, multi-section, multi-role) without redundant data required several rounds of table-structuring before the schema stabilized
 
 ---
 

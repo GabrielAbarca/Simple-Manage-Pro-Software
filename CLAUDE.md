@@ -68,12 +68,18 @@ schema is managed out of band, so a tracked migrations dir would make the
 Supabase↔GitHub integration report a history mismatch. Apply schema artifacts
 by hand (dashboard / CLI) per `docs/ONBOARDING_RUNBOOK.md`.
 
-Three of those artifacts are operational rather than structural:
+Four of those artifacts are operational rather than structural:
 
 - `demo_lockdown.sql` — restrictive `demo_deny_*` policies making the demo
   project read-only server-side. **Demo project only**; re-run after any
   schema change (it loops over the live table catalog, so new tables get
   locked too).
+- `demo_seed_costa_rica.sql` — the demo project's Costa Rican content: school
+  identity, a Feb–Dec `curso lectivo`, two `periodos`, CR names and
+  cédula-format ids. **Demo project only** — it refuses to run on a project
+  without the `demo_deny_*` lockdown and `demo_teacher_id()`. One atomic DO
+  block, idempotent, and it asserts a period is empty before deleting it
+  (`student_grades` cascades from `grading_periods`).
 - `incremental_profile_role_guard.sql` — trigger stopping a user from editing
   their own `profiles.role`. RLS chooses rows, not columns, so without it any
   signed-in user could PATCH themselves to `admin` with the browser's anon key.

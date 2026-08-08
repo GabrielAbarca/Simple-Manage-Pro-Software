@@ -30,7 +30,7 @@ const teacher = {
   first_name: "Sofía",
   last_name: "Ramírez",
   specialization: "Mathematics",
-  national_id: "0801-1990-00000",
+  national_id: "1-1054-0378",
   email: "sofia@example.com",
   phone: "555-0100",
   address: "San José",

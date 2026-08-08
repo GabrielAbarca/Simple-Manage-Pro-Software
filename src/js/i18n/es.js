@@ -271,9 +271,6 @@ export default {
     dash: {
       gradeOverview: "Resumen de calificaciones",
       subject: "Materia",
-      term1: "I Período",
-      term2: "II Período",
-      term3: "III Período",
       average: "Promedio",
     },
     grades: {
@@ -368,9 +365,6 @@ export default {
       searchPlaceholder: "Buscar en esta lista…",
       addStudent: "Agregar estudiante",
       name: "Nombre",
-      p1: "Nota P1",
-      p2: "Nota P2",
-      p3: "Nota P3",
       overall: "Nota general",
       empty: "No hay estudiantes en esta sección.",
     },
@@ -559,7 +553,7 @@ export default {
       photoUrl: "URL de foto",
       class: "Clase",
       status: "Estado",
-      nationalIdFull: "Identificación (cédula/DUI)",
+      nationalIdFull: "Cédula",
       nationalIdHelp: "Gestionado por la administración: solo lectura aquí.",
       enrollmentPlaceholder: "p. ej. 2024-001",
       name: "Nombre",
@@ -712,10 +706,10 @@ export default {
       title: "Perfil de la escuela",
       subtitle: "Identidad y terminología que usa la consola.",
       name: "Nombre de la escuela",
-      namePlaceholder: "Colegio San José",
+      namePlaceholder: "Nombre del colegio",
       idLabel: "Etiqueta del campo de identificación",
       idLabelHelp:
-        'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DUI", "Carné"). Déjalo en blanco para usar el predeterminado.',
+        'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DIMEX", "Carné"). Déjalo en blanco para usar el predeterminado.',
       saved: "Perfil de la escuela guardado.",
       unavailable:
         "El almacenamiento del perfil de la escuela aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",

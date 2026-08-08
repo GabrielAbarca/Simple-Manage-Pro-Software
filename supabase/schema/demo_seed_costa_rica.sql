@@ -1,0 +1,353 @@
+-- ═══════════════════════════════════════════════════════════════
+--  Demo content — Costa Rica
+--  ⚠ DEMO PROJECT ONLY — never run this on a school project.
+-- ═══════════════════════════════════════════════════════════════
+--
+-- The public demo was seeded with Venezuelan content: `V-` prefixed cédulas
+-- (Venezuela's format), three "Lapso" grading periods ("lapso" is the
+-- Venezuelan term; Costa Rica says "periodo"), a September–July school year,
+-- and Carnaval as a school holiday. The product claims to be built for Costa
+-- Rica, and the demo is what a visitor actually sees, so the demo has to say
+-- the same thing the source does.
+--
+-- WHAT THIS CHANGES
+--   · school identity — a name at all (it was NULL) + id_label 'Cédula'
+--   · school year     — '2026', Feb→Dec, the CR *curso lectivo* shape
+--   · grading periods — two periodos at 50/50, replacing three lapsos
+--   · grade levels    — Décimo / Undécimo / Duodécimo
+--   · people          — CR names with two apellidos, cédula-format ids
+--   · events          — the CR school calendar, no lapso references
+--   · stray dates     — rows left in 2024/2025 pulled into the 2026 year
+--
+-- WHY 10th–12th GRADE IS CORRECT HERE
+--   Costa Rica's *académica* track ends at undécimo (11th). The *técnico*
+--   track runs a twelfth year, so this demo is a Colegio Técnico Profesional
+--   and its existing 10/11/12 structure is right as-is rather than needing
+--   to be renumbered.
+--
+-- WHY IT IS ALL UPDATE AND NEVER DELETE-AND-REINSERT
+--   students.auth_user_id backs the demo student login, and
+--   app_config.demo_teacher_id pins a teacher row by id (teacher 1). Editing
+--   in place keeps those links and every FK in attendance, student_grades,
+--   schedules and class_subject_teachers intact.
+--
+-- HOW TO RUN
+--   Supabase Dashboard → SQL Editor → paste → Run, on the DEMO project.
+--   One DO block, so it is atomic: any failed assertion rolls the whole thing
+--   back rather than leaving the demo half-localized. Idempotent — re-running
+--   finds nothing left to change and passes its own checks.
+--
+--   It refuses to run on a project without the demo_deny_* lockdown and
+--   demo_teacher_id(), so the DEMO-ONLY warning above is enforced, not just
+--   advisory. Re-running demo_lockdown.sql afterwards is NOT needed: this
+--   adds no tables.
+--
+-- Names here are invented. Do not substitute a real Costa Rican school's
+-- name or a real person's — this is a public demo.
+-- ═══════════════════════════════════════════════════════════════
+
+do $$
+declare
+  y_id     integer;
+  blockers integer;
+  bad      integer;
+  n        integer;
+begin
+  -- ── 0. Refuse to run anywhere but the demo ──────────────────
+  if not exists (
+    select 1 from pg_policies
+     where schemaname = 'public' and policyname = 'demo_deny_insert'
+  ) then
+    raise exception
+      'REFUSING TO RUN: no demo_deny_* policies on this project. '
+      'This does not look like the demo — check the project ref.';
+  end if;
+
+  if not exists (
+    select 1 from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+     where ns.nspname = 'public' and p.proname = 'demo_teacher_id'
+  ) then
+    raise exception
+      'REFUSING TO RUN: demo_teacher_id() is missing. That RPC exists only on '
+      'the demo project — check the project ref.';
+  end if;
+
+  -- ── 1. School identity ──────────────────────────────────────
+  -- Both columns were NULL, so the demo rendered a nameless school and the
+  -- default ID label. Setting id_label also exercises the per-school label.
+  update public.school_settings
+     set name     = 'Colegio Técnico Profesional SMP',
+         id_label = 'Cédula'
+   where id = 1;
+
+  -- ── 2. School year ──────────────────────────────────────────
+  -- CR's curso lectivo is one calendar year, roughly February to December —
+  -- not the Sep→Jul span the demo carried.
+  select id into y_id from public.school_years where is_active order by id limit 1;
+  if y_id is null then
+    raise exception 'no active school year on this project — nothing to seed against';
+  end if;
+
+  -- Widened before the periods below: grading_period_within_year() fires on
+  -- period writes, so the parent year has to be able to contain them first.
+  update public.school_years
+     set name = '2026', start_date = '2026-02-09', end_date = '2026-12-18'
+   where id = y_id;
+
+  -- ── 3. Two periodos, 50/50 ──────────────────────────────────
+  -- Dropping a period is destructive by schema design: student_grades
+  -- cascades from grading_periods and assignments restrict it. Assert the
+  -- extra periods are empty rather than trusting they are.
+  select count(*) into blockers
+    from public.assignments a
+    join public.grading_periods g on g.id = a.grading_period_id
+   where g.school_year_id = y_id and g.period_order > 2;
+  if blockers > 0 then
+    raise exception
+      'REFUSING TO DELETE: period_order > 2 still carries % assignment(s). '
+      'Move or remove them first.', blockers;
+  end if;
+
+  select count(*) into blockers
+    from public.student_grades sg
+    join public.grading_periods g on g.id = sg.grading_period_id
+   where g.school_year_id = y_id and g.period_order > 2;
+  if blockers > 0 then
+    raise exception
+      'REFUSING TO DELETE: period_order > 2 still carries % grade(s), which '
+      'would cascade away. Move or remove them first.', blockers;
+  end if;
+
+  delete from public.grading_periods
+   where school_year_id = y_id and period_order > 2;
+
+  update public.grading_periods
+     set name = 'I Periodo', start_date = '2026-02-09',
+         end_date = '2026-07-03', weight = 50.00
+   where school_year_id = y_id and period_order = 1;
+
+  update public.grading_periods
+     set name = 'II Periodo', start_date = '2026-07-13',
+         end_date = '2026-12-18', weight = 50.00
+   where school_year_id = y_id and period_order = 2;
+
+  -- ── 4. Grade levels ─────────────────────────────────────────
+  update public.grade_levels set name = 'Décimo'    where numeric_level = 10;
+  update public.grade_levels set name = 'Undécimo'  where numeric_level = 11;
+  update public.grade_levels set name = 'Duodécimo' where numeric_level = 12;
+
+  -- ── 5. People ───────────────────────────────────────────────
+  -- Costa Rican given names (including the English-derived ones that are
+  -- genuinely common there — Kenneth, Randall, Jefferson, Yendry) and two
+  -- apellidos per person, paterno then materno, which the existing
+  -- first_name/last_name columns already accommodate.
+  --
+  -- Student 11 is the repository owner's own record; only its cédula is
+  -- filled in, its name is left alone deliberately.
+  update public.students s
+     set first_name = v.first_name,
+         last_name  = v.last_name
+    from (values
+      (1,  'Yendry',    'Rojas Vargas'),
+      (2,  'Kenneth',   'Villalobos Céspedes'),
+      (3,  'Kimberly',  'Cordero Zamora'),
+      (4,  'Randall',   'Solís Quirós'),
+      (5,  'Mariela',   'Chinchilla Montero'),
+      (6,  'Jefferson', 'Alfaro Bonilla'),
+      (7,  'Priscilla', 'Araya Brenes'),
+      (8,  'Esteban',   'Madrigal Fallas'),
+      (9,  'Natalia',   'Granados Hidalgo'),
+      (10, 'Bryan',     'Naranjo Obando')
+    ) as v(id, first_name, last_name)
+   where s.id = v.id;
+
+  update public.teachers t
+     set first_name    = v.first_name,
+         last_name     = v.last_name,
+         email         = v.email
+    from (values
+      (1, 'Gerardo',  'Picado Sáenz',      'g.picado@ctp-smp.ed.cr'),
+      (2, 'Marielos', 'Ulloa Venegas',     'm.ulloa@ctp-smp.ed.cr'),
+      (3, 'Adriana',  'Barrantes Camacho', 'a.barrantes@ctp-smp.ed.cr'),
+      (4, 'Mauricio', 'Delgado Aguilar',   'm.delgado@ctp-smp.ed.cr'),
+      (5, 'Karla',    'Espinoza Mora',     'k.espinoza@ctp-smp.ed.cr'),
+      (6, 'Álvaro',   'Quesada Rivera',    'a.quesada@ctp-smp.ed.cr'),
+      (7, 'Fabiola',  'Sandí Núñez',       'f.sandi@ctp-smp.ed.cr'),
+      (8, 'Josué',    'Corrales Vega',     'j.corrales@ctp-smp.ed.cr')
+    ) as v(id, first_name, last_name, email)
+   where t.id = v.id;
+
+  -- Guardians 1–5 are the primary contacts for students 1–5. Their apellidos
+  -- follow the CR convention the children's names imply: a madre's first
+  -- apellido is the child's second, a padre's first apellido is the child's first.
+  update public.guardians g
+     set first_name = v.first_name,
+         last_name  = v.last_name
+    from (values
+      (1, 'Xinia',   'Vargas Alpízar'),
+      (2, 'Jorge',   'Villalobos Solano'),
+      (3, 'Sandra',  'Zamora Picado'),
+      (4, 'Ricardo', 'Solís Barquero'),
+      (5, 'Elena',   'Montero Fallas')
+    ) as v(id, first_name, last_name)
+   where g.id = v.id;
+
+  update public.staff s
+     set first_name = v.first_name,
+         last_name  = v.last_name,
+         role       = v.role,
+         email      = v.email
+    from (values
+      (1, 'Óscar',   'Vega Salas',     'director',    'direccion@ctp-smp.ed.cr'),
+      (2, 'Ligia',   'Campos Rojas',   'subdirector', 'subdireccion@ctp-smp.ed.cr'),
+      (3, 'Marisol', 'Arias Segura',   'secretaria',  'secretaria@ctp-smp.ed.cr'),
+      (4, 'Tomás',   'Cruz Fonseca',   'orientador',  'orientacion@ctp-smp.ed.cr'),
+      (5, 'Beatriz', 'Jiménez Trejos', 'psicólogo',   'psicologia@ctp-smp.ed.cr')
+    ) as v(id, first_name, last_name, role, email)
+   where s.id = v.id;
+
+  -- Cédulas: 9 digits as X-XXXX-XXXX. The leading digit is the province of
+  -- registration (1–7 are valid), varied per table so the four sets stay
+  -- visibly distinct. Derived from the row id, so unique and stable on re-run.
+  update public.students
+     set national_id = format('1-%s-%s', lpad((1500 + id)::text, 4, '0'),
+                                         lpad((3000 + id * 37)::text, 4, '0'));
+
+  update public.teachers
+     set national_id = format('2-%s-%s', lpad((400 + id)::text, 4, '0'),
+                                         lpad((5000 + id * 53)::text, 4, '0'));
+
+  update public.guardians
+     set national_id = format('3-%s-%s', lpad((300 + id)::text, 4, '0'),
+                                         lpad((6000 + id * 71)::text, 4, '0'));
+
+  update public.staff
+     set national_id = format('4-%s-%s', lpad((200 + id)::text, 4, '0'),
+                                         lpad((7000 + id * 89)::text, 4, '0'));
+
+  -- ── 6. School calendar ──────────────────────────────────────
+  -- Was: two events named after lapsos, plus Carnaval — a major Venezuelan
+  -- holiday, not a Costa Rican school one. Now the CR curso lectivo.
+  update public.events e
+     set title       = v.title,
+         start_date  = v.start_date,
+         end_date    = v.end_date,
+         description = v.description
+    from (values
+      (1, 'Inicio del curso lectivo',      '2026-02-09'::date, null::date,
+          'Bienvenida a estudiantes y familias'),
+      (2, 'Exámenes finales I Periodo',    '2026-06-22'::date, '2026-07-03'::date,
+          'Semana de exámenes del I Periodo'),
+      (3, 'Vacaciones de medio periodo',   '2026-07-06'::date, '2026-07-10'::date,
+          'Receso de medio curso lectivo'),
+      (4, 'Entrega de notas I Periodo',    '2026-07-10'::date, null::date,
+          'Reunión de padres de familia y encargados'),
+      (5, 'Día de la Independencia',       '2026-09-15'::date, null::date,
+          'Feriado nacional — actos cívicos'),
+      (6, 'Exámenes finales II Periodo',   '2026-11-30'::date, '2026-12-11'::date,
+          'Semana de exámenes del II Periodo')
+    ) as v(id, title, start_date, end_date, description)
+   where e.id = v.id;
+
+  -- ── 7. Stray dates ─────────────────────────────────────────
+  -- Pre-existing drift: most activity was already dated 2026 while some rows
+  -- sat in 2024. Pull the strays into the 2026 year. Attendance moves onto two
+  -- specific weekdays (Thu/Fri 2026-08-06/07) rather than by an interval,
+  -- because attendance is unique per (student_id, date) and a blind shift can
+  -- collide; these two dates are clear for the affected students.
+  update public.attendance set date = '2026-08-06' where date = '2024-09-16';
+  update public.attendance set date = '2026-08-07' where date = '2024-09-17';
+
+  -- No uniqueness on discipline dates, so a constant shift is safe and keeps
+  -- the original spacing between records.
+  update public.discipline_records
+     set date = date + interval '22 months'
+   where date < '2026-02-09';
+
+  -- ═══════════════════════════════════════════════════════════
+  --  Verification — fails loudly rather than half-applying
+  -- ═══════════════════════════════════════════════════════════
+
+  -- No Venezuelan cédulas left anywhere.
+  select (select count(*) from public.students  where national_id like 'V-%')
+       + (select count(*) from public.teachers  where national_id like 'V-%')
+       + (select count(*) from public.guardians where national_id like 'V-%')
+       + (select count(*) from public.staff     where national_id like 'V-%')
+    into bad;
+  if bad > 0 then
+    raise exception 'VERIFY FAILED: % row(s) still carry a V- national_id', bad;
+  end if;
+
+  -- Exactly two periodos, summing to 100%, and no "Lapso" naming.
+  select count(*) into n from public.grading_periods where school_year_id = y_id;
+  if n <> 2 then
+    raise exception 'VERIFY FAILED: expected 2 grading periods, found %', n;
+  end if;
+
+  select round(sum(weight), 2) into bad
+    from public.grading_periods where school_year_id = y_id;
+  if bad <> 100 then
+    raise exception 'VERIFY FAILED: period weights total %, expected 100', bad;
+  end if;
+
+  select count(*) into bad from public.grading_periods where name ilike '%lapso%';
+  if bad > 0 then
+    raise exception 'VERIFY FAILED: % grading period(s) still named "Lapso"', bad;
+  end if;
+
+  -- School identity actually set.
+  if not exists (
+    select 1 from public.school_settings
+     where id = 1 and name is not null and id_label is not null
+  ) then
+    raise exception 'VERIFY FAILED: school_settings still incomplete';
+  end if;
+
+  -- Everything inside the school year.
+  select (select count(*) from public.attendance
+           where date < '2026-02-09' or date > '2026-12-18')
+       + (select count(*) from public.discipline_records
+           where date < '2026-02-09' or date > '2026-12-18')
+       + (select count(*) from public.events
+           where start_date < '2026-02-09' or start_date > '2026-12-18')
+    into bad;
+  if bad > 0 then
+    raise exception 'VERIFY FAILED: % row(s) fall outside the 2026 school year', bad;
+  end if;
+
+  -- Nothing was lost. These are the counts this seed is expected to preserve;
+  -- a mismatch means an edit cascaded somewhere it should not have.
+  select count(*) into n from public.students;
+  if n <> 11 then raise exception 'VERIFY FAILED: % students, expected 11', n; end if;
+  select count(*) into n from public.teachers;
+  if n <> 8 then raise exception 'VERIFY FAILED: % teachers, expected 8', n; end if;
+  select count(*) into n from public.student_grades;
+  if n <> 38 then raise exception 'VERIFY FAILED: % grades, expected 38', n; end if;
+  select count(*) into n from public.attendance;
+  if n <> 21 then raise exception 'VERIFY FAILED: % attendance rows, expected 21', n; end if;
+
+  -- The demo's login plumbing survived.
+  if not exists (
+    select 1 from public.app_config c
+     where c.key = 'demo_teacher_id'
+       and exists (select 1 from public.teachers t where t.id = c.value::integer)
+  ) then
+    raise exception 'VERIFY FAILED: app_config.demo_teacher_id no longer resolves to a teacher';
+  end if;
+
+  select count(*) into n from public.students where auth_user_id is not null;
+  if n <> 2 then
+    raise exception 'VERIFY FAILED: % student auth links, expected 2', n;
+  end if;
+
+  -- The read-only lockdown is still on (this seed must not have loosened it).
+  select count(*) into n from pg_policies
+   where schemaname = 'public'
+     and policyname in ('demo_deny_insert', 'demo_deny_update', 'demo_deny_delete');
+  if n <> (select count(*) * 3 from pg_tables where schemaname = 'public') then
+    raise exception 'VERIFY FAILED: demo lockdown is no longer complete (% policies)', n;
+  end if;
+
+  raise notice 'Costa Rica demo seed VERIFIED: 2 periodos, school year 2026, '
+    'no V- cédulas, lockdown intact (% deny policies).', n;
+end $$;

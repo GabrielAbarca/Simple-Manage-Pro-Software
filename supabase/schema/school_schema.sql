@@ -33,8 +33,9 @@ create table public.app_config (
   value text not null
 );
 
--- Single-row school identity + per-country terminology (what the national-ID
--- field is called here). Not a general custom-fields system; `check (id = 1)`
+-- Single-row school identity + per-school terminology (what the national-ID
+-- field is called here — "Cédula", "DIMEX", a school-issued "Carné").
+-- Not a general custom-fields system; `check (id = 1)`
 -- keeps it compatible with the console's id-keyed table gateway.
 create table public.school_settings (
   id integer primary key default 1 check (id = 1),
@@ -183,7 +184,7 @@ create table public.grading_periods (
   name character varying(50) not null,
   start_date date not null,
   end_date date not null,
-  weight numeric(5,2) default 33.33,
+  weight numeric(5,2) default 50.00,
   period_order integer not null,
   unique (school_year_id, period_order)
 );

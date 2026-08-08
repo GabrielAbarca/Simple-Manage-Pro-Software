@@ -202,8 +202,9 @@ The login page already handles both that shape and the default one.
 
 Sign in as the admin → you land on `/admin`. Then, without touching SQL:
 
-1. **Year & Periods** — create the school year, mark it active, add its 3
-   grading periods.
+1. **Year & Periods** — create the school year, mark it active, add its 2
+   grading periods (Costa Rica's MEP calendar runs two _periodos_ at 50% each;
+   a colegio on three trimestres adds a third and the weights follow).
 2. **Grades & Sections** — add grade levels; add rooms; add the sections
    (grade + section + homeroom + room + capacity).
 3. **Subjects** — add subjects and tick which grades take each.

@@ -274,9 +274,6 @@ export default {
     dash: {
       gradeOverview: "Grade Overview",
       subject: "Subject",
-      term1: "Term 1",
-      term2: "Term 2",
-      term3: "Term 3",
       average: "Average",
     },
     grades: {
@@ -372,9 +369,6 @@ export default {
       searchPlaceholder: "Search this roster…",
       addStudent: "Add Student",
       name: "Name",
-      p1: "P1 Grade",
-      p2: "P2 Grade",
-      p3: "P3 Grade",
       overall: "Overall Grade",
       empty: "No students in this section.",
     },
@@ -561,7 +555,7 @@ export default {
       photoUrl: "Photo URL",
       class: "Class",
       status: "Status",
-      nationalIdFull: "National ID (cédula/DUI)",
+      nationalIdFull: "National ID (cédula)",
       nationalIdHelp: "Registrar-managed — read-only here.",
       enrollmentPlaceholder: "e.g. 2024-001",
       name: "Name",
@@ -715,10 +709,10 @@ export default {
       title: "School profile",
       subtitle: "Identity and terminology used across the console.",
       name: "School name",
-      namePlaceholder: "Colegio San José",
+      namePlaceholder: "School name",
       idLabel: "ID field label",
       idLabelHelp:
-        'What the ID field is called at this school (e.g. "Cédula", "DUI", "School ID"). Leave blank for the default.',
+        'What the ID field is called at this school (e.g. "Cédula", "DIMEX", "Carné"). Leave blank for the default.',
       saved: "School profile saved.",
       unavailable:
         "School profile storage isn't set up on this project yet — default labels are in use.",

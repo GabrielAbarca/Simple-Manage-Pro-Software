@@ -25,7 +25,12 @@ import { DEMO_MODE } from "./demoMode.js";
 import { supabaseGateway, createAdminData } from "./adminData.js";
 import { createDemoGateway } from "./adminDemoDb.js";
 import { parseCsv, autoMap } from "./csv.js";
-import { TARGET_WEIGHT, totalWeight, weightStatus } from "./gradingPeriods.js";
+import {
+  TARGET_WEIGHT,
+  remainingWeight,
+  totalWeight,
+  weightStatus,
+} from "./gradingPeriods.js";
 import * as sched from "./scheduleLogic.js";
 import * as v from "./validate.js";
 import { mapDbError } from "./dbErrors.js";
@@ -567,10 +572,12 @@ function optionsFrom(list, labelFn, valueKey = "id") {
 const fmtDate = (value) => (value ? formatDate(value) : "—");
 
 // ── School profile (name + per-school ID label) ────────────────
-// The national-ID field is called something different in every country
-// ("Cédula", "DUI", "Carné"), so its label comes from school_settings with
-// the translated default as the fallback. Deliberately NOT a general
-// custom-fields system — one configurable label, nothing more.
+// The default is "Cédula", but Costa Rican schools don't all put the same
+// number in that column: private colegios with foreign families ask for the
+// DIMEX, and some register students by carné until a cédula exists. So the
+// label comes from school_settings with the translated default as the
+// fallback. Deliberately NOT a general custom-fields system — one
+// configurable label, nothing more.
 
 /** True once the settings row has been read (or found unavailable). */
 let schoolLoaded = false;
@@ -1193,10 +1200,16 @@ function openPeriodForm(period = null) {
         rules: [...withinYear, v.endAfterStart("start_date")],
       },
       {
+        // A new period defaults to whatever weight is still unclaimed, so
+        // building a year lands on 100% without arithmetic: 50/50 for Costa
+        // Rica's two periodos, 33.33/33.33/33.34 for three trimestres. A fixed
+        // default could only ever be right for one period count.
         name: "weight",
         label: t("console.periods.weight"),
         type: "number",
-        value: period?.weight ?? 33.33,
+        value:
+          period?.weight ??
+          remainingWeight(state.periods, { excludeId: period?.id }),
         min: 0,
         max: 100,
         step: "0.01",
@@ -4130,7 +4143,7 @@ const IMPORT_DESCRIPTORS = {
           period_order: order,
           start_date: start,
           end_date: end,
-          weight: coerceNum(get("weight")) ?? 33.33,
+          weight: coerceNum(get("weight")) ?? 50,
           school_year_id: ctx.activeYear.id,
         },
       };

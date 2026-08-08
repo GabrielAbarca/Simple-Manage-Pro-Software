@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   TARGET_WEIGHT,
+  remainingWeight,
   roundWeight,
   totalWeight,
   weightStatus,
@@ -21,6 +22,15 @@ describe("totalWeight", () => {
       { id: 1, weight: 33.33 },
       { id: 2, weight: 33.33 },
       { id: 3, weight: 33.34 },
+    ];
+    expect(totalWeight(periods)).toBe(100);
+    expect(weightStatus(totalWeight(periods), periods.length)).toBe("ok");
+  });
+
+  it("sums Costa Rica's two periodos to exactly 100", () => {
+    const periods = [
+      { id: 1, weight: 50 },
+      { id: 2, weight: 50 },
     ];
     expect(totalWeight(periods)).toBe(100);
     expect(weightStatus(totalWeight(periods), periods.length)).toBe("ok");
@@ -50,6 +60,38 @@ describe("totalWeight", () => {
   it("treats a missing list as zero", () => {
     expect(totalWeight(undefined)).toBe(0);
     expect(totalWeight([])).toBe(0);
+  });
+});
+
+describe("remainingWeight", () => {
+  it("suggests what a new period needs to complete the year", () => {
+    // Empty year → the whole 100 is up for grabs.
+    expect(remainingWeight([])).toBe(100);
+    // One periodo booked at 50 → the second should default to 50.
+    expect(remainingWeight([{ id: 1, weight: 50 }])).toBe(50);
+    // Two trimestres booked → the third lands on the 33.34 that squares it.
+    expect(
+      remainingWeight([
+        { id: 1, weight: 33.33 },
+        { id: 2, weight: 33.33 },
+      ]),
+    ).toBe(33.34);
+  });
+
+  it("excludes the period being edited so its own weight is reclaimable", () => {
+    const periods = [
+      { id: 1, weight: 50 },
+      { id: 2, weight: 50 },
+    ];
+    expect(remainingWeight(periods, { excludeId: 2 })).toBe(50);
+  });
+
+  it("never suggests a negative default on an overweight year", () => {
+    expect(remainingWeight([{ id: 1, weight: 140 }])).toBe(0);
+  });
+
+  it("treats a missing list as a full year to allocate", () => {
+    expect(remainingWeight(undefined)).toBe(TARGET_WEIGHT);
   });
 });
 

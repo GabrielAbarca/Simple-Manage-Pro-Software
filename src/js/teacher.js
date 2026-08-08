@@ -311,7 +311,7 @@ const realDb = {
   },
 
   // Every period's score for a section in one shot — powers the roster's
-  // P1/P2/P3 columns + weighted Overall (pivoted client-side by period_order).
+  // per-period columns + weighted Overall (pivoted client-side by period_order).
   async fetchAllPeriodGrades(cstId) {
     const { data, error } = await supabase
       .from("student_period_grades")
@@ -1314,6 +1314,16 @@ function openClassTab(tab) {
 // ───────────────────────────────────────────────────────────────
 //  7. ROSTER TAB (+ student drawer)
 // ───────────────────────────────────────────────────────────────
+
+// The roster is a CSS grid, so the column count has to reach the stylesheet:
+// one grade column per grading period the year actually has, plus Overall.
+// Costa Rica's MEP year runs two periodos, but a private colegio on three
+// trimestres is equally valid — so the count comes from the data, never a
+// literal. Kept in sync with the header/row cells, which map over PERIODS.
+function rosterColsStyle() {
+  return `--roster-cols: ${PERIODS.length + 1}`;
+}
+
 function renderRosterTab(content) {
   content.innerHTML = `
     <div class="view-toolbar">
@@ -1326,13 +1336,11 @@ function renderRosterTab(content) {
       </button>
     </div>
     <div class="recent-activity">
-      <div class="roster-list" id="roster-list">
+      <div class="roster-list" id="roster-list" style="${rosterColsStyle()}">
         <div class="roster-head">
           <div class="roster-row-cells">
             <span>${t("admin.roster.name")}</span>
-            <span>${t("admin.roster.p1")}</span>
-            <span>${t("admin.roster.p2")}</span>
-            <span>${t("admin.roster.p3")}</span>
+            ${PERIODS.map((p) => `<span>${escapeHtml(p.name)}</span>`).join("")}
             <span>${t("admin.roster.overall")}</span>
           </div>
         </div>
@@ -1419,9 +1427,10 @@ function renderRosterTable(students) {
     cells.tabIndex = 0;
     cells.innerHTML = `
       <span class="roster-name">${escapeHtml(fullName)}</span>
-      <span class="roster-grade">${gradeCellHtml(scores[1])}</span>
-      <span class="roster-grade">${gradeCellHtml(scores[2])}</span>
-      <span class="roster-grade">${gradeCellHtml(scores[3])}</span>
+      ${PERIODS.map(
+        (p) =>
+          `<span class="roster-grade">${gradeCellHtml(scores[p.period_order])}</span>`,
+      ).join("")}
       <span class="roster-grade">${gradeCellHtml(overall)}</span>`;
     cells.addEventListener("click", () => openStudentDrawer(student));
     cells.addEventListener("keydown", (e) => {

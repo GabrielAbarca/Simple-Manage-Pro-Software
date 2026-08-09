@@ -23,7 +23,12 @@ import "./errorHandler.js";
 import "./speedInsights.js";
 import { supabase } from "./supabaseClient.js";
 import { signOut, getSession } from "./auth.js";
-import { fetchRole, portalPath, haltForRedirect } from "./role.js";
+import {
+  fetchRole,
+  fetchStudentId,
+  portalPath,
+  haltForRedirect,
+} from "./role.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import {
   skeletonRows,
@@ -1391,6 +1396,39 @@ document.getElementById("logout-btn")?.addEventListener("click", async (e) => {
   await signOut();
   window.location.replace("/login.html");
 });
+
+// Cross-portal links, revealed only when the target would accept this caller.
+// `role` is the signed-in profiles.role resolved by the guard above — NOT
+// IS_ADMIN, which is a visual lock on admin-restricted controls in this console
+// and is deliberately always false. The student portal is keyed on a students
+// row rather than a role: an account can hold both (the demo account does), and
+// that row is exactly what the portal looks up.
+async function initCrossPortalLinks() {
+  const links = [
+    { id: "admin-console-link", path: "/admin", allowed: role === "admin" },
+    {
+      id: "student-portal-link",
+      path: "/",
+      allowed: (await fetchStudentId(session.user.id)) != null,
+    },
+  ];
+
+  for (const { id, path, allowed } of links) {
+    const link = document.getElementById(id);
+    if (!link || !allowed) continue;
+    link.hidden = false;
+    link.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (!(await getSession())) {
+        window.location.replace("/login.html");
+        return;
+      }
+      window.location.href = path;
+    });
+  }
+}
+
+initCrossPortalLinks();
 document.querySelector(".profile-photo")?.addEventListener("click", () => {
   showSection("settings");
   // Snap to Account & Profile (default sub-tab on first render; re-select it

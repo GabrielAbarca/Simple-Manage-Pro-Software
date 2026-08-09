@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -109,10 +109,25 @@
 
           <div class="sidebar-divider"></div>
 
-          <!-- No "View Student Portal" link here: the student dashboard resolves
-               its student by students.auth_user_id, and neither a teacher nor an
-               admin has such a row, so the link bounced every caller straight
-               back. It was an affordance no role could use. -->
+          <!-- Cross-portal links start hidden and are revealed by teacher.js
+               only for a caller the target will actually accept: the admin
+               console needs profiles.role = 'admin', and the student portal
+               resolves its subject by students.auth_user_id. An earlier
+               ungated "View Student Portal" link bounced every caller and was
+               removed — capability-gating is what makes it viable. -->
+          <a href="/admin" id="admin-console-link" class="nav-cta" hidden>
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true">
+                <use href="#icon-admin_panel_settings"></use></svg
+            ></span>
+            <h3 data-i18n="admin.nav.viewAdminConsole">View Admin Console</h3>
+          </a>
+          <a href="/" id="student-portal-link" class="nav-cta" hidden>
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true"><use href="#icon-school"></use></svg
+            ></span>
+            <h3 data-i18n="admin.nav.viewStudentPortal">View Student Portal</h3>
+          </a>
           <a href="/login.html" id="logout-btn">
             <span class="material-symbols-outlined"
               ><svg aria-hidden="true"><use href="#icon-logout"></use></svg

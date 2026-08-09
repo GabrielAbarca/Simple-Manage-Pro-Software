@@ -44,6 +44,38 @@ export async function fetchRole() {
 }
 
 /**
+ * The students row linked to an auth user, if there is one.
+ *
+ * Being a student is a separate fact from `profiles.role`: the student portal
+ * resolves its subject by `students.auth_user_id`, not by role, so an account
+ * can hold a role *and* a student record (the shared demo account does — it is
+ * an admin that also sits in a section, which is what lets one login tour all
+ * three portals). Callers use this to decide whether a link to the student
+ * portal would actually land, instead of offering one that bounces.
+ *
+ * Mirrors fetchRole(): a failed query logs and resolves to null rather than
+ * throwing, so a cross-portal link simply stays hidden.
+ *
+ * @param {string} userId auth user id
+ * @returns {Promise<number | null>} the students.id, or null when there is none
+ */
+export async function fetchStudentId(userId) {
+  if (!userId) return null;
+  // maybeSingle, not single: an admin or teacher legitimately has no students
+  // row, and single() turns that expected case into a PGRST116.
+  const { data, error } = await supabase
+    .from("students")
+    .select("id")
+    .eq("auth_user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("fetchStudentId:", error.message);
+    return null;
+  }
+  return data?.id ?? null;
+}
+
+/**
  * Portal entry point for a role. Explicit .html paths follow the app's
  * cross-page redirect convention (Vercel's cleanUrls 308s them away).
  * @param {import("./role.js").Role | null | undefined} role

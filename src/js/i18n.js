@@ -1,8 +1,11 @@
 // ─────────────────────────────────────────────────────────────────
 //  i18n — lightweight, dependency-free interface translation.
 //
-//  English is the canonical base language and the ultimate fallback;
-//  Spanish (Costa Rica) is built from it. Language is PER-VIEW: each
+//  Spanish (Costa Rica) is what the interface DEFAULTS to — the app is
+//  built for Costa Rican schools. English remains the canonical base
+//  dictionary and the ultimate per-key fallback (es.js mirrors en.js,
+//  and a key missing from es resolves through en), which is a separate
+//  thing from which language a visitor gets. Language is PER-VIEW: each
 //  entry point calls initI18n(scope) with its own scope, and the
 //  choice is persisted under a namespaced localStorage key so the
 //  student and admin views never share state.
@@ -20,8 +23,8 @@ import es from "./i18n/es.js";
 
 const DICTS = { en, es };
 
-// Per-view storage keys. login has no settings panel → detection-only,
-// so no key (null): it follows navigator.language each visit. The teacher
+// Per-view storage keys. login has no settings panel and so no key (null):
+// with nothing stored it always opens in the default language. The teacher
 // key predates the admin console and keeps its historical name so stored
 // choices survive the rename.
 const STORAGE_KEYS = {
@@ -31,14 +34,17 @@ const STORAGE_KEYS = {
   login: null,
 };
 
-// Intl locale tags per language. Spanish targets Costa Rica (the app's
-// origin) for date/number conventions (24h time, comma decimals).
+// Intl locale tags per language. Spanish targets Costa Rica for date and
+// number conventions: "15 jul 2026", comma decimals, and a non-breaking space
+// as the thousands separator.
 const LOCALE_TAGS = { en: "en-US", es: "es-CR" };
 
 const DEFAULT_DATE_OPTS = { year: "numeric", month: "short", day: "numeric" };
 
 let currentScope = "student";
-let currentLang = "en";
+// Matches resolveLang()'s default so the pre-init placeholder can't flash a
+// different language than the one the view is about to render in.
+let currentLang = "es";
 
 // ── Storage ───────────────────────────────────────────────────────
 function readStored(scope) {
@@ -61,14 +67,18 @@ function persist(scope, lang) {
   }
 }
 
-// Default/detection precedence: (a) stored choice for this view →
-// (b) Spanish browser → es → (c) English.
+// Precedence: (a) this view's stored choice → (b) Spanish.
+//
+// navigator.language deliberately does NOT participate. The product is built
+// for Costa Rican schools and the public demo is its shop window, so opening
+// in English for every non-Spanish browser undercut the claim before a visitor
+// read a word. Spanish is the product's language, not a detected preference;
+// English stays one click away in Settings and, once chosen, is remembered per
+// view by readStored() above.
 function resolveLang(scope) {
   const stored = readStored(scope);
   if (stored === "en" || stored === "es") return stored;
-  const nav = (navigator.language || "").toLowerCase();
-  if (nav.startsWith("es")) return "es";
-  return "en";
+  return "es";
 }
 
 // ── Public API ────────────────────────────────────────────────────
@@ -184,7 +194,8 @@ export function formatDate(value, opts) {
   );
 }
 
-/** Locale-aware time from "HH:MM" / "HH:MM:SS" (en → 12h, es → 24h). */
+/** Locale-aware time from "HH:MM" / "HH:MM:SS". Both locales render 12h —
+ *  es-CR as "2:30 p. m." — since neither passes hour12 and ICU decides. */
 export function formatTime(value) {
   if (!value) return "";
   const [h, m] = String(value).split(":").map(Number);

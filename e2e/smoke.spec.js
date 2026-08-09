@@ -60,7 +60,7 @@ test.describe("login", () => {
     await page.waitForSelector("#auth-form");
 
     await expect(page.locator("#auth-toast")).toHaveClass(/toast-error/);
-    await expect(page.locator("#auth-toast")).toContainText("expired");
+    await expect(page.locator("#auth-toast")).toContainText("venció");
     // Still on the sign-in card, and the spent token is out of the URL.
     await expect(page.locator("#recovery-form")).toBeHidden();
     expect(new URL(page.url()).hash).toBe("");
@@ -85,7 +85,9 @@ test.describe("login", () => {
     await page.waitForSelector("#recovery-form", { state: "visible" });
 
     await expect(page.locator("#auth-form")).toBeHidden();
-    await expect(page.locator("#auth-title")).toHaveText("Set a new password");
+    await expect(page.locator("#auth-title")).toHaveText(
+      "Crea una contraseña nueva",
+    );
     // Not redirected to a portal — the whole point of the fix.
     expect(new URL(page.url()).pathname).toBe("/login.html");
 
@@ -94,7 +96,7 @@ test.describe("login", () => {
     await page.fill("#input-confirm-new", "new-password-1");
     await page.click("#btn-recovery-submit");
     await expect(page.locator("#auth-toast")).toContainText(
-      "disabled in the live demo",
+      "deshabilitados en la demo en vivo",
     );
     expect(writes).toEqual([]);
 
@@ -120,7 +122,7 @@ test.describe("login", () => {
     await page.click("#btn-recovery-submit");
 
     await expect(page.locator("#error-confirm-new")).toContainText(
-      "do not match",
+      "no coinciden",
     );
     expect(writes).toEqual([]);
   });

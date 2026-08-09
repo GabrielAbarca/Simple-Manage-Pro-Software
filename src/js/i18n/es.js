@@ -1079,17 +1079,34 @@ export default {
   },
 
   login: {
-    tagline1: "Tu portal estudiantil para calificaciones,",
-    tagline2: "asistencia, horario y más.",
-    feature1: "Rendimiento académico en tiempo real",
-    feature2: "Horario semanal de clases",
-    feature3: "Control de asistencia",
-    feature4: "Cartelera de eventos escolares",
+    // Shown on a school's own deployment, where the people signing in every
+    // day are students, teachers and administrators. Noun phrases, so the
+    // panel describes the system instead of addressing any one role.
+    tagline1: "El sistema de gestión del colegio.",
+    tagline2: "Notas, asistencia, horarios y expedientes en un solo lugar.",
+    // Order follows the icons in login.html: school, calendar, fact_check, event.
+    feature1: "Notas por materia y periodo",
+    feature2: "Horario semanal",
+    feature3: "Asistencia diaria",
+    feature4: "Eventos y comunicados",
+    // The demo swaps in these (see login.js): its visitor is a director
+    // evaluating the product, and the panel's job is to orient them — the
+    // three portals are reachable, and nothing they touch is saved.
+    demoTagline1: "Está por entrar a un colegio de ejemplo.",
+    demoTagline2:
+      "Recorra la consola del director, la del docente y el portal del estudiante.",
+    demoFeature1: "Matrícula, secciones y horarios",
+    demoFeature2: "Libro de notas y asistencia por sección",
+    demoFeature3: "Informes de progreso y cierre de periodo",
+    demoFeature4: "Datos de ejemplo — nada de lo que haga se guarda",
     welcomeTitle: "Bienvenido de nuevo",
     welcomeSubtitle: "Inicia sesión en tu cuenta para continuar",
-    demoSubtitle: "Iniciarás sesión con la cuenta de demostración compartida",
+    demoSubtitle: "Iniciará sesión con la cuenta de demostración compartida",
+    // The brand panel is hidden below the tablet breakpoint, so this notice —
+    // which is not — carries the line that matters most to someone deciding
+    // whether it is safe to click around.
     demoNotice:
-      "Demo en vivo — las credenciales ya están completas, solo inicia sesión.",
+      "Demo en vivo — las credenciales ya están completas. Nada de lo que haga se guarda.",
     createTitle: "Crear una cuenta",
     createSubtitle: "Únete a SMP y accede a tu portal estudiantil",
     fullName: "Nombre completo",

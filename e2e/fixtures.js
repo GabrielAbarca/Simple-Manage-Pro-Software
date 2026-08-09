@@ -294,10 +294,44 @@ function rowMatches(row, params) {
 }
 
 /**
+ * Per-view i18n storage keys (src/js/i18n.js → STORAGE_KEYS). The login page
+ * has no key by design and so cannot be pinned.
+ */
+export const LANG_KEYS = [
+  "smp-lang-student",
+  "smp-lang-admin",
+  "smp-lang-console",
+];
+
+/**
+ * Pin the interface language for a test context.
+ *
+ * The app defaults to Spanish. Most specs here assert English chrome, so the
+ * suite pins a language rather than re-translating every assertion whenever
+ * the default moves — the default itself is covered by its own spec
+ * (language.spec.js), which seeds nothing.
+ *
+ * @param {import("@playwright/test").BrowserContext} context
+ * @param {"en" | "es"} [lang]
+ */
+export async function seedLang(context, lang = "en") {
+  await context.addInitScript(
+    (entries) => {
+      for (const [key, value] of entries) localStorage.setItem(key, value);
+    },
+    LANG_KEYS.map((key) => [key, lang]),
+  );
+}
+
+/**
  * Route the Supabase origin against `fix`. Returns a `writes` array that
  * captures any non-GET request reaching the backend (must stay empty in demo).
+ *
+ * Also pins the interface language: every spec that renders the app calls
+ * this, so it is the one place that keeps text assertions stable.
  */
 export async function routeSupabase(context, fix) {
+  await seedLang(context);
   const writes = [];
   await context.route(`${SUPA}/**`, async (route) => {
     const req = route.request();

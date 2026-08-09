@@ -20,7 +20,7 @@ const PAGES = [
 
 for (const page_ of PAGES) {
   test.describe(`${page_.path}`, () => {
-    test("loads in English with the Spanish version hidden", async ({
+    test("loads in Spanish with the English version hidden", async ({
       page,
     }) => {
       const errors = [];
@@ -28,29 +28,33 @@ for (const page_ of PAGES) {
 
       await page.goto(page_.path);
 
-      await expect(page.locator('section[data-legal-lang="en"]')).toBeVisible();
-      await expect(page.locator('section[data-legal-lang="es"]')).toBeHidden();
-      await expect(page.locator('section[data-legal-lang="en"] h1')).toHaveText(
-        page_.en,
+      // Spanish is the app default, and these pages ship it visible in the
+      // markup so a reader with JavaScript off still gets the same language
+      // the portal that linked here was using.
+      await expect(page.locator('section[data-legal-lang="es"]')).toBeVisible();
+      await expect(page.locator('section[data-legal-lang="en"]')).toBeHidden();
+      await expect(page.locator('section[data-legal-lang="es"] h1')).toHaveText(
+        page_.es,
       );
+      await expect(page.locator("html")).toHaveAttribute("lang", "es");
 
       expect(errors).toEqual([]);
     });
 
-    test("switches to Spanish and back", async ({ page }) => {
+    test("switches to English and back", async ({ page }) => {
       await page.goto(page_.path);
-
-      await page.click('[data-legal-set-lang="es"]');
-      await expect(page.locator('section[data-legal-lang="es"]')).toBeVisible();
-      await expect(page.locator('section[data-legal-lang="en"]')).toBeHidden();
-      await expect(page.locator("html")).toHaveAttribute("lang", "es");
-      await expect(page.locator('section[data-legal-lang="es"] h1')).toHaveText(
-        page_.es,
-      );
 
       await page.click('[data-legal-set-lang="en"]');
       await expect(page.locator('section[data-legal-lang="en"]')).toBeVisible();
+      await expect(page.locator('section[data-legal-lang="es"]')).toBeHidden();
       await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      await expect(page.locator('section[data-legal-lang="en"] h1')).toHaveText(
+        page_.en,
+      );
+
+      await page.click('[data-legal-set-lang="es"]');
+      await expect(page.locator('section[data-legal-lang="es"]')).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", "es");
     });
 
     test("states plainly that the records describe children", async ({
@@ -59,6 +63,11 @@ for (const page_ of PAGES) {
       await page.goto(page_.path);
       // Both documents must say what this system holds — that is the whole
       // reason a director reads them.
+      // Checked in both languages: whichever one is hidden is still the text
+      // a director may be handed.
+      await expect(page.locator('section[data-legal-lang="es"]')).toContainText(
+        /menor|estudiante/i,
+      );
       await expect(page.locator('section[data-legal-lang="en"]')).toContainText(
         /child|student/i,
       );

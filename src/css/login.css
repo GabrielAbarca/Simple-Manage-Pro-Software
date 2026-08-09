@@ -584,6 +584,12 @@
     margin-top: 1.4rem;
   }
 
+  /* display:flex above would otherwise beat the UA rule for [hidden], leaving
+     the sign-up switch visible despite the attribute. */
+  .auth-switch[hidden] {
+    display: none;
+  }
+
   .auth-switch p {
     font-size: 0.82rem;
     color: var(--color-info-dark);

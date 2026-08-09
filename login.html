@@ -338,7 +338,15 @@
             </button>
           </form>
 
-          <div class="auth-switch">
+          <!-- No SMP deployment offers self-registration: the demo runs on one
+               shared account, and a school's logins are issued from the admin
+               console (Create login → the admin-users Edge Function), which
+               also links the account to its teacher or student record. A
+               self-registered account would authenticate but map to nobody.
+               Hidden here rather than removed so the path is one attribute
+               away if that ever changes. The real enforcement is Supabase
+               Auth's "allow new users to sign up", which must stay off. -->
+          <div class="auth-switch" hidden>
             <p id="switch-text" data-i18n="login.noAccount">
               Don't have an account?
             </p>

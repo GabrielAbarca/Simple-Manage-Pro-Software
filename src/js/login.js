@@ -71,7 +71,6 @@ const btnText = document.getElementById("btn-text");
 const btnSpinner = document.getElementById("btn-spinner");
 const btnSwitch = document.getElementById("btn-switch");
 const switchText = document.getElementById("switch-text");
-const authSwitch = document.querySelector(".auth-switch");
 const demoNotice = document.getElementById("demo-notice");
 
 const forgotRow = document.getElementById("forgot-row");
@@ -117,8 +116,9 @@ initTheme();
 bindThemeToggle(themeToggler);
 
 // Demo sandbox: this deploy is a single shared profile. Prefill and lock the
-// credentials so visitors sign in with one click, and hide the sign-up path
-// (which only errors anyway). Gated on DEMO_MODE → a real build is untouched.
+// credentials so visitors sign in with one click. Gated on DEMO_MODE → a real
+// build is untouched. (The sign-up switch is hidden for every build, in the
+// markup — see login.html.)
 if (DEMO_MODE) {
   inputEmail.value = DEMO_CREDENTIALS.email;
   inputPassword.value = DEMO_CREDENTIALS.password;
@@ -131,11 +131,8 @@ if (DEMO_MODE) {
   // Keep the password masked and drop the reveal toggle.
   togglePassword.style.display = "none";
 
-  // Hide the Sign Up switch (disabled server-side in demo).
-  if (authSwitch) authSwitch.style.display = "none";
-
-  // Same reasoning for password recovery: the shared demo password is public
-  // by design and must not be resettable by visitors.
+  // The shared demo password is public by design and must not be resettable
+  // by visitors.
   forgotRow.style.display = "none";
 
   authSubtitle.textContent = t("login.demoSubtitle");
@@ -151,7 +148,6 @@ function showRecoveryScreen() {
   authForm.style.display = "none";
   recoveryForm.style.display = "block";
   forgotRow.style.display = "none";
-  if (authSwitch) authSwitch.style.display = "none";
   if (demoNotice) demoNotice.style.display = "none";
   authTitle.textContent = t("login.recovery.title");
   authSubtitle.textContent = t("login.recovery.subtitle");
@@ -166,7 +162,6 @@ function showSignInScreen() {
   setIcon(authAvatarIcon, "lock");
   if (!DEMO_MODE) {
     forgotRow.style.display = "";
-    if (authSwitch) authSwitch.style.display = "";
   }
 }
 

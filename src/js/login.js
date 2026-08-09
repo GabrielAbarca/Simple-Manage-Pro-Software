@@ -135,7 +135,35 @@ if (DEMO_MODE) {
   // by visitors.
   forgotRow.style.display = "none";
 
-  authSubtitle.textContent = t("login.demoSubtitle");
+  // The brand panel in the markup addresses a school's daily users. A demo
+  // visitor is a director evaluating the product, so point those nodes at the
+  // demo copy: what they are about to see, that all three portals are
+  // reachable, and that nothing they touch is saved. Swapping data-i18n
+  // rather than textContent keeps every string translatable.
+  [
+    ["login.tagline1", "login.demoTagline1"],
+    ["login.tagline2", "login.demoTagline2"],
+    ["login.feature1", "login.demoFeature1"],
+    ["login.feature2", "login.demoFeature2"],
+    ["login.feature3", "login.demoFeature3"],
+    ["login.feature4", "login.demoFeature4"],
+    ["login.welcomeSubtitle", "login.demoSubtitle"],
+  ].forEach(([from, to]) => {
+    document
+      .querySelector(`[data-i18n="${from}"]`)
+      ?.setAttribute("data-i18n", to);
+  });
+
+  // All four bullets change meaning, so their icons follow — the markup's
+  // icons belong to the student-facing copy they replace.
+  ["groups", "grading", "description", "policy"].forEach((name, i) => {
+    const icon = document.querySelectorAll(
+      ".brand-features li .material-symbols-outlined",
+    )[i];
+    if (icon) setIcon(icon, name);
+  });
+
+  applyTranslations();
 
   if (demoNotice) demoNotice.style.display = "block";
 }

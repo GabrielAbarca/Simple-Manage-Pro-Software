@@ -1077,16 +1077,34 @@ export default {
 
   // ── Login view (login.html + login.js) ──────────────────────────
   login: {
-    tagline1: "Your student portal for grades,",
-    tagline2: "attendance, schedule & more.",
-    feature1: "Real-time academic performance",
-    feature2: "Weekly class schedule",
-    feature3: "Attendance tracking",
-    feature4: "School events board",
+    // Shown on a school's own deployment, where the people signing in every
+    // day are students, teachers and administrators. Noun phrases, so the
+    // panel describes the system instead of addressing any one role.
+    tagline1: "The school's management system.",
+    tagline2: "Grades, attendance, schedules and records in one place.",
+    // Order follows the icons in login.html: school, calendar, fact_check, event.
+    feature1: "Grades by subject and term",
+    feature2: "Weekly schedule",
+    feature3: "Daily attendance",
+    feature4: "Events and announcements",
+    // The demo swaps in these (see login.js): its visitor is a director
+    // evaluating the product, and the panel's job is to orient them — the
+    // three portals are reachable, and nothing they touch is saved.
+    demoTagline1: "You're about to enter a sample school.",
+    demoTagline2:
+      "Walk through the director's console, the teacher's, and the student portal.",
+    demoFeature1: "Enrollment, sections and schedules",
+    demoFeature2: "Gradebook and attendance by section",
+    demoFeature3: "Progress reports and period close",
+    demoFeature4: "Sample data — nothing you do is saved",
     welcomeTitle: "Welcome back",
     welcomeSubtitle: "Sign in to your account to continue",
     demoSubtitle: "You're signing in with the shared demo account",
-    demoNotice: "Live demo | Non-real credentials are prefilled, just sign in!",
+    // The brand panel is hidden below the tablet breakpoint, so this notice —
+    // which is not — carries the line that matters most to someone deciding
+    // whether it is safe to click around.
+    demoNotice:
+      "Live demo — credentials are prefilled. Nothing you do is saved.",
     createTitle: "Create an account",
     createSubtitle: "Join SMP and access your student portal",
     fullName: "Full Name",

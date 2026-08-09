@@ -37,12 +37,12 @@ supabase.auth.onAuthStateChange((event) => {
 initI18n("login");
 applyTranslations();
 
-// Send a signed-in user to the portal their role resolves to. Demo keeps the
-// pre-role-routing behavior — the shared account tours the app from the
-// student dashboard (the finished admin console flips this landing later).
+// Send a signed-in user to the portal their role resolves to — demo included.
+// The demo account carries profiles.role = 'admin' (and a students row, so it
+// can tour every portal), which lands the tour on the admin console: the view
+// a director is actually evaluating, rather than one student's dashboard.
 async function redirectToPortal() {
-  const target = DEMO_MODE ? "/" : portalPath(await fetchRole());
-  window.location.replace(target);
+  window.location.replace(portalPath(await fetchRole()));
 }
 
 let isSignUpMode = false;

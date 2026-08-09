@@ -22,7 +22,7 @@
    The order statement below is repeated verbatim in every stylesheet:
    whichever file the browser loads first establishes the order, and
    later identical declarations are a no-op. Do not reorder it. */
-@layer base, page;
+@layer base, page, controls;
 
 @layer base {
   /* ── Self-hosted Poppins (replaces the Google Fonts @import) ──────────────
@@ -144,6 +144,19 @@
   }
 
   :root {
+    /* ── Native control theming ───────────────────────────────────────
+     Tells the browser which palette to render its OWN UI in: the date
+     picker's indicator and calendar, number spin buttons, the <select>
+     option list, autofill highlighting, form control internals and
+     default scrollbars.
+
+     Without this the browser assumes light and keeps assuming it, so in
+     dark mode the calendar icon stayed black on a dark field and the
+     option list opened as a white slab. None of that is reachable from
+     CSS — `color-scheme` is the only lever, and it is the whole fix for
+     that class of defect. Paired with .dark-theme-variables below. */
+    color-scheme: light;
+
     --color-primary: #7380ec;
     --color-primary-light: rgba(115, 128, 236, 0.15);
     --color-danger: #ff7782;
@@ -153,12 +166,20 @@
     --color-warning: #ffbb55;
     --color-warning-light: rgba(255, 187, 85, 0.15);
     --color-white: #fff;
-    --color-info-dark: #7d8da1;
+    /* Third text tier (hints, table headers, muted captions). Was #7d8da1,
+     which read at 3.39:1 on a card and 3.14:1 on the page — below the 4.5:1
+     floor everywhere it was used. Darkened ~3% within the same hue to reach
+     4.85:1 / 4.50:1. Dark mode pins the original value back (see below),
+     where the light shade is the legible one. */
+    --color-info-dark: #627388;
     --color-info-light: #dce1eb;
     --color-dark: #363949;
     --color-light: rgba(132, 139, 200, 0.18);
     --color-primary-variant: #111e88;
-    --color-dark-variant: #677483;
+    /* Second text tier (body copy, table cells, field labels). Was #677483 —
+     4.77:1 on a card but 4.42:1 on the page background, so the same text
+     passed or failed depending on which surface it landed on. */
+    --color-dark-variant: #667281;
     --color-background: #f6f6f9;
 
     /* Extended palette — brand accent, readable status text, alert fills.
@@ -172,6 +193,58 @@
     --color-info-bg: rgba(6, 182, 212, 0.12);
     --color-suspension: #f97316;
     --color-suspension-bg: rgba(249, 115, 22, 0.12);
+
+    /* ── Accessible text + fill shades (WCAG 2.1 AA) ──────────────────
+     The brand hues above are chosen for identity and stay exactly as they
+     are — they still paint every ring, bar, dot and active state. What they
+     could never do is carry TEXT: #7380ec on white is 3.48:1, #41f1b6 is
+     1.45:1, and white on the danger fill is 2.56:1, all short of the 4.5:1
+     body-text floor.
+
+     So each hue gains two siblings, same hue and saturation with only the
+     lightness walked until it clears 4.5:1:
+       --*-text  reads on all FOUR backgrounds it actually meets — a card, the
+                 page, and its own -light tint composited over each of those
+                 (the worst of the four governs the value; solving against
+                 three put every one of them ~0.3 short on the fourth);
+       --*-fill  is a surface that white text sits on.
+     Dark mode already had this treatment via the -dark shades; this is the
+     symmetric half for light mode, not a new palette. */
+    --color-primary-text: #4455e6; /* worst of 4 backgrounds: 4.52 */
+    --color-primary-fill: #5a69e9; /* 4.53 with #fff */
+    --color-success-text: #097c56; /* worst of 4 backgrounds: 4.55 */
+    --color-success-fill: #0a875d; /* 4.53 with #fff */
+    --color-warning-text: #9d5e00; /* worst of 4 backgrounds: 4.50 */
+    --color-warning-fill: #a56a07; /* 4.50 with #fff */
+    --color-danger-text: #d30011; /* worst of 4 backgrounds: 4.53 */
+    --color-danger-fill: #ee0013; /* 4.52 with #fff */
+    --color-info-text: #06738e; /* worst of 4 backgrounds: 4.54 */
+    --color-suspension-text: #af4b05; /* worst of 4 backgrounds: 4.51 */
+
+    /* ── Borders, split by role ───────────────────────────────────────
+     WCAG 1.4.11 asks 3:1 only of boundaries needed to IDENTIFY a control.
+     Table hairlines and card dividers are decorative and stay on the old
+     tint; form-control boundaries are not, and no alpha of that tint can
+     reach 3:1 (1.69:1 at its most opaque), so controls take a solid token.
+     --color-info-dark is reused rather than inventing a colour: 3.39:1 on a
+     card and 3.14:1 on the page in light mode, 4.57:1 / 5.14:1 in dark. */
+    --border-subtle: var(--color-light);
+    --border-control: var(--color-info-dark);
+
+    /* Hover tint for small surfaces (icon buttons, picker indicators).
+     Distinct from --color-light on purpose: that token is the divider and
+     shadow tint, and it flips to rgba(0,0,0,0.4) in dark mode. Darkening
+     works when it tints a wide table row and fails completely on a 20px
+     icon, where it fills the box and swallows the glyph. This one always
+     moves AWAY from the surface — darker on light, lighter on dark. */
+    --surface-hover: rgba(0, 0, 0, 0.06);
+
+    /* Focus ring — one definition, applied to everything focusable. */
+    --focus-ring: 0 0 0 3px var(--color-primary-light);
+    --focus-outline: 2px solid var(--color-primary-text);
+
+    /* Smallest comfortable pointer/touch target (WCAG 2.5.5). */
+    --tap-target: 44px;
 
     --card-border-radius: 2rem;
     --border-radius-1: 0.4rem;
@@ -207,15 +280,50 @@
     --shadow-md: 0 1rem 2rem var(--color-light);
     --box-shadow: 0 2rem 3rem var(--color-light);
 
-    --transition-speed: 300ms;
+    /* ── Motion scale ────────────────────────────────────────────────
+     Durations are tiered by what the motion is FOR, not picked per
+     component. Everything used to run at one 300ms setting, which is
+     the right length for a modal and three times too long for a hover:
+     a pointer sweeping a grid left a trail of still-settling cards. */
+    --duration-micro: 100ms; /* hover, toggle, focus — must feel instant */
+    --duration-fast: 200ms; /* press, tooltip */
+    --duration-base: 300ms; /* modal, dropdown, panel */
+    --duration-slow: 400ms; /* drawer, page-level transitions */
+
+    /* Enter with ease-out, leave with ease-in, move with ease-in-out. */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    /* One lift distance for the cards that genuinely respond to a click.
+     Was -2px / -3px / -4px / scale(1.02) / scale(1.06) depending on file. */
+    --lift-hover: -2px;
+
+    /* Above every dialog (modals run 1000–1400, the drawer 1200): a select
+     opened inside a modal has to paint over it. */
+    --z-popover: 1500;
+
+    /* Retained: 33 existing uses, and it is the modal/panel tier. */
+    --transition-speed: var(--duration-base);
   }
 
   .dark-theme-variables {
+    /* The other half of the native-control fix — see :root. This one
+     declaration is what turns the date picker, its calendar popup, the
+     number spinners, the option list and autofill dark along with the
+     rest of the app. */
+    color-scheme: dark;
+
     --color-background: #181a1e;
     --color-white: #202528;
     --color-dark: #edeffd;
     --color-dark-variant: #a3bdcc;
+    /* Light mode darkens the muted tier to clear 4.5:1 on white; on these dark
+     surfaces the ORIGINAL, lighter shade is the legible one (4.57:1 on a card,
+     5.14:1 on the page) and the darkened value would drop to 3.19:1. */
+    --color-info-dark: #7d8da1;
     --color-light: rgba(0, 0, 0, 0.4);
+    /* Lighten rather than darken — see :root. */
+    --surface-hover: rgba(255, 255, 255, 0.08);
     --box-shadow: 0 2rem 3rem var(--color-light);
 
     /* Brighten readable status shades for dark surfaces (G4) */
@@ -223,6 +331,19 @@
     --color-warning-dark: #ffcf7a;
     --color-info: #38bdf8;
     --color-suspension: #fb923c;
+
+    /* Same job for the -text shades: light mode darkens a hue to clear 4.5:1
+     on white, dark mode has to brighten it instead. Ratios below are
+     the worst of the four backgrounds each one meets (card, page, and its
+     tint over each).
+     --*-fill is deliberately NOT overridden — a fill carries white text, so
+     its contrast is a property of the fill itself, not of the theme. */
+    --color-primary-text: #8994ef; /* worst of 4: 4.53 */
+    --color-success-text: #41f1b6; /* worst of 4: 7.34 */
+    --color-warning-text: #ffcf7a; /* worst of 4: 7.56 */
+    --color-danger-text: #ff7782; /* worst of 4: 4.78 */
+    --color-info-text: #38bdf8; /* worst of 4: 5.95 */
+    --color-suspension-text: #fb923c; /* worst of 4: 5.80 */
   }
 
   * {
@@ -234,6 +355,135 @@
     text-decoration: none;
     list-style: none;
     box-sizing: border-box;
+  }
+
+  /* ── Focus visibility ──────────────────────────────────────────────
+   The reset above clears `outline` on every element, which removed the
+   browser's own focus ring app-wide. Only a handful of components ever
+   added a replacement, so most controls — every button, every icon
+   button, every dialog close, every sidebar link, the tabs, the theme
+   toggle — were completely invisible to keyboard users.
+
+   This is the single replacement. `:focus-visible` (not `:focus`) means
+   a mouse click never paints a ring, only keyboard/AT focus does, so
+   nothing changes for pointer users. `outline` rather than box-shadow so
+   it survives `overflow: hidden` ancestors and never affects layout.
+
+   Form controls override this below with their softer border+ring
+   treatment; both are visible indicators, so either satisfies 2.4.7. */
+  :focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+
+  /* Inside a table cell or a tight grid, an offset ring gets clipped by the
+   neighbouring cell — tuck it inside the element instead. */
+  td :focus-visible,
+  .roster-row-cells:focus-visible,
+  .sg-grid :focus-visible,
+  .pg-grid :focus-visible,
+  .cg-grid :focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   FORM CONTROLS — the app's, not the browser's
+   ───────────────────────────────────────────────────────────────
+   Form controls do NOT inherit font-family. That is a UA-stylesheet
+   rule, not an oversight in this codebase, and it is why every modal
+   input, every console select, every grade cell and every search box
+   was rendering in the system font while the rest of the app rendered
+   in Poppins. Three rules in the whole codebase set it; ~30 did not.
+
+   Declaring it once here fixes every control on every surface, and any
+   control added later inherits the fix instead of having to remember.
+═══════════════════════════════════════════════════════════════ */
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    /* Also not inherited by default — a control's label should never be
+     a different weight or leading from the text around it. */
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  /* Text-bearing controls sit on the type scale. Was --text-sm (0.82rem),
+   which at the 12.5–14px root floor rendered around 10–11px. Dense grid
+   inputs (.sg-*, .pg-*, .cg-*) deliberately keep their smaller size —
+   those are spreadsheet cells, and widening them reflows the grid. */
+  input,
+  select,
+  textarea {
+    font-size: var(--text-base);
+    color: var(--color-dark);
+  }
+
+  /* iOS zooms the viewport whenever a focused input computes under 16px,
+   and does not zoom back out — the user is left on a page scrolled
+   sideways. The app's root font never reaches 16px, so every control
+   triggered it. Applied only to touch pointers so desktop density is
+   untouched. */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: max(16px, var(--text-base));
+    }
+  }
+
+  /* Placeholders were themed on the login form only; everywhere else they
+   fell back to the UA's grey, which is outside the palette and unverified
+   for contrast. */
+  ::placeholder {
+    color: var(--color-info-dark);
+    opacity: 1; /* Firefox dims placeholders by default */
+  }
+
+  ::selection {
+    background: var(--color-primary-light);
+    color: var(--color-dark);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-primary-text);
+  }
+
+  /* ── Firefox scrollbars ───────────────────────────────────────────
+   The ::-webkit-scrollbar rules further down are Chrome/Safari only, so
+   Firefox was still painting OS scrollbars.
+
+   This MUST stay behind the @supports guard. Chromium honours both the
+   standard properties and ::-webkit-scrollbar, but specifying either
+   standard property makes it ignore the webkit rules entirely — which
+   silently threw away the slim 6px bar those rules exist to produce and
+   replaced it with a wide, always-visible one. Applying the standard
+   properties only where ::-webkit-scrollbar does NOT exist means Firefox
+   gets themed scrollbars and Chrome/Safari keep theirs untouched.
+
+   Browsers without `selector()` support skip the block and fall back to
+   the webkit rules, which is the correct outcome for them too. */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-info-light) transparent;
+    }
+  }
+
+  /* Chrome paints autofilled fields with its own hard-coded background and
+   text colour, ignoring the theme entirely — most visible on the login
+   form in dark mode. The colour cannot be set directly; the standard
+   workaround is to flood the field with an inset shadow and delay the
+   transition long enough that the UA style never becomes visible. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-dark);
+    -webkit-box-shadow: 0 0 0 100px var(--color-background) inset;
+    caret-color: var(--color-primary-text);
+    transition: background-color 100000s ease-in-out 0s;
   }
 
   /* ── Inline SVG icons (replaces the Material Symbols icon font) ──────
@@ -342,7 +592,7 @@
     align-items: center;
     justify-content: center;
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     cursor: pointer;
   }
 
@@ -362,17 +612,19 @@
   b {
     color: var(--color-dark);
   }
+  /* Text helpers take the -text shades: the raw brand hues are fills, and as
+   type they ran 1.45:1 (.success) to 3.48:1 (.primary) against white. */
   .primary {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
   .danger {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
   .success {
-    color: var(--color-success);
+    color: var(--color-success-text);
   }
   .warning {
-    color: var(--color-warning);
+    color: var(--color-warning-text);
   }
 
   aside {
@@ -416,8 +668,8 @@
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: var(--color-white);
-    background: var(--color-danger);
+    color: #fff;
+    background: var(--color-danger-fill);
     cursor: help;
   }
 
@@ -431,6 +683,7 @@
     flex: 1 0 auto;
     margin-top: 3rem;
     border-radius: var(--card-border-radius);
+    padding: 0 0.3rem;
   }
 
   aside h3 {
@@ -445,12 +698,12 @@
     align-items: center;
     position: relative;
     height: 3.7rem;
-    transition: all var(--transition-speed) ease;
+    transition: color var(--duration-micro) var(--ease-out);
   }
 
   aside .sidebar a span {
     font-size: 1.6rem;
-    transition: all var(--transition-speed) ease;
+    transition: color var(--duration-micro) var(--ease-out);
   }
 
   aside .sidebar a:last-child {
@@ -461,7 +714,7 @@
 
   aside .sidebar a.active {
     background: var(--color-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     margin-left: 0;
   }
 
@@ -473,12 +726,12 @@
   }
 
   aside .sidebar a.active span {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     margin-left: calc(1rem - 6px);
   }
 
   aside .sidebar a:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   /* ─── Sidebar divider (shared by both surfaces) ───────────────── */
@@ -493,11 +746,13 @@
     margin: 0.5rem 1.2rem;
     height: auto;
     padding: 0.9rem 1.1rem;
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-primary-fill);
+    color: #fff;
     border-radius: var(--border-radius-2);
     font-weight: 600;
-    transition: all var(--transition-speed) ease;
+    transition:
+      background var(--duration-micro) var(--ease-out),
+      opacity var(--duration-micro) var(--ease-out);
   }
 
   aside .sidebar a.nav-cta span,
@@ -519,10 +774,17 @@
   }
 
   /* ─── Buttons (shared by both surfaces) ───────────────────────── */
+  /* The root font-size floor is 12.5px, so the old `0.65rem 1.3rem` padding
+   produced a ~30px-tall button on a phone — and `.btn-sm`, which is what the
+   admin console uses for every panel action, came out at ~22px. WCAG 2.5.5
+   asks 44px. `min-height` rather than more padding so the label stays where
+   it is and only the hit area grows. */
   .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    min-height: var(--tap-target);
     padding: 0.65rem 1.3rem;
     border: none;
     border-radius: var(--border-radius-1);
@@ -538,8 +800,8 @@
   }
 
   .btn-primary {
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-primary-fill);
+    color: #fff;
   }
 
   .btn-primary:hover {
@@ -556,8 +818,8 @@
   }
 
   .btn-danger {
-    background: var(--color-danger);
-    color: var(--color-white);
+    background: var(--color-danger-fill);
+    color: #fff;
   }
 
   .btn-danger:hover {
@@ -567,14 +829,19 @@
   .btn-ghost {
     background: transparent;
     color: var(--color-dark-variant);
-    border: 1px solid var(--color-light);
+    /* Control boundary — the old tint read at 1.20:1 against a card. */
+    border: 1px solid var(--border-control);
   }
 
   .btn-ghost:hover {
     background: var(--color-background);
   }
 
+  /* Icon buttons were ~26px square. The glyph keeps its size; the button
+   grows around it to a full tap target. */
   .btn-icon {
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
     padding: 0.4rem;
     border-radius: var(--border-radius-1);
     background: transparent;
@@ -584,6 +851,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .btn-icon:hover {
@@ -591,7 +859,7 @@
   }
 
   .btn-icon.danger:hover {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
 
   main {
@@ -636,7 +904,9 @@
     border-radius: var(--card-border-radius);
     box-shadow: var(--box-shadow);
     margin: var(--space-3) 0 var(--space-1);
-    transition: all var(--transition-speed) ease;
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
   }
 
   .student-info-bar:hover {
@@ -686,29 +956,31 @@
     letter-spacing: 0.02em;
   }
 
+  /* Each badge's text sits on its own -light tint, which is the tightest of
+   the three backgrounds the -text shades were solved against. */
   .badge-primary {
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .badge-success {
     background: var(--color-success-light);
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
   }
 
   .badge-danger {
     background: var(--color-danger-light);
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
 
   .badge-warning {
     background: var(--color-warning-light);
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
   }
 
   .badge-info {
     background: var(--color-info-bg);
-    color: var(--color-info);
+    color: var(--color-info-text);
   }
 
   main .dashboard {
@@ -723,7 +995,9 @@
     border-radius: var(--card-border-radius);
     margin-top: 1rem;
     box-shadow: var(--box-shadow);
-    transition: all var(--transition-speed) ease;
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
   }
 
   main .dashboard > div:hover {
@@ -731,18 +1005,19 @@
   }
 
   /* Dashboard summary cards that double as shortcuts to their full section.
-   Pairs with each card's existing `transition: all var(--transition-speed)`
-   so the lift animates, and keeps a visible focus ring for keyboard users. */
+   This is now the ONLY card lift in the app: every other card that used to
+   rise on hover was not clickable and no longer moves. The distance comes
+   from --lift-hover so the three surfaces that do lift agree on how far. */
   .clickable-card {
     cursor: pointer;
   }
 
   .clickable-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(var(--lift-hover));
   }
 
   .clickable-card:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: var(--focus-outline);
     outline-offset: 3px;
   }
 
@@ -837,7 +1112,6 @@
     padding: var(--card-padding);
     text-align: left;
     box-shadow: var(--box-shadow);
-    transition: all var(--transition-speed) ease;
   }
 
   /* Keep status columns centered (badge is a direct child of its cell) */
@@ -845,10 +1119,11 @@
     text-align: center;
   }
 
-  main .recent-activity table:hover {
-    box-shadow: none;
-  }
-
+  /* No hover state: a <table> is not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A6. */
   main table thead th {
     padding: 0.8rem 1rem;
     color: var(--color-info-dark);
@@ -870,6 +1145,10 @@
     transition: background var(--transition-speed) ease;
   }
 
+  /* A scanning aid, not an affordance: these rows are read-only, and the
+   tint only helps the eye hold its place across a wide row. Deliberately
+   left in place — see the teacher console, where rows that DO open
+   something take the accent tint so the two cases look different. */
   main table tbody tr:hover {
     background: var(--color-light);
   }
@@ -893,19 +1172,19 @@
     text-align: center;
     display: block;
     margin: 1rem auto;
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .score-high {
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
     font-weight: 600;
   }
   .score-mid {
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
     font-weight: 600;
   }
   .score-low {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
     font-weight: 600;
   }
 
@@ -919,27 +1198,27 @@
 
   .status-pass {
     background: var(--color-success-light);
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
   }
   .status-fail {
     background: var(--color-danger-light);
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
   .status-present {
     background: var(--color-success-light);
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
   }
   .status-absent {
     background: var(--color-danger-light);
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
   .status-late {
     background: var(--color-warning-light);
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
   }
   .status-excused {
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .subject-dot {
@@ -974,20 +1253,30 @@
     color: var(--color-dark-variant);
   }
 
+  /* `appearance: auto` used to be restored here — it was this one select's
+   private workaround for the global reset stripping the dropdown arrow. The
+   controls layer now gives every select a chevron, so the workaround is dead
+   code (and would have painted a second, native arrow beside the new one).
+   font-family/font-size are likewise inherited from the shared control rules
+   and no longer restated. */
   .period-selector select {
     padding: 0.6rem 0.9rem;
     border-radius: var(--border-radius-2);
     background: var(--color-white);
     color: var(--color-dark);
-    font-family: inherit;
-    font-size: var(--text-sm);
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     cursor: pointer;
-    transition: all var(--transition-speed) ease;
-    appearance: auto;
+    transition:
+      border-color var(--duration-micro) var(--ease-out),
+      box-shadow var(--duration-micro) var(--ease-out);
   }
 
-  /* ─── Shared focus ring for form controls (mirrors the login input ring) ── */
+  /* ─── Shared focus ring for form controls (mirrors the login input ring) ──
+   Form controls get this softer border+ring instead of the global outline —
+   `outline: none` here is legitimate because the ring IS the replacement.
+   The console selects below (.panel-actions, .map-row, .sched-field) were
+   missing from this list while also carrying an unconditional
+   `outline: none`, so they had no focus indicator of any kind. */
   .period-selector select:focus-visible,
   .view-toolbar select:focus-visible,
   .view-toolbar input:focus-visible,
@@ -996,10 +1285,14 @@
   .modal-body textarea:focus-visible,
   .data-table input:focus-visible,
   .data-table select:focus-visible,
+  .panel-actions select:focus-visible,
+  .map-row select:focus-visible,
+  .sched-field select:focus-visible,
+  .settings-field input:focus-visible,
   .score-input:focus-visible,
   .search-bar:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-light);
+    border-color: var(--color-primary-text);
+    box-shadow: var(--focus-ring);
     outline: none;
   }
 
@@ -1028,7 +1321,7 @@
   }
 
   .schedule-grid .sch-header {
-    background: var(--color-primary);
+    background: var(--color-primary-fill);
     color: #fff;
     padding: 0.8rem 0.5rem;
     text-align: center;
@@ -1059,17 +1352,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: all var(--transition-speed) ease;
     position: relative;
     gap: 0.2rem;
   }
 
-  .schedule-grid .sch-cell:hover {
-    transform: scale(1.02);
-    z-index: 1;
-    box-shadow: var(--shadow-md);
-  }
-
+  /* No hover state: schedule cells are read-only, and this rule applied to
+   EMPTY cells too — the grid advertised an action on slots with no class in
+   them. It also raised z-index and scaled, so a hovered cell lifted out of
+   the grid and overlapped its neighbours, shifting the thing the user was
+   trying to read. Removed with A1. */
   .schedule-grid .sch-cell .sch-subject {
     font-weight: 700;
     font-size: 0.82rem;
@@ -1110,7 +1401,6 @@
     padding: 1.8rem;
     border-radius: var(--card-border-radius);
     box-shadow: var(--box-shadow);
-    transition: all var(--transition-speed) ease;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1134,11 +1424,11 @@
     );
   }
 
-  .teacher-card:hover {
-    box-shadow: none;
-    transform: translateY(-4px);
-  }
-
+  /* No hover state: teacher cards are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A2. */
   .teacher-card .teacher-avatar {
     width: 3.8rem;
     height: 3.8rem;
@@ -1165,7 +1455,7 @@
   }
 
   .teacher-card .teacher-spec {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     font-size: 0.78rem;
     font-weight: 500;
   }
@@ -1194,13 +1484,13 @@
     box-shadow: var(--box-shadow);
     flex: 1 1 120px;
     text-align: center;
-    transition: all var(--transition-speed) ease;
   }
 
-  .att-stat:hover {
-    box-shadow: none;
-  }
-
+  /* No hover state: attendance tiles are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A4. */
   .att-stat h2 {
     font-size: 1.6rem;
     font-weight: 800;
@@ -1214,16 +1504,16 @@
   }
 
   .att-stat.stat-present h2 {
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
   }
   .att-stat.stat-absent h2 {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
   .att-stat.stat-late h2 {
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
   }
   .att-stat.stat-excused h2 {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .events-timeline {
@@ -1238,7 +1528,6 @@
     padding: 1.4rem 1.8rem;
     border-radius: var(--card-border-radius);
     box-shadow: var(--box-shadow);
-    transition: all var(--transition-speed) ease;
     display: flex;
     gap: 1.2rem;
     align-items: flex-start;
@@ -1274,11 +1563,11 @@
     background: var(--color-info-dark);
   }
 
-  .event-card:hover {
-    box-shadow: none;
-    transform: translateX(4px);
-  }
-
+  /* No hover state: event cards are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A3. */
   .event-icon {
     width: 2.8rem;
     height: 2.8rem;
@@ -1291,23 +1580,23 @@
 
   .event-holiday .event-icon {
     background: var(--color-danger-light);
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
   .event-exam_period .event-icon {
     background: var(--color-warning-light);
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
   }
   .event-activity .event-icon {
     background: var(--color-success-light);
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
   }
   .event-parent_meeting .event-icon {
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
   .event-suspension .event-icon {
     background: var(--color-suspension-bg);
-    color: var(--color-suspension);
+    color: var(--color-suspension-text);
   }
   .event-general .event-icon {
     background: var(--color-light);
@@ -1368,7 +1657,9 @@
     font-weight: var(--weight-medium);
     text-align: left;
     cursor: pointer;
-    transition: all var(--transition-speed) ease;
+    transition:
+      background var(--duration-micro) var(--ease-out),
+      color var(--duration-micro) var(--ease-out);
   }
 
   .settings-rail-item .material-symbols-outlined {
@@ -1382,7 +1673,7 @@
 
   .settings-rail-item.active {
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     font-weight: var(--weight-semibold);
   }
 
@@ -1415,7 +1706,7 @@
     padding: 0.8rem 1.1rem;
     border-radius: var(--border-radius-2);
     background: var(--color-warning-light);
-    color: var(--color-warning-dark);
+    color: var(--color-warning-text);
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
   }
@@ -1515,7 +1806,7 @@
 
   .settings-field input {
     padding: 0.6rem 0.9rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-background);
     color: var(--color-dark);
@@ -1552,11 +1843,11 @@
   }
 
   .settings-hint-error {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
 
   .settings-hint-success {
-    color: var(--color-success);
+    color: var(--color-success-text);
   }
 
   /* ── Change-password form (live outside demo mode) ── */
@@ -1626,7 +1917,7 @@
   .settings-segmented {
     display: inline-flex;
     background: var(--color-background);
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     padding: 0.2rem;
     gap: 0.2rem;
@@ -1640,18 +1931,20 @@
     font-family: inherit;
     font-size: var(--text-sm);
     cursor: pointer;
-    transition: all var(--transition-speed) ease;
+    transition:
+      background var(--duration-micro) var(--ease-out),
+      color var(--duration-micro) var(--ease-out);
   }
 
   .settings-segment.active {
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-primary-fill);
+    color: #fff;
   }
 
   .settings-coming-soon {
     font-size: var(--text-xs);
     font-weight: var(--weight-semibold);
-    color: var(--color-info);
+    color: var(--color-info-text);
     background: var(--color-info-bg);
     padding: 0.15rem 0.55rem;
     border-radius: var(--border-radius-3);
@@ -1690,7 +1983,7 @@
   }
 
   .settings-contact .material-symbols-outlined {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   /* ── More info ── */
@@ -1726,7 +2019,7 @@
   }
 
   .settings-links a {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .settings-links a:hover {
@@ -1789,17 +2082,26 @@
     margin-bottom: 1rem;
   }
 
-  .right .top button {
+  /* Hides the mobile menu button on desktop. Scoped to #menu-btn rather than
+   `button`: the theme toggler in this same container is a <button> now (it
+   was a <div>, which is why it was never keyboard-operable), and the loose
+   selector would hide it. */
+  .right .top #menu-btn {
     display: none;
   }
 
+  /* Now a <button> rather than a <div>, so it is focusable and operable by
+   keyboard. Sized to a full tap target: it was ~55x21px. */
   .right .theme-toggler {
     background: var(--color-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 1.6rem;
-    width: 4.2rem;
+    min-height: var(--tap-target);
+    height: var(--tap-target);
+    width: 4.6rem;
+    padding: 0;
+    border: none;
     cursor: pointer;
     border-radius: var(--border-radius-1);
   }
@@ -1814,8 +2116,8 @@
   }
 
   .right .theme-toggler span.active {
-    background: var(--color-primary);
-    color: white;
+    background: var(--color-primary-fill);
+    color: #fff;
     border-radius: var(--border-radius-1);
   }
 
@@ -1842,7 +2144,9 @@
     padding: var(--card-padding);
     box-shadow: var(--box-shadow);
     border-radius: var(--card-border-radius);
-    transition: all var(--transition-speed) ease;
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
   }
 
   .right .recent-updates .updates-card:hover {
@@ -1883,13 +2187,13 @@
     margin-bottom: 0.7rem;
     display: flex;
     align-items: center;
-    transition: all var(--transition-speed) ease;
   }
 
-  .right .subjects-analytics .item:hover {
-    box-shadow: none;
-  }
-
+  /* No hover state: subject rows are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A5. */
   .right .subjects-analytics .item .right-content {
     display: flex;
     justify-content: space-between;
@@ -2006,15 +2310,15 @@
   }
 
   .load-error-text {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
     font-size: var(--text-sm);
     font-weight: var(--weight-medium);
     margin: 0;
   }
 
   .btn-retry {
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-primary-fill);
+    color: #fff;
     border: none;
     border-radius: var(--border-radius-1);
     padding: 0.5rem 1.2rem;
@@ -2078,8 +2382,8 @@
   }
 
   .legal-lang button.active {
-    background: var(--color-primary);
-    color: var(--color-white);
+    background: var(--color-primary-fill);
+    color: #fff;
   }
 
   .legal {
@@ -2116,7 +2420,7 @@
   }
 
   .legal a {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     text-decoration: underline;
   }
 
@@ -2340,7 +2644,7 @@
       display: none;
     }
 
-    .right .top button {
+    .right .top #menu-btn {
       display: inline-block;
       background: transparent;
       cursor: pointer;
@@ -2349,7 +2653,7 @@
       left: 1rem;
     }
 
-    .right .top button span {
+    .right .top #menu-btn span {
       font-size: 2rem;
     }
 
@@ -2463,7 +2767,7 @@
   }
   .notfound-btn {
     display: inline-block;
-    background: var(--color-primary);
+    background: var(--color-primary-fill);
     color: #fff;
     padding: 0.8rem 1.6rem;
     border-radius: var(--border-radius-2);
@@ -2494,6 +2798,463 @@
     .btn-spinner {
       animation-duration: 0.7s !important;
       animation-iteration-count: infinite !important;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTROLS LAYER — the app claims the controls the browser drew
+   ───────────────────────────────────────────────────────────────
+   These rules sit in a THIRD cascade layer, above `page`, and that
+   placement is load-bearing rather than stylistic.
+
+   Several per-surface rules style selects with the `background:`
+   SHORTHAND (e.g. `.panel-actions select { background: var(--color-white) }`).
+   The shorthand resets `background-image` to none, so a chevron declared
+   in `base` would be silently wiped by the page layer on exactly the
+   controls that need it. Sitting above `page` is what makes control
+   ownership hold everywhere instead of surface by surface.
+
+   Everything here has one job: no control renders as a browser default.
+═══════════════════════════════════════════════════════════════ */
+@layer controls {
+  /* ── Select: give back the affordance the reset removed ──────────
+   The global `* { appearance: none }` strips a <select> of its native
+   dropdown arrow. Only two rules in the app ever restored it, so ~29
+   selects rendered as plain rectangles — nothing said "this opens".
+
+   The chevron is an inline SVG data URI. It cannot reference a custom
+   property (data URIs are opaque to the cascade), so the stroke colour
+   is written literally and the dark variant is declared below. Both
+   values are --color-dark-variant for their theme; keep them in step. */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667281' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 0.9rem;
+    /* Room for the chevron so a long option label never runs under it. */
+    padding-right: 2.1rem;
+  }
+
+  .dark-theme-variables select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3bdcc' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
+  /* The option list itself is drawn by the OS and is not styleable in
+   most browsers; `color-scheme` on :root is what makes it follow the
+   theme. These two properties are honoured by Firefox and by Chrome on
+   Linux/Windows, so they are worth setting even though they are not
+   universal. */
+  select option {
+    background: var(--color-white);
+    color: var(--color-dark);
+  }
+
+  /* ── Number: spin buttons ────────────────────────────────────────
+   Kept rather than hidden — score entry genuinely benefits from them,
+   and removing a control users expect would trade one Jakob's Law
+   problem for another. `color-scheme` themes them; this only stops them
+   crowding the value. */
+  input[type="number"] {
+    padding-right: 0.5rem;
+  }
+
+  /* ── Date / time: the picker trigger ─────────────────────────────
+   The indicator is a UA-drawn glyph. With `color-scheme` set it now
+   follows the theme instead of staying black on a dark field. Sized and
+   spaced here so it lines up with the select chevron beside it, and
+   given a pointer so it reads as the affordance it is. */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: var(--space-1);
+    margin-right: calc(var(--space-1) * -1);
+    border-radius: var(--border-radius-1);
+    opacity: 0.75;
+  }
+
+  /* The tint here used to be --color-light, which is rgba(0,0,0,0.4) in dark
+   mode — a near-black square painted behind an already-dark icon, so hovering
+   turned the whole indicator into one solid block. --surface-hover moves away
+   from the surface in both themes. */
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background: var(--surface-hover);
+  }
+
+  /* ── Search: the clear affordance ───────────────────────────────── */
+  input[type="search"]::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
+  /* ── Colour: the swatch ─────────────────────────────────────────
+   The UA wraps the colour in its own inset border with square corners,
+   which reads as a broken input next to the app's rounded fields. */
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+  }
+
+  input[type="color"]::-moz-color-swatch {
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+  }
+
+  /* ── File: the least-owned control in the app ───────────────────
+   The CSV import's file input shipped as a bare OS button — different
+   font, different metrics, no theme, on the screen a director uses to
+   load their entire roster. Dressed as a ghost button so it belongs to
+   the same family as the actions beside it. Both spellings: the
+   standardised one and the -webkit- alias older Safari still needs. */
+  input[type="file"] {
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: var(--text-sm);
+    color: var(--color-dark-variant);
+  }
+
+  input[type="file"]::file-selector-button,
+  input[type="file"]::-webkit-file-upload-button {
+    font: inherit;
+    margin-right: var(--space-2);
+    min-height: var(--tap-target);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+
+  input[type="file"]::file-selector-button:hover,
+  input[type="file"]::-webkit-file-upload-button:hover {
+    background: var(--color-background);
+    border-color: var(--color-primary-text);
+    color: var(--color-dark);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     CUSTOM SELECT + DATE PICKER
+     ───────────────────────────────────────────────────────────────
+     The native control is still in the DOM in both cases — it holds the
+     value the form submits and the tests drive. It is CLIPPED, never
+     `display: none`: hiding it outright would take it out of the layout
+     and Playwright would stop being able to act on it.
+
+     On coarse pointers everything here reverses and the OS control comes
+     back, because a wheel picker beats a custom list on a phone.
+  ═══════════════════════════════════════════════════════════════ */
+  /* Six different surface rules style a <select> or a date input — modal,
+     panel toolbar, view toolbar, schedule field, CSV mapping row, data-table
+     cell — each with its own padding, border and background. Rather than
+     restate all six for a new element, the NATIVE control keeps painting its
+     own box and the custom UI is laid over it, transparent. Theme switches,
+     focus rings and any future surface rule then keep working for free.
+
+     The native's text is what has to go, not its chrome: `color: transparent`
+     hides the value it would otherwise draw under ours. Its own dropdown
+     chevron stays visible and serves as the trigger's chevron. */
+  .smp-select,
+  .smp-date {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  .smp-select__native,
+  .smp-date__native {
+    width: 100%;
+    color: transparent;
+    /* Clicks belong to the overlay. Automation still reads and sets the
+       element directly, which is what the e2e suite does. */
+    pointer-events: none;
+  }
+
+  /* Enhanced date inputs hand their picker button to ours. */
+  .smp-date__native::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  .smp-select__trigger,
+  .smp-date__field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* Padding is copied from the native control at enhance time — it is the
+       one box property that differs per surface and never changes with the
+       theme, so copying it once is safe where copying colours would not be. */
+    font: inherit;
+    color: var(--color-dark);
+    background: transparent;
+    border: none;
+    border-radius: inherit;
+  }
+
+  .smp-select__trigger {
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .smp-date__field {
+    cursor: text;
+  }
+
+  .smp-select__value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .smp-select__trigger.is-placeholder .smp-select__value,
+  .smp-date__field::placeholder {
+    color: var(--color-info-dark);
+  }
+
+  .smp-select__trigger:disabled,
+  .smp-date__field:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* The focus ring belongs on the visible box, which is the native element —
+     but focus lands on the overlay. Forward it. */
+  .smp-select:has(.smp-select__trigger:focus-visible) .smp-select__native,
+  .smp-date:has(.smp-date__field:focus-visible) .smp-date__native {
+    border-color: var(--color-primary-text);
+    box-shadow: var(--focus-ring);
+  }
+
+  .smp-select__trigger:focus-visible,
+  .smp-date__field:focus-visible {
+    outline: none;
+  }
+
+  /* ── The surfaces ─────────────────────────────────────────────── */
+  .smp-popover-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .smp-select__listbox,
+  .smp-date__pop {
+    position: fixed;
+    z-index: var(--z-popover, 1500);
+    margin: 0;
+    padding: var(--space-1);
+    list-style: none;
+    background: var(--color-white);
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-2);
+    box-shadow: var(--shadow-md);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    animation: smp-pop-in var(--duration-micro) var(--ease-out);
+  }
+
+  @keyframes smp-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .smp-select__listbox,
+    .smp-date__pop {
+      animation: none;
+    }
+  }
+
+  .smp-select__option {
+    display: block;
+    padding: 0.5rem 0.7rem;
+    border-radius: var(--border-radius-1);
+    font-size: var(--text-base);
+    color: var(--color-dark);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* One highlight, driven by the keyboard's active option — pointer hover
+     writes to the same state so the two can never disagree about what
+     Enter would choose. */
+  .smp-select__option.is-active {
+    background: var(--color-primary-light);
+    color: var(--color-primary-text);
+  }
+
+  .smp-select__option[aria-selected="true"] {
+    font-weight: var(--weight-semibold);
+  }
+
+  .smp-select__option[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .smp-select__group {
+    padding: 0.5rem 0.7rem 0.25rem;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-info-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Date field ───────────────────────────────────────────────── */
+  .smp-date__field {
+    padding: 0.6rem 0.9rem;
+    cursor: text;
+  }
+
+  /* Sits over the right edge of the native input, where its own picker
+     indicator used to be (that one is hidden above). */
+  .smp-date__button {
+    position: absolute;
+    top: 50%;
+    right: 0.3rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    cursor: pointer;
+  }
+
+  .smp-date__button:hover {
+    background: var(--surface-hover);
+    color: var(--color-dark);
+  }
+
+  .smp-date__pop {
+    padding: var(--space-2);
+    min-width: 17rem;
+  }
+
+  .smp-date__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .smp-date__month {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-dark);
+    text-transform: capitalize;
+  }
+
+  .smp-date__nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    cursor: pointer;
+  }
+
+  .smp-date__nav:hover {
+    background: var(--surface-hover);
+    color: var(--color-dark);
+  }
+
+  .smp-date__row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .smp-date__dow {
+    padding: 0.3rem 0;
+    text-align: center;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-info-dark);
+    text-transform: capitalize;
+  }
+
+  .smp-date__day {
+    aspect-ratio: 1;
+    min-width: 2.2rem;
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .smp-date__day:hover:not(:disabled) {
+    background: var(--surface-hover);
+  }
+
+  .smp-date__day.is-outside {
+    color: var(--color-info-dark);
+  }
+
+  /* Today is marked with a ring, selection with a fill — never colour
+     alone, so the two remain distinguishable to a colour-blind user and
+     when both land on the same day. */
+  .smp-date__day.is-today {
+    outline: 1px solid var(--border-control);
+    outline-offset: -3px;
+  }
+
+  .smp-date__day.is-selected {
+    background: var(--color-primary-fill);
+    color: #fff;
+    font-weight: var(--weight-semibold);
+  }
+
+  .smp-date__day:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* ── Touch: hand the controls back to the OS ──────────────────── */
+  @media (pointer: coarse) {
+    .smp-select__native,
+    .smp-date__native {
+      position: static;
+      width: 100%;
+      height: auto;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .smp-select__trigger,
+    .smp-select__listbox,
+    .smp-date__field,
+    .smp-date__button,
+    .smp-date__pop {
+      display: none;
     }
   }
 }

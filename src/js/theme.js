@@ -30,19 +30,30 @@ export function isDarkMode() {
   return document.documentElement.classList.contains(DARK_CLASS);
 }
 
-/** Reflect the current mode in any toggler present on the page. */
+/**
+ * Reflect the current mode in any toggler present on the page.
+ *
+ * The togglers are <button aria-pressed> (they used to be plain <div>s, which
+ * made theme switching mouse-only). `aria-pressed` is what tells a screen
+ * reader which way the switch currently sits — the .active class only moves
+ * the highlight visually, so both have to be kept in step here.
+ */
 function syncTogglers(isDark) {
-  // Student + admin: <div class="theme-toggler"><span>light_mode</span><span>dark_mode</span></div>
+  // Student + teacher + admin: .theme-toggler wrapping a light + dark icon.
   document.querySelectorAll(".theme-toggler").forEach((toggler) => {
     const spans = toggler.querySelectorAll("span");
     spans[0]?.classList.toggle("active", !isDark);
     spans[1]?.classList.toggle("active", isDark);
+    toggler.setAttribute("aria-pressed", String(isDark));
   });
-  // Login: distinct icon ids
+  // Login: distinct icon ids on a single toggler.
   const lightIcon = document.getElementById("theme-icon-light");
   const darkIcon = document.getElementById("theme-icon-dark");
   lightIcon?.classList.toggle("active", !isDark);
   darkIcon?.classList.toggle("active", isDark);
+  document
+    .getElementById("login-theme-toggler")
+    ?.setAttribute("aria-pressed", String(isDark));
 }
 
 /** Apply a theme everywhere (html + body + togglers) and persist it. */

@@ -31,7 +31,13 @@ import {
   skeletonCards,
   skeletonCardItems,
   initSidebarToggle,
+  errorState,
+  errorRow,
 } from "./ui.js";
+import { registerDialog } from "./dialog.js";
+import { initControls } from "./controls/index.js";
+import { mapDbError } from "./dbErrors.js";
+import * as v from "./validate.js";
 import { renderSettings } from "./settings.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { wrapDbForDemo } from "./demoDb.js";
@@ -577,7 +583,7 @@ const realDb = {
       .select(
         `
         id, class_id, subject_id, day_of_week, start_time, end_time,
-        classes!class_id(display_name),
+        classes!class_id(display_name, section, grade_levels!grade_level_id(name)),
         subjects!subject_id(name, color),
         rooms!room_id(name)
       `,
@@ -629,16 +635,131 @@ const modalCancel = document.getElementById("modal-cancel");
 const modalSubmit = document.getElementById("modal-submit");
 
 let currentSubmitHandler = null;
+let modalDirty = false;
+
+/**
+ * User-facing text for a failed write — the same treatment the admin console
+ * gives it. `err.message` on a PostgREST failure names constraints and columns
+ * ("violates foreign key constraint class_subject_teachers_teacher_id_fkey")
+ * and means nothing to a teacher; this maps the SQLSTATE to a translated
+ * sentence and keeps the raw error in the console for debugging.
+ * @param {any} err
+ */
+function errorText(err) {
+  console.error("[SMP] Write failed:", err);
+  return t(mapDbError(err).key);
+}
+
+/**
+ * Human-readable label for a class — "10th Grade — Section A".
+ *
+ * `classes.display_name` is a STORAGE code (numeric level + section, e.g.
+ * "1010-1"). The admin console has rendered the readable form for a while
+ * via its own sectionName(); this console was still printing the raw code on
+ * every class card, every workspace header, the Today list and every class
+ * picker. Same phrasing and same i18n key as the other two surfaces, so a
+ * section reads identically wherever it appears.
+ *
+ * Falls back to the code only when the joined grade level is missing, which
+ * is strictly better than showing nothing.
+ *
+ * @param {{ display_name?: string|null, section?: string|number|null,
+ *   grade_levels?: { name?: string|null } | null } | null | undefined} cls
+ */
+function className(cls) {
+  const grade = cls?.grade_levels?.name;
+  if (grade && cls?.section != null) {
+    return t("student.classLine", { grade, section: cls.section });
+  }
+  return cls?.display_name ?? "—";
+}
+
+/** Inline validation message bound to its field (see admin.js for the rationale). */
+function setFieldError(name, message) {
+  const input = modalForm.querySelector(`[name="${name}"]`);
+  const group = input?.closest(".field-group");
+  if (!group) return;
+  group.classList.add("input-error");
+  const msg = document.createElement("small");
+  msg.className = "field-error";
+  msg.dataset.fieldError = name;
+  msg.id = `modal-error-${name}`;
+  msg.setAttribute("role", "alert");
+  msg.textContent = message;
+  group.appendChild(msg);
+  input?.setAttribute("aria-invalid", "true");
+  input?.setAttribute("aria-describedby", msg.id);
+}
+
+function clearFieldErrors() {
+  modalForm.querySelectorAll("[data-field-error]").forEach((el) => el.remove());
+  modalForm
+    .querySelectorAll(".field-group.input-error")
+    .forEach((el) => el.classList.remove("input-error"));
+  modalForm.querySelectorAll("[aria-invalid]").forEach((el) => {
+    el.removeAttribute("aria-invalid");
+    el.removeAttribute("aria-describedby");
+  });
+}
+
+function clearFieldError(name) {
+  modalForm
+    .querySelectorAll(`[data-field-error="${name}"]`)
+    .forEach((el) => el.remove());
+  modalForm
+    .querySelector(`[name="${name}"]`)
+    ?.closest(".field-group")
+    ?.classList.remove("input-error");
+  const input = modalForm.querySelector(`[name="${name}"]`);
+  input?.removeAttribute("aria-invalid");
+  input?.removeAttribute("aria-describedby");
+}
+
+/**
+ * Field specs → the { field: Rule[] } map validate.js runs. Mirrors
+ * admin.js: a spec marked `required` gets required() prepended, so switching
+ * off the browser's own validation does not quietly drop the check.
+ * @param {any[]} fields
+ */
+function collectRules(fields) {
+  /** @type {Record<string, import("./validate.js").Rule[]>} */
+  const map = {};
+  fields.forEach((field) => {
+    if (field.disabled) return;
+    const rules = [...(field.rules ?? [])];
+    if (field.required) rules.unshift(v.required());
+    if (field.maxLength != null) rules.push(v.maxLen(field.maxLength));
+    if (rules.length) map[field.name] = rules;
+  });
+  return map;
+}
+
+/** validate.js message descriptors → display strings. */
+function translateMessages(messages) {
+  /** @type {Record<string, string>} */
+  const out = {};
+  for (const [field, message] of Object.entries(messages)) {
+    out[field] = t(message.key, message.vars);
+  }
+  return out;
+}
 
 function openModal({
   title,
   fields,
   onSubmit,
+  validate,
   submitLabel = t("common.save"),
 }) {
   modalTitle.textContent = title;
   modalSubmit.textContent = submitLabel;
   modalForm.innerHTML = "";
+  modalDirty = false;
+  // This console still handed validation to the browser, which answers with a
+  // native popup: always English, unstyleable, one field at a time, and gone
+  // the moment focus moves. The admin console stopped doing that; this brings
+  // the teacher console onto the same inline, translated messages.
+  modalForm.noValidate = true;
 
   fields.forEach((field) => {
     const group = document.createElement("div");
@@ -713,12 +834,29 @@ function openModal({
   currentSubmitHandler = async (e) => {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(modalForm));
+
+    // Validation gate: render every message under its own field and stop.
+    // Field rules win over whole-form ones — a malformed value is more
+    // actionable than the aggregate complaint it produces.
+    clearFieldErrors();
+    const errors = {
+      ...(validate ? (validate(formData) ?? {}) : {}),
+      ...translateMessages(v.runRules(collectRules(fields), formData)),
+    };
+    const invalid = Object.keys(errors);
+    if (invalid.length) {
+      invalid.forEach((name) => setFieldError(name, errors[name]));
+      const first = modalForm.querySelector(`[name="${invalid[0]}"]`);
+      if (first instanceof HTMLElement) first.focus();
+      return;
+    }
+
     modalSubmit.disabled = true;
     try {
       await onSubmit(formData);
       closeModal();
     } catch (err) {
-      showToast(err.message, "error");
+      showToast(errorText(err), "error");
     } finally {
       modalSubmit.disabled = false;
     }
@@ -731,25 +869,70 @@ function openModal({
 function closeModal() {
   modalOverlay.classList.remove("active");
   modalForm.innerHTML = "";
+  modalDirty = false;
   if (currentSubmitHandler) {
     modalForm.removeEventListener("submit", currentSubmitHandler);
     currentSubmitHandler = null;
   }
 }
 
-modalClose.addEventListener("click", closeModal);
-modalCancel.addEventListener("click", closeModal);
+/**
+ * Close on explicit intent only, confirming first when the form carries
+ * unsaved edits. The X and Cancel both used to discard a half-filled form
+ * without a word — the admin console already warns, this matches it.
+ */
+function requestCloseModal() {
+  if (!modalDirty) {
+    closeModal();
+    return;
+  }
+  openConfirm(t("admin.confirm.discardMessage"), () => closeModal(), {
+    title: t("admin.confirm.discardTitle"),
+    confirmLabel: t("admin.confirm.discard"),
+    cancelLabel: t("admin.confirm.keepEditing"),
+  });
+}
+
+// Any edit to any control marks the form dirty (delegated: the contents are
+// rebuilt on every open but the <form> element itself persists), and retires
+// that field's error so a correction clears the message immediately.
+["input", "change"].forEach((evt) =>
+  modalForm.addEventListener(evt, (e) => {
+    modalDirty = true;
+    const name = /** @type {any} */ (e.target)?.name;
+    if (name) clearFieldError(name);
+  }),
+);
+
+modalClose.addEventListener("click", requestCloseModal);
+modalCancel.addEventListener("click", requestCloseModal);
 
 // ── Confirm Modal ──────────────────────────────────────────────
 const confirmOverlay = document.getElementById("confirm-overlay");
+const confirmTitle = document.getElementById("confirm-title");
 const confirmMessage = document.getElementById("confirm-message");
 const confirmDelete = document.getElementById("confirm-delete");
 const confirmCancel = document.getElementById("confirm-cancel");
 
 let confirmHandler = null;
 
-function openConfirm(message, onConfirm) {
+/**
+ * Ask before an irreversible action. Defaults to the delete wording; `opts`
+ * retitles it and relabels the buttons so a non-delete decision (discarding a
+ * dirty form) can reuse the same dialog rather than inventing another.
+ * @param {string} message
+ * @param {() => any} onConfirm
+ * @param {{ title?: string, confirmLabel?: string, cancelLabel?: string,
+ *   danger?: boolean }} [opts]
+ */
+function openConfirm(message, onConfirm, opts = {}) {
+  const danger = opts.danger !== false;
+  confirmTitle.textContent = opts.title ?? t("admin.confirm.title");
   confirmMessage.textContent = message;
+  confirmDelete.textContent = opts.confirmLabel ?? t("common.delete");
+  confirmDelete.classList.toggle("btn-danger", danger);
+  confirmDelete.classList.toggle("btn-primary", !danger);
+  confirmCancel.textContent = opts.cancelLabel ?? t("common.cancel");
   confirmHandler = onConfirm;
   confirmOverlay.classList.add("active");
 }
@@ -766,7 +949,7 @@ confirmDelete.addEventListener("click", async () => {
     await confirmHandler();
     closeConfirm();
   } catch (err) {
-    showToast(err.message, "error");
+    showToast(errorText(err), "error");
   } finally {
     confirmDelete.disabled = false;
   }
@@ -878,6 +1061,20 @@ document
   .addEventListener("click", closeColumnGrades);
 cgSave.addEventListener("click", saveColumnGrades);
 
+// ── Dialog keyboard contract ───────────────────────────────────
+// Focus trap, Escape to close, focus moved in on open and returned to the
+// trigger on close — for all eight dialogs this console raises. The stack in
+// dialog.js handles the nesting here: the shared form and confirm dialogs
+// open on top of Manage Assignments, and only the topmost one traps.
+registerDialog(modalOverlay, { close: requestCloseModal });
+registerDialog(confirmOverlay, { close: closeConfirm });
+registerDialog(drawerOverlay, { close: closeDrawer });
+registerDialog(assignmentsOverlay, { close: closeManageAssignments });
+registerDialog(sgOverlay, { close: closeStudentGradesModal });
+registerDialog(categoriesOverlay, { close: closeCategoriesModal });
+registerDialog(pgOverlay, { close: closePostGrades });
+registerDialog(cgOverlay, { close: closeColumnGrades });
+
 // Print progress report from the open student drawer (item 6).
 document
   .getElementById("drawer-print")
@@ -905,8 +1102,38 @@ function renderEmptyRow(tbodyId, colspan, message = t("common.noRecords")) {
     tbody.innerHTML = `<tr><td colspan="${colspan}" class="loading-cell">${message}</td></tr>`;
 }
 
-function renderErrorRow(tbodyId, colspan) {
-  renderEmptyRow(tbodyId, colspan, t("common.loadFailed"));
+/**
+ * A section that failed to load, with a way to try again.
+ *
+ * Two things were wrong with what this replaces. It rendered through
+ * renderEmptyRow, so "no students in this section" and "the server did not
+ * answer" came out as the same muted grey line. And several call sites went
+ * further and interpolated `err.message` straight into the page, putting raw
+ * PostgREST text ("violates foreign key constraint …") in front of a teacher.
+ *
+ * Same `.load-error` / `[data-retry]` markup as the student portal (ui.js).
+ * The raw error still goes to console.error at each call site.
+ *
+ * @param {string} tbodyId
+ * @param {number} colspan
+ * @param {() => any} [retry]
+ */
+function renderErrorRow(tbodyId, colspan, retry) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = errorRow(colspan, t("common.loadError"), t("common.retry"));
+  tbody
+    .querySelector("[data-retry]")
+    ?.addEventListener("click", () => retry?.());
+}
+
+/** The same failure notice for a container that is not a table body. */
+function renderErrorBlock(host, retry) {
+  if (!host) return;
+  host.innerHTML = errorState(t("common.loadError"), t("common.retry"));
+  host
+    .querySelector("[data-retry]")
+    ?.addEventListener("click", () => retry?.());
 }
 
 function makeActionBtn(
@@ -962,7 +1189,7 @@ function teacherClassOptions() {
     seen.add(cst.class_id);
     opts.push({
       value: cst.class_id,
-      label: cst.classes?.display_name ?? `Class ${cst.class_id}`,
+      label: className(cst.classes),
     });
   });
   return opts;
@@ -1180,6 +1407,11 @@ bindThemeToggle(document.querySelector(".theme-toggler"));
 initI18n("teacher");
 applyTranslations();
 
+// Enhance every <select> and <input type="date"> — now and whenever the app
+// renders more. Must run AFTER initI18n/applyTranslations: the date picker
+// takes its month names, field order and week start from the active locale.
+initControls();
+
 document.getElementById("class-back-btn")?.addEventListener("click", () => {
   showSection("myclasses");
 });
@@ -1226,7 +1458,7 @@ async function loadMyClasses() {
     renderMyClasses(classes, counts);
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<div class="loading-cell">${t("admin.myclasses.loadFailed")}</div>`;
+    renderErrorBlock(grid, loadMyClasses);
   }
 }
 
@@ -1249,9 +1481,7 @@ function renderMyClasses(classes, counts) {
       <span class="class-card-accent"></span>
       <div class="class-card-body">
         <h3 class="class-card-subject">${escapeHtml(cst.subjects?.name ?? "—")}</h3>
-        <p class="class-card-section">${escapeHtml(cst.classes?.display_name ?? "—")} · ${escapeHtml(
-          cst.classes?.grade_levels?.name ?? "",
-        )}</p>
+        <p class="class-card-section">${escapeHtml(className(cst.classes))}</p>
         <p class="class-card-count">
           <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-group"></use></svg></span>
           ${tn("admin.students", count)}
@@ -1280,7 +1510,7 @@ function openClassWorkspace(cst, initialTab = "roster") {
     cstId: cst.id,
     classId: cst.class_id,
     subjectId: cst.subject_id,
-    className: cst.classes?.display_name ?? "—",
+    className: className(cst.classes),
     subjectName: cst.subjects?.name ?? "—",
     color: cst.subjects?.color || "var(--color-primary)",
     gradeLevel: cst.classes?.grade_levels?.name ?? "",
@@ -1288,8 +1518,9 @@ function openClassWorkspace(cst, initialTab = "roster") {
 
   document.getElementById("class-ws-title").textContent =
     `${currentClass.subjectName} · ${currentClass.className}`;
-  document.getElementById("class-ws-subtitle").textContent =
-    `${currentClass.gradeLevel} · ${ACTIVE_YEAR.name}`;
+  // The title now spells the grade out ("10th Grade — Section A"), so the
+  // subtitle drops the grade it used to repeat and carries the year alone.
+  document.getElementById("class-ws-subtitle").textContent = ACTIVE_YEAR.name;
   document.getElementById("class-ws-dot").style.background = currentClass.color;
 
   showSection("class");
@@ -1329,7 +1560,7 @@ function renderRosterTab(content) {
     <div class="view-toolbar">
       <div class="search-bar">
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-search"></use></svg></span>
-        <input type="search" id="roster-search" placeholder="${t("admin.roster.searchPlaceholder")}" />
+        <input type="search" id="roster-search" placeholder="${t("admin.roster.searchPlaceholder")}" aria-label="${t("admin.roster.searchLabel")}" />
       </div>
       <button class="btn btn-primary" id="btn-add-student">
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-person_add"></use></svg></span> ${t("admin.roster.addStudent")}
@@ -1386,9 +1617,7 @@ async function loadRoster() {
     renderRosterTable(_rosterCache);
   } catch (err) {
     console.error(err);
-    const body = document.getElementById("roster-body");
-    if (body)
-      body.innerHTML = `<div class="loading-cell">${t("common.loadFailed")}</div>`;
+    renderErrorBlock(document.getElementById("roster-body"), loadRoster);
   }
 }
 
@@ -1915,7 +2144,7 @@ async function loadGradebook() {
       renderManageAssignments();
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<div class="loading-cell">${t("admin.gradebook.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    renderErrorBlock(grid, loadGradebook);
   }
 }
 
@@ -2181,7 +2410,8 @@ async function openStudentGradesModal(student) {
       student.id,
     );
   } catch (err) {
-    sgBody.innerHTML = `<div class="loading-cell">${t("admin.sg.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(sgBody, () => openStudentGradesModal(student));
     return;
   }
 
@@ -2202,12 +2432,14 @@ async function openStudentGradesModal(student) {
       const graded = g && g.score != null;
       const scoreField = graded
         ? `<input class="sg-score sg-locked" type="number" min="0" max="${a.max_score}" step="0.01"
-            data-assignment="${a.id}" data-original="${score}" value="${score}" readonly />
+            data-assignment="${a.id}" data-original="${score}" value="${score}" readonly
+            aria-label="${t("a11y.scoreFor", { name: a.name })}" />
           <button type="button" class="sg-edit-btn" data-assignment="${a.id}" title="${t("admin.sg.editScore")}" aria-label="${t("admin.sg.editScore")}">
             <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-edit"></use></svg></span>
           </button>`
         : `<input class="sg-score" type="number" min="0" max="${a.max_score}" step="0.01"
-            data-assignment="${a.id}" data-original="${score}" value="${score}" placeholder="—" />`;
+            data-assignment="${a.id}" data-original="${score}" value="${score}" placeholder="—"
+            aria-label="${t("a11y.scoreFor", { name: a.name })}" />`;
       return `
       <div class="sg-row">
         <span class="sg-cell sg-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</span>
@@ -2221,7 +2453,8 @@ async function openStudentGradesModal(student) {
         <span class="sg-cell sg-muted">${formatDate(g?.graded_at)}</span>
         <span class="sg-cell">
           <input class="sg-note" type="text" data-assignment="${a.id}"
-            data-original="${escapeHtml(note)}" value="${escapeHtml(note)}" placeholder="${t("admin.sg.notePlaceholder")}" />
+            data-original="${escapeHtml(note)}" value="${escapeHtml(note)}" placeholder="${t("admin.sg.notePlaceholder")}"
+            aria-label="${t("a11y.noteFor", { name: a.name })}" />
         </span>
       </div>`;
     })
@@ -2320,7 +2553,7 @@ async function saveStudentGrades() {
     closeStudentGradesModal();
     loadGradebook(); // refresh current-period grade + completion from the view
   } catch (err) {
-    showToast(err.message, "error");
+    showToast(errorText(err), "error");
   } finally {
     sgSave.disabled = false;
   }
@@ -2398,7 +2631,8 @@ async function loadAttendanceSheet(date) {
     });
     renderAttendanceSheet(_attendanceRows);
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="3" class="loading-cell">${t("admin.attendance.error", { msg: escapeHtml(err.message) })}</td></tr>`;
+    console.error(err);
+    renderErrorRow("attendance-body", 3, loadAttendanceSheet);
   }
 }
 
@@ -2423,7 +2657,8 @@ function renderAttendanceSheet(rows) {
       <td>${escapeHtml(row.last_name)}, ${escapeHtml(row.first_name)}</td>
       <td><div class="attendance-status-group">${statusButtons}</div></td>
       <td><input type="text" class="attendance-notes-input" data-idx="${idx}"
-        value="${escapeHtml(row.notes ?? "")}" placeholder="${t("admin.attendance.notePlaceholder")}"></td>`;
+        value="${escapeHtml(row.notes ?? "")}" placeholder="${t("admin.attendance.notePlaceholder")}"
+        aria-label="${t("a11y.noteFor", { name: `${row.last_name}, ${row.first_name}` })}"></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -2453,6 +2688,12 @@ async function saveAttendance() {
     return;
   }
 
+  // Every sibling save disables its button for the round trip; this one did
+  // not, so a second click during a slow save wrote the whole sheet twice.
+  const saveBtn = /** @type {HTMLButtonElement | null} */ (
+    document.getElementById("btn-save-attendance")
+  );
+  if (saveBtn) saveBtn.disabled = true;
   try {
     await db.upsertAttendance(currentClass.classId, date, changed, TEACHER_ID);
     changed.forEach((row) => {
@@ -2465,7 +2706,9 @@ async function saveAttendance() {
     );
     loadAbsenceSummary(); // counts may have shifted a student over the threshold
   } catch (err) {
-    showToast(err.message, "error");
+    showToast(errorText(err), "error");
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 
@@ -2495,7 +2738,8 @@ async function loadSchedule() {
     const entries = await db.fetchScheduleByClass(currentClass.classId);
     renderScheduleTable(entries);
   } catch (err) {
-    container.innerHTML = `<div class="loading-cell">${t("admin.schedule.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(container, loadSchedule);
   }
 }
 
@@ -2552,7 +2796,7 @@ async function loadSubjects() {
     renderSubjectsTable();
   } catch (err) {
     console.error(err);
-    renderErrorRow("subjects-body", 4);
+    renderErrorRow("subjects-body", 4, loadSubjects);
   }
 }
 
@@ -2779,7 +3023,8 @@ async function openPostGrades() {
       db.fetchPostedGrades(cstId, periodId),
     ]);
   } catch (err) {
-    pgBody.innerHTML = `<div class="loading-cell">${t("admin.pg.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(pgBody, () => openPostGrades(cstId, periodId));
     return;
   }
 
@@ -2821,11 +3066,13 @@ async function openPostGrades() {
         <span class="pg-cell">
           <input class="pg-score" type="number" min="0" max="100" step="0.01"
             data-student="${s.id}" data-computed="${computedScore != null ? computedScore.toFixed(2) : ""}"
-            value="${prefill}" placeholder="—" />
+            value="${prefill}" placeholder="—"
+            aria-label="${t("a11y.scoreFor", { name: `${s.last_name}, ${s.first_name}` })}" />
         </span>
         <span class="pg-cell">
           <input class="pg-note" type="text" data-student="${s.id}"
-            value="${escapeHtml(note)}" placeholder="${t("admin.pg.commentPlaceholder")}" />
+            value="${escapeHtml(note)}" placeholder="${t("admin.pg.commentPlaceholder")}"
+            aria-label="${t("a11y.noteFor", { name: `${s.last_name}, ${s.first_name}` })}" />
         </span>
       </div>`;
     })
@@ -2912,7 +3159,7 @@ async function savePostGrades() {
     );
     closePostGrades();
   } catch (err) {
-    showToast(err.message, "error");
+    showToast(errorText(err), "error");
   } finally {
     pgSave.disabled = false;
   }
@@ -2934,7 +3181,8 @@ async function openColumnGrades(assignment) {
   try {
     existing = await db.fetchAssignmentColumn(assignment.id);
   } catch (err) {
-    cgBody.innerHTML = `<div class="loading-cell">${t("admin.pg.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(cgBody, () => openColumnGrades(assignment));
     return;
   }
   const byStudent = Object.fromEntries(existing.map((g) => [g.student_id, g]));
@@ -2955,11 +3203,13 @@ async function openColumnGrades(assignment) {
         <span class="cg-cell cg-name">${escapeHtml(s.last_name)}, ${escapeHtml(s.first_name)}</span>
         <span class="cg-cell">
           <input class="cg-score" type="number" min="0" max="${assignment.max_score}" step="0.01"
-            data-student="${s.id}" data-original="${score}" value="${score}" placeholder="—" />
+            data-student="${s.id}" data-original="${score}" value="${score}" placeholder="—"
+            aria-label="${t("a11y.scoreFor", { name: `${s.last_name}, ${s.first_name}` })}" />
         </span>
         <span class="cg-cell">
           <input class="cg-note" type="text" data-student="${s.id}"
-            data-original="${escapeHtml(note)}" value="${escapeHtml(note)}" placeholder="${t("admin.cg.notePlaceholder")}" />
+            data-original="${escapeHtml(note)}" value="${escapeHtml(note)}" placeholder="${t("admin.cg.notePlaceholder")}"
+            aria-label="${t("a11y.noteFor", { name: `${s.last_name}, ${s.first_name}` })}" />
         </span>
       </div>`;
     })
@@ -3050,7 +3300,7 @@ async function saveColumnGrades() {
     closeColumnGrades();
     loadGradebook();
   } catch (err) {
-    showToast(err.message, "error");
+    showToast(errorText(err), "error");
   } finally {
     cgSave.disabled = false;
   }
@@ -3207,7 +3457,8 @@ async function loadAbsenceSummary() {
     ]);
     renderAbsenceSummary(rows, roster, container);
   } catch (err) {
-    container.innerHTML = `<div class="loading-cell">${t("admin.absence.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(container, loadAbsenceSummary);
   }
 }
 
@@ -3304,7 +3555,8 @@ async function loadToday() {
     renderToday(entries, grid, jsDow);
   } catch (err) {
     loaded.today = false; // allow a retry on next visit
-    grid.innerHTML = `<div class="loading-cell">${t("admin.today.loadFailed", { msg: escapeHtml(err.message) })}</div>`;
+    console.error(err);
+    renderErrorBlock(grid, loadToday);
   }
 }
 
@@ -3348,7 +3600,7 @@ function renderToday(entries, grid, jsDow = null) {
       </div>
       <div class="today-card-body">
         <h3>${escapeHtml(e.subjects?.name ?? "—")}</h3>
-        <p>${escapeHtml(e.classes?.display_name ?? "—")}${
+        <p>${escapeHtml(className(e.classes))}${
           e.rooms?.name ? " · " + escapeHtml(e.rooms.name) : ""
         }</p>
       </div>

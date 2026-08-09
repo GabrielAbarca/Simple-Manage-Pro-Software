@@ -7,7 +7,7 @@
    The order statement below is repeated verbatim in every stylesheet:
    whichever file the browser loads first establishes the order, and
    later identical declarations are a no-op. Do not reorder it. */
-@layer base, page;
+@layer base, page, controls;
 
 @layer page {
   #login-body {
@@ -43,6 +43,27 @@
   .brand-bg-shapes {
     position: absolute;
     inset: 0;
+    pointer-events: none;
+  }
+
+  /* ── Legibility scrim ─────────────────────────────────────────────
+   The panel gradient runs to #a78bfa, which is light enough that even
+   pure white text only reached 2.72:1 against it — and the pink half of
+   the wordmark sat at 1.36:1 over the middle of the gradient, effectively
+   unreadable. No shade of that pink clears 3:1 across the whole gradient,
+   so the fix has to be the backdrop rather than the text.
+
+   This is a flat 28% black wash: it keeps the gradient and the brand hues
+   exactly as they are, and lifts every text element on the panel over its
+   threshold where the content actually sits (title 6.04:1, wordmark
+   3.96:1 as large text, tagline 6.04:1). Not decoration — without it the
+   copy on this panel is not readable. */
+  .brand-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(0, 0, 0, 0.28);
     pointer-events: none;
   }
 
@@ -130,13 +151,18 @@
     line-height: 1.2;
   }
 
+  /* A light tint of the same brand pink. The full-strength hue reads at
+   1.36:1 over the middle of the gradient even with the scrim absent; this
+   tint reaches 3.96:1 there, and the wordmark is large bold text. */
   .brand-title span {
-    color: var(--color-danger);
+    color: #ffc2c7;
   }
 
   .brand-tagline {
     font-size: 0.92rem;
-    color: rgba(255, 255, 255, 0.78);
+    /* Was rgba(255,255,255,0.78) — 2.23:1. This is body-size text, so it
+       needs the full 4.5:1, which only full-strength white reaches here. */
+    color: #fff;
     line-height: 1.6;
     margin-bottom: 2rem;
   }
@@ -151,13 +177,16 @@
     gap: 0.85rem;
   }
 
+  /* The glass rows lightened their own backdrop, which worked against the
+   white label on them. Tinting downward instead keeps the same frosted
+   look and takes the label from 2.55:1 to 4.85:1 where the panel sits. */
   .brand-features li {
     display: flex;
     align-items: center;
     gap: 0.7rem;
     font-size: var(--text-sm);
-    color: rgba(255, 255, 255, 0.88);
-    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.12);
     padding: 0.55rem 0.9rem;
     border-radius: 0.8rem;
     backdrop-filter: blur(4px);
@@ -166,11 +195,11 @@
       transform 300ms ease;
   }
 
-  .brand-features li:hover {
-    background: rgba(255, 255, 255, 0.18);
-    transform: translateX(4px);
-  }
-
+  /* No hover state: the feature list is not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A10. */
   .brand-features li .material-symbols-outlined {
     font-size: 1.15rem;
     color: var(--color-success);
@@ -186,6 +215,7 @@
     overflow-y: auto;
   }
 
+  /* A <button>, not a <div> — see the app-page toggler in style.css. */
   .login-theme-toggler {
     position: absolute;
     top: 1.4rem;
@@ -194,8 +224,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 1.6rem;
-    width: 4.2rem;
+    height: var(--tap-target);
+    width: 4.6rem;
+    padding: 0;
+    border: none;
     cursor: pointer;
     border-radius: var(--border-radius-1);
     z-index: 10;
@@ -233,10 +265,11 @@
     transition: box-shadow var(--transition-speed) ease;
   }
 
-  .auth-card:hover {
-    box-shadow: 0 4px 20px var(--color-light);
-  }
-
+  /* No hover state: the sign-in card is not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A8. */
   @keyframes cardReveal {
     from {
       opacity: 0;
@@ -270,10 +303,11 @@
     transition: transform 300ms ease;
   }
 
-  .auth-avatar:hover {
-    transform: scale(1.06) rotate(-3deg);
-  }
-
+  /* No hover state: the header icon is not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A9. */
   .auth-avatar .material-symbols-outlined {
     color: #fff;
     font-size: 1.7rem;
@@ -305,14 +339,14 @@
   .auth-toast.toast-error {
     display: block;
     background: var(--color-danger-light);
-    color: var(--color-danger);
+    color: var(--color-danger-text);
     border-left: 3px solid var(--color-danger);
   }
 
   .auth-toast.toast-success {
     display: block;
     background: var(--color-success-light);
-    color: var(--color-success-dark);
+    color: var(--color-success-text);
     border-left: 3px solid var(--color-success);
   }
 
@@ -324,7 +358,7 @@
     margin-bottom: 1.1rem;
     line-height: 1.45;
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     border-left: 3px solid var(--color-primary);
   }
 
@@ -383,7 +417,7 @@
   .input-wrapper input {
     width: 100%;
     padding: 0.75rem 1rem 0.75rem 2.7rem;
-    border: 1.5px solid var(--color-info-light);
+    border: 1.5px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-background);
     color: var(--color-dark);
@@ -397,7 +431,7 @@
   }
 
   .input-wrapper input::placeholder {
-    color: var(--color-info-light);
+    color: var(--color-info-dark);
   }
 
   .input-wrapper input:focus {
@@ -409,11 +443,11 @@
 
   .input-wrapper input:focus + .toggle-password,
   .input-wrapper input:focus ~ .input-icon {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .input-wrapper:focus-within .input-icon {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .input-wrapper.input-error input {
@@ -445,7 +479,7 @@
   }
 
   .toggle-password:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .toggle-password .material-symbols-outlined {
@@ -455,7 +489,7 @@
   .field-error {
     display: block;
     font-size: 0.72rem;
-    color: var(--color-danger);
+    color: var(--color-danger-text);
     margin-top: 0.3rem;
     min-height: 1rem;
     font-weight: 500;
@@ -500,7 +534,7 @@
   }
 
   .btn-submit:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translateY(var(--lift-hover));
     box-shadow: 0 8px 28px rgba(115, 128, 236, 0.55);
   }
 
@@ -572,7 +606,7 @@
   }
 
   .auth-legal a:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     text-decoration: underline;
   }
 
@@ -582,7 +616,7 @@
     font-family: "Poppins", sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     cursor: pointer;
     padding: 0;
     transition:

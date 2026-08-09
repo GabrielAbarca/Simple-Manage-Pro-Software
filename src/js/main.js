@@ -6,6 +6,7 @@ import { supabase } from "./supabaseClient.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import { skeletonRows, initSidebarToggle, errorState, errorRow } from "./ui.js";
+import { initControls } from "./controls/index.js";
 import { renderSettings } from "./settings.js";
 import {
   initI18n,
@@ -103,6 +104,11 @@ bindThemeToggle(themeToggler);
 // and translate the static markup before any view renders.
 initI18n("student");
 applyTranslations();
+
+// Enhance every <select> and <input type="date"> — now and whenever the app
+// renders more. Must run AFTER initI18n/applyTranslations: the date picker
+// takes its month names, field order and week start from the active locale.
+initControls();
 
 // Mark the frontend sandbox so students see the same "DEMO" tag as the admin
 // console (reuses the admin.demo.* strings; the badge is purely informational).

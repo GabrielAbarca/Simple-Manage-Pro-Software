@@ -201,7 +201,14 @@
             </div>
           </div>
 
-          <div class="overview-stats">
+          <!-- First-run guidance. Rendered by admin.js only when the school
+               has no year, no people and no structure yet: on a director's
+               very first login every figure below is an em dash, which is a
+               void rather than a starting point. Hidden the moment the
+               school has any data. -->
+          <div id="overview-setup" hidden></div>
+
+          <div class="overview-stats" id="overview-stats">
             <div class="stat-card">
               <span class="stat-icon stat-icon-primary material-symbols-outlined"
                 ><svg aria-hidden="true"><use href="#icon-groups"></use></svg
@@ -701,14 +708,20 @@
               ><svg aria-hidden="true"><use href="#icon-menu"></use></svg
             ></span>
           </button>
-          <div class="theme-toggler">
+          <button
+            type="button"
+            class="theme-toggler"
+            aria-pressed="false"
+            aria-label="Dark mode"
+            data-i18n-aria-label="common.darkMode"
+          >
             <span class="material-symbols-outlined active"
               ><svg aria-hidden="true"><use href="#icon-light_mode"></use></svg
             ></span>
             <span class="material-symbols-outlined"
               ><svg aria-hidden="true"><use href="#icon-dark_mode"></use></svg
             ></span>
-          </div>
+          </button>
           <div class="profile">
             <div class="info">
               <p>
@@ -854,6 +867,14 @@
     <!-- ═══════════════════════════════════════════════════════════
          TOAST CONTAINER
     ═══════════════════════════════════════════════════════════════ -->
-    <div class="toast-container" id="toast-container"></div>
+    <!-- Live region: toasts are how every save and every failure is
+         reported, and without this they were announced to nobody. -->
+    <div
+      class="toast-container"
+      id="toast-container"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
   </body>
 </html>

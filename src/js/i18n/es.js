@@ -28,6 +28,7 @@ export default {
       "Parece que no tienes conexión. Puede que la información no esté actualizada.",
     couldNotLoadProfile: "No se pudo cargar tu perfil.",
     adminOnly: "Solo un administrador puede realizar esta acción.",
+    darkMode: "Modo oscuro",
     comingSoon: "Próximamente",
     days: {
       monday: "Lunes",
@@ -51,6 +52,15 @@ export default {
 
   // ── Validación de formularios en línea (se muestra bajo el campo, nunca
   //    como una ventana emergente del navegador). Compartida como `common`.
+  // Nombres accesibles para controles sin etiqueta visible — las cuadrículas
+  // de notas y los buscadores. Nunca se muestran; solo se leen en voz alta.
+  a11y: {
+    scoreFor: "Nota de {name}",
+    openCalendar: "Abrir calendario",
+    prevMonth: "Mes anterior",
+    nextMonth: "Mes siguiente",
+    noteFor: "Observación de {name}",
+  },
   validation: {
     required: "Este campo es obligatorio.",
     email: "Ingresa un correo electrónico válido.",
@@ -363,6 +373,7 @@ export default {
     },
     roster: {
       searchPlaceholder: "Buscar en esta lista…",
+      searchLabel: "Buscar en esta lista",
       addStudent: "Agregar estudiante",
       name: "Nombre",
       overall: "Nota general",
@@ -453,6 +464,7 @@ export default {
     },
     subjects: {
       searchPlaceholder: "Buscar por nombre o código...",
+      searchLabel: "Buscar materias",
       readonly: "Referencia de solo lectura",
       code: "Código",
       name: "Nombre",
@@ -589,6 +601,10 @@ export default {
         '¿Eliminar la tarea "{name}"? También se eliminarán todas las notas de los estudiantes. Esto no se puede deshacer.',
       deleteCategory:
         '¿Eliminar la categoría "{name}"? Sus tareas se mantienen, pero quedan sin categoría (ponderación simple).',
+      discardTitle: "¿Descartar cambios?",
+      discardMessage: "Tienes cambios sin guardar. ¿Deseas descartarlos?",
+      discard: "Descartar",
+      keepEditing: "Seguir editando",
     },
     modal: {
       addAssignment: "Agregar tarea",
@@ -674,6 +690,9 @@ export default {
       intro:
         "En esta consola se configura y opera la escuela: estructura académica, personas, matrícula y un resumen general.",
       activeYear: "Año escolar activo",
+      setupTitle: "Configuremos tu colegio",
+      setupBody:
+        "Todavía no hay nada configurado. Empieza agregando un año escolar: los periodos de calificación, las secciones, las materias y las matrículas dependen de él.",
       noActiveYear: "Aún no hay un año escolar activo",
       loading: "Cargando resumen…",
       enrollment: "Matrícula total",

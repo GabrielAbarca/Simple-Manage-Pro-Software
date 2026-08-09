@@ -22,7 +22,7 @@
    The order statement below is repeated verbatim in every stylesheet:
    whichever file the browser loads first establishes the order, and
    later identical declarations are a no-op. Do not reorder it. */
-@layer base, page;
+@layer base, page, controls;
 
 @layer page {
   /* ─── Section subtitle (same treatment as the teacher console) ── */
@@ -61,7 +61,7 @@
   }
 
   .console-year .material-symbols-outlined {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     display: inline-flex;
   }
 
@@ -95,15 +95,15 @@
   }
 
   .stat-icon-primary {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     background: color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
   .stat-icon-success {
-    color: var(--color-success);
+    color: var(--color-success-text);
     background: color-mix(in srgb, var(--color-success) 16%, transparent);
   }
   .stat-icon-warning {
-    color: var(--color-warning-strong, var(--color-warning));
+    color: var(--color-warning-text);
     background: color-mix(in srgb, var(--color-warning) 20%, transparent);
   }
 
@@ -141,7 +141,7 @@
   }
 
   .console-placeholder .material-symbols-outlined {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     display: inline-flex;
   }
 
@@ -266,6 +266,13 @@
     margin-left: 0.25rem;
   }
 
+  /* Keep the destructive action off the edge of the benign one. Edit and
+     Delete were 4px apart at ~26px each, so a slip on Edit hit Delete. */
+  .actions-col .btn-icon.danger,
+  .roster-row-rail .btn-icon.danger {
+    margin-left: var(--space-3);
+  }
+
   .loading-cell {
     text-align: center;
     color: var(--color-dark-variant);
@@ -332,12 +339,27 @@
     font-size: 1.1rem;
   }
 
+  /* Was the bare glyph at the inherited font size — a ~12px target, and the
+   primary way out of every dialog. */
   .modal-close {
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1)
+      calc(var(--space-2) * -1) 0;
     background: none;
     border: none;
+    border-radius: var(--border-radius-1);
     cursor: pointer;
     color: var(--color-dark-variant);
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover {
+    background: var(--color-background);
+    color: var(--color-dark);
   }
 
   .modal-body {
@@ -363,12 +385,10 @@
   .modal-body select,
   .modal-body textarea {
     padding: 0.6rem 0.9rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-background);
     color: var(--color-dark);
-    font-size: var(--text-sm);
-    outline: none;
     width: 100%;
   }
 
@@ -394,7 +414,7 @@
   .field-error {
     display: block;
     font-size: 0.72rem;
-    color: var(--color-danger);
+    color: var(--color-danger-text);
     font-weight: 500;
   }
 
@@ -419,7 +439,7 @@
     color: var(--color-dark);
     cursor: pointer;
     padding: 0.35rem 0.5rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     transition: border-color var(--transition-speed) ease;
   }
@@ -496,11 +516,10 @@
 
   .sched-field select {
     padding: 0.5rem 0.7rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-background);
     color: var(--color-dark);
-    font-size: 0.82rem;
   }
 
   .sched-toolbar-actions {
@@ -564,7 +583,7 @@
 
   .sched-add {
     flex: 1;
-    border: 1px dashed var(--color-light);
+    border: 1px dashed var(--border-control);
     border-radius: var(--border-radius-2);
     background: transparent;
     color: var(--color-dark-variant);
@@ -632,18 +651,17 @@
   .panel-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 0.6rem;
     flex-wrap: wrap;
   }
 
   .panel-actions select {
     padding: 0.45rem 0.7rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-white);
     color: var(--color-dark);
-    font-size: 0.82rem;
-    outline: none;
   }
 
   /* ─── CSV import modal ─────────────────────────────────────────── */
@@ -671,17 +689,15 @@
   }
 
   .map-label .req {
-    color: var(--color-danger);
+    color: var(--color-danger-text);
   }
 
   .map-row select {
     padding: 0.5rem 0.7rem;
-    border: 1px solid var(--color-light);
+    border: 1px solid var(--border-control);
     border-radius: var(--border-radius-2);
     background: var(--color-background);
     color: var(--color-dark);
-    font-size: 0.82rem;
-    outline: none;
     width: 100%;
   }
 

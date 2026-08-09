@@ -114,11 +114,15 @@
       </div>
 
       <div class="auth-panel">
-        <div
+        <button
+          type="button"
           class="login-theme-toggler"
           id="login-theme-toggler"
           title="Toggle dark mode"
           data-i18n-title="login.toggleTheme"
+          aria-pressed="false"
+          aria-label="Dark mode"
+          data-i18n-aria-label="common.darkMode"
         >
           <span class="material-symbols-outlined active" id="theme-icon-light"
             ><svg aria-hidden="true"><use href="#icon-light_mode"></use></svg
@@ -126,7 +130,7 @@
           <span class="material-symbols-outlined" id="theme-icon-dark"
             ><svg aria-hidden="true"><use href="#icon-dark_mode"></use></svg
           ></span>
-        </div>
+        </button>
 
         <div class="auth-card" id="auth-card">
           <div class="auth-card-header">

@@ -162,7 +162,15 @@ export function applyTranslations(root = document) {
 
 // ── Locale-aware formatting (Intl) ───────────────────────────────
 
-function localeTag() {
+/**
+ * The BCP-47 tag for the active language ("en-US" / "es-CR").
+ *
+ * Exported so the custom date picker can drive Intl directly — month and
+ * weekday names, field order and the first day of the week all come from
+ * here rather than from translated strings, which keeps the calendar
+ * bilingual without adding a single dictionary entry.
+ */
+export function localeTag() {
   return LOCALE_TAGS[currentLang] ?? "en-US";
 }
 

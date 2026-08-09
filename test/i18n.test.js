@@ -8,11 +8,12 @@ import {
   formatNumber,
 } from "../src/js/i18n.js";
 
-// i18n defaults to English before any initI18n() call (no DOM/localStorage in
-// this environment), so these assert the deterministic English behavior.
+// i18n defaults to Spanish before any initI18n() call (no DOM/localStorage in
+// this environment), so these assert the deterministic es-CR behavior. Spanish
+// is the product default; English stays the per-key fallback dictionary.
 describe("i18n translation resolver", () => {
-  it("defaults to English", () => {
-    expect(getLang()).toBe("en");
+  it("defaults to Spanish", () => {
+    expect(getLang()).toBe("es");
   });
 
   it("resolves a real key to a non-empty string", () => {
@@ -42,9 +43,9 @@ describe("i18n translation resolver", () => {
   });
 });
 
-describe("i18n locale-aware formatting (en-US)", () => {
+describe("i18n locale-aware formatting (es-CR)", () => {
   it("formats an ISO date without timezone drift", () => {
-    expect(formatDate("2026-07-15")).toBe("Jul 15, 2026");
+    expect(formatDate("2026-07-15")).toBe("15 jul 2026");
   });
 
   it("returns '' for empty and the raw value for unparseable dates", () => {
@@ -53,13 +54,16 @@ describe("i18n locale-aware formatting (en-US)", () => {
     expect(formatDate("not-a-date")).toBe("not-a-date");
   });
 
-  it("formats 24h time strings to 12h in English", () => {
-    expect(formatTime("14:30")).toBe("2:30 PM");
-    expect(formatTime("08:05")).toBe("8:05 AM");
+  it("formats 24h time strings to the locale's 12h form", () => {
+    expect(formatTime("14:30")).toBe("2:30 p. m.");
+    expect(formatTime("08:05")).toBe("8:05 a. m.");
   });
 
   it("formats numbers with grouping separators", () => {
-    expect(formatNumber(1234.5)).toBe("1,234.5");
+    // es-CR groups with a non-breaking space and uses a comma decimal. Which
+    // space character ICU picks has shifted between versions, so normalize it
+    // and assert the part that actually matters: the comma.
+    expect(formatNumber(1234.5).replace(/\s/g, " ")).toBe("1 234,5");
     expect(formatNumber("nan")).toBe("");
   });
 });

@@ -706,6 +706,20 @@
     transition: color var(--duration-micro) var(--ease-out);
   }
 
+  /* `display: flex` above outranks the UA stylesheet's [hidden] rule, so the
+     cross-portal links would stay visible without this. They are hidden in
+     markup and revealed per-role at runtime. */
+  aside .sidebar a[hidden] {
+    display: none;
+  }
+
+  /* `display: flex` above outranks the UA stylesheet's [hidden] rule, so the
+     cross-portal links would stay visible without this. They are hidden in
+     markup and revealed per-role at runtime. */
+  aside .sidebar a[hidden] {
+    display: none;
+  }
+
   aside .sidebar a:last-child {
     margin-top: auto;
     margin-bottom: 2rem;

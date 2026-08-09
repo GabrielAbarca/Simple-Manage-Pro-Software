@@ -8,7 +8,9 @@ import "./errorHandler.js";
 //  loaded by the app bundles and hold interface strings, while this is long
 //  prose that has to stay readable in the page source, remain available if
 //  scripting fails, and be quotable by someone who was shown it. A reader
-//  with JavaScript off sees English rather than an empty page.
+//  with JavaScript off sees Spanish rather than an empty page — the markup
+//  ships the `es` section visible and hides `en`, matching the app's default
+//  (src/js/i18n.js). Keep the two in step: if one flips, so does the other.
 // ─────────────────────────────────────────────────────────────
 
 const SUPPORTED = ["en", "es"];
@@ -23,10 +25,12 @@ function preferredLang() {
     const stored = localStorage.getItem("smp-lang-student");
     if (SUPPORTED.includes(stored)) return stored;
   } catch {
-    // Private browsing can throw on access; fall through to the browser.
+    // Private browsing can throw on access; fall through to the default.
   }
-  const nav = (navigator.language || "").slice(0, 2).toLowerCase();
-  return SUPPORTED.includes(nav) ? nav : "en";
+  // Spanish, like the app — navigator.language is deliberately not consulted
+  // here either, so the privacy page can't render in a language the portal
+  // that linked to it never used.
+  return "es";
 }
 
 /**
@@ -51,7 +55,7 @@ function applyInlineText(lang) {
 }
 
 function setLang(lang) {
-  const next = SUPPORTED.includes(lang) ? lang : "en";
+  const next = SUPPORTED.includes(lang) ? lang : "es";
   document.documentElement.lang = next;
 
   all("[data-legal-lang]").forEach((section) => {

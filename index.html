@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -128,7 +128,16 @@
 
           <div class="sidebar-divider"></div>
 
-          <a href="/teacher" id="teacher-portal-link" class="nav-cta">
+          <!-- Both start hidden; main.js reveals each one only for a role the
+               target portal accepts, so neither can bounce the caller. -->
+          <a href="/admin" id="admin-console-link" class="nav-cta" hidden>
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true">
+                <use href="#icon-admin_panel_settings"></use></svg
+            ></span>
+            <h3 data-i18n="student.nav.adminConsole">Admin Console</h3>
+          </a>
+          <a href="/teacher" id="teacher-portal-link" class="nav-cta" hidden>
             <span class="material-symbols-outlined"
               ><svg aria-hidden="true">
                 <use href="#icon-co_present"></use></svg

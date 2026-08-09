@@ -1,7 +1,12 @@
 import "./errorHandler.js";
 import "./speedInsights.js";
 import { getSession, signOut } from "./auth.js";
-import { fetchRole, portalPath, haltForRedirect } from "./role.js";
+import {
+  fetchRole,
+  fetchStudentId,
+  portalPath,
+  haltForRedirect,
+} from "./role.js";
 import { supabase } from "./supabaseClient.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
@@ -32,18 +37,12 @@ const user = session?.user;
 
 if (!user) haltForRedirect("/login.html", "Unauthenticated");
 
-// maybeSingle, not single: an admin or teacher opening the site root legitimately
-// has no students row, and single() turns that expected case into a PGRST116.
-const { data: studentRow, error: studentError } = await supabase
-  .from("students")
-  .select("id")
-  .eq("auth_user_id", user.id)
-  .maybeSingle();
+const linkedStudentId = await fetchStudentId(user.id);
 
 let STUDENT_ID;
 
-if (studentRow?.id) {
-  STUDENT_ID = studentRow.id;
+if (linkedStudentId) {
+  STUDENT_ID = linkedStudentId;
 } else {
   // Not a student — an admin or teacher landing here belongs in their own
   // portal, not signed out (role routing). Only a role-less account with no
@@ -60,10 +59,7 @@ if (studentRow?.id) {
     );
     STUDENT_ID = 1;
   } else {
-    console.error(
-      "[SMP] No student profile linked to this account.",
-      studentError?.message,
-    );
+    console.error("[SMP] No student profile linked to this account.");
     await signOut();
     haltForRedirect("/login.html", "No student profile linked");
   }
@@ -186,20 +182,36 @@ if (logoutBtn) {
   });
 }
 
-// Cross-link to the teacher console. Route through the same session check its
-// guard begins with; teacher.js's on-load guard then enforces the role.
-const teacherPortalLink = document.getElementById("teacher-portal-link");
-if (teacherPortalLink) {
-  teacherPortalLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const session = await getSession();
-    if (!session) {
-      window.location.replace("/login.html");
-      return;
-    }
-    window.location.href = "/teacher";
-  });
+// Cross-portal links. Each target enforces its own guard on load, so these are
+// shown only when that guard would let this user in — an ungated link is worse
+// than no link, because it bounces straight back to where it was clicked.
+// A plain student matches neither and sees the sidebar it had before.
+const CROSS_PORTAL_LINKS = [
+  { id: "admin-console-link", path: "/admin", roles: ["admin"] },
+  { id: "teacher-portal-link", path: "/teacher", roles: ["teacher", "admin"] },
+];
+
+async function initCrossPortalLinks() {
+  const role = await fetchRole();
+  for (const { id, path, roles } of CROSS_PORTAL_LINKS) {
+    const link = document.getElementById(id);
+    if (!link || !roles.includes(role)) continue;
+    link.hidden = false;
+    link.addEventListener("click", async (e) => {
+      e.preventDefault();
+      // Re-check the session at click time: the tab may have sat open long
+      // enough for it to expire, and the target's guard would only bounce
+      // the user to a login page without explaining why.
+      if (!(await getSession())) {
+        window.location.replace("/login.html");
+        return;
+      }
+      window.location.href = path;
+    });
+  }
 }
+
+initCrossPortalLinks();
 
 // Where each view's failure notice goes, and whether it has to be a table row.
 // The dashboard's colspan is a function: its table is subject + one column per

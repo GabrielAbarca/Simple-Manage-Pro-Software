@@ -2986,15 +2986,26 @@
   .smp-select__native,
   .smp-date__native {
     width: 100%;
-    color: transparent;
-    /* Clicks belong to the overlay. Automation still reads and sets the
-       element directly, which is what the e2e suite does. */
-    pointer-events: none;
   }
 
-  /* Enhanced date inputs hand their picker button to ours. */
-  .smp-date__native::-webkit-calendar-picker-indicator {
-    display: none;
+  /* Clipping the native's text is only correct where the overlay is drawn to
+     replace it. On a coarse pointer the OS control is what the user sees and
+     touches (the touch block at the end of this file removes the overlay), so
+     it has to keep painting its own value — scoping the clip here is what
+     keeps the two halves from ever disagreeing. */
+  @media not (pointer: coarse) {
+    .smp-select__native,
+    .smp-date__native {
+      color: transparent;
+      /* Clicks belong to the overlay. Automation still reads and sets the
+         element directly, which is what the e2e suite does. */
+      pointer-events: none;
+    }
+
+    /* Enhanced date inputs hand their picker button to ours. */
+    .smp-date__native::-webkit-calendar-picker-indicator {
+      display: none;
+    }
   }
 
   .smp-select__trigger,
@@ -3253,16 +3264,10 @@
   }
 
   /* ── Touch: hand the controls back to the OS ──────────────────── */
+  /* Nothing to restore on the native control: the clip above never applies
+     here, so it is still the one the surface rules styled. Take the overlay
+     out and the OS control is simply what is left. */
   @media (pointer: coarse) {
-    .smp-select__native,
-    .smp-date__native {
-      position: static;
-      width: 100%;
-      height: auto;
-      opacity: 1;
-      pointer-events: auto;
-    }
-
     .smp-select__trigger,
     .smp-select__listbox,
     .smp-date__field,

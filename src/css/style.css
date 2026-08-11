@@ -2055,7 +2055,7 @@
 
     .settings-rail-item {
       flex-shrink: 0;
-      min-height: 2.75rem;
+      min-height: var(--tap-target);
     }
 
     .settings-grid {
@@ -2073,7 +2073,7 @@
     }
 
     .settings-segment {
-      min-height: 2.5rem;
+      min-height: var(--tap-target);
     }
   }
 
@@ -3274,6 +3274,28 @@
     .smp-date__button,
     .smp-date__pop {
       display: none;
+    }
+  }
+
+  /* ── Touch: one floor under every text control ────────────────── */
+  /* `--tap-target` is the single place a touch-target size is written down,
+     but it reached only buttons: every <select> and <input> is sized by the
+     padding its surface happens to use — a dozen surfaces, eleven different
+     vertical paddings — which left them at 36–41px on touch while every
+     button beside them sat at 44px.
+     This has to live in `controls`: the surface rules are in `page`, which
+     beats `base`. Buttons already carry the floor via `.btn`, so naming them
+     here would be redundant.
+     Checkbox, radio and range are excluded deliberately — they are fixed-size
+     glyphs (a checkbox is a 1rem box), not text fields, and a 44px floor would
+     stretch them into rectangles rather than enlarge their hit area. */
+  @media (pointer: coarse) {
+    :is(
+      select,
+      textarea,
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"])
+    ) {
+      min-height: var(--tap-target);
     }
   }
 }

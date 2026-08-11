@@ -497,6 +497,10 @@
 
   .btn-submit {
     width: 100%;
+    /* Not a .btn, so it never inherited the shared 44px floor, and the coarse
+       font bump in base targets input/select/textarea only — this button was
+       the one control on the login screen that missed both. */
+    min-height: var(--tap-target);
     padding: 0.85rem 1.5rem;
     margin-top: 0.4rem;
     background: linear-gradient(

@@ -21,13 +21,13 @@ export default {
     loading: "Cargando…",
     saved: "Guardado.",
     deleted: "Eliminado.",
-    loadFailed: "No se pudieron cargar los datos. Inténtalo de nuevo.",
-    loadError: "No pudimos cargar esta sección. Revisa tu conexión.",
+    loadFailed: "No se pudieron cargar los datos. Inténtelo de nuevo.",
+    loadError: "No pudimos cargar esta sección. Revise su conexión.",
     retry: "Reintentar",
     offline:
-      "Parece que no tienes conexión. Puede que la información no esté actualizada.",
-    couldNotLoadProfile: "No se pudo cargar tu perfil.",
-    adminOnly: "Solo un administrador puede realizar esta acción.",
+      "Parece que no tiene conexión. Puede que la información no esté actualizada.",
+    couldNotLoadProfile: "No se pudo cargar su perfil.",
+    adminOnly: "Solo la dirección puede realizar esta acción.",
     darkMode: "Modo oscuro",
     comingSoon: "Próximamente",
     days: {
@@ -63,14 +63,14 @@ export default {
   },
   validation: {
     required: "Este campo es obligatorio.",
-    email: "Ingresa un correo electrónico válido.",
+    email: "Ingrese un correo electrónico válido.",
     phone: "Solo se permiten dígitos, espacios, + y -.",
-    integer: "Ingresa un número entero.",
-    number: "Ingresa un número válido.",
+    integer: "Ingrese un número entero.",
+    number: "Ingrese un número válido.",
     min: "Debe ser al menos {min}.",
     max: "Debe ser como máximo {max}.",
     maxLength: "Debe tener {max} caracteres o menos.",
-    percent: "Ingresa un porcentaje entre 0 y 100.",
+    percent: "Ingrese un porcentaje entre 0 y 100.",
     dateWithin: "Debe estar entre {start} y {end}.",
     endAfterStart: "La fecha de fin debe ser posterior a la fecha de inicio.",
     futureDate: "La fecha no puede estar en el futuro.",
@@ -85,16 +85,16 @@ export default {
   // mencionan una tabla, columna o restricción.
   errors: {
     db: {
-      tooLong: "Ese valor es demasiado largo. Acórtalo e inténtalo de nuevo.",
+      tooLong: "Ese valor es demasiado largo. Acórtelo e inténtelo de nuevo.",
       missingRequired:
-        "Falta un campo obligatorio. Complétalo e inténtalo de nuevo.",
+        "Falta un campo obligatorio. Complételo e inténtelo de nuevo.",
       stillReferenced:
         "Este registro todavía se usa en otro lugar, así que no se puede eliminar. Primero elimina o reasigna lo que depende de él.",
       duplicate: "Ese valor ya lo usa otro registro.",
       notAllowedValue:
-        "Ese valor no se permite aquí. Revísalo e inténtalo de nuevo.",
-      notPermitted: "No tienes permiso para hacer este cambio.",
-      generic: "No se pudo guardar el cambio. Inténtalo de nuevo.",
+        "Ese valor no se permite aquí. Revíselo e inténtelo de nuevo.",
+      notPermitted: "No tiene permiso para hacer este cambio.",
+      generic: "No se pudo guardar el cambio. Inténtelo de nuevo.",
     },
   },
 
@@ -165,7 +165,7 @@ export default {
       personalInfo: "Información personal",
       username: "Usuario",
       changeUsername: "Cambiar usuario",
-      usernameHint: "Tu usuario es el correo con el que inicias sesión.",
+      usernameHint: "Su usuario es el correo con el que inicia sesión.",
       loginSecurity: "Seguridad de la cuenta",
       email: "Correo electrónico",
       password: "Contraseña",
@@ -175,27 +175,27 @@ export default {
       changePasswordSaving: "Guardando…",
       changePasswordSuccess: "Contraseña actualizada.",
       changePasswordMismatch: "Las contraseñas no coinciden.",
-      changePasswordTooShort: "Usa al menos 6 caracteres.",
+      changePasswordTooShort: "Use al menos 6 caracteres.",
       changePasswordFailed:
-        "No se pudo actualizar tu contraseña. Inténtalo de nuevo.",
+        "No se pudo actualizar su contraseña. Inténtelo de nuevo.",
       changePasswordReauth:
-        "Por seguridad, inicia sesión de nuevo antes de cambiar tu contraseña. " +
-        "También puedes usar «¿Olvidaste tu contraseña?» en la pantalla de inicio de sesión.",
+        "Por seguridad, inicie sesión de nuevo antes de cambiar su contraseña. " +
+        "También puede usar «¿Olvidó su contraseña?» en la pantalla de inicio de sesión.",
       twoFactor: "Autenticación de dos factores",
-      twoFactorHint: "Agrega un segundo paso al iniciar sesión.",
+      twoFactorHint: "Agregue un segundo paso al iniciar sesión.",
       twoFactorDisabled: "Deshabilitado en la demo",
     },
     prefs: {
       title: "Preferencias",
       language: "Idioma",
-      languageHint: "Elige el idioma de la interfaz.",
+      languageHint: "Elija el idioma de la interfaz.",
       moreHint: "Más preferencias llegarán en una próxima actualización.",
     },
     help: {
       faqTitle: "Preguntas frecuentes",
-      faq1q: "¿Cómo veo mis calificaciones?",
+      faq1q: "¿Cómo veo mis notas?",
       faq1a:
-        "Abre la sección Calificaciones desde el menú lateral para ver las notas por materia y período.",
+        "Abra la sección Notas desde el menú lateral para ver las notas por materia y periodo.",
       faq2q: "¿Dónde consulto la asistencia?",
       faq2a:
         "La sección Asistencia muestra cada registro con su estado y la persona que lo registró.",
@@ -204,12 +204,12 @@ export default {
         "Esta es una versión de demostración: Cuenta y perfil es de solo lectura para explorar con seguridad.",
       needHand: "¿Necesitas ayuda?",
       needHandText:
-        "Usa el menú lateral para navegar entre secciones. Cada tarjeta del panel es un acceso directo a su vista completa.",
+        "Use el menú lateral para navegar entre secciones. Cada tarjeta del panel es un acceso directo a su vista completa.",
       contactPrefix: "Contactar a soporte — ",
     },
     about: {
       title: "Acerca de Simple Manage Pro",
-      text: "Simple Manage Pro (SMP) es un portal de gestión escolar para estudiantes, docentes y personal: calificaciones, asistencia, horarios e información de clases en un solo lugar.",
+      text: "Simple Manage Pro (SMP) es un portal de gestión escolar para estudiantes, docentes y personal: notas, asistencia, horarios e información de clases en un solo lugar.",
       version: "Versión",
       links: "Enlaces",
       documentation: "Documentación",
@@ -241,7 +241,7 @@ export default {
   student: {
     nav: {
       dashboard: "Panel",
-      grades: "Calificaciones",
+      grades: "Notas",
       schedule: "Horario",
       teachers: "Docentes",
       attendance: "Asistencia",
@@ -253,7 +253,7 @@ export default {
     },
     heading: {
       dashboard: "Panel",
-      grades: "Calificaciones",
+      grades: "Notas",
       schedule: "Horario semanal",
       teachers: "Docentes",
       attendance: "Asistencia",
@@ -263,7 +263,7 @@ export default {
     aria: {
       goToSettings: "Ir a Configuración",
       goToAttendance: "Ir a Asistencia",
-      goToGrades: "Ir a Calificaciones",
+      goToGrades: "Ir a Notas",
       goToSchedule: "Ir a Horario",
       goToEvents: "Ir a Eventos",
     },
@@ -273,29 +273,29 @@ export default {
       attendance: "Asistencia",
       gradeAverage: "Promedio de notas",
       nextClass: "Próxima clase",
-      currentSchoolYear: "año escolar actual",
+      currentSchoolYear: "curso lectivo actual",
     },
     next: {
       none: "Sin próximas",
-      enjoyBreak: "¡Disfruta tu descanso!",
+      enjoyBreak: "¡Disfrute su descanso!",
     },
     dash: {
-      gradeOverview: "Resumen de calificaciones",
+      gradeOverview: "Resumen de notas",
       subject: "Materia",
       average: "Promedio",
     },
     grades: {
-      gradingPeriod: "Período:",
-      allPeriods: "Todos los períodos",
+      gradingPeriod: "Periodo:",
+      allPeriods: "Todos los periodos",
       subject: "Materia",
       code: "Código",
       teacher: "Docente",
       score: "Nota",
       status: "Estado",
-      period: "Período",
-      periodAverage: "Promedio del período",
-      empty: "No hay calificaciones para este período.",
-      dashEmpty: "Aún no hay calificaciones registradas.",
+      period: "Periodo",
+      periodAverage: "Promedio del periodo",
+      empty: "No hay notas para este periodo.",
+      dashEmpty: "Aún no hay notas registradas.",
     },
     schedule: {
       time: "Hora",
@@ -347,22 +347,22 @@ export default {
     sections: { one: "{count} sección", other: "{count} secciones" },
     students: { one: "{count} estudiante", other: "{count} estudiantes" },
     today: {
-      loading: "Cargando tu día…",
+      loading: "Cargando su día…",
       contextNotLoaded: "No se cargó el contexto del docente.",
       noTeacherRecordTitle: "Sin registro de docente",
       noTeacherRecordBody:
-        "Esta cuenta no está vinculada a un docente, así que no hay clases que mostrar aquí. Los administradores pueden gestionar la escuela desde la consola de administración.",
+        "Esta cuenta no está vinculada a un docente, así que no hay clases que mostrar aquí. La dirección puede gestionar el colegio desde la consola administrativa.",
       weekend: "Hoy no hay clases — es fin de semana.",
-      noClasses: "No tienes clases en tu horario de hoy.",
+      noClasses: "No tiene clases en su horario de hoy.",
       loadFailed: "No se pudo cargar el día: {msg}",
       attendance: "Asistencia",
       gradebook: "Libro de notas",
     },
     myclasses: {
-      loading: "Cargando tus asignaciones…",
+      loading: "Cargando sus asignaciones…",
       summary: "{year} · {sections} · {students}",
-      loadFailed: "No se pudieron cargar tus clases.",
-      empty: "No tienes clases asignadas este año escolar.",
+      loadFailed: "No se pudieron cargar sus clases.",
+      empty: "No tiene clases asignadas este curso lectivo.",
     },
     classws: {
       back: "Mis clases",
@@ -385,8 +385,8 @@ export default {
       studentFallback: "Estudiante",
       printReport: "Imprimir informe de progreso",
       attendance: "Asistencia",
-      grades: "Calificaciones",
-      gradesWithPeriod: "Calificaciones · {period}",
+      grades: "Notas",
+      gradesWithPeriod: "Notas · {period}",
       discipline: "Disciplina",
       addRecord: "+ Agregar registro",
       guardians: "Encargados y contactos",
@@ -399,20 +399,20 @@ export default {
         one: "{rate}% de asistencia en {count} día.",
         other: "{rate}% de asistencia en {count} días.",
       },
-      noGrades: "No hay calificaciones registradas para este período.",
+      noGrades: "No hay notas registradas para este periodo.",
       noDiscipline: "Sin registros de disciplina. ✔",
       incident: "Incidente",
       resolutionPrefix: "Resolución: ",
     },
     gradebook: {
-      period: "Período:",
+      period: "Periodo:",
       categories: "Categorías",
       manage: "Gestionar tareas",
       addAssignment: "Agregar tarea",
       postGrades: "Publicar notas",
       loadFailed: "No se pudo cargar el libro de notas: {msg}",
-      noAssignments: "Aún no hay tareas para este período.",
-      noAssignmentsSub: "Agrega una tarea para comenzar a calificar.",
+      noAssignments: "Aún no hay tareas para este periodo.",
+      noAssignmentsSub: "Agregue una tarea para comenzar a calificar.",
       noActiveStudents: "No hay estudiantes activos en esta sección.",
       student: "Estudiante",
       grade: "Nota",
@@ -422,12 +422,12 @@ export default {
     manage: {
       title: "Tareas — {period}",
       empty:
-        "Aún no hay tareas para este período. Agrega una para comenzar a calificar.",
+        "Aún no hay tareas para este periodo. Agregue una para comenzar a calificar.",
       enterScores: "Ingresar notas de todos los estudiantes",
     },
     sg: {
       noAssignments: "Aún no hay tareas para {period}.",
-      loadFailed: "No se pudieron cargar las calificaciones: {msg}",
+      loadFailed: "No se pudieron cargar las notas: {msg}",
       periodLine: {
         one: "{period} · {count} tarea",
         other: "{period} · {count} tareas",
@@ -473,12 +473,12 @@ export default {
       color: "Color",
       gradeLevels: "Niveles",
       loading: "Cargando materias...",
-      noMatch: "Ninguna materia coincide con tu búsqueda.",
+      noMatch: "Ninguna materia coincide con su búsqueda.",
     },
     categories: {
       title: "Categorías de notas — {subject} {class}",
       empty:
-        "Aún no hay categorías. La nota del período es un promedio simple de puntos. Agrega categorías (p. ej. Exámenes 50%, Tareas 30%, Participación 20%) para ponderarlas: las tareas que etiquetes con una categoría se promedian dentro de ella y luego se combinan por ponderación.",
+        "Aún no hay categorías. La nota del periodo es un promedio simple de puntos. Agregue categorías (p. ej. Exámenes 50%, Tareas 30%, Participación 20%) para ponderarlas: las tareas que etiquete con una categoría se promedian dentro de ella y luego se combinan por ponderación.",
       weight: "Ponderación: {weight}%",
       total: "Total: ",
       totalOff:
@@ -493,7 +493,7 @@ export default {
       loadFailed: "No se pudo cargar: {msg}",
       noStudents: "No hay estudiantes activos.",
       intro:
-        "{period} · revisa cada promedio calculado, ajústalo si es necesario y publícalo. Las notas publicadas son las que ven estudiantes y padres en el boletín.",
+        "{period} · revise cada promedio calculado, ajústelo si es necesario y publíquelo. Las notas publicadas son las que ven estudiantes y padres en el boletín.",
       student: "Estudiante",
       computed: "Calculada",
       posted: "Publicada",
@@ -536,7 +536,7 @@ export default {
       gender: "Género:",
       status: "Estado:",
       email: "Correo:",
-      gradesBySubject: "Calificaciones por materia",
+      gradesBySubject: "Notas por materia",
       subject: "Materia",
       noGrades: "Aún no hay notas publicadas.",
       attendance: "Asistencia",
@@ -604,7 +604,7 @@ export default {
       deleteCategory:
         '¿Eliminar la categoría "{name}"? Sus tareas se mantienen, pero quedan sin categoría (ponderación simple).',
       discardTitle: "¿Descartar cambios?",
-      discardMessage: "Tienes cambios sin guardar. ¿Deseas descartarlos?",
+      discardMessage: "Tiene cambios sin guardar. ¿Desea descartarlos?",
       discard: "Descartar",
       keepEditing: "Seguir editando",
     },
@@ -617,7 +617,7 @@ export default {
     demo: {
       badge: "DEMO",
       sandboxNotice:
-        "Modo demo — los cambios son locales a tu sesión y se restablecen al recargar.",
+        "Modo demo — los cambios son locales a su sesión y se restablecen al recargar.",
     },
     toast: {
       studentAdded: "{name} agregado.",
@@ -627,8 +627,8 @@ export default {
       assignmentUpdated: 'Tarea "{name}" actualizada.',
       assignmentDeleted: 'Tarea "{name}" eliminada.',
       gradesSaved: {
-        one: "Se guardó {count} calificación de {name}.",
-        other: "Se guardaron {count} calificaciones de {name}.",
+        one: "Se guardó {count} nota de {name}.",
+        other: "Se guardaron {count} notas de {name}.",
       },
       attendanceSaved: {
         one: "Asistencia guardada para {count} estudiante.",
@@ -638,8 +638,8 @@ export default {
       categoryUpdated: 'Categoría "{name}" actualizada.',
       categoryDeleted: 'Categoría "{name}" eliminada.',
       gradesPosted: {
-        one: "Se publicó {count} calificación en el boletín.",
-        other: "Se publicaron {count} calificaciones en el boletín.",
+        one: "Se publicó {count} nota en el boletín.",
+        other: "Se publicaron {count} notas en el boletín.",
       },
       scoresSaved: {
         one: "Se guardó {count} nota.",
@@ -654,16 +654,16 @@ export default {
       scoreRange: "Las notas deben estar entre 0 y {max}.",
       postRange: "Las notas publicadas deben estar entre 0 y 100.",
       noChanges: "No hay cambios para guardar.",
-      pickDate: "Primero elige una fecha.",
+      pickDate: "Primero elija una fecha.",
       noAttendanceData: "No hay datos de asistencia para guardar.",
-      atLeastOne: "Ingresa al menos una nota para publicar.",
+      atLeastOne: "Ingrese al menos una nota para publicar.",
     },
   },
 
   console: {
     nav: {
       overview: "Resumen",
-      yearPeriods: "Año y períodos",
+      yearPeriods: "Curso lectivo y periodos",
       gradesSections: "Grados y secciones",
       subjects: "Materias",
       schedules: "Horarios",
@@ -676,7 +676,7 @@ export default {
     },
     heading: {
       overview: "Resumen escolar",
-      yearPeriods: "Año escolar y períodos",
+      yearPeriods: "Curso lectivo y periodos",
       gradesSections: "Grados y secciones",
       subjects: "Materias",
       schedules: "Horarios",
@@ -686,19 +686,23 @@ export default {
       settings: "Configuración",
     },
     overview: {
-      subtitle: "Configuración y administración de toda la escuela.",
+      subtitle: "Configuración y administración de todo el colegio.",
       welcome: "Bienvenido, {name}",
       welcomeFallback: "Bienvenido",
       intro:
-        "En esta consola se configura y opera la escuela: estructura académica, personas, matrícula y un resumen general.",
-      activeYear: "Año escolar activo",
-      setupTitle: "Configuremos tu colegio",
+        "En esta consola la dirección y la coordinación configuran y operan el colegio: estructura académica, personas, matrícula y un resumen general.",
+      activeYear: "Curso lectivo activo",
+      setupTitle: "Configuremos su colegio",
       setupBody:
-        "Todavía no hay nada configurado. Empieza agregando un año escolar: los periodos de calificación, las secciones, las materias y las matrículas dependen de él.",
-      noActiveYear: "Aún no hay un año escolar activo",
+        "Todavía no hay nada configurado. Empiece agregando un curso lectivo: los periodos, las secciones, las materias y las matrículas dependen de él.",
+      noActiveYear: "Aún no hay un curso lectivo activo",
       loading: "Cargando resumen…",
       enrollment: "Matrícula total",
-      attendanceToday: "Asistencia de hoy",
+      attendanceMonth: "Asistencia del mes",
+      attendanceRecords: {
+        one: "{count} registro",
+        other: "{count} registros",
+      },
       atRisk: "Estudiantes en riesgo",
       atRiskHint: "3 o más ausencias registradas",
       teachers: "Docentes",
@@ -709,45 +713,45 @@ export default {
     },
     placeholder: {
       yearPeriods:
-        "Crea el año escolar y sus períodos de evaluación — disponible en la próxima actualización.",
+        "Cree el curso lectivo y sus periodos de evaluación — disponible en la próxima actualización.",
       gradesSections:
-        "Define los grados y sus secciones — disponible en la próxima actualización.",
+        "Defina los grados y sus secciones — disponible en la próxima actualización.",
       subjects:
-        "Administra el catálogo de materias y su asignación por grado — disponible en la próxima actualización.",
+        "Administre el catálogo de materias y su asignación por grado — disponible en la próxima actualización.",
       teachers:
-        "Crea cuentas de docentes y asigna clases — disponible en la próxima actualización.",
+        "Cree cuentas de docentes y asigne clases — disponible en la próxima actualización.",
       students:
-        "Matricula estudiantes e importa listas desde CSV — disponible en la próxima actualización.",
+        "Matricule estudiantes e importe listas desde CSV — disponible en la próxima actualización.",
     },
     profile: {
       signedInAs: "Sesión iniciada como",
       admin: "Administrador",
     },
     school: {
-      title: "Perfil de la escuela",
+      title: "Perfil del colegio",
       subtitle: "Identidad y terminología que usa la consola.",
-      name: "Nombre de la escuela",
-      namePlaceholder: "Nombre del colegio",
+      name: "Nombre del colegio",
+      namePlaceholder: "Colegio Técnico Profesional",
       idLabel: "Etiqueta del campo de identificación",
       idLabelHelp:
-        'Cómo se llama el campo de identificación en esta escuela (p. ej. "Cédula", "DIMEX", "Carné"). Déjalo en blanco para usar el predeterminado.',
-      saved: "Perfil de la escuela guardado.",
+        'Cómo se llama el campo de identificación en este colegio (p. ej. "Cédula", "Tarjeta de identificación de menores", "DIMEX", "Carné"). Déjelo en blanco para usar el predeterminado.',
+      saved: "Perfil del colegio guardado.",
       unavailable:
-        "El almacenamiento del perfil de la escuela aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",
+        "El almacenamiento del perfil del colegio aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",
     },
     confirm: {
       title: "¿Eliminar elemento?",
       message: "Esta acción no se puede deshacer.",
       discardTitle: "¿Descartar cambios?",
-      discardMessage: "Tienes cambios sin guardar. ¿Deseas descartarlos?",
+      discardMessage: "Tiene cambios sin guardar. ¿Desea descartarlos?",
       discard: "Descartar",
       keepEditing: "Seguir editando",
     },
     years: {
-      title: "Años escolares",
-      add: "Agregar año",
-      addTitle: "Agregar año escolar",
-      editTitle: "Editar año escolar",
+      title: "Cursos lectivos",
+      add: "Agregar curso lectivo",
+      addTitle: "Agregar curso lectivo",
+      editTitle: "Editar curso lectivo",
       name: "Nombre",
       start: "Inicio",
       end: "Fin",
@@ -755,39 +759,39 @@ export default {
       active: "Activo",
       inactive: "Inactivo",
       setActive: "Activar",
-      activated: "Año escolar activo actualizado.",
+      activated: "Curso lectivo activo actualizado.",
       activateWeightWarn:
-        "Los pesos de los períodos de este año suman {total}%, no 100%. ¿Activarlo de todas formas?",
+        "Los pesos de los periodos de este curso lectivo suman {total}%, no 100%. ¿Activarlo de todas formas?",
       activateAnyway: "Activar de todas formas",
-      deleted: "Año escolar eliminado.",
-      empty: "Aún no hay años escolares. Agrega uno para comenzar.",
-      confirmDelete: '¿Eliminar el año escolar "{name}"?',
-      deleteBlockedTitle: "No se puede eliminar este año escolar",
+      deleted: "Curso lectivo eliminado.",
+      empty: "Aún no hay cursos lectivos. Agregue uno para comenzar.",
+      confirmDelete: '¿Eliminar el curso lectivo "{name}"?',
+      deleteBlockedTitle: "No se puede eliminar este curso lectivo",
       deleteBlocked:
-        '"{name}" todavía tiene {periods} período(s) de calificación y {sections} sección(es). Eliminarlo borraría de forma permanente esos registros junto con todas las matrículas, horarios y calificaciones del año. Elimínalos primero y luego elimina el año.',
+        '"{name}" todavía tiene {periods} periodo(s) y {sections} sección(es). Eliminarlo borraría de forma permanente esos registros junto con todas las matrículas, horarios y notas del curso lectivo. Elimínelos primero y luego elimine el curso lectivo.',
       deleteCheckFailed:
-        "No se pudo verificar qué pertenece a este año escolar, así que no se eliminó. Inténtalo de nuevo.",
+        "No se pudo verificar qué pertenece a este curso lectivo, así que no se eliminó. Inténtelo de nuevo.",
     },
     periods: {
-      title: "Períodos de evaluación",
-      add: "Agregar período",
-      addTitle: "Agregar período de evaluación",
-      editTitle: "Editar período de evaluación",
+      title: "Periodos de evaluación",
+      add: "Agregar periodo",
+      addTitle: "Agregar periodo de evaluación",
+      editTitle: "Editar periodo de evaluación",
       order: "#",
       name: "Nombre",
-      namePlaceholder: "Período 1",
+      namePlaceholder: "Periodo 1",
       start: "Inicio",
       end: "Fin",
       weight: "Peso",
       totalWeight: "Peso total: {total}%",
       weightWarning:
-        "Los pesos de los períodos suman {total}% — deberían sumar 100%.",
+        "Los pesos de los periodos suman {total}% — deberían sumar 100%.",
       weightOver:
-        "Los pesos de los períodos superarían el 100% (total {total}%).",
-      deleted: "Período de evaluación eliminado.",
-      empty: "Aún no hay períodos para este año.",
-      noYear: "Activa un año escolar para gestionar sus períodos.",
-      confirmDelete: '¿Eliminar el período "{name}"?',
+        "Los pesos de los periodos superarían el 100% (total {total}%).",
+      deleted: "Periodo de evaluación eliminado.",
+      empty: "Aún no hay periodos para este curso lectivo.",
+      noYear: "Active un curso lectivo para gestionar sus periodos.",
+      confirmDelete: '¿Eliminar el periodo "{name}"?',
     },
     grades: {
       title: "Grados",
@@ -829,12 +833,12 @@ export default {
       section: "Sección",
       homeroom: "Guía",
       homeroomHelp:
-        "El docente guía es el responsable de la sección y el contacto principal de sus estudiantes. Opcional — puedes asignarlo después.",
+        "El docente guía es el responsable de la sección y el contacto principal de sus estudiantes. Opcional — puede asignarlo después.",
       room: "Aula",
       capacity: "Capacidad",
-      empty: "Aún no hay secciones para este año.",
-      noYear: "Activa un año escolar para gestionar sus secciones.",
-      needGrade: "Primero crea al menos un grado.",
+      empty: "Aún no hay secciones para este curso lectivo.",
+      noYear: "Active un curso lectivo para gestionar sus secciones.",
+      needGrade: "Primero cree al menos un grado.",
       confirmDelete:
         '¿Eliminar la sección "{name}"? Se eliminarán su horario y sus asignaciones de materias, y sus estudiantes quedarán sin sección.',
     },
@@ -850,7 +854,7 @@ export default {
       gradeLevels: "Grados",
       empty: "Aún no hay materias.",
       confirmDelete:
-        '¿Eliminar la materia "{name}"? También se eliminarán sus asignaciones de clase y entradas de horario, junto con las calificaciones registradas en ellas.',
+        '¿Eliminar la materia "{name}"? También se eliminarán sus asignaciones de clase y entradas de horario, junto con las notas registradas en ellas.',
     },
     teachers: {
       title: "Docentes",
@@ -881,11 +885,11 @@ export default {
       section: "Sección",
       subject: "Materia",
       teacher: "Docente",
-      empty: "Aún no hay asignaciones para este año.",
-      noYear: "Activa un año escolar para gestionar asignaciones.",
+      empty: "Aún no hay asignaciones para este curso lectivo.",
+      noYear: "Active un curso lectivo para gestionar asignaciones.",
       needData: "Primero agrega secciones, materias y docentes.",
       confirmDelete:
-        "¿Quitar esta asignación? También se eliminarán todas las calificaciones y tareas de los estudiantes asociadas a ella.",
+        "¿Quitar esta asignación? También se eliminarán todas las notas y tareas de los estudiantes asociadas a ella.",
     },
     schedules: {
       // Etiquetas compartidas por el editor semanal y el de bloques.
@@ -904,7 +908,7 @@ export default {
       editor: {
         title: "Horario semanal",
         subtitle:
-          "Arma la semana de cada sección. Elige una jornada para colocar los bloques y luego complétalos.",
+          "Arme la semana de cada sección. Elija una jornada para colocar los bloques y luego complételos.",
         section: "Sección",
         template: "Jornada",
         freeTimes: "Horas libres (sin jornada)",
@@ -912,10 +916,10 @@ export default {
         addTitle: "Agregar clase",
         editTitle: "Editar clase",
         empty:
-          "Aún no hay clases. Haz clic en un espacio de la cuadrícula para agregar una.",
-        noYear: "Activa un año escolar para armar horarios.",
+          "Aún no hay clases. Haga clic en un espacio de la cuadrícula para agregar una.",
+        noYear: "Active un curso lectivo para armar horarios.",
         needSections: "Primero agrega secciones, materias y docentes.",
-        pickSection: "Elige una sección para ver su semana.",
+        pickSection: "Elija una sección para ver su semana.",
         confirmDelete: "¿Quitar esta clase del horario?",
         added: "Clase agregada.",
         updated: "Clase actualizada.",
@@ -923,7 +927,7 @@ export default {
       },
       conflicts: {
         title: "Conflictos de horario",
-        none: "No hay conflictos en los horarios de este año.",
+        none: "No hay conflictos en los horarios de este curso lectivo.",
         section: "{section} ya tiene una clase a esa hora ({detail}).",
         teacher: "{teacher} ya está dando clase en {detail}.",
         room: "{room} ya está ocupada por {detail}.",
@@ -936,13 +940,13 @@ export default {
         configure: "Días de clase",
         title: "Días de la semana escolar",
         help: "Solo los días que elijas aquí aparecen en la cuadrícula del horario.",
-        atLeastOne: "Elige al menos un día.",
+        atLeastOne: "Elija al menos un día.",
         saved: "Días de clase actualizados.",
       },
       templates: {
         title: "Jornadas",
         subtitle:
-          "Conjuntos reutilizables de bloques de tiempo. Al aplicar una se rellena la cuadrícula; las clases que guardes conservan sus propias horas.",
+          "Conjuntos reutilizables de bloques de tiempo. Al aplicar una se rellena la cuadrícula; las clases que guarde conservan sus propias horas.",
         add: "Agregar jornada",
         addTitle: "Agregar jornada",
         editTitle: "Renombrar jornada",
@@ -951,7 +955,7 @@ export default {
         blockCount: "{count} bloques",
         empty: "Aún no hay jornadas.",
         confirmDelete: "¿Eliminar esta jornada y sus bloques?",
-        pick: "Selecciona una jornada para editar sus bloques.",
+        pick: "Seleccione una jornada para editar sus bloques.",
         addBlock: "Agregar bloque",
         addBlockTitle: "Agregar bloque",
         editBlockTitle: "Editar bloque",
@@ -970,7 +974,7 @@ export default {
         title: "Copiar una semana",
         source: "Copiar desde la sección",
         help: "Las clases que ya tiene la sección destino se conservan; las que se cruzan se omiten.",
-        needTarget: "Primero elige la sección destino.",
+        needTarget: "Primero elija la sección destino.",
         noSource: "No hay otra sección con horario para copiar.",
         summary: "¿Copiar {count} clases a {section}?",
         skipped:
@@ -990,7 +994,7 @@ export default {
       firstName: "Nombre",
       lastName: "Apellidos",
       enrollmentNumber: "N.º de matrícula",
-      enrollmentHelp: "Déjalo en blanco para generarlo automáticamente.",
+      enrollmentHelp: "Déjelo en blanco para generarlo automáticamente.",
       nationalId: "Cédula",
       dateOfBirth: "Fecha de nacimiento",
       gender: "Género",
@@ -1005,23 +1009,23 @@ export default {
       sectionsGroup: "Secciones",
       filterStudents: "Filtrar estudiantes",
       count: { one: "{count} estudiante", other: "{count} estudiantes" },
-      empty: "Aún no hay estudiantes. Agrega uno o importa una lista.",
+      empty: "Aún no hay estudiantes. Agregue uno o importe una lista.",
       confirmDelete:
-        "¿Eliminar al estudiante {name}? También se eliminarán sus calificaciones, asistencia y registros de disciplina.",
+        "¿Eliminar al estudiante {name}? También se eliminarán sus notas, asistencia y registros de disciplina.",
     },
     import: {
       title: "Importar lista (CSV)",
       sourceHelp:
-        "Sube o pega un CSV/TSV de tu lista. La primera fila debe tener los encabezados de columna.",
-      chooseFile: "Elige un archivo CSV",
-      orPaste: "…o pega el texto CSV",
+        "Suba o pegue un CSV/TSV de su lista. La primera fila debe tener los encabezados de columna.",
+      chooseFile: "Elija un archivo CSV",
+      orPaste: "…o pegue el texto CSV",
       targetSection: "Matricular a todos en la sección",
       noSection: "— Sin sección (matricular luego) —",
       next: "Siguiente",
       back: "Atrás",
       preview: "Vista previa",
       noData:
-        "No se encontraron filas — revisa que el archivo tenga encabezados y datos.",
+        "No se encontraron filas — revise que el archivo tenga encabezados y datos.",
       mapHelp:
         "Asocia cada campo a una columna. Se encontraron {count} filas de datos.",
       fields: {
@@ -1037,7 +1041,7 @@ export default {
       willImport: "{count} para importar",
       willSkip: "{count} omitidas",
       nothingValid:
-        "No hay filas válidas para importar — revisa la asociación de columnas.",
+        "No hay filas válidas para importar — revise la asociación de columnas.",
       skippedRows: "Filas omitidas",
       lineLabel: "Fila {line}",
       andMore: "…y {count} más",
@@ -1058,8 +1062,8 @@ export default {
         gradeLevels: "Importar grados (CSV)",
         rooms: "Importar aulas (CSV)",
         sections: "Importar secciones (CSV)",
-        schoolYears: "Importar años escolares (CSV)",
-        gradingPeriods: "Importar períodos (CSV)",
+        schoolYears: "Importar cursos lectivos (CSV)",
+        gradingPeriods: "Importar periodos (CSV)",
       },
     },
     accounts: {
@@ -1100,7 +1104,7 @@ export default {
     demoFeature3: "Informes de progreso y cierre de periodo",
     demoFeature4: "Datos de ejemplo — nada de lo que haga se guarda",
     welcomeTitle: "Bienvenido de nuevo",
-    welcomeSubtitle: "Inicia sesión en tu cuenta para continuar",
+    welcomeSubtitle: "Inicie sesión en su cuenta para continuar",
     demoSubtitle: "Iniciará sesión con la cuenta de demostración compartida",
     // The brand panel is hidden below the tablet breakpoint, so this notice —
     // which is not — carries the line that matters most to someone deciding
@@ -1108,8 +1112,9 @@ export default {
     demoNotice:
       "Demo en vivo — las credenciales ya están completas. Nada de lo que haga se guarda.",
     createTitle: "Crear una cuenta",
-    createSubtitle: "Únete a SMP y accede a tu portal estudiantil",
+    createSubtitle: "Únase a SMP y acceda a su portal estudiantil",
     fullName: "Nombre completo",
+    fullNamePlaceholder: "María Rojas Vargas",
     emailAddress: "Correo electrónico",
     password: "Contraseña",
     confirmPassword: "Confirmar contraseña",
@@ -1117,24 +1122,24 @@ export default {
     toggleTheme: "Alternar modo oscuro",
     signIn: "Iniciar sesión",
     signUp: "Registrarse",
-    noAccount: "¿No tienes una cuenta?",
+    noAccount: "¿No tiene una cuenta?",
     privacy: "Política de privacidad",
     terms: "Términos del servicio",
-    haveAccount: "¿Ya tienes una cuenta?",
-    forgotPassword: "¿Olvidaste tu contraseña?",
+    haveAccount: "¿Ya tiene una cuenta?",
+    forgotPassword: "¿Olvidó su contraseña?",
     resetLinkSent:
-      "Si existe una cuenta con ese correo, te enviamos un enlace para restablecerla.",
+      "Si existe una cuenta con ese correo, le enviamos un enlace para restablecerla.",
     recovery: {
-      title: "Crea una contraseña nueva",
-      subtitle: "Elige una contraseña nueva para tu cuenta",
+      title: "Cree una contraseña nueva",
+      subtitle: "Elija una contraseña nueva para su cuenta",
       newPassword: "Contraseña nueva",
       confirmPassword: "Confirmar contraseña nueva",
       submit: "Actualizar contraseña",
-      verifying: "Verificando tu enlace…",
-      success: "Contraseña actualizada. Inicia sesión con tu contraseña nueva.",
+      verifying: "Verificando su enlace…",
+      success: "Contraseña actualizada. Inicie sesión con su contraseña nueva.",
     },
     validation: {
-      email: "Ingresa un correo electrónico válido.",
+      email: "Ingrese un correo electrónico válido.",
       password: "La contraseña debe tener al menos 6 caracteres.",
       name: "El nombre completo es obligatorio.",
       passwordsMatch: "Las contraseñas no coinciden.",
@@ -1145,21 +1150,21 @@ export default {
       recoveryDemoDisabled:
         "Los cambios de contraseña están deshabilitados en la demo en vivo.",
       linkExpired:
-        "Este enlace de restablecimiento venció o ya fue usado. Solicita uno nuevo abajo.",
+        "Este enlace de restablecimiento venció o ya fue usado. Solicite uno nuevo abajo.",
       linkInvalid:
-        "Este enlace de restablecimiento no es válido. Solicita uno nuevo abajo.",
+        "Este enlace de restablecimiento no es válido. Solicite uno nuevo abajo.",
       emailForReset:
-        "Ingresa tu correo electrónico y luego elige «¿Olvidaste tu contraseña?».",
+        "Ingrese su correo electrónico y luego elija «¿Olvidó su contraseña?».",
       samePassword: "La contraseña nueva debe ser distinta de la anterior.",
-      unexpected: "Ocurrió un error inesperado. Inténtalo de nuevo.",
-      credentials: "Correo o contraseña incorrectos. Inténtalo de nuevo.",
+      unexpected: "Ocurrió un error inesperado. Inténtelo de nuevo.",
+      credentials: "Correo o contraseña incorrectos. Inténtelo de nuevo.",
       notConfirmed:
-        "Tu correo no está confirmado. Revisa tu bandeja de entrada.",
-      exists: "Ya existe una cuenta con este correo. Intenta iniciar sesión.",
+        "Su correo no está confirmado. Revise su bandeja de entrada.",
+      exists: "Ya existe una cuenta con este correo. Intente iniciar sesión.",
       passwordLength: "La contraseña debe tener al menos 6 caracteres.",
       rateLimit:
-        "Demasiados intentos. Espera un momento antes de volver a intentarlo.",
-      network: "Error de red. Verifica tu conexión e inténtalo de nuevo.",
+        "Demasiados intentos. Espere un momento antes de volver a intentarlo.",
+      network: "Error de red. Verifique su conexión e inténtelo de nuevo.",
     },
   },
 };

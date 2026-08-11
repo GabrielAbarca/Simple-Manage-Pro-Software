@@ -30,7 +30,7 @@ function bannerText() {
     .toLowerCase()
     .startsWith("es");
   return es
-    ? "Algo salió mal. Por favor, actualiza la página."
+    ? "Algo salió mal. Por favor, actualice la página."
     : "Something went wrong. Please refresh the page.";
 }
 
@@ -86,12 +86,16 @@ function showErrorBanner() {
 
 let offlineBar = null;
 
+// Deliberately duplicates `common.offline` rather than importing i18n: this
+// module is the first import on every page and stays dependency-free, so it
+// still works when the dictionary is what failed to load. Keep the two in
+// step — same sentence, same usted register.
 function offlineText() {
   const es = (document.documentElement.lang || "")
     .toLowerCase()
     .startsWith("es");
   return es
-    ? "Parece que no tienes conexión. Puede que la información no esté actualizada."
+    ? "Parece que no tiene conexión. Puede que la información no esté actualizada."
     : "You appear to be offline. Some information may be out of date.";
 }
 

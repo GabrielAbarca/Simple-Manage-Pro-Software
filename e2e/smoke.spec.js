@@ -86,7 +86,7 @@ test.describe("login", () => {
 
     await expect(page.locator("#auth-form")).toBeHidden();
     await expect(page.locator("#auth-title")).toHaveText(
-      "Crea una contraseña nueva",
+      "Cree una contraseña nueva",
     );
     // Not redirected to a portal — the whole point of the fix.
     expect(new URL(page.url()).pathname).toBe("/login.html");
@@ -511,7 +511,16 @@ test.describe("admin console", () => {
     page,
     context,
   }) => {
-    const today = new Date().toISOString().slice(0, 10);
+    // Local-time dates, matching how the console builds its month window
+    // (toISOString() would drift a day either side of UTC midnight).
+    const pad = (n) => String(n).padStart(2, "0");
+    const iso = (d) =>
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const now = new Date();
+    const today = iso(now);
+    const monthStart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
+    const lastMonth = (day) =>
+      iso(new Date(now.getFullYear(), now.getMonth() - 1, day));
     const seeded = {
       ...consoleFix,
       school_settings: [{ id: 1, name: "Colegio San José", id_label: null }],
@@ -561,6 +570,10 @@ test.describe("admin console", () => {
           class_id: 21,
         },
       ],
+      // Four rows inside the current month — 3 present/late of 4 = 75% — and
+      // three absences in the month before it. The older rows still feed the
+      // at-risk count (which spans the whole record) but must stay out of the
+      // month's rate, which is what separates this from the old daily figure.
       attendance: [
         {
           id: 1,
@@ -571,24 +584,38 @@ test.describe("admin console", () => {
         },
         { id: 2, student_id: 102, class_id: 21, date: today, status: "absent" },
         {
+          id: 6,
+          student_id: 101,
+          class_id: 21,
+          date: monthStart,
+          status: "present",
+        },
+        {
+          id: 7,
+          student_id: 102,
+          class_id: 21,
+          date: monthStart,
+          status: "late",
+        },
+        {
           id: 3,
           student_id: 101,
           class_id: 21,
-          date: "2026-01-01",
+          date: lastMonth(10),
           status: "absent",
         },
         {
           id: 4,
           student_id: 101,
           class_id: 21,
-          date: "2026-01-02",
+          date: lastMonth(11),
           status: "absent",
         },
         {
           id: 5,
           student_id: 101,
           class_id: 21,
-          date: "2026-01-03",
+          date: lastMonth(12),
           status: "absent",
         },
       ],
@@ -602,7 +629,17 @@ test.describe("admin console", () => {
 
     await page.goto("/admin.html");
     await expect(page.locator("#stat-enrollment")).toHaveText("2");
-    await expect(page.locator("#stat-attendance")).toHaveText("50%");
+    // 3 present/late of the 4 rows dated this month. Were last month's three
+    // absences counted, this would read 43%.
+    await expect(page.locator("#stat-attendance")).toHaveText("75%");
+    // The hint names the month and the sample size behind the percentage.
+    const monthName = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric",
+    }).format(new Date(now.getFullYear(), now.getMonth(), 1));
+    await expect(page.locator("#stat-attendance-hint")).toHaveText(
+      `${monthName} · 4 records`,
+    );
     // At-risk is a summary figure now — the per-student table it used to sit
     // above was demoted off the dashboard.
     await expect(page.locator("#stat-atrisk")).toHaveText("1");

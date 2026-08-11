@@ -2055,7 +2055,7 @@
 
     .settings-rail-item {
       flex-shrink: 0;
-      min-height: 2.75rem;
+      min-height: var(--tap-target);
     }
 
     .settings-grid {
@@ -2073,7 +2073,7 @@
     }
 
     .settings-segment {
-      min-height: 2.5rem;
+      min-height: var(--tap-target);
     }
   }
 
@@ -2986,15 +2986,26 @@
   .smp-select__native,
   .smp-date__native {
     width: 100%;
-    color: transparent;
-    /* Clicks belong to the overlay. Automation still reads and sets the
-       element directly, which is what the e2e suite does. */
-    pointer-events: none;
   }
 
-  /* Enhanced date inputs hand their picker button to ours. */
-  .smp-date__native::-webkit-calendar-picker-indicator {
-    display: none;
+  /* Clipping the native's text is only correct where the overlay is drawn to
+     replace it. On a coarse pointer the OS control is what the user sees and
+     touches (the touch block at the end of this file removes the overlay), so
+     it has to keep painting its own value — scoping the clip here is what
+     keeps the two halves from ever disagreeing. */
+  @media not (pointer: coarse) {
+    .smp-select__native,
+    .smp-date__native {
+      color: transparent;
+      /* Clicks belong to the overlay. Automation still reads and sets the
+         element directly, which is what the e2e suite does. */
+      pointer-events: none;
+    }
+
+    /* Enhanced date inputs hand their picker button to ours. */
+    .smp-date__native::-webkit-calendar-picker-indicator {
+      display: none;
+    }
   }
 
   .smp-select__trigger,
@@ -3253,22 +3264,38 @@
   }
 
   /* ── Touch: hand the controls back to the OS ──────────────────── */
+  /* Nothing to restore on the native control: the clip above never applies
+     here, so it is still the one the surface rules styled. Take the overlay
+     out and the OS control is simply what is left. */
   @media (pointer: coarse) {
-    .smp-select__native,
-    .smp-date__native {
-      position: static;
-      width: 100%;
-      height: auto;
-      opacity: 1;
-      pointer-events: auto;
-    }
-
     .smp-select__trigger,
     .smp-select__listbox,
     .smp-date__field,
     .smp-date__button,
     .smp-date__pop {
       display: none;
+    }
+  }
+
+  /* ── Touch: one floor under every text control ────────────────── */
+  /* `--tap-target` is the single place a touch-target size is written down,
+     but it reached only buttons: every <select> and <input> is sized by the
+     padding its surface happens to use — a dozen surfaces, eleven different
+     vertical paddings — which left them at 36–41px on touch while every
+     button beside them sat at 44px.
+     This has to live in `controls`: the surface rules are in `page`, which
+     beats `base`. Buttons already carry the floor via `.btn`, so naming them
+     here would be redundant.
+     Checkbox, radio and range are excluded deliberately — they are fixed-size
+     glyphs (a checkbox is a 1rem box), not text fields, and a 44px floor would
+     stretch them into rectangles rather than enlarge their hit area. */
+  @media (pointer: coarse) {
+    :is(
+      select,
+      textarea,
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"])
+    ) {
+      min-height: var(--tap-target);
     }
   }
 }

@@ -7,6 +7,8 @@ import {
   formatTime,
   formatNumber,
 } from "../src/js/i18n.js";
+import enDict from "../src/js/i18n/en.js";
+import esDict from "../src/js/i18n/es.js";
 
 // i18n defaults to Spanish before any initI18n() call (no DOM/localStorage in
 // this environment), so these assert the deterministic es-CR behavior. Spanish
@@ -65,5 +67,55 @@ describe("i18n locale-aware formatting (es-CR)", () => {
     // and assert the part that actually matters: the comma.
     expect(formatNumber(1234.5).replace(/\s/g, " ")).toBe("1 234,5");
     expect(formatNumber("nan")).toBe("");
+  });
+});
+
+// The dictionaries are maintained by hand and t() falls back to English per
+// key, so a Spanish key that goes missing renders English text in a Spanish UI
+// with nothing failing anywhere — silently, and only in production. These lock
+// the two trees together.
+describe("i18n dictionary parity", () => {
+  /** Every leaf path in a nested dictionary, as dotted keys. */
+  function leafKeys(obj, prefix = "") {
+    return Object.entries(obj).flatMap(([k, v]) => {
+      const path = prefix ? `${prefix}.${k}` : k;
+      return v && typeof v === "object" && !Array.isArray(v)
+        ? leafKeys(v, path)
+        : [path];
+    });
+  }
+
+  it("en and es carry exactly the same keys", () => {
+    const en = leafKeys(enDict).sort();
+    const es = leafKeys(esDict).sort();
+    expect(es.filter((k) => !en.includes(k))).toEqual([]); // extra in es
+    expect(en.filter((k) => !es.includes(k))).toEqual([]); // missing from es
+    expect(es).toEqual(en);
+  });
+
+  it("every value is a non-empty string", () => {
+    for (const [name, dict] of [
+      ["en", enDict],
+      ["es", esDict],
+    ]) {
+      for (const key of leafKeys(dict)) {
+        const value = key
+          .split(".")
+          .reduce((acc, part) => acc?.[part], /** @type {any} */ (dict));
+        expect(typeof value, `${name}.${key}`).toBe("string");
+        expect(value.trim(), `${name}.${key}`).not.toBe("");
+      }
+    }
+  });
+
+  it("matching keys use matching {placeholders}", () => {
+    const tokens = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+    for (const key of leafKeys(enDict)) {
+      const read = (d) =>
+        key
+          .split(".")
+          .reduce((acc, part) => acc?.[part], /** @type {any} */ (d));
+      expect(tokens(read(esDict)), key).toEqual(tokens(read(enDict)));
+    }
   });
 });

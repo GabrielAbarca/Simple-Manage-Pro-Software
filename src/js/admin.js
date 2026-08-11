@@ -790,14 +790,52 @@ function applySchoolHeading() {
   if (heading && name) heading.textContent = name;
 }
 
-// Count cards only. Enrollment = active students; today's attendance rate =
-// present+late over today's records; at-risk = how many students have 3+
-// recorded absences (a figure, not a roster — the per-student breakdown is a
-// report, not something a director needs on a school-wide dashboard).
+// Count cards only. Enrollment = active students; the attendance rate =
+// present+late over the current month's records; at-risk = how many students
+// have 3+ recorded absences (a figure, not a roster — the per-student
+// breakdown is a report, not something a director needs on a school-wide
+// dashboard).
 const AT_RISK_THRESHOLD = 3;
 function todayIso() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** First day of the month `date` falls in, as a local-time `YYYY-MM-DD`. */
+function monthStartIso(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+/**
+ * The month's attendance rate, as present+late over every record in the
+ * window — the same numerator the student portal and the teacher console use,
+ * so the three never disagree about what "attendance" counts.
+ *
+ * A month rather than a day because a single date is only meaningful once
+ * that day has been taken: before homeroom it reads 0%, and on a holiday or
+ * any day nobody recorded, it reads "no data" on a school that is running
+ * perfectly well.
+ *
+ * `date` is a plain `date` column, so lexicographic comparison on
+ * `YYYY-MM-DD` is the same as chronological — no parsing needed.
+ *
+ * @param {Array<{ date?: string, status?: string }>} rows every attendance row
+ * @param {string} from inclusive `YYYY-MM-DD`
+ * @param {string} to inclusive `YYYY-MM-DD`
+ * @returns {{ rate: number, present: number, total: number }}
+ */
+function attendanceRate(rows, from, to) {
+  const inWindow = rows.filter(
+    (r) => typeof r.date === "string" && r.date >= from && r.date <= to,
+  );
+  const present = inWindow.filter(
+    (r) => r.status === "present" || r.status === "late",
+  ).length;
+  return {
+    rate: inWindow.length ? Math.round((present / inWindow.length) * 100) : 0,
+    present,
+    total: inWindow.length,
+  };
 }
 
 /** Write a count into a stat card, guarding against markup drift. */
@@ -861,25 +899,20 @@ function renderOverviewSetup({ students, teachers, subjects, sectionsList }) {
 
 async function loadOverviewStats() {
   try {
-    const [
-      students,
-      sectionsList,
-      todayRows,
-      allAttendance,
-      teachers,
-      subjects,
-      rooms,
-    ] = await Promise.all([
-      data.listStudents(),
-      state.activeYear
-        ? data.listSections(state.activeYear.id)
-        : Promise.resolve([]),
-      data.listAttendanceOn(todayIso()),
-      data.listAllAttendance(),
-      data.listTeachers(),
-      data.listSubjects(),
-      data.listRooms(),
-    ]);
+    const [students, sectionsList, allAttendance, teachers, subjects, rooms] =
+      await Promise.all([
+        data.listStudents(),
+        state.activeYear
+          ? data.listSections(state.activeYear.id)
+          : Promise.resolve([]),
+        // One unfiltered read serves both attendance figures below: the
+        // at-risk count needs every record anyway, so the month is a filter
+        // over a payload already in hand rather than a second round trip.
+        data.listAllAttendance(),
+        data.listTeachers(),
+        data.listSubjects(),
+        data.listRooms(),
+      ]);
     state.students = students;
     state.sections = sectionsList;
     state.teachers = teachers;
@@ -920,13 +953,25 @@ async function loadOverviewStats() {
         : t("console.overview.noData"),
     );
 
-    // Today's attendance rate.
-    const present = todayRows.filter(
-      (r) => r.status === "present" || r.status === "late",
-    ).length;
-    document.getElementById("stat-attendance").textContent = todayRows.length
-      ? `${Math.round((present / todayRows.length) * 100)}%`
-      : t("console.overview.noData");
+    // This month's attendance rate, with the month named on the card so the
+    // percentage is not mistaken for a running total, and the record count
+    // underneath so it reads as a sample rather than a claim.
+    // The card's label is static ("Attendance this month") and translated by
+    // applyTranslations; the month itself goes in the hint, where Intl can
+    // name it per locale without a dictionary entry per month.
+    const monthFrom = monthStartIso();
+    const month = attendanceRate(allAttendance, monthFrom, todayIso());
+    setStat(
+      "stat-attendance",
+      month.total ? `${month.rate}%` : t("console.overview.noData"),
+    );
+    const monthName = formatDate(monthFrom, { month: "long", year: "numeric" });
+    setStat(
+      "stat-attendance-hint",
+      month.total
+        ? `${monthName} · ${tn("console.overview.attendanceRecords", month.total, { count: month.total })}`
+        : monthName,
+    );
 
     // At-risk: how many students have crossed the absence threshold. Only
     // students still on the roster count.

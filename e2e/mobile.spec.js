@@ -74,6 +74,60 @@ test.describe("mobile — teacher console", () => {
     await page.waitForSelector(".myclasses-grid");
     expect(await noOverflow(page)).toBe(true);
   });
+
+  // The enhanced <select> keeps the OS control on touch and takes the custom
+  // overlay out. The overlay's job is to draw the value, so on this branch the
+  // native has to draw its own — it once kept the `color: transparent` meant
+  // for the desktop overlay and the gradebook's period filter rendered as an
+  // empty box on every phone.
+  test("the gradebook period filter shows its value on touch", async ({
+    page,
+    context,
+  }) => {
+    await routeSupabase(context, teacherFix);
+    await seedSession(context);
+
+    await page.goto("/teacher.html");
+    await page.waitForFunction(
+      () =>
+        document.getElementById("teacher-name")?.textContent?.includes("Sofía"),
+      { timeout: 10_000 },
+    );
+    await page.evaluate(() =>
+      document.querySelector('aside a[data-page="myclasses"]')?.click(),
+    );
+    await page.waitForSelector(".class-card");
+    await page.locator(".class-card").first().click();
+    await page.locator('.class-subtab[data-tab="gradebook"]').click();
+    await page.waitForSelector("#gradebook-period");
+
+    const control = await page.evaluate(() => {
+      const native = document.querySelector("#gradebook-period");
+      const trigger = document.querySelector("#gradebook-period-trigger");
+      const cs = getComputedStyle(native);
+      const box = native.getBoundingClientRect();
+      return {
+        coarse: matchMedia("(pointer: coarse)").matches,
+        enhanced: !!native.closest(".smp-select"),
+        color: cs.color,
+        pointerEvents: cs.pointerEvents,
+        width: box.width,
+        height: box.height,
+        overlayDisplay: trigger ? getComputedStyle(trigger).display : "absent",
+        selected: native.selectedOptions[0]?.textContent?.trim(),
+      };
+    });
+
+    expect(control.coarse).toBe(true);
+    expect(control.enhanced).toBe(true);
+    // The OS control is the whole UI here, so it has to paint and take taps.
+    expect(control.color).not.toMatch(/rgba\(\s*0,\s*0,\s*0,\s*0\s*\)/);
+    expect(control.pointerEvents).not.toBe("none");
+    expect(control.width).toBeGreaterThan(0);
+    expect(control.height).toBeGreaterThan(0);
+    expect(control.overlayDisplay).toBe("none");
+    expect(control.selected).toBeTruthy();
+  });
 });
 
 test.describe("mobile — admin console", () => {

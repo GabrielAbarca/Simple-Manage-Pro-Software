@@ -323,8 +323,15 @@ begin
   if n <> 8 then raise exception 'VERIFY FAILED: % teachers, expected 8', n; end if;
   select count(*) into n from public.student_grades;
   if n <> 38 then raise exception 'VERIFY FAILED: % grades, expected 38', n; end if;
-  select count(*) into n from public.attendance;
-  if n <> 21 then raise exception 'VERIFY FAILED: % attendance rows, expected 21', n; end if;
+  -- Attendance is asserted by the two dates this seed pins rather than by a
+  -- total: demo_seed_attendance.sql tops the current month up on every run, so
+  -- the table's size is deliberately not fixed. What must not change is that
+  -- the 21 rows this seed moved are still where it put them.
+  select count(*) into n from public.attendance
+   where date in ('2026-08-06', '2026-08-07');
+  if n <> 21 then
+    raise exception 'VERIFY FAILED: % attendance rows on 2026-08-06/07, expected 21', n;
+  end if;
 
   -- The demo's login plumbing survived.
   if not exists (

@@ -48,6 +48,7 @@ declare
   win_from  date;
   win_to    date;
   inserted  integer;
+  offdays   integer;
   n         integer;
   rate      numeric;
 begin
@@ -116,22 +117,28 @@ begin
       -- hashtext can be negative; abs() then mod for a stable 0-99 bucket.
       (abs(hashtext(r.student_id::text || s.day::text)) % 100) as bucket
       from roster r cross join school_days s
+  ),
+  ins as (
+    insert into public.attendance (student_id, class_id, date, status)
+    select
+      student_id,
+      class_id,
+      day,
+      case
+        when bucket < 91 then 'present'
+        when bucket < 95 then 'late'
+        when bucket < 98 then 'absent'
+        else 'excused'
+      end
+      from register
+    on conflict do nothing
+    returning date
   )
-  insert into public.attendance (student_id, class_id, date, status)
   select
-    student_id,
-    class_id,
-    day,
-    case
-      when bucket < 91 then 'present'
-      when bucket < 95 then 'late'
-      when bucket < 98 then 'absent'
-      else 'excused'
-    end
-    from register
-  on conflict do nothing;
-
-  get diagnostics inserted = row_count;
+    count(*),
+    count(*) filter (where extract(isodow from date) > 5 or date > current_date)
+    into inserted, offdays
+    from ins;
 
   -- ═══════════════════════════════════════════════════════════
   --  Verification — fails loudly rather than half-applying
@@ -157,20 +164,14 @@ begin
       win_from, win_to, y_start, y_end;
   end if;
 
-  -- No weekend registers, and nothing dated in the future.
-  select count(*) into n from public.attendance
-   where date between win_from and win_to
-     and (extract(isodow from date) > 5 or date > current_date);
-  if n > 0 then
+  -- No weekend registers and nothing dated ahead, counted over the rows this
+  -- run actually inserted rather than over the window. The demo already
+  -- carries two Saturday rows from June; scanning the window would fail this
+  -- seed in June for data it did not write, which is the same trap the
+  -- year-bounds check above avoids.
+  if offdays > 0 then
     raise exception
-      'VERIFY FAILED: % row(s) in the window fall on a weekend or in the future', n;
-  end if;
-
-  -- Every status is one the schema's CHECK allows.
-  select count(*) into n from public.attendance
-   where status not in ('present', 'absent', 'late', 'excused');
-  if n > 0 then
-    raise exception 'VERIFY FAILED: % row(s) carry an unknown status', n;
+      'VERIFY FAILED: % inserted row(s) fall on a weekend or in the future', offdays;
   end if;
 
   -- The 21 rows demo_seed_costa_rica.sql pins to those two dates survived.

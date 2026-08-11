@@ -31,6 +31,24 @@
 --   in place keeps those links and every FK in attendance, student_grades,
 --   schedules and class_subject_teachers intact.
 --
+-- IT HAS ALREADY BEEN APPLIED, AND THE DEMO HAS MOVED ON SINCE
+--   This is a one-time migration off the Venezuelan content, and the demo has
+--   long since run it. What the demo did next is the reason this file needed
+--   revisiting: it grew from 11 students to 90, from 38 grades to 1080, and
+--   its calendar was curated by hand (the curso lectivo now closes December 9,
+--   not the 18th this file first wrote, and II Periodo opens July 20).
+--
+--   So two classes of assumption had to go. The closing checks used to assert
+--   absolute row counts — "expected 11 students" — which turned ordinary
+--   growth into 'VERIFY FAILED' on a seed that advertises itself as safe to
+--   re-run. They now compare against a baseline taken at the top of this block,
+--   which is what "nothing was lost" actually means. And the year and periodo
+--   dates are no longer rewritten wholesale: a calendar that already runs
+--   Feb→Dec keeps its own, and only the opening date is corrected.
+--
+--   Re-running it today is a no-op that verifies. It is kept runnable so a
+--   fresh demo project can still be localized from scratch.
+--
 -- HOW TO RUN
 --   Supabase Dashboard → SQL Editor → paste → Run, on the DEMO project.
 --   One DO block, so it is atomic: any failed assertion rolls the whole thing
@@ -49,9 +67,21 @@
 do $$
 declare
   y_id     integer;
+  y_start  date;
+  y_end    date;
+  reshaped boolean;
   blockers integer;
   bad      integer;
   n        integer;
+  -- Row counts taken before the first mutation and compared again at the end.
+  -- See the "nothing was lost" check for why these are measured, not literals.
+  pre_students   integer;
+  pre_teachers   integer;
+  pre_guardians  integer;
+  pre_staff      integer;
+  pre_grades     integer;
+  pre_attendance integer;
+  pre_events     integer;
 begin
   -- ── 0. Refuse to run anywhere but the demo ──────────────────
   if not exists (
@@ -72,6 +102,17 @@ begin
       'the demo project — check the project ref.';
   end if;
 
+  -- ── 0b. Baseline ────────────────────────────────────────────
+  -- Taken before anything is written, so the closing checks can prove this run
+  -- destroyed nothing without needing to know how big the demo happens to be.
+  select count(*) into pre_students   from public.students;
+  select count(*) into pre_teachers   from public.teachers;
+  select count(*) into pre_guardians  from public.guardians;
+  select count(*) into pre_staff      from public.staff;
+  select count(*) into pre_grades     from public.student_grades;
+  select count(*) into pre_attendance from public.attendance;
+  select count(*) into pre_events     from public.events;
+
   -- ── 1. School identity ──────────────────────────────────────
   -- Both columns were NULL, so the demo rendered a nameless school and the
   -- default ID label. Setting id_label also exercises the per-school label.
@@ -85,16 +126,35 @@ begin
   -- Sep→Jul span the demo carried. 2026 opened on February 23 per the MEP
   -- calendar, which is the date the demo's "Inicio del curso lectivo" and its
   -- I Periodo both start on.
-  select id into y_id from public.school_years where is_active order by id limit 1;
+  select id, start_date, end_date into y_id, y_start, y_end
+    from public.school_years where is_active order by id limit 1;
   if y_id is null then
     raise exception 'no active school year on this project — nothing to seed against';
   end if;
 
+  -- Reshape only a year that is not already a curso lectivo. This migration has
+  -- been applied to the demo for some time, and the demo's calendar has been
+  -- curated since — its year now closes December 9, not the 18th this file
+  -- first wrote, and II Periodo opens July 20. Rewriting those wholesale would
+  -- undo somebody's deliberate work, so a year that already runs Feb→Dec keeps
+  -- its own dates and only has the opening corrected, which is the one value
+  -- this file is authoritative for (MEP opened 2026 on February 23).
+  reshaped := extract(month from y_start) <> 2 or extract(month from y_end) <> 12;
+
   -- Widened before the periods below: grading_period_within_year() fires on
   -- period writes, so the parent year has to be able to contain them first.
-  update public.school_years
-     set name = '2026', start_date = '2026-02-23', end_date = '2026-12-18'
-   where id = y_id;
+  if reshaped then
+    update public.school_years
+       set name = '2026', start_date = '2026-02-23', end_date = '2026-12-18'
+     where id = y_id;
+  else
+    update public.school_years
+       set start_date = '2026-02-23'
+     where id = y_id and start_date <> '2026-02-23';
+  end if;
+
+  select start_date, end_date into y_start, y_end
+    from public.school_years where id = y_id;
 
   -- ── 3. Two periodos, 50/50 ──────────────────────────────────
   -- Dropping a period is destructive by schema design: student_grades
@@ -123,15 +183,29 @@ begin
   delete from public.grading_periods
    where school_year_id = y_id and period_order > 2;
 
-  update public.grading_periods
-     set name = 'I Periodo', start_date = '2026-02-23',
-         end_date = '2026-07-03', weight = 50.00
-   where school_year_id = y_id and period_order = 1;
+  -- Same rule as the year above: the naming and the 50/50 split are this
+  -- file's to enforce, but on a calendar that is already CR-shaped the dates
+  -- belong to whoever curated it. I Periodo is the exception — it opens with
+  -- the curso lectivo by definition, so it tracks the year's start either way.
+  if reshaped then
+    update public.grading_periods
+       set name = 'I Periodo', start_date = y_start,
+           end_date = '2026-07-03', weight = 50.00
+     where school_year_id = y_id and period_order = 1;
 
-  update public.grading_periods
-     set name = 'II Periodo', start_date = '2026-07-13',
-         end_date = '2026-12-18', weight = 50.00
-   where school_year_id = y_id and period_order = 2;
+    update public.grading_periods
+       set name = 'II Periodo', start_date = '2026-07-13',
+           end_date = y_end, weight = 50.00
+     where school_year_id = y_id and period_order = 2;
+  else
+    update public.grading_periods
+       set name = 'I Periodo', start_date = y_start, weight = 50.00
+     where school_year_id = y_id and period_order = 1;
+
+    update public.grading_periods
+       set name = 'II Periodo', weight = 50.00
+     where school_year_id = y_id and period_order = 2;
+  end if;
 
   -- ── 4. Grade levels ─────────────────────────────────────────
   update public.grade_levels set name = 'Décimo'    where numeric_level = 10;
@@ -324,36 +398,80 @@ begin
     raise exception 'VERIFY FAILED: school_settings still incomplete';
   end if;
 
-  -- Everything inside the school year.
+  -- Attendance and discipline are records of school days, so they genuinely
+  -- cannot fall outside the curso lectivo. Read the bounds from the year
+  -- itself rather than repeating literals, so the check follows the calendar
+  -- instead of pinning it to the dates this file was written with.
   select (select count(*) from public.attendance
-           where date < '2026-02-23' or date > '2026-12-18')
+           where date < y_start or date > y_end)
        + (select count(*) from public.discipline_records
-           where date < '2026-02-23' or date > '2026-12-18')
-       + (select count(*) from public.events
-           where start_date < '2026-02-23' or start_date > '2026-12-18')
+           where date < y_start or date > y_end)
     into bad;
   if bad > 0 then
-    raise exception 'VERIFY FAILED: % row(s) fall outside the 2026 school year', bad;
+    raise exception 'VERIFY FAILED: % row(s) fall outside the curso lectivo (% → %)',
+      bad, y_start, y_end;
   end if;
 
-  -- Nothing was lost. These are the counts this seed is expected to preserve;
-  -- a mismatch means an edit cascaded somewhere it should not have.
+  -- Events are held to the calendar year instead, not to the teaching year.
+  -- A colegio's calendar legitimately brackets the last day of classes — the
+  -- demo's own acto de graduación and entrega de notas del II Periodo sit two
+  -- days past it — so the tighter bound rejected correct data. The 2024/2025
+  -- strays this seed exists to catch are still caught.
+  select count(*) into bad from public.events
+   where extract(year from start_date) <> extract(year from y_start);
+  if bad > 0 then
+    raise exception 'VERIFY FAILED: % event(s) fall outside %',
+      bad, extract(year from y_start);
+  end if;
+
+  -- Nothing was lost. Measured against the baseline taken at the top of this
+  -- block, not against literals: written when the demo held 11 students and 38
+  -- grades, those numbers made a seed that advertises itself as idempotent
+  -- fail outright once the demo grew to 90 and 1080 — a false alarm about
+  -- growth, on a check whose entire job is to catch a cascading DELETE. A
+  -- cascade shows up as a drop from whatever the table held a moment ago, so
+  -- that is what this compares.
+  --
+  -- Only shrinkage is an error. Rows appearing between the baseline and here
+  -- would mean something else wrote concurrently, which is not this seed's
+  -- business to police.
   select count(*) into n from public.students;
-  if n <> 11 then raise exception 'VERIFY FAILED: % students, expected 11', n; end if;
+  if n < pre_students then
+    raise exception 'VERIFY FAILED: students dropped from % to %', pre_students, n;
+  end if;
   select count(*) into n from public.teachers;
-  if n <> 8 then raise exception 'VERIFY FAILED: % teachers, expected 8', n; end if;
+  if n < pre_teachers then
+    raise exception 'VERIFY FAILED: teachers dropped from % to %', pre_teachers, n;
+  end if;
+  select count(*) into n from public.guardians;
+  if n < pre_guardians then
+    raise exception 'VERIFY FAILED: guardians dropped from % to %', pre_guardians, n;
+  end if;
+  select count(*) into n from public.staff;
+  if n < pre_staff then
+    raise exception 'VERIFY FAILED: staff dropped from % to %', pre_staff, n;
+  end if;
   select count(*) into n from public.student_grades;
-  if n <> 38 then raise exception 'VERIFY FAILED: % grades, expected 38', n; end if;
-  -- Attendance is asserted as a floor on the two dates this seed pins, not as
-  -- a table total: demo_seed_attendance.sql tops the current month up on every
-  -- run, so the table's size is deliberately not fixed — and since these two
-  -- dates are themselves ordinary weekdays, that seed may add rows here too.
-  -- What must not change is that the 21 rows this seed moved are still here.
+  if n < pre_grades then
+    raise exception 'VERIFY FAILED: grades dropped from % to % — a period delete cascaded',
+      pre_grades, n;
+  end if;
+  select count(*) into n from public.attendance;
+  if n < pre_attendance then
+    raise exception 'VERIFY FAILED: attendance dropped from % to %', pre_attendance, n;
+  end if;
+  select count(*) into n from public.events;
+  if n < pre_events then
+    raise exception 'VERIFY FAILED: events dropped from % to %', pre_events, n;
+  end if;
+
+  -- The two 2024 attendance dates this seed moves are actually gone. That is
+  -- the move's real post-condition; the count it used to assert instead (21)
+  -- was a fact about the demo's size, not about the move.
   select count(*) into n from public.attendance
-   where date in ('2026-08-06', '2026-08-07');
-  if n < 21 then
-    raise exception
-      'VERIFY FAILED: % attendance rows on 2026-08-06/07, expected at least 21', n;
+   where date in ('2024-09-16', '2024-09-17');
+  if n > 0 then
+    raise exception 'VERIFY FAILED: % attendance row(s) still dated 2024-09-16/17', n;
   end if;
 
   -- The demo's login plumbing survived.

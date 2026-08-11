@@ -173,13 +173,17 @@ begin
     raise exception 'VERIFY FAILED: % row(s) carry an unknown status', n;
   end if;
 
-  -- The 21 rows the demo already had are untouched.
+  -- The 21 rows demo_seed_costa_rica.sql pins to those two dates survived.
+  -- A floor, not an exact count: August 6 and 7 2026 are ordinary weekdays, so
+  -- when this seed runs during that month it legitimately fills the gaps on
+  -- them too. What `on conflict do nothing` guarantees is that it never
+  -- rewrites or removes one of the originals, which is what this checks.
   select count(*) into n from public.attendance
    where date in ('2026-08-06', '2026-08-07');
-  if n <> 21 then
+  if n < 21 then
     raise exception
-      'VERIFY FAILED: the 21 original attendance rows are no longer intact '
-      '(found % on 2026-08-06/07)', n;
+      'VERIFY FAILED: only % attendance row(s) left on 2026-08-06/07, expected '
+      'at least the 21 the Costa Rica seed pins there', n;
   end if;
 
   -- The read-only lockdown is still on (this seed must not have loosened it).

@@ -81,8 +81,10 @@ begin
    where id = 1;
 
   -- ── 2. School year ──────────────────────────────────────────
-  -- CR's curso lectivo is one calendar year, roughly February to December —
-  -- not the Sep→Jul span the demo carried.
+  -- CR's curso lectivo is one calendar year, February to December — not the
+  -- Sep→Jul span the demo carried. 2026 opened on February 23 per the MEP
+  -- calendar, which is the date the demo's "Inicio del curso lectivo" and its
+  -- I Periodo both start on.
   select id into y_id from public.school_years where is_active order by id limit 1;
   if y_id is null then
     raise exception 'no active school year on this project — nothing to seed against';
@@ -91,7 +93,7 @@ begin
   -- Widened before the periods below: grading_period_within_year() fires on
   -- period writes, so the parent year has to be able to contain them first.
   update public.school_years
-     set name = '2026', start_date = '2026-02-09', end_date = '2026-12-18'
+     set name = '2026', start_date = '2026-02-23', end_date = '2026-12-18'
    where id = y_id;
 
   -- ── 3. Two periodos, 50/50 ──────────────────────────────────
@@ -122,7 +124,7 @@ begin
    where school_year_id = y_id and period_order > 2;
 
   update public.grading_periods
-     set name = 'I Periodo', start_date = '2026-02-09',
+     set name = 'I Periodo', start_date = '2026-02-23',
          end_date = '2026-07-03', weight = 50.00
    where school_year_id = y_id and period_order = 1;
 
@@ -234,7 +236,7 @@ begin
          end_date    = v.end_date,
          description = v.description
     from (values
-      (1, 'Inicio del curso lectivo',      '2026-02-09'::date, null::date,
+      (1, 'Inicio del curso lectivo',      '2026-02-23'::date, null::date,
           'Bienvenida a estudiantes y familias'),
       (2, 'Exámenes finales I Periodo',    '2026-06-22'::date, '2026-07-03'::date,
           'Semana de exámenes del I Periodo'),
@@ -260,9 +262,28 @@ begin
 
   -- No uniqueness on discipline dates, so a constant shift is safe and keeps
   -- the original spacing between records.
+  --
+  -- The threshold is a fixed sentinel, deliberately NOT the year's start_date.
+  -- Anchoring it to the start would mean that moving the start forward — as
+  -- February 9 → 23 did — re-catches rows a previous run already shifted into
+  -- the gap and shifts them a second time, 22 months further out, silently, on
+  -- a seed whose whole contract is that re-running it is a no-op. January 1
+  -- separates the 2024/2025 strays from anything already in the curso lectivo,
+  -- which is all this needs to do.
   update public.discipline_records
      set date = date + interval '22 months'
-   where date < '2026-02-09';
+   where date < '2026-01-01';
+
+  -- A fixed shift cannot promise to land inside a year whose start can move:
+  -- +22 months puts an April 2024 record on 2026-02-15, which was inside a
+  -- curso lectivo opening February 9 and is outside one opening February 23.
+  -- Rather than retune the interval — and move every stray, breaking the
+  -- spacing the shift exists to preserve — pull just the ones that fell short
+  -- into the first week of classes. Idempotent: a second run finds nothing
+  -- before the start date left to move.
+  update public.discipline_records
+     set date = '2026-03-02'
+   where date < '2026-02-23';
 
   -- ═══════════════════════════════════════════════════════════
   --  Verification — fails loudly rather than half-applying
@@ -305,11 +326,11 @@ begin
 
   -- Everything inside the school year.
   select (select count(*) from public.attendance
-           where date < '2026-02-09' or date > '2026-12-18')
+           where date < '2026-02-23' or date > '2026-12-18')
        + (select count(*) from public.discipline_records
-           where date < '2026-02-09' or date > '2026-12-18')
+           where date < '2026-02-23' or date > '2026-12-18')
        + (select count(*) from public.events
-           where start_date < '2026-02-09' or start_date > '2026-12-18')
+           where start_date < '2026-02-23' or start_date > '2026-12-18')
     into bad;
   if bad > 0 then
     raise exception 'VERIFY FAILED: % row(s) fall outside the 2026 school year', bad;
@@ -323,14 +344,16 @@ begin
   if n <> 8 then raise exception 'VERIFY FAILED: % teachers, expected 8', n; end if;
   select count(*) into n from public.student_grades;
   if n <> 38 then raise exception 'VERIFY FAILED: % grades, expected 38', n; end if;
-  -- Attendance is asserted by the two dates this seed pins rather than by a
-  -- total: demo_seed_attendance.sql tops the current month up on every run, so
-  -- the table's size is deliberately not fixed. What must not change is that
-  -- the 21 rows this seed moved are still where it put them.
+  -- Attendance is asserted as a floor on the two dates this seed pins, not as
+  -- a table total: demo_seed_attendance.sql tops the current month up on every
+  -- run, so the table's size is deliberately not fixed — and since these two
+  -- dates are themselves ordinary weekdays, that seed may add rows here too.
+  -- What must not change is that the 21 rows this seed moved are still here.
   select count(*) into n from public.attendance
    where date in ('2026-08-06', '2026-08-07');
-  if n <> 21 then
-    raise exception 'VERIFY FAILED: % attendance rows on 2026-08-06/07, expected 21', n;
+  if n < 21 then
+    raise exception
+      'VERIFY FAILED: % attendance rows on 2026-08-06/07, expected at least 21', n;
   end if;
 
   -- The demo's login plumbing survived.

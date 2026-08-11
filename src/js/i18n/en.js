@@ -701,7 +701,11 @@ export default {
       noActiveYear: "No active school year yet",
       loading: "Loading overview…",
       enrollment: "Total enrollment",
-      attendanceToday: "Attendance today",
+      attendanceMonth: "Attendance this month",
+      attendanceRecords: {
+        one: "{count} record",
+        other: "{count} records",
+      },
       atRisk: "At-risk students",
       atRiskHint: "3 or more recorded absences",
       teachers: "Teachers",

@@ -698,7 +698,11 @@ export default {
       noActiveYear: "Aún no hay un año escolar activo",
       loading: "Cargando resumen…",
       enrollment: "Matrícula total",
-      attendanceToday: "Asistencia de hoy",
+      attendanceMonth: "Asistencia del mes",
+      attendanceRecords: {
+        one: "{count} registro",
+        other: "{count} registros",
+      },
       atRisk: "Estudiantes en riesgo",
       atRiskHint: "3 o más ausencias registradas",
       teachers: "Docentes",

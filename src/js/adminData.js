@@ -293,10 +293,8 @@ export function createAdminData(gateway) {
     ) => gateway.update("school_settings", id, patch),
 
     // ── Overview (school-wide reads) ──────────────────────────
-    /** Attendance rows for a single date (today's attendance rate). */
-    listAttendanceOn: (/** @type {string} */ date) =>
-      gateway.select("attendance", { match: { date } }),
-    /** All attendance rows (aggregated client-side for the at-risk list). */
+    /** All attendance rows. Aggregated client-side into both overview
+     *  figures: the month's rate and the at-risk count. */
     listAllAttendance: () => gateway.select("attendance"),
   };
 }

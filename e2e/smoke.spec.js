@@ -86,7 +86,7 @@ test.describe("login", () => {
 
     await expect(page.locator("#auth-form")).toBeHidden();
     await expect(page.locator("#auth-title")).toHaveText(
-      "Crea una contraseña nueva",
+      "Cree una contraseña nueva",
     );
     // Not redirected to a portal — the whole point of the fix.
     expect(new URL(page.url()).pathname).toBe("/login.html");

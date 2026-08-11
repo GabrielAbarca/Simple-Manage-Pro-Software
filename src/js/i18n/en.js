@@ -737,7 +737,7 @@ export default {
       namePlaceholder: "School name",
       idLabel: "ID field label",
       idLabelHelp:
-        'What the ID field is called at this school (e.g. "Cédula", "DIMEX", "Carné"). Leave blank for the default.',
+        'What the ID field is called at this school (e.g. "Cédula", "Tarjeta de identificación de menores", "DIMEX", "Carné"). Leave blank for the default.',
       saved: "School profile saved.",
       unavailable:
         "School profile storage isn't set up on this project yet — default labels are in use.",
@@ -1112,6 +1112,7 @@ export default {
     createTitle: "Create an account",
     createSubtitle: "Join SMP and access your student portal",
     fullName: "Full Name",
+    fullNamePlaceholder: "María Rojas Vargas",
     emailAddress: "Email Address",
     password: "Password",
     confirmPassword: "Confirm Password",

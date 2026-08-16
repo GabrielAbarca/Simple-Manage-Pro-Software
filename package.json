@@ -1,5 +1,5 @@
 {
-  "name": "smp-web-page",
+  "name": "simple-manage-pro-software",
   "version": "1.0.0",
   "description": "Simple Manage Pro dashboard site reorganized with Vite and Vercel Serverless API.",
   "type": "module",

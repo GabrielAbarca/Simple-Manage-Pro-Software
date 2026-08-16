@@ -11,7 +11,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/Status-In%20Progress-f59e0b?style=for-the-badge" alt="Status"/>
   &nbsp;
-  <img src="https://img.shields.io/github/actions/workflow/status/GabrielAbarca/SMP-Web-Page/ci.yml?style=for-the-badge&label=CI&logo=github&logoColor=white" alt="CI"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/GabrielAbarca/Simple-Manage-Pro-Software/ci.yml?style=for-the-badge&label=CI&logo=github&logoColor=white" alt="CI"/>
   &nbsp;
   <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   &nbsp;
@@ -102,8 +102,8 @@ Core entities (partial):
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/GabrielAbarca/SMP-Web-Page.git
-cd SMP-Web-Page
+git clone https://github.com/GabrielAbarca/Simple-Manage-Pro-Software.git
+cd Simple-Manage-Pro-Software
 
 # 2. Install dependencies
 npm install

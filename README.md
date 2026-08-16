@@ -5,7 +5,7 @@
 
   <br/>
 
-  <a href="https://smp-web-page-hylqkoh2o-gabrielabarcas-projects.vercel.app/" target="_blank">
+  <a href="https://demo.simplemanagepro.com" target="_blank">
     <img src="https://img.shields.io/badge/Live%20Demo-Open%20App-7c3aed?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo"/>
   </a>
   &nbsp;

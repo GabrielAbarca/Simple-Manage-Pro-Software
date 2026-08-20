@@ -133,7 +133,16 @@ declare
   v_cst_a int; v_cst_a2 int; v_cst_b int;
   v_student_a int; v_student_b int;
   v_period int; v_assignment int;
+  -- Baselines for the handful of assertions below that read a table with no
+  -- row-ownership filter (subjects, teachers/teachers_directory, students as
+  -- admin) — on any project that isn't freshly created, those tables already
+  -- have real rows, and a hardcoded expected count silently assumes zero.
+  v_pre_subjects int; v_pre_teachers int; v_pre_students int;
 begin
+  select count(*) into v_pre_subjects from public.subjects;
+  select count(*) into v_pre_teachers  from public.teachers;
+  select count(*) into v_pre_students  from public.students;
+
   insert into auth.users (id, email)
   select uid, who || '@rls-audit.invalid' from _audit_ids;
 
@@ -224,7 +233,9 @@ begin
     ('teacher', v_teacher), ('teacher2', v_teacher2),
     ('cst_a', v_cst_a), ('cst_a2', v_cst_a2), ('cst_b', v_cst_b),
     ('student_a', v_student_a), ('student_b', v_student_b),
-    ('period', v_period), ('assignment', v_assignment);
+    ('period', v_period), ('assignment', v_assignment),
+    ('pre_subjects', v_pre_subjects), ('pre_teachers', v_pre_teachers),
+    ('pre_students', v_pre_students);
 
   raise notice '--- fixture ready (year %, classes %/%, students %/%) ---',
     v_year, v_class_a, v_class_b, v_student_a, v_student_b;
@@ -325,8 +336,12 @@ begin
     'select 1 from public.profiles', 1);
 
   -- Reference data stays readable — the portal needs it to render.
+  -- Baseline + 2: the fixture above inserts exactly two subjects
+  -- (v_subject, v_subject2). Unfiltered read — whatever else the project
+  -- already has stays visible too.
   perform pg_temp._expect_rows('student can read subjects (reference data)',
-    'select 1 from public.subjects', 1);
+    'select 1 from public.subjects',
+    (select v from _audit_fx where k = 'pre_subjects') + 2);
 
   -- The teachers table was the leak: any signed-in user could read every
   -- teacher's national_id, address, phone and hire_date (RLS restricts rows,
@@ -342,8 +357,12 @@ begin
   perform pg_temp._expect_rows('student cannot read a teacher''s hire_date',
     format('select hire_date from public.teachers where id = %s', teacher), 0);
   -- The PII-free directory view is still readable — the Teachers tab works.
+  -- Baseline + 2: the fixture inserts two teachers (v_teacher, v_teacher2).
+  -- teachers_directory is an unfiltered 1:1 mirror of teachers (see
+  -- incremental_narrow_read_policies.sql), so it shares the teachers baseline.
   perform pg_temp._expect_rows('student can read the teacher directory (no PII)',
-    'select 1 from public.teachers_directory', 2);
+    'select 1 from public.teachers_directory',
+    (select v from _audit_fx where k = 'pre_teachers') + 2);
 
   -- Nothing is writable, including their own record.
   perform pg_temp._expect_denied('student cannot change their own grade',
@@ -495,11 +514,15 @@ begin
        and policyname = 'demo_deny_insert'
   ) into demo_locked;
 
-  -- Reads are unrestricted either way.
+  -- Reads are unrestricted either way. Baseline + 2 for the same reason as
+  -- the student-section reads above: admin sees every row, not just the
+  -- fixture's own, so a hardcoded count assumes an empty project.
   perform pg_temp._expect_rows('admin reads every student',
-    'select 1 from public.students', 2);
+    'select 1 from public.students',
+    (select v from _audit_fx where k = 'pre_students') + 2);
   perform pg_temp._expect_rows('admin reads every teacher',
-    'select 1 from public.teachers', 2);
+    'select 1 from public.teachers',
+    (select v from _audit_fx where k = 'pre_teachers') + 2);
 
   if demo_locked then
     -- On the demo project the lockdown outranks the admin policy. That is

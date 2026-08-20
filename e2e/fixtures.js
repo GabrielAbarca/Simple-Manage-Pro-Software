@@ -60,6 +60,19 @@ export const studentFix = {
     { id: 7, first_name: "Sofía", last_name: "Ramírez" },
     { id: 8, first_name: "Marco", last_name: "López" },
   ],
+  // Mirrors public.teachers_directory: the PII-free columns every signed-in
+  // user (not just admin/self) can read after the RLS narrowing.
+  teachers_directory: [
+    {
+      id: 7,
+      first_name: "Sofía",
+      last_name: "Ramírez",
+      specialization: "Mathematics",
+      email: "sofia@example.com",
+      status: "active",
+    },
+    { id: 8, first_name: "Marco", last_name: "López", status: "active" },
+  ],
   rooms: [{ id: 41, name: "Room 101" }],
   grading_periods: [
     {
@@ -80,13 +93,13 @@ export const studentFix = {
       grading_periods: { id: 1, name: "Period 1", period_order: 1 },
       class_subject_teachers: {
         id: 11,
+        teacher_id: 7,
         subjects: {
           id: 31,
           name: "Mathematics",
           code: "MATH7",
           color: "#7380ec",
         },
-        teachers: { id: 7, first_name: "Sofía", last_name: "Ramírez" },
       },
     },
   ],
@@ -126,7 +139,6 @@ export const studentFix = {
     start_time: "08:00",
     end_time: "09:00",
     subjects: { id: 31, name: "Mathematics", code: "MATH7", color: "#7380ec" },
-    teachers: { id: 7, first_name: "Sofía", last_name: "Ramírez" },
     rooms: { id: 41, name: "Room 101" },
   })),
   events: [
@@ -148,6 +160,7 @@ export const teacherFix = {
   school_years: [{ id: 1, name: "2025-2026", is_active: true }],
   grading_periods: studentFix.grading_periods,
   teachers: [teacher, { id: 8, first_name: "Marco", last_name: "López" }],
+  teachers_directory: studentFix.teachers_directory,
   class_subject_teachers: [
     {
       id: 11,

@@ -61,6 +61,11 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   project cannot read a single student and the teacher console is dead.
 >   **Diff the view against the demo project's existing definition before
 >   applying it there** — see the warning in the file.
+> - [`supabase/schema/incremental_narrow_read_policies.sql`](../supabase/schema/incremental_narrow_read_policies.sql)
+>   — **security fix, apply to every project including the demo.** Narrows
+>   `teachers`' blanket "any signed-in user" read policy (national_id, phone,
+>   address, hire_date were readable by every student) to admin + self, and
+>   adds `teachers_directory`, a PII-free view for legitimate name lookups.
 >
 > All of them are already included in `school_schema.sql`, so a fresh project
 > does **not** need them separately.

@@ -67,7 +67,7 @@ function seed() {
     { id: 3, student_id: 101, status: "absent", recorded_by: 7 },
     { id: 4, student_id: 101, status: "absent", recorded_by: 7 },
   ];
-  fixtures.teachers = [
+  fixtures.teachers_directory = [
     { id: 7, first_name: "Sofía", last_name: "Ramírez" },
     { id: 8, first_name: "Marco", last_name: "López" },
   ];
@@ -93,7 +93,7 @@ beforeEach(seed);
 describe("fetchStudentAttendance (N+1 fix)", () => {
   it("resolves all recorders in a single batched teachers?id=in.(…) query", async () => {
     const rows = await fetchStudentAttendance(101);
-    const teacherCalls = calls.filter((c) => c.table === "teachers");
+    const teacherCalls = calls.filter((c) => c.table === "teachers_directory");
     expect(teacherCalls).toHaveLength(1);
     expect(teacherCalls[0].filters).toEqual([["in", "id", [7, 8]]]);
     // Each row carries its resolved recorder on `.teacher` (singular).

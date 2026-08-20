@@ -41,7 +41,7 @@ export async function fetchStudentProfile(studentId) {
   const cls = data.classes;
   if (cls && cls.homeroom_teacher_id) {
     const { data: teacher } = await supabase
-      .from("teachers")
+      .from("teachers_directory")
       .select("id, first_name, last_name")
       .eq("id", cls.homeroom_teacher_id)
       .maybeSingle();
@@ -82,9 +82,8 @@ export async function fetchStudentGrades(studentId, gradingPeriodId = null) {
       id, score, notes, submitted_at,
       grading_periods ( id, name, period_order ),
       class_subject_teachers (
-        id,
-        subjects ( id, name, code, color ),
-        teachers ( id, first_name, last_name )
+        id, teacher_id,
+        subjects ( id, name, code, color )
       )
     `,
     )
@@ -100,6 +99,32 @@ export async function fetchStudentGrades(studentId, gradingPeriodId = null) {
     console.error("fetchStudentGrades:", error.message);
     throw error;
   }
+
+  // teachers isn't a real foreign-key target PostgREST can embed anymore (RLS
+  // narrowed to admin/self; the safe columns live in teachers_directory
+  // instead) — resolve every teacher in one batched query, same pattern as
+  // fetchStudentAttendance's recorder lookup below.
+  const teacherIds = [
+    ...new Set(
+      /** @type {any[]} */ (data)
+        .map((g) => g.class_subject_teachers?.teacher_id)
+        .filter((id) => id != null),
+    ),
+  ];
+  if (teacherIds.length > 0) {
+    const { data: teachers } = await supabase
+      .from("teachers_directory")
+      .select("id, first_name, last_name")
+      .in("id", teacherIds);
+    const byId = new Map((teachers ?? []).map((tch) => [tch.id, tch]));
+    for (const record of /** @type {any[]} */ (data)) {
+      const cst = record.class_subject_teachers;
+      if (cst) {
+        cst.teachers = byId.get(cst.teacher_id) ?? null;
+      }
+    }
+  }
+
   return data;
 }
 
@@ -127,7 +152,7 @@ export async function fetchStudentAttendance(studentId) {
   ];
   if (recorderIds.length > 0) {
     const { data: teachers } = await supabase
-      .from("teachers")
+      .from("teachers_directory")
       .select("id, first_name, last_name")
       .in("id", recorderIds);
     const byId = new Map((teachers ?? []).map((tch) => [tch.id, tch]));
@@ -148,9 +173,8 @@ export async function fetchClassSchedule(classId) {
     .from("schedules")
     .select(
       `
-      id, day_of_week, start_time, end_time,
+      id, day_of_week, start_time, end_time, teacher_id,
       subjects ( id, name, code, color ),
-      teachers ( id, first_name, last_name ),
       rooms ( id, name )
     `,
     )
@@ -162,12 +186,30 @@ export async function fetchClassSchedule(classId) {
     console.error("fetchClassSchedule:", error.message);
     throw error;
   }
+
+  // Same reasoning as fetchStudentGrades: teachers can no longer be embedded
+  // for a non-admin, non-self caller, so resolve names in one batched query
+  // against the PII-free directory view instead.
+  const teacherIds = [
+    ...new Set(data.map((s) => s.teacher_id).filter((id) => id != null)),
+  ];
+  if (teacherIds.length > 0) {
+    const { data: teachers } = await supabase
+      .from("teachers_directory")
+      .select("id, first_name, last_name")
+      .in("id", teacherIds);
+    const byId = new Map((teachers ?? []).map((tch) => [tch.id, tch]));
+    for (const record of /** @type {any[]} */ (data)) {
+      record.teachers = byId.get(record.teacher_id) ?? null;
+    }
+  }
+
   return data;
 }
 
 export async function fetchTeachers() {
   const { data, error } = await supabase
-    .from("teachers")
+    .from("teachers_directory")
     .select("*")
     .order("last_name", { ascending: true });
 

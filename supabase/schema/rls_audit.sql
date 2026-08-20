@@ -247,6 +247,7 @@ do $$
 declare
   student_b int := (select v from _audit_fx where k = 'student_b');
   class_a    int := (select v from _audit_fx where k = 'class_a');
+  teacher    int := (select v from _audit_fx where k = 'teacher');
 begin
   -- Sees exactly one student: themselves.
   perform pg_temp._expect_rows('student sees only their own student row',
@@ -266,6 +267,23 @@ begin
   -- Reference data stays readable — the portal needs it to render.
   perform pg_temp._expect_rows('student can read subjects (reference data)',
     'select 1 from public.subjects', 1);
+
+  -- The teachers table was the leak: any signed-in user could read every
+  -- teacher's national_id, address, phone and hire_date (RLS restricts rows,
+  -- not columns, and the old policy had no row restriction either). Now the
+  -- row itself is invisible to a student, so a select naming any of these
+  -- columns comes back empty rather than just "column not requested".
+  perform pg_temp._expect_rows('student cannot read a teacher''s national_id',
+    format('select national_id from public.teachers where id = %s', teacher), 0);
+  perform pg_temp._expect_rows('student cannot read a teacher''s address',
+    format('select address from public.teachers where id = %s', teacher), 0);
+  perform pg_temp._expect_rows('student cannot read a teacher''s phone',
+    format('select phone from public.teachers where id = %s', teacher), 0);
+  perform pg_temp._expect_rows('student cannot read a teacher''s hire_date',
+    format('select hire_date from public.teachers where id = %s', teacher), 0);
+  -- The PII-free directory view is still readable — the Teachers tab works.
+  perform pg_temp._expect_rows('student can read the teacher directory (no PII)',
+    'select 1 from public.teachers_directory', 2);
 
   -- Nothing is writable, including their own record.
   perform pg_temp._expect_denied('student cannot change their own grade',
@@ -301,6 +319,7 @@ declare
   cst_b      int := (select v from _audit_fx where k = 'cst_b');
   period     int := (select v from _audit_fx where k = 'period');
   year       int := (select v from _audit_fx where k = 'year');
+  teacher2   int := (select v from _audit_fx where k = 'teacher2');
   demo_locked boolean := exists (
     select 1 from pg_policies
      where schemaname = 'public' and tablename = 'attendance'
@@ -321,6 +340,14 @@ begin
   -- The gradebook view must respect the same boundary.
   perform pg_temp._expect_rows('teacher sees only their own rows in student_period_grades',
     format('select 1 from public.student_period_grades where class_subject_teacher_id = %s', cst_b), 0);
+
+  -- Self-read on `teachers` must survive the narrowed policy (the Settings
+  -- view reads their own national_id/phone/address/hire_date) — but a
+  -- colleague's PII must stay just as invisible as a student's would be.
+  perform pg_temp._expect_rows('teacher reads their own full teacher record',
+    'select 1 from public.teachers where auth_user_id = auth.uid()', 1);
+  perform pg_temp._expect_rows('teacher cannot read a colleague''s national_id',
+    format('select national_id from public.teachers where id = %s', teacher2), 0);
 
   -- Writes inside their own classes. On the demo project the lockdown
   -- outranks every permissive policy, so there the same three writes must

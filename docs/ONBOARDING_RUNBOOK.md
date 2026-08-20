@@ -66,6 +66,12 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   `teachers`' blanket "any signed-in user" read policy (national_id, phone,
 >   address, hire_date were readable by every student) to admin + self, and
 >   adds `teachers_directory`, a PII-free view for legitimate name lookups.
+> - [`supabase/schema/incremental_attendance_by_subject.sql`](../supabase/schema/incremental_attendance_by_subject.sql)
+>   — adds `attendance.class_subject_teacher_id` (REAC 2026 needs attendance
+>   per subject, not per day) and replaces the old `unique (student_id, date)`
+>   / `unique (student_id, class_id, date)` constraints with
+>   `unique (student_id, class_subject_teacher_id, date)`, best-effort
+>   backfilling existing rows against each class's homeroom teacher.
 >
 > All of them are already included in `school_schema.sql`, so a fresh project
 > does **not** need them separately.

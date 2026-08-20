@@ -245,15 +245,17 @@ describe.skipIf(!live)("live RLS audit", () => {
         .from("class_subject_teachers")
         .select("class_id");
 
-      // The reference tables are readable by every authenticated user, so this
-      // asks the narrower question: is every *student* row inside my classes?
+      // `teachers` is self-read-only now (RLS narrowed to admin + the caller's
+      // own row — see incremental_narrow_read_policies.sql), so this just
+      // confirms that self-read still works, not that the whole table is
+      // readable. The class/student boundary below is the real assertion.
       const { data: myTeacher } = await teacher
         .from("teachers")
         .select("id")
         .limit(1000);
       expect(
         myTeacher,
-        "teacher could not read the teachers reference table",
+        "teacher could not read their own teachers row",
       ).toBeTruthy();
 
       const taught = new Set((classes ?? []).map((r) => r.class_id));

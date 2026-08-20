@@ -110,18 +110,39 @@ exception
     raise exception 'FAIL [%]: write was DENIED (42501) but should be allowed — %', label, stmt;
 end $fn$;
 
+-- For proving a unique constraint still does its job, not an RLS policy —
+-- used by the attendance-per-subject invariant below.
+create or replace function pg_temp._expect_unique_violation(label text, stmt text)
+returns void language plpgsql as $fn$
+begin
+  execute stmt;
+  raise exception 'FAIL [%]: expected a unique-constraint violation but the write succeeded — %', label, stmt;
+exception
+  when unique_violation then
+    raise notice 'PASS [%]  (blocked: unique_violation)', label;
+end $fn$;
+
 -- ── Fixture: one small fictional school ────────────────────────
 -- Runs as the session role, which owns the tables and therefore bypasses
 -- RLS — exactly how an admin-provisioned project gets seeded.
 do $$
 declare
-  v_year int; v_grade int; v_subject int;
+  v_year int; v_grade int; v_subject int; v_subject2 int;
   v_class_a int; v_class_b int;
   v_teacher int; v_teacher2 int;
-  v_cst_a int; v_cst_b int;
+  v_cst_a int; v_cst_a2 int; v_cst_b int;
   v_student_a int; v_student_b int;
   v_period int; v_assignment int;
+  -- Baselines for the handful of assertions below that read a table with no
+  -- row-ownership filter (subjects, teachers/teachers_directory, students as
+  -- admin) — on any project that isn't freshly created, those tables already
+  -- have real rows, and a hardcoded expected count silently assumes zero.
+  v_pre_subjects int; v_pre_teachers int; v_pre_students int;
 begin
+  select count(*) into v_pre_subjects from public.subjects;
+  select count(*) into v_pre_teachers  from public.teachers;
+  select count(*) into v_pre_students  from public.students;
+
   insert into auth.users (id, email)
   select uid, who || '@rls-audit.invalid' from _audit_ids;
 
@@ -140,6 +161,10 @@ begin
     values ('RLS Audit Grade', 999) returning id into v_grade;
   insert into public.subjects (name, code)
     values ('RLS Audit Subject', 'RLSA') returning id into v_subject;
+  -- A second subject, so class A can have two teachers — the "two teachers
+  -- share a section" scenario the attendance-per-subject invariant proves.
+  insert into public.subjects (name, code)
+    values ('RLS Audit Subject Two', 'RLSA2') returning id into v_subject2;
 
   insert into public.teachers (first_name, last_name, email, auth_user_id)
     values ('Audit', 'TeacherOne', 't1@rls-audit.invalid',
@@ -161,6 +186,10 @@ begin
     values (v_class_a, v_subject, v_teacher, v_year) returning id into v_cst_a;
   insert into public.class_subject_teachers (class_id, subject_id, teacher_id, school_year_id)
     values (v_class_b, v_subject, v_teacher2, v_year) returning id into v_cst_b;
+  -- Teacher two also teaches a second subject in class A — the section
+  -- teacher one is homeroom for. Same class, same date, different subject.
+  insert into public.class_subject_teachers (class_id, subject_id, teacher_id, school_year_id)
+    values (v_class_a, v_subject2, v_teacher2, v_year) returning id into v_cst_a2;
 
   insert into public.students
     (first_name, last_name, enrollment_number, class_id, auth_user_id)
@@ -184,10 +213,10 @@ begin
   insert into public.assignment_grades (assignment_id, student_id, score)
     values (v_assignment, v_student_a, 80);
 
-  insert into public.attendance (student_id, class_id, date, status)
-    values (v_student_a, v_class_a, date '2400-03-01', 'present');
-  insert into public.attendance (student_id, class_id, date, status)
-    values (v_student_b, v_class_b, date '2400-03-01', 'absent');
+  insert into public.attendance (student_id, class_id, class_subject_teacher_id, date, status)
+    values (v_student_a, v_class_a, v_cst_a, date '2400-03-01', 'present');
+  insert into public.attendance (student_id, class_id, class_subject_teacher_id, date, status)
+    values (v_student_b, v_class_b, v_cst_b, date '2400-03-01', 'absent');
 
   insert into public.student_grades
     (student_id, class_subject_teacher_id, grading_period_id, score)
@@ -202,9 +231,11 @@ begin
     ('year', v_year), ('grade', v_grade), ('subject', v_subject),
     ('class_a', v_class_a), ('class_b', v_class_b),
     ('teacher', v_teacher), ('teacher2', v_teacher2),
-    ('cst_a', v_cst_a), ('cst_b', v_cst_b),
+    ('cst_a', v_cst_a), ('cst_a2', v_cst_a2), ('cst_b', v_cst_b),
     ('student_a', v_student_a), ('student_b', v_student_b),
-    ('period', v_period), ('assignment', v_assignment);
+    ('period', v_period), ('assignment', v_assignment),
+    ('pre_subjects', v_pre_subjects), ('pre_teachers', v_pre_teachers),
+    ('pre_students', v_pre_students);
 
   raise notice '--- fixture ready (year %, classes %/%, students %/%) ---',
     v_year, v_class_a, v_class_b, v_student_a, v_student_b;
@@ -212,6 +243,43 @@ end $$;
 
 -- Impersonation reads these, and they must survive the role switch.
 grant select on _audit_ids, _audit_fx to anon, authenticated;
+
+-- ═══════════════════════════════════════════════════════════════
+--  Schema invariant — attendance is unique per (student, subject, date)
+-- ═══════════════════════════════════════════════════════════════
+-- Runs as the fixture owner (RLS-exempt), before any impersonation begins.
+-- This is not a role-boundary check like the sections below — it proves
+-- incremental_attendance_by_subject.sql's constraint actually does what it
+-- was written for: two teachers sharing class A (teacher one on subject
+-- one via cst_a, teacher two on subject two via cst_a2) each recording
+-- attendance for student A on the same date no longer collide, the way
+-- the old `unique (student_id, date)` constraint made them.
+do $$
+declare
+  student_a int := (select v from _audit_fx where k = 'student_a');
+  class_a   int := (select v from _audit_fx where k = 'class_a');
+  cst_a     int := (select v from _audit_fx where k = 'cst_a');
+  cst_a2    int := (select v from _audit_fx where k = 'cst_a2');
+begin
+  perform pg_temp._expect_allowed(
+    'teacher one''s attendance row for student A on the shared date',
+    format('insert into public.attendance
+              (student_id, class_id, class_subject_teacher_id, date, status)
+              values (%s, %s, %s, date ''2400-03-05'', ''present'')',
+           student_a, class_a, cst_a));
+  perform pg_temp._expect_allowed(
+    'teacher two''s attendance row for the same student/date does not collide',
+    format('insert into public.attendance
+              (student_id, class_id, class_subject_teacher_id, date, status)
+              values (%s, %s, %s, date ''2400-03-05'', ''absent'')',
+           student_a, class_a, cst_a2));
+  perform pg_temp._expect_unique_violation(
+    'a duplicate (student, subject, date) attendance row is still rejected',
+    format('insert into public.attendance
+              (student_id, class_id, class_subject_teacher_id, date, status)
+              values (%s, %s, %s, date ''2400-03-05'', ''late'')',
+           student_a, class_a, cst_a));
+end $$;
 
 -- ═══════════════════════════════════════════════════════════════
 --  1. Anonymous visitor — reads nothing, writes nothing
@@ -255,8 +323,11 @@ begin
   perform pg_temp._expect_rows('student cannot see another student by id',
     format('select 1 from public.students where id = %s', student_b), 0);
 
+  -- 3, not 1: the shared-section fixture above gave student A a second
+  -- date's worth of attendance (one row per subject/teacher). All three
+  -- belong to student A, so the student-scoped policy must show all three.
   perform pg_temp._expect_rows('student sees their own attendance only',
-    'select 1 from public.attendance', 1);
+    'select 1 from public.attendance', 3);
   perform pg_temp._expect_rows('student sees their own period grades only',
     'select 1 from public.student_grades', 1);
   perform pg_temp._expect_rows('student sees their own discipline only',
@@ -265,8 +336,12 @@ begin
     'select 1 from public.profiles', 1);
 
   -- Reference data stays readable — the portal needs it to render.
+  -- Baseline + 2: the fixture above inserts exactly two subjects
+  -- (v_subject, v_subject2). Unfiltered read — whatever else the project
+  -- already has stays visible too.
   perform pg_temp._expect_rows('student can read subjects (reference data)',
-    'select 1 from public.subjects', 1);
+    'select 1 from public.subjects',
+    (select v from _audit_fx where k = 'pre_subjects') + 2);
 
   -- The teachers table was the leak: any signed-in user could read every
   -- teacher's national_id, address, phone and hire_date (RLS restricts rows,
@@ -282,8 +357,12 @@ begin
   perform pg_temp._expect_rows('student cannot read a teacher''s hire_date',
     format('select hire_date from public.teachers where id = %s', teacher), 0);
   -- The PII-free directory view is still readable — the Teachers tab works.
+  -- Baseline + 2: the fixture inserts two teachers (v_teacher, v_teacher2).
+  -- teachers_directory is an unfiltered 1:1 mirror of teachers (see
+  -- incremental_narrow_read_policies.sql), so it shares the teachers baseline.
   perform pg_temp._expect_rows('student can read the teacher directory (no PII)',
-    'select 1 from public.teachers_directory', 2);
+    'select 1 from public.teachers_directory',
+    (select v from _audit_fx where k = 'pre_teachers') + 2);
 
   -- Nothing is writable, including their own record.
   perform pg_temp._expect_denied('student cannot change their own grade',
@@ -332,8 +411,13 @@ begin
     format('select 1 from public.students where id = %s', student_b), 0);
   perform pg_temp._expect_rows('teacher sees exactly one student overall',
     'select 1 from public.students', 1);
+  -- 3, not 1: the policy is class-scoped, not subject-scoped (see
+  -- incremental_teacher_policies.sql), so teacher one — homeroom for class
+  -- A — reads every subject's attendance for class A, including teacher
+  -- two's cst_a2 row. That's existing, unchanged behavior; narrowing it to
+  -- per-subject is out of scope for the attendance-per-subject migration.
   perform pg_temp._expect_rows('teacher reads attendance for their class only',
-    'select 1 from public.attendance', 1);
+    'select 1 from public.attendance', 3);
   perform pg_temp._expect_rows('teacher reads discipline for their students only',
     'select 1 from public.discipline_records', 1);
 
@@ -430,11 +514,15 @@ begin
        and policyname = 'demo_deny_insert'
   ) into demo_locked;
 
-  -- Reads are unrestricted either way.
+  -- Reads are unrestricted either way. Baseline + 2 for the same reason as
+  -- the student-section reads above: admin sees every row, not just the
+  -- fixture's own, so a hardcoded count assumes an empty project.
   perform pg_temp._expect_rows('admin reads every student',
-    'select 1 from public.students', 2);
+    'select 1 from public.students',
+    (select v from _audit_fx where k = 'pre_students') + 2);
   perform pg_temp._expect_rows('admin reads every teacher',
-    'select 1 from public.teachers', 2);
+    'select 1 from public.teachers',
+    (select v from _audit_fx where k = 'pre_teachers') + 2);
 
   if demo_locked then
     -- On the demo project the lockdown outranks the admin policy. That is

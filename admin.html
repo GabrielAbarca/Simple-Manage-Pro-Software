@@ -136,6 +136,13 @@
             ></span>
             <h3 data-i18n="console.nav.students">Students &amp; Enrollment</h3>
           </a>
+          <a href="/admin" data-page="accounts">
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true">
+                <use href="#icon-admin_panel_settings"></use></svg
+            ></span>
+            <h3 data-i18n="console.nav.accounts">Accounts</h3>
+          </a>
           <a href="/admin" data-page="settings">
             <span class="material-symbols-outlined"
               ><svg aria-hidden="true"><use href="#icon-settings"></use></svg
@@ -680,6 +687,50 @@
                   </tr>
                 </thead>
                 <tbody id="students-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── ACCOUNTS (login management) ──────────────────── -->
+        <section class="view-section" id="view-accounts">
+          <h1 data-i18n="console.heading.accounts">User Accounts</h1>
+          <div class="console-panel">
+            <div class="panel-head">
+              <div>
+                <h2 data-i18n="console.accounts.title">Login accounts</h2>
+                <p class="panel-sub" data-i18n="console.accounts.subtitle">
+                  Who can sign in, and with what role.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <button class="btn btn-primary btn-sm" id="btn-add-admin">
+                  <span class="material-symbols-outlined"
+                    ><svg aria-hidden="true">
+                      <use href="#icon-person_add"></use></svg
+                  ></span>
+                  <span data-i18n="console.accounts.createAdmin"
+                    >Create admin login</span
+                  >
+                </button>
+              </div>
+            </div>
+            <p class="panel-hint" data-i18n="console.accounts.hint">
+              Create logins for teachers and students from their own tables.
+              Admin logins are created here.
+            </p>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="console.accounts.colName">Name</th>
+                    <th data-i18n="console.accounts.colEmail">Email</th>
+                    <th data-i18n="console.accounts.colRole">Role</th>
+                    <th data-i18n="console.accounts.colStatus">Status</th>
+                    <th class="actions-col"></th>
+                  </tr>
+                </thead>
+                <tbody id="accounts-body"></tbody>
               </table>
             </div>
           </div>

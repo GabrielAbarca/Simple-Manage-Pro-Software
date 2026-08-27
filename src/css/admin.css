@@ -183,6 +183,13 @@
     margin-top: 0.15rem;
   }
 
+  /* Explanatory line between a panel head and its table. */
+  .panel-hint {
+    font-size: 0.8rem;
+    color: var(--color-dark-variant);
+    margin: -0.25rem 0 1rem;
+  }
+
   .btn-sm {
     padding: 0.45rem 0.8rem;
     font-size: 0.8rem;

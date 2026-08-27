@@ -706,6 +706,44 @@ test.describe("admin console", () => {
     expect(writes).toEqual([]);
   });
 
+  test("lists accounts and creates an admin login, simulated in demo mode", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, consoleFix);
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+
+    await page.goto("/admin.html");
+    await page.waitForFunction(() =>
+      document.getElementById("admin-name")?.textContent?.includes("Gabriel"),
+    );
+
+    await page.click('.sidebar a[data-page="accounts"]');
+    await expect(page.locator("#view-accounts .console-panel")).toBeVisible();
+    // The simulated fixture renders, including a deactivated row that offers
+    // reactivation.
+    await expect(page.locator("#accounts-body")).toContainText("demo@smp.app");
+    await expect(page.locator("#accounts-body")).toContainText("Deactivated");
+    await expect(
+      page.locator('#accounts-body button[title="Reactivate sign-in"]'),
+    ).toBeVisible();
+
+    // Create an admin login — reflected locally in demo, never sent to the
+    // backend.
+    await page.click("#btn-add-admin");
+    await page.fill("#modal-field-name", "Nueva Dirección");
+    await page.fill("#modal-field-email", "nueva@smp.app");
+    await page.click("#modal-submit");
+    await expect(page.locator("#accounts-body")).toContainText("nueva@smp.app");
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
   test("generic CSV import handles teachers, grade levels and sections", async ({
     page,
     context,

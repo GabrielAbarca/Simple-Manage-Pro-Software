@@ -11,6 +11,43 @@ import { supabase } from "./supabaseClient.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { recoveryRedirectUrl } from "./recovery.js";
 
+/**
+ * A representative set of logins for the demo Accounts screen. Demo mode
+ * never mints real users, so `listAccounts` returns this fixture instead of
+ * calling the service. One deactivated row shows the reactivate flow.
+ * @type {Array<{ id: string, email: string, name: string, role: string, banned: boolean }>}
+ */
+const DEMO_ACCOUNTS = [
+  {
+    id: "demo-admin",
+    email: "demo@smp.app",
+    name: "Dirección",
+    role: "admin",
+    banned: false,
+  },
+  {
+    id: "demo-teacher",
+    email: "docente@smp.app",
+    name: "Docente Demo",
+    role: "teacher",
+    banned: false,
+  },
+  {
+    id: "demo-student",
+    email: "estudiante@smp.app",
+    name: "Estudiante Demo",
+    role: "student",
+    banned: false,
+  },
+  {
+    id: "demo-inactive",
+    email: "retirado@smp.app",
+    name: "Cuenta Inactiva",
+    role: "student",
+    banned: true,
+  },
+];
+
 /** Pull a human message out of a functions.invoke error or data.error. */
 async function unwrap(error, data) {
   if (data && data.error) throw new Error(String(data.error));
@@ -64,6 +101,24 @@ export async function setAccountActive(userId, active) {
   if (DEMO_MODE) return { simulated: true };
   const { data, error } = await supabase.functions.invoke("admin-users", {
     body: { action: "setActive", userId, active },
+  });
+  await unwrap(error, data);
+  return data;
+}
+
+/**
+ * List every login account with its role and active state. Real mode calls
+ * the admin-gated `list` action (service role enumerates auth users); demo
+ * mode returns a simulated fixture and never reaches the service.
+ * @returns {Promise<{ accounts: Array<{ id: string, email: string, name: string, role: string, banned: boolean }>, simulated?: boolean }>}
+ */
+export async function listAccounts() {
+  // Fresh copies so a caller's optimistic edits never mutate the fixture.
+  if (DEMO_MODE) {
+    return { simulated: true, accounts: DEMO_ACCOUNTS.map((a) => ({ ...a })) };
+  }
+  const { data, error } = await supabase.functions.invoke("admin-users", {
+    body: { action: "list" },
   });
   await unwrap(error, data);
   return data;

@@ -23,6 +23,7 @@
 //    create     { email, password, role, name?, linkType?, linkId? }
 //    reset      { email, redirectTo? }          → returns a recovery link
 //    setActive  { userId, active }              → ban / unban the login
+//    list       { }                             → every login + role + status
 //
 //  `redirectTo` is where the emailed link sends the user back to; the
 //  console passes its own origin so a reset works from localhost and from
@@ -159,6 +160,52 @@ Deno.serve(async (req: Request) => {
       });
       if (error) return json({ error: error.message }, 400);
       return json({ userId, active });
+    }
+
+    if (action === "list") {
+      // Auth users only exist behind the service-role key, so the console
+      // can't enumerate logins on its own — page through them here.
+      // listUsers() caps perPage at 1000; loop until a short page.
+      const users: Array<Record<string, unknown>> = [];
+      let page = 1;
+      const perPage = 1000;
+      for (;;) {
+        const { data, error } = await admin.auth.admin.listUsers({
+          page,
+          perPage,
+        });
+        if (error) return json({ error: error.message }, 400);
+        users.push(...data.users);
+        if (data.users.length < perPage) break;
+        page += 1;
+      }
+
+      // Roles and display names live in profiles (one row per auth user,
+      // created by the handle_new_user trigger). Join in memory.
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("id, name, role");
+      const byId = new Map(
+        (profiles ?? []).map((p: Record<string, unknown>) => [p.id, p]),
+      );
+
+      const now = Date.now();
+      const accounts = users.map((u) => {
+        const prof = byId.get(u.id) as Record<string, unknown> | undefined;
+        const meta = (u.user_metadata ?? {}) as Record<string, unknown>;
+        const bannedUntil = u.banned_until
+          ? Date.parse(String(u.banned_until))
+          : NaN;
+        return {
+          id: u.id,
+          email: u.email ?? "",
+          name: prof?.name ?? meta.name ?? "",
+          role: prof?.role ?? "student",
+          banned: Number.isFinite(bannedUntil) && bannedUntil > now,
+        };
+      });
+
+      return json({ accounts });
     }
 
     return json({ error: `Unknown action: ${action}` }, 400);

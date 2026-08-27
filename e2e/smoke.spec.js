@@ -200,6 +200,44 @@ test.describe("teacher console", () => {
     expect(writes).toEqual([]);
   });
 
+  test("applies an MEP component scheme to a gradebook with zero writes", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, teacherFix);
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+
+    await page.goto("/teacher.html");
+    await page.waitForFunction(
+      () =>
+        document.getElementById("teacher-name")?.textContent?.includes("Sofía"),
+      { timeout: 10_000 },
+    );
+
+    await page.click('aside a[data-page="myclasses"]');
+    await page.waitForSelector(".class-card");
+    await page.locator(".class-card").first().click();
+    await page.locator('.class-subtab[data-tab="gradebook"]').click();
+    await page.waitForSelector("#gradebook-period");
+
+    await page.click("#btn-categories");
+    await expect(page.locator("#categories-overlay")).toHaveClass(/active/);
+    await page.click("#categories-apply-template");
+    // The default scheme is pre-selected in the picker; apply it.
+    await page.click("#modal-submit");
+
+    // The scheme's components land in this gradebook's categories.
+    await expect(page.locator("#categories-body")).toContainText("Cotidiano");
+    await expect(page.locator("#categories-body")).toContainText("Pruebas");
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
   test("Logout leaves the console instead of bouncing back", async ({
     page,
     context,
@@ -739,6 +777,45 @@ test.describe("admin console", () => {
     await page.fill("#modal-field-email", "nueva@smp.app");
     await page.click("#modal-submit");
     await expect(page.locator("#accounts-body")).toContainText("nueva@smp.app");
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
+  test("defines an MEP component scheme and loads the preset with zero writes", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, consoleFix);
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+
+    await page.goto("/admin.html");
+    await page.waitForFunction(() =>
+      document.getElementById("admin-name")?.textContent?.includes("Gabriel"),
+    );
+
+    await page.click('.sidebar a[data-page="subjects"]');
+    await expect(page.locator("#templates-body")).toBeVisible();
+
+    // Define a school-wide scheme (no subjects seeded, so scope stays blank).
+    await page.click("#btn-add-template");
+    await page.fill("#modal-field-name", "Plan MEP");
+    await page.click("#modal-submit");
+    await expect(page.locator("#templates-body")).toContainText("Plan MEP");
+
+    // Fill it from the MEP preset; the weights total 100%.
+    await page.click('#templates-body button[title="Edit components"]');
+    await page.click("#template-items-footer >> text=Load MEP preset");
+    await expect(page.locator("#template-items-body")).toContainText(
+      "Cotidiano",
+    );
+    await expect(page.locator("#template-items-body")).toContainText(
+      "Total: 100%",
+    );
 
     expect(errors).toEqual([]);
     expect(writes).toEqual([]);

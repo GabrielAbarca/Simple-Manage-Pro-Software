@@ -489,6 +489,15 @@ export default {
       addTitle: "Add category",
       add: "Add category",
       namePlaceholder: "e.g. Exams",
+      applyTemplate: "Apply MEP template",
+      applyTitle: "Apply a component scheme",
+      apply: "Apply",
+      pickTemplate: "Scheme",
+      schoolWide: "all subjects",
+      noTemplates:
+        "No component schemes are set up yet. Ask an admin to add one.",
+      applied: "{count} component(s) added.",
+      alreadyApplied: "Those components are already in this gradebook.",
     },
     pg: {
       title: "Post grades — {period}",

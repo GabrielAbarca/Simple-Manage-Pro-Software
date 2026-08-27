@@ -487,6 +487,15 @@ export default {
       addTitle: "Agregar categoría",
       add: "Agregar categoría",
       namePlaceholder: "p. ej. Exámenes",
+      applyTemplate: "Aplicar plantilla MEP",
+      applyTitle: "Aplicar un esquema de componentes",
+      apply: "Aplicar",
+      pickTemplate: "Esquema",
+      schoolWide: "todas las materias",
+      noTemplates:
+        "Aún no hay esquemas de componentes. Pida a un administrador que agregue uno.",
+      applied: "{count} componente(s) agregado(s).",
+      alreadyApplied: "Esos componentes ya están en esta libreta.",
     },
     pg: {
       title: "Publicar notas — {period}",

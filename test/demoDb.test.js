@@ -21,6 +21,15 @@ beforeEach(() => {
   realDb = {
     fetchRoster: async (classId) => server[classId].map((s) => ({ ...s })),
     fetchActiveCountByClass: async () => ({ 21: 2 }),
+    // MEP component templates: read-only reference data the teacher instantiates.
+    fetchComponentTemplates: async () => [
+      { id: 5, name: "MEP", subject_id: null, is_default: true },
+    ],
+    fetchTemplateItems: async () => [
+      { name: "Cotidiano", weight: 35, item_order: 1 },
+      { name: "Pruebas", weight: 40, item_order: 2 },
+    ],
+    fetchCategories: async () => [],
   };
   writes = 0;
   db = wrapDbForDemo(realDb, { onWrite: () => writes++ });
@@ -70,6 +79,35 @@ describe("demoDb write sandbox — student deltas overlay reads", () => {
     expect((await db.fetchActiveCountByClass())[21]).toBe(3);
     await db.deleteStudent(101);
     expect((await db.fetchActiveCountByClass())[21]).toBe(2);
+  });
+});
+
+describe("demoDb — MEP component templates instantiate locally", () => {
+  it("passes template reads through to realDb without writing", async () => {
+    expect(await db.fetchComponentTemplates()).toEqual([
+      { id: 5, name: "MEP", subject_id: null, is_default: true },
+    ]);
+    expect((await db.fetchTemplateItems(5)).map((i) => i.name)).toEqual([
+      "Cotidiano",
+      "Pruebas",
+    ]);
+    expect(writes).toBe(0); // reads never write
+  });
+
+  it("applying a scheme records category deltas, never a server write", async () => {
+    await db.fetchCategories(7); // warm the (empty) gradebook first
+    for (const it of await db.fetchTemplateItems(5)) {
+      await db.insertCategory({
+        name: it.name,
+        weight: it.weight,
+        class_subject_teacher_id: 7,
+      });
+    }
+    const cats = await db.fetchCategories(7);
+    expect(cats.map((c) => c.name)).toEqual(["Cotidiano", "Pruebas"]);
+    // Local rows carry negative ids and every write stayed in the overlay.
+    expect(cats.every((c) => c.id < 0)).toBe(true);
+    expect(writes).toBe(2);
   });
 });
 

@@ -133,6 +133,7 @@ declare
   v_cst_a int; v_cst_a2 int; v_cst_b int;
   v_student_a int; v_student_b int;
   v_period int; v_assignment int;
+  v_ctemplate int;
   -- Baselines for the handful of assertions below that read a table with no
   -- row-ownership filter (subjects, teachers/teachers_directory, students as
   -- admin) — on any project that isn't freshly created, those tables already
@@ -225,6 +226,13 @@ begin
   insert into public.discipline_records (student_id, date, type, description, reported_by_teacher)
     values (v_student_a, date '2400-03-02', 'RLS Audit', 'fixture', v_teacher);
 
+  -- A component template + one item, to prove admins own it while every
+  -- signed-in user (teacher, student) may read it and no one else may write.
+  insert into public.grade_component_templates (name, subject_id, is_default)
+    values ('RLS Audit Scheme', v_subject, false) returning id into v_ctemplate;
+  insert into public.grade_component_template_items (template_id, name, weight, item_order)
+    values (v_ctemplate, 'Cotidiano', 100, 1);
+
   -- Stash the ids so the impersonation blocks can find them by name.
   create temporary table _audit_fx (k text primary key, v int) on commit drop;
   insert into _audit_fx values
@@ -234,6 +242,7 @@ begin
     ('cst_a', v_cst_a), ('cst_a2', v_cst_a2), ('cst_b', v_cst_b),
     ('student_a', v_student_a), ('student_b', v_student_b),
     ('period', v_period), ('assignment', v_assignment),
+    ('component_template', v_ctemplate),
     ('pre_subjects', v_pre_subjects), ('pre_teachers', v_pre_teachers),
     ('pre_students', v_pre_students);
 
@@ -302,6 +311,10 @@ begin
   perform pg_temp._expect_denied('anon cannot insert a student',
     'insert into public.students (first_name, last_name, enrollment_number)
        values (''Anon'', ''Intruder'', ''RLS-X-999'')');
+  perform pg_temp._expect_rows('anon cannot read component templates',
+    'select 1 from public.grade_component_templates', 0);
+  perform pg_temp._expect_denied('anon cannot insert a component template',
+    'insert into public.grade_component_templates (name) values (''hack'')');
 end $$;
 reset role;
 
@@ -316,6 +329,7 @@ declare
   student_b int := (select v from _audit_fx where k = 'student_b');
   class_a    int := (select v from _audit_fx where k = 'class_a');
   teacher    int := (select v from _audit_fx where k = 'teacher');
+  ctemplate  int := (select v from _audit_fx where k = 'component_template');
 begin
   -- Sees exactly one student: themselves.
   perform pg_temp._expect_rows('student sees only their own student row',
@@ -342,6 +356,13 @@ begin
   perform pg_temp._expect_rows('student can read subjects (reference data)',
     'select 1 from public.subjects',
     (select v from _audit_fx where k = 'pre_subjects') + 2);
+
+  -- Component templates are reference data: readable by any signed-in user so
+  -- a teacher can instantiate them, but a student may never write one.
+  perform pg_temp._expect_rows('student can read a component template',
+    format('select 1 from public.grade_component_templates where id = %s', ctemplate), 1);
+  perform pg_temp._expect_denied('student cannot insert a component template',
+    'insert into public.grade_component_templates (name) values (''hack'')');
 
   -- The teachers table was the leak: any signed-in user could read every
   -- teacher's national_id, address, phone and hire_date (RLS restricts rows,
@@ -399,6 +420,7 @@ declare
   period     int := (select v from _audit_fx where k = 'period');
   year       int := (select v from _audit_fx where k = 'year');
   teacher2   int := (select v from _audit_fx where k = 'teacher2');
+  ctemplate  int := (select v from _audit_fx where k = 'component_template');
   demo_locked boolean := exists (
     select 1 from pg_policies
      where schemaname = 'public' and tablename = 'attendance'
@@ -474,6 +496,13 @@ begin
               (student_id, class_subject_teacher_id, grading_period_id, score)
               values (%s, %s, %s, 100)', student_b, cst_b, period));
 
+  -- Component templates: a teacher reads them (to instantiate into a
+  -- gradebook) but cannot author the school's scheme.
+  perform pg_temp._expect_rows('teacher can read a component template',
+    format('select 1 from public.grade_component_templates where id = %s', ctemplate), 1);
+  perform pg_temp._expect_denied('teacher cannot create a component template',
+    'insert into public.grade_component_templates (name) values (''Not Mine'')');
+
   -- Admin surfaces stay closed.
   perform pg_temp._expect_denied('teacher cannot create a school year',
     'insert into public.school_years (name, start_date, end_date)
@@ -506,7 +535,9 @@ set local request.jwt.claims = '{"sub":"00000000-0000-4000-a000-00000000ad11","r
 set local role authenticated;
 
 do $$
-declare demo_locked boolean;
+declare
+  demo_locked boolean;
+  ctemplate int := (select v from _audit_fx where k = 'component_template');
 begin
   select exists (
     select 1 from pg_policies
@@ -534,6 +565,8 @@ begin
       'update public.school_settings set name = ''Renamed By Audit'' where id = 1');
     perform pg_temp._expect_denied('demo lockdown blocks admin delete',
       'delete from public.subjects');
+    perform pg_temp._expect_denied('demo lockdown blocks admin component-template insert',
+      'insert into public.grade_component_templates (name) values (''Locked'')');
   else
     raise notice '--- no demo lockdown (school project): asserting admin can write ---';
     perform pg_temp._expect_allowed('admin creates a room',
@@ -546,6 +579,13 @@ begin
       format('insert into public.students (first_name, last_name, enrollment_number, class_id)
                 values (''Audit'', ''StudentC'', ''RLS-C-001'', %s)',
              (select v from _audit_fx where k = 'class_a')));
+    perform pg_temp._expect_allowed('admin creates a component template',
+      'insert into public.grade_component_templates (name, is_default)
+         values (''Audit Scheme 2'', false)');
+    perform pg_temp._expect_allowed('admin adds an item to a component template',
+      format('insert into public.grade_component_template_items
+                (template_id, name, weight, item_order)
+                values (%s, ''Pruebas'', 40, 2)', ctemplate));
   end if;
 end $$;
 reset role;

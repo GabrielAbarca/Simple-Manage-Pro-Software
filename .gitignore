@@ -10,7 +10,6 @@ node_modules/
 dist/
 build/
 .vercel/
-.claude/
 
 # ==========================================
 # SEGURIDAD, SECRETOS Y VARIABLES DE ENTORNO

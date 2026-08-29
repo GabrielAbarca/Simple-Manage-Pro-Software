@@ -10,12 +10,12 @@ There are **no per-portal directories** (`admin-console/`, `teacher-console/`,
 `student-portal/` do not exist). This is a flat multi-page app: each portal is
 one page controller living directly under `src/js/`.
 
-| Portal          | HTML entry     | Controller       | Purpose                                                        |
-| --------------- | -------------- | ----------------- | --------------------------------------------------------------- |
-| Login            | `login.html`   | `src/js/login.js`  | Sign-in/up, password recovery, role-based redirect              |
-| Student          | `index.html`   | `src/js/main.js`   | Student dashboard SPA (grades, schedule, attendance, settings)  |
-| Teacher          | `teacher.html` | `src/js/teacher.js`| Teacher console (classes, roster, gradebook, attendance)        |
-| Admin            | `admin.html`   | `src/js/admin.js`  | Admin console (school setup, CRUD, accounts, schedules)         |
+| Portal  | HTML entry     | Controller          | Purpose                                                  |
+| ------- | -------------- | ------------------- | -------------------------------------------------------- |
+| Login   | `login.html`   | `src/js/login.js`   | Sign-in/up, password recovery, role-based redirect       |
+| Student | `index.html`   | `src/js/main.js`    | Student dashboard SPA — thin orchestrator; see below     |
+| Teacher | `teacher.html` | `src/js/teacher.js` | Teacher console (classes, roster, gradebook, attendance) |
+| Admin   | `admin.html`   | `src/js/admin.js`   | Admin console (school setup, CRUD, accounts, schedules)  |
 
 The only real subdirectories under `src/js/` are:
 
@@ -24,6 +24,23 @@ The only real subdirectories under `src/js/` are:
   `index.js`).
 - `src/js/i18n/` — the two translation dictionaries (`en.js`, `es.js`),
   consumed by `src/js/i18n.js`.
+- `src/js/views/` — the student portal's per-section view controllers
+  (`dashboard.js`, `grades.js`, `schedule.js`, `teachers.js`, `attendance.js`,
+  `events.js`, `settingsView.js`), one file per sidebar section, extracted
+  from `main.js`. DOM glue like the other controllers — excluded from
+  `typecheck` alongside `admin.js`/`teacher.js`/`login.js`/`main.js`/
+  `studentNav.js`. Unlike a hypothetical `student-portal/` directory this
+  only holds JS view sections, not the page's HTML/CSS — those still live at
+  the flat top level (`index.html`, `src/css/style.css`).
+
+`src/js/main.js` itself is now a thin orchestrator (~90 lines): resolves the
+session via `studentAuth.js`, bootstraps theme/i18n/controls, and wires the
+`views/*.js` init functions into `studentNav.js`'s router. The routing/sidebar
+chrome (`navigateTo`, view caching, error-retry, cross-portal links) lives in
+`src/js/studentNav.js`; the shared session state (current student id, cached
+profile, memoized events/grading-periods fetchers) lives in
+`src/js/studentState.js`; the auth guard (`resolveStudentSession`) and
+session-lifecycle listeners live in `src/js/studentAuth.js`.
 
 Everything else in `src/js/` is a flat, single-purpose logic module shared
 across portals (see root `CLAUDE.md`'s Architecture section for the full
@@ -32,7 +49,7 @@ list): `auth.js`, `role.js`, `theme.js`, `dialog.js`, `errorHandler.js`,
 `scheduleLogic.js`, `recovery.js`, `projectRef.js`, `demoMode.js`,
 `speedInsights.js`, `supabaseClient.js`, `supabaseQueries.js`, `settings.js`,
 `ui.js`, `legal.js`, `accounts.js`, `adminData.js`, `adminDemoDb.js`,
-`demoDb.js`.
+`demoDb.js`, `studentAuth.js`, `studentState.js`, `studentNav.js`.
 
 CSS follows the same flat convention: `src/css/style.css` (shared design
 system + student portal) plus one override file per page (`admin.css`,
@@ -80,15 +97,23 @@ folders.
 Files over 1,000 lines, largest first. These are **flagged only** — no split
 plan in this pass, no application code was touched to produce this list.
 
-| File                    | Lines | Notes                                                             |
-| ------------------------ | ----: | ------------------------------------------------------------------ |
-| `src/js/admin.js`        | 5,092 | **Top candidate for a future dedicated splitting task.**          |
-| `src/js/teacher.js`      | 3,876 | Second-largest controller.                                        |
-| `src/css/style.css`      | 3,301 | Shared design system + student portal styles combined.            |
-| `src/css/teacher.css`    | 1,660 | Teacher-console-only component styles.                            |
-| `src/js/i18n/es.js`      | 1,200 | Spanish translation dictionary.                                   |
-| `src/js/i18n/en.js`      | 1,195 | English translation dictionary.                                   |
-| `src/js/main.js`         | 1,016 | Student portal SPA controller.                                    |
+| File                  | Lines | Notes                                                    |
+| --------------------- | ----: | -------------------------------------------------------- |
+| `src/js/admin.js`     | 5,092 | **Top candidate for a future dedicated splitting task.** |
+| `src/js/teacher.js`   | 3,876 | Second-largest controller.                               |
+| `src/css/style.css`   | 3,301 | Shared design system + student portal styles combined.   |
+| `src/css/teacher.css` | 1,660 | Teacher-console-only component styles.                   |
+| `src/js/i18n/es.js`   | 1,200 | Spanish translation dictionary.                          |
+| `src/js/i18n/en.js`   | 1,195 | English translation dictionary.                          |
+
+`src/js/main.js` (formerly 1,016 lines) was split into `src/js/views/*.js`
+(one file per dashboard section, largest ~280 lines), `src/js/studentNav.js`,
+`src/js/studentState.js`, and `src/js/studentAuth.js` — see the Portals
+section above. No file in the split exceeds 300 lines. This is a template for
+splitting `admin.js`/`teacher.js` later: pull the auth guard and shared
+mutable state into their own modules, pull the sidebar/routing chrome into
+its own module taking a `{page: loader}` map, and give each independent
+section its own file under a `views/`-style subdirectory.
 
 **`admin.js` (5,092 lines) — why it's this large:** it's a single monolithic
 controller for the whole admin portal, holding 8+ largely independent feature
@@ -118,7 +143,10 @@ future sessions don't go looking for a file that doesn't exist.
 
 - No `admin-console/`, `teacher-console/`, or `student-portal/` directories
   exist. Don't assume a per-portal folder layout — it's flat `src/js/` with
-  one controller file per page.
+  one controller file per page. `src/js/views/` is not an exception to this:
+  it groups the student portal's _JS view sections_ only (mirroring
+  `controls/`), not a full per-portal directory — the page's HTML/CSS and
+  shared session/auth/routing modules stay flat at the top of `src/js/`.
 - `supabase/` is the only directory with its own nested `CLAUDE.md`
   (`supabase/CLAUDE.md`) — Claude Code auto-loads directory-scoped
   `CLAUDE.md` files, and `supabase/` is the only portal-adjacent directory

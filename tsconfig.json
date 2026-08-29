@@ -25,11 +25,26 @@
   "include": ["src/js/**/*.js"],
   // The large view-controllers are DOM-glue and typed incrementally in a
   // later pass; the reusable logic layer (queries, demo DB, i18n, …) is checked.
+  // src/js/main.js is now a thin orchestrator (session bootstrap + wiring),
+  // but TS still walks a root file's imports and type-checks them even when
+  // those imported files are themselves excluded — so main.js has to stay
+  // excluded too, or importing the DOM-glue view modules below would pull
+  // them back into the checked set. studentState.js/studentAuth.js/
+  // views/viewHelpers.js aren't affected: they're matched by the "include"
+  // glob directly and checked as their own root files regardless.
   "exclude": [
     "src/js/admin.js",
     "src/js/teacher.js",
     "src/js/main.js",
     "src/js/login.js",
+    "src/js/studentNav.js",
+    "src/js/views/dashboard.js",
+    "src/js/views/grades.js",
+    "src/js/views/schedule.js",
+    "src/js/views/teachers.js",
+    "src/js/views/attendance.js",
+    "src/js/views/events.js",
+    "src/js/views/settingsView.js",
     "node_modules",
     "dist"
   ]

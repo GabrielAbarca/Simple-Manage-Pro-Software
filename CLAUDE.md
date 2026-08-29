@@ -39,6 +39,9 @@ CI (`.github/workflows/ci.yml`) mirrors `lint` → `typecheck` → `test` → `b
 
 ## Architecture
 
+See `.claude/ARCHITECTURE_MAP.md` for a full file-by-file navigation map
+(portals, data layer, flagged large files). Summary below.
+
 `src/js/` splits into two layers:
 
 - **View controllers** — `admin.js`, `teacher.js`, `main.js`, `login.js`. DOM glue. These are **excluded from `typecheck`** (see `tsconfig.json`) and typed incrementally; keep them thin and push logic down into the layer below.
@@ -59,33 +62,10 @@ CI (`.github/workflows/ci.yml`) mirrors `lint` → `typecheck` → `test` → `b
 
 `errorHandler.js` installs a global error banner and **must remain the first import of every page entry point**. Don't reorder it below other imports.
 
-Backend artifacts live under `supabase/`: `schema/` (`school_schema.sql`, the
-baseline for a fresh per-school project, plus incremental snippets) and
-`functions/admin-users/` (the service-role Edge Function for account
-management, deployed to real school projects only — never the demo). There is
-deliberately **no** `supabase/migrations/` or `config.toml`: the demo project's
-schema is managed out of band, so a tracked migrations dir would make the
-Supabase↔GitHub integration report a history mismatch. Apply schema artifacts
-by hand (dashboard / CLI) per `docs/ONBOARDING_RUNBOOK.md`.
-
-Four of those artifacts are operational rather than structural:
-
-- `demo_lockdown.sql` — restrictive `demo_deny_*` policies making the demo
-  project read-only server-side. **Demo project only**; re-run after any
-  schema change (it loops over the live table catalog, so new tables get
-  locked too).
-- `demo_seed_costa_rica.sql` — the demo project's Costa Rican content: school
-  identity, a Feb–Dec `curso lectivo`, two `periodos`, CR names and
-  cédula-format ids. **Demo project only** — it refuses to run on a project
-  without the `demo_deny_*` lockdown and `demo_teacher_id()`. One atomic DO
-  block, idempotent, and it asserts a period is empty before deleting it
-  (`student_grades` cascades from `grading_periods`).
-- `incremental_profile_role_guard.sql` — trigger stopping a user from editing
-  their own `profiles.role`. RLS chooses rows, not columns, so without it any
-  signed-in user could PATCH themselves to `admin` with the browser's anon key.
-- `rls_audit.sql` — impersonates anon/student/teacher/admin and asserts ~45
-  allowed/denied outcomes inside a transaction that rolls back. Run it after
-  any policy change and as the last step of a restore drill.
+Backend artifacts live under `supabase/` — schema, RLS policies, the demo
+lockdown/seed scripts, and the `admin-users` Edge Function. See
+`supabase/CLAUDE.md` for the full layout and conventions; hard rule 5 below
+still applies there as everywhere.
 
 Docs: `docs/ONBOARDING_RUNBOOK.md` (provisioning),
 `docs/BACKUP_RESTORE.md` (backups + the restore drill),

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds and generated output
+dist/
+build/
+.vercel/
+.vite/
+*.tsbuildinfo
+.eslintcache
+
+# Test/coverage artifacts
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Logs
+*.log
+
+# Secrets and environment
+.env*
+!.env.example
+
+# Temp
+.temp/
+tmp/
+
+# Large, low-value-for-review lockfile
+package-lock.json

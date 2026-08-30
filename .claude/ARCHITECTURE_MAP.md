@@ -31,14 +31,40 @@ The only real subdirectories under `src/js/` are:
   `adminConsole.operations.js` (merged into the `console` key), `login.js`).
   `en/` and `es/` mirror each other file-for-file. Consumed by
   `src/js/i18n.js`.
-- `src/js/views/` — the student portal's per-section view controllers
-  (`dashboard.js`, `grades.js`, `schedule.js`, `teachers.js`, `attendance.js`,
-  `events.js`, `settingsView.js`), one file per sidebar section, extracted
-  from `main.js`. DOM glue like the other controllers — excluded from
-  `typecheck` alongside `admin.js`/`teacher.js`/`login.js`/`main.js`/
-  `studentNav.js`. Unlike a hypothetical `student-portal/` directory this
-  only holds JS view sections, not the page's HTML/CSS — those still live at
-  the flat top level (`index.html`, `src/css/style.css`).
+- `src/js/views/` — per-section view controllers for **both** the student
+  portal and the teacher console, extracted from `main.js` and `teacher.js`
+  respectively. Student portal: `dashboard.js`, `grades.js`, `schedule.js`,
+  `teachers.js`, `attendance.js`, `events.js`, `settingsView.js` (one file per
+  sidebar section). Teacher console: `teacherToday.js`, `myClasses.js`,
+  `classWorkspace.js` (workspace shell + sub-tab dispatch), `roster.js` +
+  `studentForm.js` + `studentDrawer.js` + `discipline.js` +
+  `progressReport.js` (roster tab and everything reachable from a student
+  row), `gradebook.js` + `assignments.js` + `studentGrades.js` +
+  `categories.js` + `postGrades.js` + `columnGrades.js` (gradebook tab and
+  its modals), `teacherAttendance.js` (attendance tab + absence summary),
+  `teacherSchedule.js` (read-only schedule tab), `subjects.js` (read-only
+  catalog), `teacherSettings.js`. The teacher-side files that would otherwise
+  collide with an existing student-portal filename are prefixed `teacher*`
+  (`teacherAttendance.js` vs `attendance.js`, `teacherSchedule.js` vs
+  `schedule.js`, `teacherSettings.js` vs `settingsView.js`); everything else
+  keeps its natural name since there's no collision. All of it is DOM glue —
+  excluded from `typecheck` alongside `admin.js`/`teacher.js`/`login.js`/
+  `main.js`/`studentNav.js`/`teacherNav.js`/`teacherFeedback.js`/
+  `teacherModal.js`. Unlike a hypothetical `student-portal/`/`teacher-console/`
+  directory this only holds JS view sections, not each page's HTML/CSS —
+  those still live at the flat top level (`index.html`, `teacher.html`,
+  `src/css/style.css`, `src/css/teacher.css`).
+- `src/js/teacherData/` — the teacher console's data layer (Supabase
+  queries), split by domain: `identity.js`, `classes.js`, `students.js`,
+  `gradebook.js`, `categories.js`, `attendance.js`, `schedule.js`,
+  `reference.js`, composed and demo-wrapped by `index.js` into the same `db`
+  shape the console used to expose as an inline object. Mirrors how
+  `adminData.js` gives the admin console a data layer, but as flat
+  per-domain modules rather than a generic CRUD `Gateway`. Pure query
+  functions, no DOM — checked by `typecheck`, except `index.js` itself (a
+  thin composition file that also wires in `teacherFeedback.js`'s toast for
+  the demo-write notice, so it stays excluded for the same reason `main.js`
+  does — see the `tsconfig.json` comment).
 
 `src/js/main.js` itself is now a thin orchestrator (~90 lines): resolves the
 session via `studentAuth.js`, bootstraps theme/i18n/controls, and wires the
@@ -56,7 +82,9 @@ list): `auth.js`, `role.js`, `theme.js`, `dialog.js`, `errorHandler.js`,
 `scheduleLogic.js`, `recovery.js`, `projectRef.js`, `demoMode.js`,
 `speedInsights.js`, `supabaseClient.js`, `supabaseQueries.js`, `settings.js`,
 `ui.js`, `legal.js`, `accounts.js`, `adminData.js`, `adminDemoDb.js`,
-`demoDb.js`, `studentAuth.js`, `studentState.js`, `studentNav.js`.
+`demoDb.js`, `studentAuth.js`, `studentState.js`, `studentNav.js`,
+`teacherAuth.js`, `teacherState.js`, `teacherNav.js`, `teacherFeedback.js`,
+`teacherModal.js`, `teacherTableHelpers.js`, `teacherFormat.js`.
 
 CSS follows the same flat convention: `src/css/style.css` (shared design
 system + student portal) plus one override file per page (`admin.css`,
@@ -109,7 +137,6 @@ plan in this pass, no application code was touched to produce this list.
 | File                  | Lines | Notes                                                    |
 | --------------------- | ----: | -------------------------------------------------------- |
 | `src/js/admin.js`     | 5,092 | **Top candidate for a future dedicated splitting task.** |
-| `src/js/teacher.js`   | 3,876 | Second-largest controller.                               |
 | `src/css/style.css`   | 3,301 | Shared design system + student portal styles combined.   |
 | `src/css/teacher.css` | 1,660 | Teacher-console-only component styles.                   |
 
@@ -121,11 +148,32 @@ section above. No file in the split exceeds 300 lines.
 `src/js/main.js` (formerly 1,016 lines) was split into `src/js/views/*.js`
 (one file per dashboard section, largest ~280 lines), `src/js/studentNav.js`,
 `src/js/studentState.js`, and `src/js/studentAuth.js` — see the Portals
-section above. No file in the split exceeds 300 lines. This is a template for
-splitting `admin.js`/`teacher.js` later: pull the auth guard and shared
-mutable state into their own modules, pull the sidebar/routing chrome into
-its own module taking a `{page: loader}` map, and give each independent
-section its own file under a `views/`-style subdirectory.
+section above. No file in the split exceeds 300 lines. This was the template
+for splitting `teacher.js` (below); `admin.js` is the one candidate still
+unsplit.
+
+`src/js/teacher.js` (formerly 3,972 lines) was split the same way, plus a
+data layer: `src/js/teacherAuth.js` (session guard + admin-lock helpers),
+`src/js/teacherState.js` (shared session/nav state), `src/js/teacherData/*`
+(Supabase queries, split by domain — see the Portals section above), a small
+shared UI kit (`teacherFeedback.js`, `teacherModal.js`,
+`teacherTableHelpers.js`, `teacherFormat.js`), `src/js/teacherNav.js`
+(sidebar section switching + cross-portal links, taking a `{page: loader}`
+map like `studentNav.js`'s `initNav`), and one `src/js/views/teacher*.js` /
+`views/*.js` file per class-workspace tab and its modals (roster, gradebook,
+attendance, schedule, plus every dialog reachable from them — see the
+Portals section above for the full list). `teacher.js` itself is now a
+~120-line thin bootstrap. Only `roster.js` (406 lines, table + list) needed
+a further split (`studentForm.js`, the add/edit forms) to stay near the
+300-line guideline; every other file in the split is under 300.
+
+A handful of module pairs in the gradebook cluster (`gradebook.js` ↔ its
+sub-features) and the roster cluster (`roster.js` ↔ `studentForm.js`) import
+each other: the sub-feature is opened from the hub's toolbar/row action and,
+on save, calls back into the hub to refresh. This is safe because every
+cross-call happens inside an event-handler closure, never at module
+top-level evaluation — the standard case ES modules (and Vite/Rollup) handle
+correctly, and this repo has no `import/no-cycle` lint rule.
 
 **`admin.js` (5,092 lines) — why it's this large:** it's a single monolithic
 controller for the whole admin portal, holding 8+ largely independent feature
@@ -134,12 +182,8 @@ gateway, generic UI helpers, navigation, then one section each for overview,
 year & periods, grades & sections, subjects, teachers & accounts, schedules,
 students/enrollment (+ CSV import), and settings. Each section is effectively
 a self-contained mini-page (its own load/render/form/import logic), so the
-file grows linearly with every new admin feature.
-
-**`teacher.js` (3,876 lines):** mixes an auth/identity guard, its data layer
-(kept inline as a `db` object rather than split out the way `adminData.js`
-splits the admin console's), UI helpers, and all class workspace/roster/
-gradebook/attendance features in one controller.
+file grows linearly with every new admin feature. `teacher.js`'s split above
+is a second template available for this one, in addition to `main.js`'s.
 
 **`style.css` (3,301 lines):** carries both the shared design-system tokens
 (used by every page) and the full student-portal layout/chrome in one file,

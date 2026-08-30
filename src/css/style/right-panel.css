@@ -1,0 +1,168 @@
+@layer base {
+  /* ═══════════════════════════════════════════════════════════════
+   [SHARED] RIGHT PANEL
+   Profile/header, theme toggler, activity feed (.recent-updates) and
+   analytics list (.subjects-analytics). Rendered by BOTH the student
+   portal and the admin console — keep here, not in admin.css.
+═══════════════════════════════════════════════════════════════ */
+
+  .right {
+    margin-top: 2rem;
+  }
+
+  .right .top {
+    display: flex;
+    justify-content: end;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  /* Hides the mobile menu button on desktop. Scoped to #menu-btn rather than
+   `button`: the theme toggler in this same container is a <button> now (it
+   was a <div>, which is why it was never keyboard-operable), and the loose
+   selector would hide it. */
+  .right .top #menu-btn {
+    display: none;
+  }
+
+  /* Now a <button> rather than a <div>, so it is focusable and operable by
+   keyboard. Sized to a full tap target: it was ~55x21px. */
+  .right .theme-toggler {
+    background: var(--color-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: var(--tap-target);
+    height: var(--tap-target);
+    width: 4.6rem;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--border-radius-1);
+  }
+
+  .right .theme-toggler span {
+    font-size: 1.2rem;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .right .theme-toggler span.active {
+    background: var(--color-primary-fill);
+    color: #fff;
+    border-radius: var(--border-radius-1);
+  }
+
+  .right .top .profile {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .right .profile .info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+    text-align: right;
+  }
+
+  .right .recent-updates h2 {
+    margin-bottom: 0.8rem;
+  }
+
+  .right .recent-updates .updates-card {
+    background: var(--color-white);
+    padding: var(--card-padding);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--card-border-radius);
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
+  }
+
+  .right .recent-updates .updates-card:hover {
+    box-shadow: none;
+  }
+
+  .right .recent-updates .updates-card .update {
+    display: grid;
+    grid-template-columns: 2.6rem auto;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .right .recent-updates .updates-card .update:last-child {
+    margin-bottom: 0;
+  }
+
+  .right .recent-updates .updates-card .update .profile-photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .right .subjects-analytics {
+    margin-top: 2rem;
+  }
+
+  .right .subjects-analytics h2 {
+    margin-bottom: 0.8rem;
+  }
+
+  .right .subjects-analytics .item {
+    background: var(--color-white);
+    border-radius: var(--card-border-radius);
+    padding: 1.4rem var(--card-padding);
+    box-shadow: var(--box-shadow);
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+    display: flex;
+    align-items: center;
+  }
+
+  /* No hover state: subject rows are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A5. */
+  .right .subjects-analytics .item .right-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    width: 100%;
+  }
+
+  .right .subjects-analytics .item .icon {
+    padding: 0.6rem;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .right .subjects-analytics .item .score-display {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .grade-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--color-light);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.3rem;
+  }
+
+  .grade-bar .grade-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 800ms ease;
+  }
+}

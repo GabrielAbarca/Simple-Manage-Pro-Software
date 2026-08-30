@@ -1,0 +1,97 @@
+@layer base {
+  /* ═══════════════════════════════════════════════════════════════
+   [STUDENT] STUDENT-PORTAL VIEWS
+   The components below (student info bar, dashboard progress cards,
+   teacher cards, attendance summary, events timeline, settings,
+   period selector, score/status helpers) are rendered only by
+   index.html. The admin console uses admin.css instead.
+═══════════════════════════════════════════════════════════════ */
+
+  .student-info-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--color-white);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    margin: var(--space-3) 0 var(--space-1);
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
+  }
+
+  .student-info-bar:hover {
+    box-shadow: none;
+  }
+
+  .student-avatar {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      var(--color-primary),
+      var(--color-primary-accent)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .student-avatar span {
+    color: #fff;
+    font-size: 1.8rem;
+  }
+
+  .student-details h3 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .student-details p {
+    font-size: 0.8rem;
+  }
+
+  .student-meta {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--border-radius-3);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* Each badge's text sits on its own -light tint, which is the tightest of
+   the three backgrounds the -text shades were solved against. */
+  .badge-primary {
+    background: var(--color-primary-light);
+    color: var(--color-primary-text);
+  }
+
+  .badge-success {
+    background: var(--color-success-light);
+    color: var(--color-success-text);
+  }
+
+  .badge-danger {
+    background: var(--color-danger-light);
+    color: var(--color-danger-text);
+  }
+
+  .badge-warning {
+    background: var(--color-warning-light);
+    color: var(--color-warning-text);
+  }
+
+  .badge-info {
+    background: var(--color-info-bg);
+    color: var(--color-info-text);
+  }
+}

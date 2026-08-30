@@ -1,0 +1,183 @@
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    appearance: none;
+    border: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+  }
+
+  /* ── Focus visibility ──────────────────────────────────────────────
+   The reset above clears `outline` on every element, which removed the
+   browser's own focus ring app-wide. Only a handful of components ever
+   added a replacement, so most controls — every button, every icon
+   button, every dialog close, every sidebar link, the tabs, the theme
+   toggle — were completely invisible to keyboard users.
+
+   This is the single replacement. `:focus-visible` (not `:focus`) means
+   a mouse click never paints a ring, only keyboard/AT focus does, so
+   nothing changes for pointer users. `outline` rather than box-shadow so
+   it survives `overflow: hidden` ancestors and never affects layout.
+
+   Form controls override this below with their softer border+ring
+   treatment; both are visible indicators, so either satisfies 2.4.7. */
+  :focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+
+  /* Inside a table cell or a tight grid, an offset ring gets clipped by the
+   neighbouring cell — tuck it inside the element instead. */
+  td :focus-visible,
+  .roster-row-cells:focus-visible,
+  .sg-grid :focus-visible,
+  .pg-grid :focus-visible,
+  .cg-grid :focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   FORM CONTROLS — the app's, not the browser's
+   ───────────────────────────────────────────────────────────────
+   Form controls do NOT inherit font-family. That is a UA-stylesheet
+   rule, not an oversight in this codebase, and it is why every modal
+   input, every console select, every grade cell and every search box
+   was rendering in the system font while the rest of the app rendered
+   in Poppins. Three rules in the whole codebase set it; ~30 did not.
+
+   Declaring it once here fixes every control on every surface, and any
+   control added later inherits the fix instead of having to remember.
+═══════════════════════════════════════════════════════════════ */
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+    /* Also not inherited by default — a control's label should never be
+     a different weight or leading from the text around it. */
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
+  /* Text-bearing controls sit on the type scale. Was --text-sm (0.82rem),
+   which at the 12.5–14px root floor rendered around 10–11px. Dense grid
+   inputs (.sg-*, .pg-*, .cg-*) deliberately keep their smaller size —
+   those are spreadsheet cells, and widening them reflows the grid. */
+  input,
+  select,
+  textarea {
+    font-size: var(--text-base);
+    color: var(--color-dark);
+  }
+
+  /* iOS zooms the viewport whenever a focused input computes under 16px,
+   and does not zoom back out — the user is left on a page scrolled
+   sideways. The app's root font never reaches 16px, so every control
+   triggered it. Applied only to touch pointers so desktop density is
+   untouched. */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: max(16px, var(--text-base));
+    }
+  }
+
+  /* Placeholders were themed on the login form only; everywhere else they
+   fell back to the UA's grey, which is outside the palette and unverified
+   for contrast. */
+  ::placeholder {
+    color: var(--color-info-dark);
+    opacity: 1; /* Firefox dims placeholders by default */
+  }
+
+  ::selection {
+    background: var(--color-primary-light);
+    color: var(--color-dark);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-primary-text);
+  }
+
+  /* ── Firefox scrollbars ───────────────────────────────────────────
+   The ::-webkit-scrollbar rules further down are Chrome/Safari only, so
+   Firefox was still painting OS scrollbars.
+
+   This MUST stay behind the @supports guard. Chromium honours both the
+   standard properties and ::-webkit-scrollbar, but specifying either
+   standard property makes it ignore the webkit rules entirely — which
+   silently threw away the slim 6px bar those rules exist to produce and
+   replaced it with a wide, always-visible one. Applying the standard
+   properties only where ::-webkit-scrollbar does NOT exist means Firefox
+   gets themed scrollbars and Chrome/Safari keep theirs untouched.
+
+   Browsers without `selector()` support skip the block and fall back to
+   the webkit rules, which is the correct outcome for them too. */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-info-light) transparent;
+    }
+  }
+
+  /* Chrome paints autofilled fields with its own hard-coded background and
+   text colour, ignoring the theme entirely — most visible on the login
+   form in dark mode. The colour cannot be set directly; the standard
+   workaround is to flood the field with an inset shadow and delay the
+   transition long enough that the UA style never becomes visible. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-dark);
+    -webkit-box-shadow: 0 0 0 100px var(--color-background) inset;
+    caret-color: var(--color-primary-text);
+    transition: background-color 100000s ease-in-out 0s;
+  }
+
+  /* ── Inline SVG icons (replaces the Material Symbols icon font) ──────
+   Each icon is now an inline sprite reference (<svg><use href="#icon-NAME">)
+   nested inside the SAME `.material-symbols-outlined` span that previously held
+   the font ligature. Keeping the span and its classes means every existing
+   size/colour selector still applies to it: the span sets the em-size + colour,
+   while the svg fills 1em and inherits colour through currentColor. */
+  .material-symbols-outlined {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  .material-symbols-outlined > svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+  svg:has(use[href^="#icon-event"]),
+  svg:has(use[href^="#icon-calculate"]),
+  svg:has(use[href^="#icon-menu_book"]),
+  svg:has(use[href^="#icon-history_edu"]),
+  svg:has(use[href^="#icon-translate"]),
+  svg:has(use[href^="#icon-fitness_center"]),
+  svg:has(use[href^="#icon-science"]) {
+    width: 1.6em;
+    height: 1.6em;
+  }
+  a svg:has(use[href^="#icon-event"]) {
+    width: 1em;
+    height: 1em;
+  }
+  a svg:has(use[href^="#icon-menu_book"]) {
+    width: 1em;
+    height: 1em;
+  }
+  label svg:has(use[href^="#icon-event"]) {
+    width: 1em;
+    height: 1em;
+  }
+}

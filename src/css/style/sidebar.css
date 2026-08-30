@@ -1,0 +1,161 @@
+@layer base {
+  aside {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  aside .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.4rem;
+  }
+
+  aside .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  aside .logo img {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.4rem;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  aside .logo h2 {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  /* Frontend sandbox tag — mirrors the admin console's DEMO badge. */
+  .demo-badge {
+    align-self: center;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: var(--color-danger-fill);
+    cursor: help;
+  }
+
+  aside .close {
+    display: none;
+  }
+
+  aside .sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    margin-top: 3rem;
+    border-radius: var(--card-border-radius);
+    padding: 0 0.3rem;
+  }
+
+  aside h3 {
+    font-weight: 500;
+  }
+
+  aside .sidebar a {
+    display: flex;
+    color: var(--color-info-dark);
+    margin-left: 2rem;
+    gap: 1rem;
+    align-items: center;
+    position: relative;
+    height: 3.7rem;
+    transition: color var(--duration-micro) var(--ease-out);
+  }
+
+  aside .sidebar a span {
+    font-size: 1.6rem;
+    transition: color var(--duration-micro) var(--ease-out);
+  }
+
+  /* `display: flex` above outranks the UA stylesheet's [hidden] rule, so the
+     cross-portal links would stay visible without this. They are hidden in
+     markup and revealed per-role at runtime. */
+  aside .sidebar a[hidden] {
+    display: none;
+  }
+
+  /* `display: flex` above outranks the UA stylesheet's [hidden] rule, so the
+     cross-portal links would stay visible without this. They are hidden in
+     markup and revealed per-role at runtime. */
+  aside .sidebar a[hidden] {
+    display: none;
+  }
+
+  aside .sidebar a:last-child {
+    margin-top: auto;
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+
+  aside .sidebar a.active {
+    background: var(--color-light);
+    color: var(--color-primary-text);
+    margin-left: 0;
+  }
+
+  aside .sidebar a.active::before {
+    content: "";
+    width: 6px;
+    height: 100%;
+    background: var(--color-primary);
+  }
+
+  aside .sidebar a.active span {
+    color: var(--color-primary-text);
+    margin-left: calc(1rem - 6px);
+  }
+
+  aside .sidebar a:hover {
+    color: var(--color-primary-text);
+  }
+
+  /* ─── Sidebar divider (shared by both surfaces) ───────────────── */
+  .sidebar-divider {
+    height: 1px;
+    background: var(--color-light);
+    margin: 1.4rem 1.6rem;
+  }
+
+  /* ─── Sidebar cross-link CTA (student ⇆ admin) — matched pair ──── */
+  aside .sidebar a.nav-cta {
+    margin: 0.5rem 1.2rem;
+    height: auto;
+    padding: 0.9rem 1.1rem;
+    background: var(--color-primary-fill);
+    color: #fff;
+    border-radius: var(--border-radius-2);
+    font-weight: 600;
+    transition:
+      background var(--duration-micro) var(--ease-out),
+      opacity var(--duration-micro) var(--ease-out);
+  }
+
+  aside .sidebar a.nav-cta span,
+  aside .sidebar a.nav-cta h3 {
+    color: var(--color-white);
+  }
+
+  aside .sidebar a.nav-cta span {
+    font-size: 1.3rem;
+  }
+
+  aside .sidebar a.nav-cta:hover {
+    opacity: 0.92;
+    color: var(--color-white);
+  }
+
+  aside .sidebar a.nav-cta:hover span {
+    margin-left: 0;
+  }
+}

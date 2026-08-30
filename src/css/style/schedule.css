@@ -1,0 +1,94 @@
+@layer base {
+  .schedule-wrapper,
+  .sg-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .schedule-wrapper {
+    margin-top: 1rem;
+  }
+
+  .schedule-grid {
+    display: grid;
+    /* Column count is set from the days the student actually has class on
+       (five unless the school teaches on a weekend). */
+    grid-template-columns: 90px repeat(var(--sched-days, 5), 1fr);
+    gap: 2px;
+    background: var(--color-light);
+    border-radius: var(--card-border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    min-width: 600px;
+  }
+
+  .schedule-grid .sch-header {
+    background: var(--color-primary-fill);
+    color: #fff;
+    padding: 0.8rem 0.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .schedule-grid .sch-time {
+    background: var(--color-white);
+    padding: 0.8rem 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-info-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .schedule-grid .sch-cell {
+    background: var(--color-white);
+    padding: 0.8rem 0.6rem;
+    text-align: center;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 0.2rem;
+  }
+
+  /* No hover state: schedule cells are read-only, and this rule applied to
+   EMPTY cells too — the grid advertised an action on slots with no class in
+   them. It also raised z-index and scaled, so a hovered cell lifted out of
+   the grid and overlapped its neighbours, shifting the thing the user was
+   trying to read. Removed with A1. */
+  .schedule-grid .sch-cell .sch-subject {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--color-dark);
+  }
+
+  .schedule-grid .sch-cell .sch-teacher {
+    font-size: var(--text-xs);
+    color: var(--color-dark-variant);
+  }
+
+  .schedule-grid .sch-cell .sch-room {
+    font-size: 0.65rem;
+    color: var(--color-info-dark);
+  }
+
+  .schedule-grid .sch-cell.empty {
+    background: var(--color-background);
+    opacity: 0.5;
+  }
+
+  .sch-color-bar {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 0.25rem;
+  }
+}

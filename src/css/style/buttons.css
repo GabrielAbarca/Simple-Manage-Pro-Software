@@ -1,0 +1,115 @@
+@layer base {
+  /* ─── Buttons (shared by both surfaces) ───────────────────────── */
+  /* The root font-size floor is 12.5px, so the old `0.65rem 1.3rem` padding
+   produced a ~30px-tall button on a phone — and `.btn-sm`, which is what the
+   admin console uses for every panel action, came out at ~22px. WCAG 2.5.5
+   asks 44px. `min-height` rather than more padding so the label stays where
+   it is and only the hit area grows. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--tap-target);
+    padding: 0.65rem 1.3rem;
+    border: none;
+    border-radius: var(--border-radius-1);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+    white-space: nowrap;
+  }
+
+  .btn .material-symbols-outlined {
+    font-size: 1.2rem;
+  }
+
+  .btn-primary {
+    background: var(--color-primary-fill);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background: var(--color-dark-variant);
+    color: var(--color-white);
+  }
+
+  .btn-secondary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-danger {
+    background: var(--color-danger-fill);
+    color: #fff;
+  }
+
+  .btn-danger:hover {
+    opacity: 0.9;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-dark-variant);
+    /* Control boundary — the old tint read at 1.20:1 against a card. */
+    border: 1px solid var(--border-control);
+  }
+
+  .btn-ghost:hover {
+    background: var(--color-background);
+  }
+
+  /* Icon buttons were ~26px square. The glyph keeps its size; the button
+   grows around it to a full tap target. */
+  .btn-icon {
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    padding: 0.4rem;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-dark-variant);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .btn-icon:hover {
+    background: var(--color-background);
+  }
+
+  .btn-icon.danger:hover {
+    color: var(--color-danger-text);
+  }
+
+  main {
+    margin-top: 3rem;
+    min-width: 0;
+  }
+
+  .view-section {
+    display: none;
+    animation: fadeIn 350ms ease;
+  }
+
+  .view-section.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

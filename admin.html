@@ -543,6 +543,42 @@
               </table>
             </div>
           </div>
+
+          <!-- MEP evaluative-component templates (governed schemes) -->
+          <div class="console-panel">
+            <div class="panel-head">
+              <div>
+                <h2 data-i18n="console.components.title">Grade components</h2>
+                <p class="panel-sub" data-i18n="console.components.subtitle">
+                  Reusable MEP component schemes teachers apply to a gradebook.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <button class="btn btn-primary btn-sm" id="btn-add-template">
+                  <span class="material-symbols-outlined"
+                    ><svg aria-hidden="true"><use href="#icon-add"></use></svg
+                  ></span>
+                  <span data-i18n="console.components.add">Add scheme</span>
+                </button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="console.components.name">Name</th>
+                    <th data-i18n="console.components.scope">Applies to</th>
+                    <th data-i18n="console.components.componentsCol">
+                      Components
+                    </th>
+                    <th data-i18n="console.components.weight">Weight</th>
+                    <th class="actions-col"></th>
+                  </tr>
+                </thead>
+                <tbody id="templates-body"></tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <!-- ─── SCHEDULES ────────────────────────────────────── -->
@@ -913,6 +949,34 @@
         </div>
         <div class="modal-body" id="import-body"></div>
         <div class="modal-footer" id="import-footer"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         GRADE-COMPONENT TEMPLATE ITEMS — a scheme's components (JS-driven)
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="template-items-overlay">
+      <div
+        class="modal modal-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-items-title"
+      >
+        <div class="modal-header">
+          <h2 id="template-items-title">Components</h2>
+          <button
+            class="modal-close"
+            id="template-items-close"
+            aria-label="Close"
+            data-i18n-aria-label="common.close"
+          >
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true"><use href="#icon-close"></use></svg
+            ></span>
+          </button>
+        </div>
+        <div class="modal-body" id="template-items-body"></div>
+        <div class="modal-footer" id="template-items-footer"></div>
       </div>
     </div>
 

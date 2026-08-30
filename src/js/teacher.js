@@ -577,6 +577,26 @@ const realDb = {
     if (error) throw error;
   },
 
+  // ── MEP component templates (admin-owned; teacher instantiates) ──
+  async fetchComponentTemplates() {
+    const { data, error } = await supabase
+      .from("grade_component_templates")
+      .select("id, name, subject_id, is_default")
+      .order("name");
+    if (error) throw error;
+    return data;
+  },
+
+  async fetchTemplateItems(templateId) {
+    const { data, error } = await supabase
+      .from("grade_component_template_items")
+      .select("name, weight, item_order")
+      .eq("template_id", templateId)
+      .order("item_order");
+    if (error) throw error;
+    return data;
+  },
+
   // ── Column grade entry (item 4) ─────────────────────────────
   // Every student's score for ONE assignment, for the whole-class entry grid.
   async fetchAssignmentColumn(assignmentId) {
@@ -1059,6 +1079,9 @@ document
 document
   .getElementById("categories-add")
   .addEventListener("click", () => openCategoryForm());
+document
+  .getElementById("categories-apply-template")
+  ?.addEventListener("click", () => openApplyTemplate());
 
 // ── Post grades modal (item 1) ─────────────────────────────────
 const pgOverlay = document.getElementById("post-grades-overlay");
@@ -3057,6 +3080,79 @@ function confirmDeleteCategory(category) {
 async function refreshAfterCategoryChange() {
   await loadGradebook();
   if (categoriesOverlay.classList.contains("active")) renderCategories();
+}
+
+// ── Apply an admin-owned MEP scheme to this gradebook ──────────
+// The admin defines reusable component schemes (console → Subjects →
+// Grade components); here a teacher copies one into this gradebook's
+// categories instead of retyping cotidiano/tareas/pruebas by hand. Only
+// components whose name isn't already present are added, so re-applying or
+// applying two overlapping schemes never duplicates a category.
+async function openApplyTemplate() {
+  if (!currentClass) return;
+  let templates;
+  try {
+    templates = await db.fetchComponentTemplates();
+  } catch (err) {
+    showToast(errorText(err), "error");
+    return;
+  }
+  const relevant = (templates ?? []).filter(
+    (tpl) =>
+      tpl.subject_id == null || tpl.subject_id === currentClass.subjectId,
+  );
+  if (!relevant.length) {
+    showToast(t("admin.categories.noTemplates"));
+    return;
+  }
+  const def = relevant.find((tpl) => tpl.is_default);
+  openModal({
+    title: t("admin.categories.applyTitle"),
+    submitLabel: t("admin.categories.apply"),
+    fields: [
+      {
+        name: "templateId",
+        type: "select",
+        label: t("admin.categories.pickTemplate"),
+        required: true,
+        value: def?.id ?? "",
+        options: relevant.map((tpl) => ({
+          value: tpl.id,
+          label: tpl.subject_id
+            ? tpl.name
+            : `${tpl.name} · ${t("admin.categories.schoolWide")}`,
+        })),
+      },
+    ],
+    onSubmit: async (formData) => {
+      await applyTemplate(Number(formData.templateId));
+    },
+  });
+}
+
+async function applyTemplate(templateId) {
+  const items = await db.fetchTemplateItems(templateId);
+  const existing = new Set(
+    (gradebookState?.categories ?? []).map((c) =>
+      String(c.name).trim().toLowerCase(),
+    ),
+  );
+  let added = 0;
+  for (const it of items ?? []) {
+    if (existing.has(String(it.name).trim().toLowerCase())) continue;
+    await db.insertCategory({
+      name: it.name,
+      weight: Number(it.weight),
+      class_subject_teacher_id: currentClass.cstId,
+    });
+    added += 1;
+  }
+  showToast(
+    added
+      ? t("admin.categories.applied", { count: added })
+      : t("admin.categories.alreadyApplied"),
+  );
+  await refreshAfterCategoryChange();
 }
 
 // ───────────────────────────────────────────────────────────────

@@ -82,6 +82,8 @@ const state = {
   /** @type {any[]} */ sections: [],
   /** @type {any[]} */ students: [],
   /** @type {any[]} */ accounts: [], // login accounts (Accounts screen)
+  /** @type {any[]} */ componentTemplates: [], // MEP grade-component schemes
+  /** @type {Record<number, any[]>} */ templateItems: {}, // template id → items
   /** @type {any[]} */ schoolYears: [],
   /** @type {any[]} */ periods: [], // active year's grading periods (weight total)
   /** @type {any} */ school: null, // school_settings row: name + ID-field label
@@ -1863,6 +1865,7 @@ async function loadSubjects() {
     state.subjects = subjects;
     state.gradeLevels = gls;
     renderSubjects(subjects, mapping);
+    loadComponentTemplates();
   } catch (err) {
     console.error("loadSubjects:", err);
     renderErrorRow("subjects-body", 5, loadSubjects);
@@ -2014,6 +2017,363 @@ function openSubjectForm(subject = null, mapped = []) {
 document
   .getElementById("btn-add-subject")
   .addEventListener("click", () => openSubjectForm());
+
+// ───────────────────────────────────────────────────────────────
+//  5d-bis. MEP GRADE-COMPONENT TEMPLATES
+// ───────────────────────────────────────────────────────────────
+// Admin-owned evaluative-component schemes (cotidiano, tareas, pruebas, …). A
+// teacher applies one to a gradebook, copying its items into that gradebook's
+// grade_categories. Weights are validated to total 100% with the same helpers
+// and rule that grading periods use — warned, not blocked, so a scheme can be
+// built up one component at a time.
+
+const TEMPLATES_COLS = 5;
+
+/** The MEP-standard components, as a starting scheme an admin can adjust. */
+const MEP_PRESET = [
+  { name: "Cotidiano", weight: 35 },
+  { name: "Pruebas", weight: 40 },
+  { name: "Tareas", weight: 10 },
+  { name: "Proyecto", weight: 10 },
+  { name: "Asistencia", weight: 5 },
+];
+
+/** @type {any} the scheme whose components the items overlay is editing */
+let currentTemplate = null;
+
+async function loadComponentTemplates() {
+  renderMessageRow("templates-body", TEMPLATES_COLS, t("common.loading"));
+  try {
+    const templates = await data.listComponentTemplates();
+    const items = await Promise.all(
+      templates.map((tpl) => data.listTemplateItems(tpl.id)),
+    );
+    state.componentTemplates = templates;
+    state.templateItems = {};
+    templates.forEach((tpl, i) => {
+      state.templateItems[tpl.id] = items[i];
+    });
+    renderComponentTemplates(templates);
+  } catch (err) {
+    console.error("loadComponentTemplates:", err);
+    renderErrorRow("templates-body", TEMPLATES_COLS, loadComponentTemplates);
+  }
+}
+
+/** "School-wide", or the subject a subject-scoped scheme belongs to. */
+function templateScopeLabel(tpl) {
+  if (!tpl.subject_id) return t("console.components.schoolWide");
+  const subj = state.subjects.find((s) => s.id === tpl.subject_id);
+  return subj ? subj.name : t("console.components.schoolWide");
+}
+
+/** A weight-total badge (green at exactly 100%, warning otherwise). */
+function weightBadgeHtml(items) {
+  if (!items.length) return "—";
+  const total = totalWeight(items);
+  const ok = weightStatus(total, items.length) === "ok";
+  return `<span class="badge ${ok ? "badge-success" : "badge-warning"}">${escapeHtml(
+    t("console.components.totalWeight", { total }),
+  )}</span>`;
+}
+
+function renderComponentTemplates(list) {
+  const tbody = document.getElementById("templates-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!list.length) {
+    renderEmptyRow(
+      "templates-body",
+      TEMPLATES_COLS,
+      t("console.components.empty"),
+    );
+    return;
+  }
+  list.forEach((tpl) => {
+    const items = state.templateItems[tpl.id] ?? [];
+    const nameCell =
+      escapeHtml(tpl.name) +
+      (tpl.is_default
+        ? ` <span class="badge badge-success">${escapeHtml(t("console.components.default"))}</span>`
+        : "");
+    const componentsCell = items.length
+      ? escapeHtml(items.map((i) => i.name).join(", "))
+      : `<span class="muted">${escapeHtml(t("console.components.noComponents"))}</span>`;
+    tbody.appendChild(
+      tableRow(
+        [
+          nameCell,
+          escapeHtml(templateScopeLabel(tpl)),
+          componentsCell,
+          weightBadgeHtml(items),
+        ],
+        [
+          iconBtn("tune", t("console.components.editItems"), () =>
+            openTemplateItems(tpl),
+          ),
+          iconBtn("grade", t("console.components.setDefault"), () =>
+            setTemplateDefault(tpl),
+          ),
+          iconBtn("edit", t("common.edit"), () => openTemplateForm(tpl)),
+          iconBtn(
+            "delete",
+            t("common.delete"),
+            () =>
+              openConfirm(
+                t("console.components.confirmDelete", { name: tpl.name }),
+                async () => {
+                  await data.deleteComponentTemplate(tpl.id);
+                  showToast(t("common.deleted"));
+                  loadComponentTemplates();
+                },
+              ),
+            true,
+          ),
+        ],
+        tpl.id,
+      ),
+    );
+  });
+  applySavedFlash("templates-body");
+}
+
+async function setTemplateDefault(tpl) {
+  if (tpl.is_default) return;
+  try {
+    const previouslyDefault = state.componentTemplates
+      .filter((x) => x.is_default)
+      .map((x) => x.id);
+    await data.setDefaultTemplate(tpl.id, previouslyDefault);
+    markSaved("templates-body", tpl.id);
+    showToast(t("console.components.defaultSet", { name: tpl.name }));
+    loadComponentTemplates();
+  } catch (err) {
+    showToast(errorText(err), "error");
+  }
+}
+
+function openTemplateForm(tpl = null) {
+  openModal({
+    title: tpl
+      ? t("console.components.editTitle")
+      : t("console.components.addTitle"),
+    fields: [
+      {
+        name: "name",
+        maxLength: 100,
+        label: t("console.components.name"),
+        value: tpl?.name,
+        required: true,
+        rules: [v.required()],
+      },
+      {
+        name: "subject_id",
+        type: "select",
+        label: t("console.components.scope"),
+        value: tpl?.subject_id ?? "",
+        help: t("console.components.scopeHelp"),
+        options: state.subjects.map((s) => ({ value: s.id, label: s.name })),
+      },
+    ],
+    onSubmit: async (vals) => {
+      const payload = {
+        name: vals.name.trim(),
+        subject_id: vals.subject_id ? Number(vals.subject_id) : null,
+      };
+      let id = tpl?.id;
+      if (tpl) {
+        await data.updateComponentTemplate(tpl.id, payload);
+      } else {
+        const created = await data.createComponentTemplate({
+          ...payload,
+          is_default: false,
+        });
+        id = created?.id;
+      }
+      markSaved("templates-body", id);
+      showToast(t("common.saved"));
+      loadComponentTemplates();
+    },
+  });
+}
+
+document
+  .getElementById("btn-add-template")
+  ?.addEventListener("click", () => openTemplateForm());
+
+// ── Template items overlay (a scheme's components) ──────────────
+const templateItemsOverlay = document.getElementById("template-items-overlay");
+
+function closeTemplateItems() {
+  templateItemsOverlay?.classList.remove("active");
+  currentTemplate = null;
+}
+document
+  .getElementById("template-items-close")
+  ?.addEventListener("click", closeTemplateItems);
+
+async function openTemplateItems(tpl) {
+  currentTemplate = tpl;
+  const titleEl = document.getElementById("template-items-title");
+  if (titleEl)
+    titleEl.textContent = t("console.components.itemsTitle", {
+      name: tpl.name,
+    });
+  await refreshTemplateItems();
+  templateItemsOverlay?.classList.add("active");
+}
+
+async function refreshTemplateItems() {
+  if (!currentTemplate) return;
+  const items = await data.listTemplateItems(currentTemplate.id);
+  state.templateItems[currentTemplate.id] = items;
+  renderTemplateItems(items);
+}
+
+function renderTemplateItems(items) {
+  const body = document.getElementById("template-items-body");
+  const footer = document.getElementById("template-items-footer");
+  if (!body || !footer) return;
+
+  const rows = items.length
+    ? items
+        .map(
+          (it) => `
+        <tr>
+          <td>${escapeHtml(it.name)}</td>
+          <td>${escapeHtml(t("console.components.percent", { value: it.weight }))}</td>
+          <td class="actions-col">
+            <button class="btn-icon" data-edit="${it.id}" title="${escapeHtml(t("common.edit"))}"><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-edit"></use></svg></span></button>
+            <button class="btn-icon danger" data-del="${it.id}" title="${escapeHtml(t("common.delete"))}"><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-delete"></use></svg></span></button>
+          </td>
+        </tr>`,
+        )
+        .join("")
+    : `<tr><td colspan="3" class="loading-cell">${escapeHtml(t("console.components.noComponents"))}</td></tr>`;
+
+  body.innerHTML = `
+    <p class="panel-sub">${escapeHtml(t("console.components.itemsHelp"))} ${weightBadgeHtml(items)}</p>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr>
+          <th>${escapeHtml(t("console.components.componentName"))}</th>
+          <th>${escapeHtml(t("console.components.weight"))}</th>
+          <th class="actions-col"></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  footer.innerHTML = "";
+  const preset = document.createElement("button");
+  preset.type = "button";
+  preset.className = "btn btn-ghost";
+  preset.textContent = t("console.components.loadPreset");
+  preset.addEventListener("click", loadMepPreset);
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "btn btn-primary";
+  add.textContent = t("console.components.addComponent");
+  add.addEventListener("click", () => openTemplateItemForm());
+  footer.append(preset, add);
+
+  body.querySelectorAll("button[data-edit]").forEach((btn) => {
+    const id = Number(btn.getAttribute("data-edit"));
+    const item = items.find((x) => x.id === id);
+    btn.addEventListener("click", () => openTemplateItemForm(item));
+  });
+  body.querySelectorAll("button[data-del]").forEach((btn) => {
+    const id = Number(btn.getAttribute("data-del"));
+    const item = items.find((x) => x.id === id);
+    btn.addEventListener("click", () =>
+      openConfirm(
+        t("console.components.confirmDeleteItem", { name: item?.name ?? "" }),
+        async () => {
+          await data.deleteTemplateItem(id);
+          await refreshTemplateItems();
+          loadComponentTemplates();
+        },
+      ),
+    );
+  });
+}
+
+function openTemplateItemForm(item = null) {
+  if (!currentTemplate) return;
+  openModal({
+    title: item
+      ? t("console.components.editComponent")
+      : t("console.components.addComponent"),
+    fields: [
+      {
+        name: "name",
+        maxLength: 100,
+        label: t("console.components.componentName"),
+        value: item?.name,
+        required: true,
+        rules: [v.required()],
+      },
+      {
+        name: "weight",
+        type: "number",
+        step: "0.01",
+        label: t("console.components.weight"),
+        value: item?.weight ?? "",
+        required: true,
+        rules: [v.required(), v.percent()],
+      },
+    ],
+    onSubmit: async (vals) => {
+      const items = state.templateItems[currentTemplate.id] ?? [];
+      const payload = { name: vals.name.trim(), weight: Number(vals.weight) };
+      if (item) {
+        await data.updateTemplateItem(item.id, payload);
+      } else {
+        const nextOrder =
+          items.reduce((m, x) => Math.max(m, x.item_order ?? 0), 0) + 1;
+        await data.createTemplateItem({
+          ...payload,
+          template_id: currentTemplate.id,
+          item_order: nextOrder,
+        });
+      }
+      showToast(t("common.saved"));
+      await refreshTemplateItems();
+      loadComponentTemplates();
+    },
+  });
+}
+
+/** Fill the scheme with the MEP standard components, skipping ones present. */
+async function loadMepPreset() {
+  if (!currentTemplate) return;
+  try {
+    const existing = new Set(
+      (state.templateItems[currentTemplate.id] ?? []).map((x) =>
+        String(x.name).trim().toLowerCase(),
+      ),
+    );
+    let order = (state.templateItems[currentTemplate.id] ?? []).reduce(
+      (m, x) => Math.max(m, x.item_order ?? 0),
+      0,
+    );
+    for (const c of MEP_PRESET) {
+      if (existing.has(c.name.toLowerCase())) continue;
+      order += 1;
+      await data.createTemplateItem({
+        template_id: currentTemplate.id,
+        name: c.name,
+        weight: c.weight,
+        item_order: order,
+      });
+    }
+    showToast(t("console.components.presetLoaded"));
+    await refreshTemplateItems();
+    loadComponentTemplates();
+  } catch (err) {
+    showToast(errorText(err), "error");
+  }
+}
 
 // ───────────────────────────────────────────────────────────────
 //  5e. TEACHERS (+ assignments)

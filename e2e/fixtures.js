@@ -205,6 +205,14 @@ export const teacherFix = {
   discipline_records: [],
   student_grades: [],
   grade_categories: [],
+  grade_component_templates: [
+    { id: 5, name: "Plantilla MEP", subject_id: null, is_default: true },
+  ],
+  grade_component_template_items: [
+    { id: 1, template_id: 5, name: "Cotidiano", weight: 35, item_order: 1 },
+    { id: 2, template_id: 5, name: "Pruebas", weight: 40, item_order: 2 },
+    { id: 3, template_id: 5, name: "Asistencia", weight: 25, item_order: 3 },
+  ],
 };
 
 // Admin-console fixtures (admin.html). The shell only reads the signed-in

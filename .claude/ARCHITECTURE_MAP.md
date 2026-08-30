@@ -22,8 +22,15 @@ The only real subdirectories under `src/js/` are:
 - `src/js/controls/` — shared, portal-agnostic custom form-control widgets
   (`select.js`, `datepicker.js`, `popover.js`, `typeahead.js`, `dateUtils.js`,
   `index.js`).
-- `src/js/i18n/` — the two translation dictionaries (`en.js`, `es.js`),
-  consumed by `src/js/i18n.js`.
+- `src/js/i18n/` — the two translation dictionaries. `en.js`/`es.js` are thin
+  composition roots (~30 lines each) that import and spread per-namespace
+  fragments from the sibling `en/`/`es/` directories (`common.js`,
+  `a11y.js`, `validation.js`, `errors.js`, `enums.js`, `settings.js`,
+  `student.js`, `teacherConsole.core.js` + `teacherConsole.grading.js`
+  (merged into the `admin` key), `adminConsole.setup.js` +
+  `adminConsole.operations.js` (merged into the `console` key), `login.js`).
+  `en/` and `es/` mirror each other file-for-file. Consumed by
+  `src/js/i18n.js`.
 - `src/js/views/` — the student portal's per-section view controllers
   (`dashboard.js`, `grades.js`, `schedule.js`, `teachers.js`, `attendance.js`,
   `events.js`, `settingsView.js`), one file per sidebar section, extracted
@@ -90,7 +97,9 @@ folders.
   `src/js/supabaseClient.js` (client creation, fails fast on missing env).
 - **i18n**: `src/js/i18n.js` (engine — per-view language selection,
   localStorage persistence, ES default with EN fallback) +
-  `src/js/i18n/en.js` + `src/js/i18n/es.js` (dictionaries).
+  `src/js/i18n/en.js` + `src/js/i18n/es.js` (composition roots that spread
+  together the per-namespace fragments under `src/js/i18n/en/` and
+  `src/js/i18n/es/`).
 
 ## Large files — flagged, not fixed
 
@@ -103,8 +112,11 @@ plan in this pass, no application code was touched to produce this list.
 | `src/js/teacher.js`   | 3,876 | Second-largest controller.                               |
 | `src/css/style.css`   | 3,301 | Shared design system + student portal styles combined.   |
 | `src/css/teacher.css` | 1,660 | Teacher-console-only component styles.                   |
-| `src/js/i18n/es.js`   | 1,200 | Spanish translation dictionary.                          |
-| `src/js/i18n/en.js`   | 1,195 | English translation dictionary.                          |
+
+`src/js/i18n/en.js` and `src/js/i18n/es.js` (formerly 1,195 / 1,200 lines)
+were each split into a ~30-line composition root plus 11 per-namespace
+fragment files under `en/`/`es/` (largest ~220 lines) — see the Portals
+section above. No file in the split exceeds 300 lines.
 
 `src/js/main.js` (formerly 1,016 lines) was split into `src/js/views/*.js`
 (one file per dashboard section, largest ~280 lines), `src/js/studentNav.js`,

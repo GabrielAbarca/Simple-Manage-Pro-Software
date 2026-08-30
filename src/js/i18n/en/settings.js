@@ -1,0 +1,85 @@
+// Shared Settings renderer (student + teacher).
+export default {
+  rail: {
+    account: "Account & Profile",
+    preferences: "Preferences",
+    help: "Help",
+    moreinfo: "More info",
+  },
+  account: {
+    demoBanner:
+      "Editing is disabled in this demo — values are shown read-only.",
+    personalInfo: "Personal info",
+    username: "Username",
+    changeUsername: "Change username",
+    usernameHint: "Your username is the email you sign in with.",
+    loginSecurity: "Login security",
+    email: "Email",
+    password: "Password",
+    changePassword: "Change password",
+    newPassword: "New password",
+    confirmPassword: "Confirm new password",
+    changePasswordSaving: "Saving…",
+    changePasswordSuccess: "Password updated.",
+    changePasswordMismatch: "The two passwords don't match.",
+    changePasswordTooShort: "Use at least 6 characters.",
+    changePasswordFailed: "Could not update your password. Please try again.",
+    changePasswordReauth:
+      "For your security, sign in again before changing your password. " +
+      "You can also use “Forgot password?” on the sign-in screen.",
+    twoFactor: "Two-factor authentication",
+    twoFactorHint: "Adds a second step at sign-in.",
+    twoFactorDisabled: "Disabled in demo",
+  },
+  prefs: {
+    title: "Preferences",
+    language: "Language",
+    languageHint: "Choose the language for the interface.",
+    moreHint: "More preferences will land in a future update.",
+  },
+  help: {
+    faqTitle: "Frequently asked",
+    faq1q: "How do I view my grades?",
+    faq1a:
+      "Open the Grades section from the sidebar to see scores by subject and grading period.",
+    faq2q: "Where do I check attendance?",
+    faq2a:
+      "The Attendance section lists every record with its status and the staff member who logged it.",
+    faq3q: "Why can't I edit my profile?",
+    faq3a:
+      "This is a demo build — Account & Profile is read-only so reviewers can explore safely.",
+    needHand: "Need a hand?",
+    needHandText:
+      "Use the sidebar to move between sections. Each card on the dashboard is a shortcut to its full view.",
+    contactPrefix: "Contact support — ",
+  },
+  about: {
+    title: "About Simple Manage Pro",
+    text: "Simple Manage Pro (SMP) is a school-management portal for students, teachers and staff — grades, attendance, schedules and class information in one place.",
+    version: "Version",
+    links: "Links",
+    documentation: "Documentation",
+    privacy: "Privacy policy",
+    terms: "Terms of service",
+  },
+  roleStudent: "Student",
+  roleTeacher: "Teacher",
+  roleAdmin: "Administrator",
+  fields: {
+    name: "Name",
+    firstName: "First name",
+    lastName: "Last name",
+    nationalId: "National ID",
+    specialization: "Specialization",
+    email: "Email",
+    phone: "Phone",
+    address: "Address",
+    hireDate: "Hire date",
+    status: "Status",
+    enrollmentNumber: "Enrollment number",
+    dateOfBirth: "Date of birth",
+    gender: "Gender",
+    class: "Class",
+    enrolled: "Enrolled",
+  },
+};

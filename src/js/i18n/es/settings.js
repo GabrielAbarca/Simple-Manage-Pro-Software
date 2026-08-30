@@ -1,0 +1,85 @@
+export default {
+  rail: {
+    account: "Cuenta y perfil",
+    preferences: "Preferencias",
+    help: "Ayuda",
+    moreinfo: "Más información",
+  },
+  account: {
+    demoBanner:
+      "La edición está deshabilitada en esta demo: los valores se muestran solo como lectura.",
+    personalInfo: "Información personal",
+    username: "Usuario",
+    changeUsername: "Cambiar usuario",
+    usernameHint: "Su usuario es el correo con el que inicia sesión.",
+    loginSecurity: "Seguridad de la cuenta",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    changePassword: "Cambiar contraseña",
+    newPassword: "Nueva contraseña",
+    confirmPassword: "Confirmar nueva contraseña",
+    changePasswordSaving: "Guardando…",
+    changePasswordSuccess: "Contraseña actualizada.",
+    changePasswordMismatch: "Las contraseñas no coinciden.",
+    changePasswordTooShort: "Use al menos 6 caracteres.",
+    changePasswordFailed:
+      "No se pudo actualizar su contraseña. Inténtelo de nuevo.",
+    changePasswordReauth:
+      "Por seguridad, inicie sesión de nuevo antes de cambiar su contraseña. " +
+      "También puede usar «¿Olvidó su contraseña?» en la pantalla de inicio de sesión.",
+    twoFactor: "Autenticación de dos factores",
+    twoFactorHint: "Agregue un segundo paso al iniciar sesión.",
+    twoFactorDisabled: "Deshabilitado en la demo",
+  },
+  prefs: {
+    title: "Preferencias",
+    language: "Idioma",
+    languageHint: "Elija el idioma de la interfaz.",
+    moreHint: "Más preferencias llegarán en una próxima actualización.",
+  },
+  help: {
+    faqTitle: "Preguntas frecuentes",
+    faq1q: "¿Cómo veo mis notas?",
+    faq1a:
+      "Abra la sección Notas desde el menú lateral para ver las notas por materia y periodo.",
+    faq2q: "¿Dónde consulto la asistencia?",
+    faq2a:
+      "La sección Asistencia muestra cada registro con su estado y la persona que lo registró.",
+    faq3q: "¿Por qué no puedo editar mi perfil?",
+    faq3a:
+      "Esta es una versión de demostración: Cuenta y perfil es de solo lectura para explorar con seguridad.",
+    needHand: "¿Necesitas ayuda?",
+    needHandText:
+      "Use el menú lateral para navegar entre secciones. Cada tarjeta del panel es un acceso directo a su vista completa.",
+    contactPrefix: "Contactar a soporte — ",
+  },
+  about: {
+    title: "Acerca de Simple Manage Pro",
+    text: "Simple Manage Pro (SMP) es un portal de gestión escolar para estudiantes, docentes y personal: notas, asistencia, horarios e información de clases en un solo lugar.",
+    version: "Versión",
+    links: "Enlaces",
+    documentation: "Documentación",
+    privacy: "Política de privacidad",
+    terms: "Términos de servicio",
+  },
+  roleStudent: "Estudiante",
+  roleTeacher: "Docente",
+  roleAdmin: "Administrador",
+  fields: {
+    name: "Nombre",
+    firstName: "Nombre",
+    lastName: "Apellidos",
+    nationalId: "Cédula",
+    specialization: "Especialización",
+    email: "Correo electrónico",
+    phone: "Teléfono",
+    address: "Dirección",
+    hireDate: "Fecha de contratación",
+    status: "Estado",
+    enrollmentNumber: "Número de matrícula",
+    dateOfBirth: "Fecha de nacimiento",
+    gender: "Género",
+    class: "Clase",
+    enrolled: "Matriculado",
+  },
+};

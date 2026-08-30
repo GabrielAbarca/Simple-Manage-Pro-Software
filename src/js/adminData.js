@@ -166,6 +166,54 @@ export function createAdminData(gateway) {
     deleteGradeLevelSubject: (/** @type {number} */ id) =>
       gateway.remove("grade_level_subjects", id),
 
+    // ── MEP grade-component templates ─────────────────────────
+    // Admin-owned schemes (cotidiano, tareas, pruebas, …) that teachers
+    // instantiate into a gradebook's grade_categories.
+    listComponentTemplates: () =>
+      gateway.select("grade_component_templates", {
+        order: { column: "name" },
+      }),
+    createComponentTemplate: (/** @type {object} */ row) =>
+      gateway.insert("grade_component_templates", row),
+    updateComponentTemplate: (
+      /** @type {number} */ id,
+      /** @type {object} */ patch,
+    ) => gateway.update("grade_component_templates", id, patch),
+    deleteComponentTemplate: (/** @type {number} */ id) =>
+      gateway.remove("grade_component_templates", id),
+
+    /**
+     * Mark one template the school default, clearing the others (mirrors
+     * setActiveYear — a single default, enforced in the app not the schema).
+     * @param {number} id
+     * @param {number[]} [previouslyDefault] ids currently flagged is_default
+     */
+    async setDefaultTemplate(id, previouslyDefault = []) {
+      for (const prev of previouslyDefault) {
+        if (prev !== id)
+          await gateway.update("grade_component_templates", prev, {
+            is_default: false,
+          });
+      }
+      await gateway.update("grade_component_templates", id, {
+        is_default: true,
+      });
+    },
+
+    listTemplateItems: (/** @type {number} */ templateId) =>
+      gateway.select("grade_component_template_items", {
+        match: { template_id: templateId },
+        order: { column: "item_order" },
+      }),
+    createTemplateItem: (/** @type {object} */ row) =>
+      gateway.insert("grade_component_template_items", row),
+    updateTemplateItem: (
+      /** @type {number} */ id,
+      /** @type {object} */ patch,
+    ) => gateway.update("grade_component_template_items", id, patch),
+    deleteTemplateItem: (/** @type {number} */ id) =>
+      gateway.remove("grade_component_template_items", id),
+
     // ── Teachers (records; auth accounts are Phase 3) ─────────
     listTeachers: () =>
       gateway.select("teachers", { order: { column: "last_name" } }),

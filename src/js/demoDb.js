@@ -301,6 +301,10 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     fetchTeachers: realDb.fetchTeachers,
     fetchRooms: realDb.fetchRooms,
     fetchSubjectsDetailed: realDb.fetchSubjectsDetailed,
+    // Admin-owned MEP schemes are read-only reference data for the teacher;
+    // instantiating one writes through insertCategory, which the overlay owns.
+    fetchComponentTemplates: realDb.fetchComponentTemplates,
+    fetchTemplateItems: realDb.fetchTemplateItems,
 
     // Passthrough that also feeds the join-resolution caches.
     async fetchMyClasses(teacherId, yearId) {

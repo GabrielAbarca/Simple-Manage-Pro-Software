@@ -1,0 +1,150 @@
+@layer base {
+  .attendance-summary {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+
+  .att-stat {
+    background: var(--color-white);
+    padding: 1rem 1.6rem;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    flex: 1 1 120px;
+    text-align: center;
+  }
+
+  /* No hover state: attendance tiles are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A4. */
+  .att-stat h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .att-stat p {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0.3rem;
+  }
+
+  .att-stat.stat-present h2 {
+    color: var(--color-success-text);
+  }
+  .att-stat.stat-absent h2 {
+    color: var(--color-danger-text);
+  }
+  .att-stat.stat-late h2 {
+    color: var(--color-warning-text);
+  }
+  .att-stat.stat-excused h2 {
+    color: var(--color-primary-text);
+  }
+
+  .events-timeline {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .event-card {
+    background: var(--color-white);
+    padding: 1.4rem 1.8rem;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .event-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+  }
+
+  .event-card.event-holiday::before {
+    background: var(--color-danger);
+  }
+  .event-card.event-exam_period::before {
+    background: var(--color-warning);
+  }
+  .event-card.event-activity::before {
+    background: var(--color-success);
+  }
+  .event-card.event-parent_meeting::before {
+    background: var(--color-primary);
+  }
+  .event-card.event-suspension::before {
+    background: var(--color-suspension);
+  }
+  .event-card.event-general::before {
+    background: var(--color-info-dark);
+  }
+
+  /* No hover state: event cards are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A3. */
+  .event-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .event-holiday .event-icon {
+    background: var(--color-danger-light);
+    color: var(--color-danger-text);
+  }
+  .event-exam_period .event-icon {
+    background: var(--color-warning-light);
+    color: var(--color-warning-text);
+  }
+  .event-activity .event-icon {
+    background: var(--color-success-light);
+    color: var(--color-success-text);
+  }
+  .event-parent_meeting .event-icon {
+    background: var(--color-primary-light);
+    color: var(--color-primary-text);
+  }
+  .event-suspension .event-icon {
+    background: var(--color-suspension-bg);
+    color: var(--color-suspension-text);
+  }
+  .event-general .event-icon {
+    background: var(--color-light);
+    color: var(--color-info-dark);
+  }
+
+  .event-body h3 {
+    font-size: var(--text-base);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .event-body p {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .event-body .event-dates {
+    font-size: 0.72rem;
+    color: var(--color-info-dark);
+  }
+}

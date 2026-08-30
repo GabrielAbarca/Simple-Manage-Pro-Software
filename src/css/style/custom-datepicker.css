@@ -1,0 +1,159 @@
+@layer controls {
+  /* ── Date field ───────────────────────────────────────────────── */
+  .smp-date__field {
+    padding: 0.6rem 0.9rem;
+    cursor: text;
+  }
+
+  /* Sits over the right edge of the native input, where its own picker
+     indicator used to be (that one is hidden above). */
+  .smp-date__button {
+    position: absolute;
+    top: 50%;
+    right: 0.3rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    cursor: pointer;
+  }
+
+  .smp-date__button:hover {
+    background: var(--surface-hover);
+    color: var(--color-dark);
+  }
+
+  .smp-date__pop {
+    padding: var(--space-2);
+    min-width: 17rem;
+  }
+
+  .smp-date__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .smp-date__month {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-dark);
+    text-transform: capitalize;
+  }
+
+  .smp-date__nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    cursor: pointer;
+  }
+
+  .smp-date__nav:hover {
+    background: var(--surface-hover);
+    color: var(--color-dark);
+  }
+
+  .smp-date__row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .smp-date__dow {
+    padding: 0.3rem 0;
+    text-align: center;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-info-dark);
+    text-transform: capitalize;
+  }
+
+  .smp-date__day {
+    aspect-ratio: 1;
+    min-width: 2.2rem;
+    border: none;
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark);
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .smp-date__day:hover:not(:disabled) {
+    background: var(--surface-hover);
+  }
+
+  .smp-date__day.is-outside {
+    color: var(--color-info-dark);
+  }
+
+  /* Today is marked with a ring, selection with a fill — never colour
+     alone, so the two remain distinguishable to a colour-blind user and
+     when both land on the same day. */
+  .smp-date__day.is-today {
+    outline: 1px solid var(--border-control);
+    outline-offset: -3px;
+  }
+
+  .smp-date__day.is-selected {
+    background: var(--color-primary-fill);
+    color: #fff;
+    font-weight: var(--weight-semibold);
+  }
+
+  .smp-date__day:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* ── Touch: hand the controls back to the OS ──────────────────── */
+  /* Nothing to restore on the native control: the clip above never applies
+     here, so it is still the one the surface rules styled. Take the overlay
+     out and the OS control is simply what is left. */
+  @media (pointer: coarse) {
+    .smp-select__trigger,
+    .smp-select__listbox,
+    .smp-date__field,
+    .smp-date__button,
+    .smp-date__pop {
+      display: none;
+    }
+  }
+
+  /* ── Touch: one floor under every text control ────────────────── */
+  /* `--tap-target` is the single place a touch-target size is written down,
+     but it reached only buttons: every <select> and <input> is sized by the
+     padding its surface happens to use — a dozen surfaces, eleven different
+     vertical paddings — which left them at 36–41px on touch while every
+     button beside them sat at 44px.
+     This has to live in `controls`: the surface rules are in `page`, which
+     beats `base`. Buttons already carry the floor via `.btn`, so naming them
+     here would be redundant.
+     Checkbox, radio and range are excluded deliberately — they are fixed-size
+     glyphs (a checkbox is a 1rem box), not text fields, and a 44px floor would
+     stretch them into rectangles rather than enlarge their hit area. */
+  @media (pointer: coarse) {
+    :is(
+      select,
+      textarea,
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"])
+    ) {
+      min-height: var(--tap-target);
+    }
+  }
+}

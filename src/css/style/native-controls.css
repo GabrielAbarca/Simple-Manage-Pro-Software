@@ -1,0 +1,124 @@
+@layer controls {
+  /* ── Select: give back the affordance the reset removed ──────────
+   The global `* { appearance: none }` strips a <select> of its native
+   dropdown arrow. Only two rules in the app ever restored it, so ~29
+   selects rendered as plain rectangles — nothing said "this opens".
+
+   The chevron is an inline SVG data URI. It cannot reference a custom
+   property (data URIs are opaque to the cascade), so the stroke colour
+   is written literally and the dark variant is declared below. Both
+   values are --color-dark-variant for their theme; keep them in step. */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667281' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 0.9rem;
+    /* Room for the chevron so a long option label never runs under it. */
+    padding-right: 2.1rem;
+  }
+
+  .dark-theme-variables select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3bdcc' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
+  /* The option list itself is drawn by the OS and is not styleable in
+   most browsers; `color-scheme` on :root is what makes it follow the
+   theme. These two properties are honoured by Firefox and by Chrome on
+   Linux/Windows, so they are worth setting even though they are not
+   universal. */
+  select option {
+    background: var(--color-white);
+    color: var(--color-dark);
+  }
+
+  /* ── Number: spin buttons ────────────────────────────────────────
+   Kept rather than hidden — score entry genuinely benefits from them,
+   and removing a control users expect would trade one Jakob's Law
+   problem for another. `color-scheme` themes them; this only stops them
+   crowding the value. */
+  input[type="number"] {
+    padding-right: 0.5rem;
+  }
+
+  /* ── Date / time: the picker trigger ─────────────────────────────
+   The indicator is a UA-drawn glyph. With `color-scheme` set it now
+   follows the theme instead of staying black on a dark field. Sized and
+   spaced here so it lines up with the select chevron beside it, and
+   given a pointer so it reads as the affordance it is. */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: var(--space-1);
+    margin-right: calc(var(--space-1) * -1);
+    border-radius: var(--border-radius-1);
+    opacity: 0.75;
+  }
+
+  /* The tint here used to be --color-light, which is rgba(0,0,0,0.4) in dark
+   mode — a near-black square painted behind an already-dark icon, so hovering
+   turned the whole indicator into one solid block. --surface-hover moves away
+   from the surface in both themes. */
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background: var(--surface-hover);
+  }
+
+  /* ── Search: the clear affordance ───────────────────────────────── */
+  input[type="search"]::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
+  /* ── Colour: the swatch ─────────────────────────────────────────
+   The UA wraps the colour in its own inset border with square corners,
+   which reads as a broken input next to the app's rounded fields. */
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+  }
+
+  input[type="color"]::-moz-color-swatch {
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+  }
+
+  /* ── File: the least-owned control in the app ───────────────────
+   The CSV import's file input shipped as a bare OS button — different
+   font, different metrics, no theme, on the screen a director uses to
+   load their entire roster. Dressed as a ghost button so it belongs to
+   the same family as the actions beside it. Both spellings: the
+   standardised one and the -webkit- alias older Safari still needs. */
+  input[type="file"] {
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: var(--text-sm);
+    color: var(--color-dark-variant);
+  }
+
+  input[type="file"]::file-selector-button,
+  input[type="file"]::-webkit-file-upload-button {
+    font: inherit;
+    margin-right: var(--space-2);
+    min-height: var(--tap-target);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: transparent;
+    color: var(--color-dark-variant);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+
+  input[type="file"]::file-selector-button:hover,
+  input[type="file"]::-webkit-file-upload-button:hover {
+    background: var(--color-background);
+    border-color: var(--color-primary-text);
+    color: var(--color-dark);
+  }
+}

@@ -1,0 +1,263 @@
+@layer base {
+  @media screen and (max-width: 1200px) {
+    .container {
+      width: 94%;
+      grid-template-columns: 7rem minmax(0, 1fr) 23rem;
+    }
+
+    aside .top {
+      justify-content: center;
+    }
+    aside .logo {
+      margin-left: 0;
+      justify-content: center;
+    }
+    aside .logo h2 {
+      display: none;
+    }
+    aside .sidebar h3 {
+      display: none;
+    }
+    aside .sidebar {
+      width: 5.6rem;
+    }
+
+    main .dashboard {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    /* Keep tables in normal flow and let a wide table scroll INSIDE its card
+     (scoped scroll) instead of the old absolute/84vw hack, which pushed
+     columns past the viewport (clipped by body{overflow-x:hidden}, so the
+     rightmost columns were unreachable). Mirrors the admin treatment. */
+    main .recent-activity {
+      position: static;
+      left: auto;
+      width: auto;
+      margin-top: 2rem;
+      overflow-x: auto;
+    }
+
+    main .recent-activity table {
+      width: 100%;
+      min-width: 560px;
+    }
+
+    .teacher-cards {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .container {
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .container > aside {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      z-index: 4;
+      width: min(20rem, 86vw);
+      height: 100vh;
+      height: 100dvh;
+      background: var(--color-white);
+      box-shadow: 1rem 3rem 4rem var(--color-light);
+      padding-right: var(--card-padding);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      display: none;
+      animation: showMenu 400ms ease forwards;
+    }
+
+    .container > aside.active {
+      display: flex;
+    }
+
+    body.nav-open {
+      overflow: hidden;
+    }
+
+    body.nav-open::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    @keyframes showMenu {
+      to {
+        left: 0;
+      }
+    }
+
+    .container > aside .sidebar {
+      width: 100%;
+    }
+    .container > aside .sidebar h3 {
+      display: inline;
+    }
+    .container > aside .sidebar a {
+      height: 3.4rem;
+    }
+
+    .container > aside .top {
+      justify-content: space-between;
+    }
+
+    .container > aside .logo {
+      margin-left: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .container > aside .logo h2 {
+      display: inline;
+      font-size: 1rem;
+    }
+
+    .container > aside .close {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+    }
+
+    .container > aside .close span {
+      font-size: 1.7rem;
+    }
+
+    main {
+      margin-top: 8rem;
+      padding: 0 0.2rem;
+    }
+
+    main .recent-activity {
+      position: relative;
+      left: 0%;
+      width: 100%;
+      margin-top: 3rem;
+      overflow-x: auto;
+    }
+
+    /* Keep the columns and scroll the table inside its card (the .recent-activity
+     container scrolls), so the page itself never scrolls sideways. */
+    main .recent-activity table {
+      width: 100%;
+      min-width: 560px;
+    }
+
+    .right {
+      width: 94%;
+      margin: 0 auto 4rem;
+    }
+
+    .right .top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      align-items: center;
+      padding: 0 1rem;
+      height: 4.6rem;
+      width: 100%;
+      background: var(--color-white);
+      z-index: 2;
+      box-shadow: 0 1rem 1rem var(--color-light);
+    }
+
+    .right .top .theme-toggler {
+      width: 4.4rem;
+      position: absolute;
+      left: 66%;
+    }
+
+    .right .profile .info {
+      display: none;
+    }
+
+    .right .top #menu-btn {
+      display: inline-block;
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-dark);
+      position: absolute;
+      left: 1rem;
+    }
+
+    .right .top #menu-btn span {
+      font-size: 2rem;
+    }
+
+    .student-info-bar {
+      flex-wrap: wrap;
+    }
+
+    .student-meta {
+      width: 100%;
+      margin-left: 0;
+      justify-content: flex-start;
+    }
+
+    main .dashboard {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .teacher-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .attendance-summary {
+      flex-direction: column;
+    }
+
+    .recent-activity {
+      overflow-x: auto;
+    }
+
+    .right .subjects-analytics .item .right-content .grade-title {
+      position: absolute;
+      left: 68%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    :root {
+      --card-padding: 1.2rem;
+      --card-border-radius: 1.2rem;
+    }
+
+    .container {
+      gap: var(--space-3);
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-info-light);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-info-dark);
+  }
+
+  /* ── Right-rail widgets scoped to the dashboard (A6) ───────────────
+   `.right` holds the always-visible top bar (menu / theme / profile) AND the
+   dashboard-only widgets. navigateTo() toggles .rail-widgets-hidden on `.right`
+   for every non-dashboard view, so "Upcoming Events" and "Subject Performance"
+   show only on the Panel at all breakpoints, while the top bar stays put. */
+  .right.rail-widgets-hidden .recent-updates,
+  .right.rail-widgets-hidden .subjects-analytics {
+    display: none;
+  }
+}

@@ -1,0 +1,204 @@
+@layer base {
+  :root {
+    /* ── Native control theming ───────────────────────────────────────
+     Tells the browser which palette to render its OWN UI in: the date
+     picker's indicator and calendar, number spin buttons, the <select>
+     option list, autofill highlighting, form control internals and
+     default scrollbars.
+
+     Without this the browser assumes light and keeps assuming it, so in
+     dark mode the calendar icon stayed black on a dark field and the
+     option list opened as a white slab. None of that is reachable from
+     CSS — `color-scheme` is the only lever, and it is the whole fix for
+     that class of defect. Paired with .dark-theme-variables below. */
+    color-scheme: light;
+
+    --color-primary: #7380ec;
+    --color-primary-light: rgba(115, 128, 236, 0.15);
+    --color-danger: #ff7782;
+    --color-danger-light: rgba(255, 119, 130, 0.15);
+    --color-success: #41f1b6;
+    --color-success-light: rgba(65, 241, 182, 0.15);
+    --color-warning: #ffbb55;
+    --color-warning-light: rgba(255, 187, 85, 0.15);
+    --color-white: #fff;
+    /* Third text tier (hints, table headers, muted captions). Was #7d8da1,
+     which read at 3.39:1 on a card and 3.14:1 on the page — below the 4.5:1
+     floor everywhere it was used. Darkened ~3% within the same hue to reach
+     4.85:1 / 4.50:1. Dark mode pins the original value back (see below),
+     where the light shade is the legible one. */
+    --color-info-dark: #627388;
+    --color-info-light: #dce1eb;
+    --color-dark: #363949;
+    --color-light: rgba(132, 139, 200, 0.18);
+    --color-primary-variant: #111e88;
+    /* Second text tier (body copy, table cells, field labels). Was #677483 —
+     4.77:1 on a card but 4.42:1 on the page background, so the same text
+     passed or failed depending on which surface it landed on. */
+    --color-dark-variant: #667281;
+    --color-background: #f6f6f9;
+
+    /* Extended palette — brand accent, readable status text, alert fills.
+     The -dark text shades are brightened in dark mode (see below) so badges,
+     scores and event accents stay legible on dark surfaces. */
+    --color-primary-accent: #a78bfa;
+    --color-success-dark: #0d9668;
+    --color-warning-dark: #b97a1e;
+    --color-warning-strong: #f59e0b;
+    --color-info: #0891b2;
+    --color-info-bg: rgba(6, 182, 212, 0.12);
+    --color-suspension: #f97316;
+    --color-suspension-bg: rgba(249, 115, 22, 0.12);
+
+    /* ── Accessible text + fill shades (WCAG 2.1 AA) ──────────────────
+     The brand hues above are chosen for identity and stay exactly as they
+     are — they still paint every ring, bar, dot and active state. What they
+     could never do is carry TEXT: #7380ec on white is 3.48:1, #41f1b6 is
+     1.45:1, and white on the danger fill is 2.56:1, all short of the 4.5:1
+     body-text floor.
+
+     So each hue gains two siblings, same hue and saturation with only the
+     lightness walked until it clears 4.5:1:
+       --*-text  reads on all FOUR backgrounds it actually meets — a card, the
+                 page, and its own -light tint composited over each of those
+                 (the worst of the four governs the value; solving against
+                 three put every one of them ~0.3 short on the fourth);
+       --*-fill  is a surface that white text sits on.
+     Dark mode already had this treatment via the -dark shades; this is the
+     symmetric half for light mode, not a new palette. */
+    --color-primary-text: #4455e6; /* worst of 4 backgrounds: 4.52 */
+    --color-primary-fill: #5a69e9; /* 4.53 with #fff */
+    --color-success-text: #097c56; /* worst of 4 backgrounds: 4.55 */
+    --color-success-fill: #0a875d; /* 4.53 with #fff */
+    --color-warning-text: #9d5e00; /* worst of 4 backgrounds: 4.50 */
+    --color-warning-fill: #a56a07; /* 4.50 with #fff */
+    --color-danger-text: #d30011; /* worst of 4 backgrounds: 4.53 */
+    --color-danger-fill: #ee0013; /* 4.52 with #fff */
+    --color-info-text: #06738e; /* worst of 4 backgrounds: 4.54 */
+    --color-suspension-text: #af4b05; /* worst of 4 backgrounds: 4.51 */
+
+    /* ── Borders, split by role ───────────────────────────────────────
+     WCAG 1.4.11 asks 3:1 only of boundaries needed to IDENTIFY a control.
+     Table hairlines and card dividers are decorative and stay on the old
+     tint; form-control boundaries are not, and no alpha of that tint can
+     reach 3:1 (1.69:1 at its most opaque), so controls take a solid token.
+     --color-info-dark is reused rather than inventing a colour: 3.39:1 on a
+     card and 3.14:1 on the page in light mode, 4.57:1 / 5.14:1 in dark. */
+    --border-subtle: var(--color-light);
+    --border-control: var(--color-info-dark);
+
+    /* Hover tint for small surfaces (icon buttons, picker indicators).
+     Distinct from --color-light on purpose: that token is the divider and
+     shadow tint, and it flips to rgba(0,0,0,0.4) in dark mode. Darkening
+     works when it tints a wide table row and fails completely on a 20px
+     icon, where it fills the box and swallows the glyph. This one always
+     moves AWAY from the surface — darker on light, lighter on dark. */
+    --surface-hover: rgba(0, 0, 0, 0.06);
+
+    /* Focus ring — one definition, applied to everything focusable. */
+    --focus-ring: 0 0 0 3px var(--color-primary-light);
+    --focus-outline: 2px solid var(--color-primary-text);
+
+    /* Smallest comfortable pointer/touch target (WCAG 2.5.5). */
+    --tap-target: 44px;
+
+    --card-border-radius: 2rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 0.8rem;
+    --border-radius-3: 1.2rem;
+
+    /* Spacing scale */
+    --space-1: 0.4rem;
+    --space-2: 0.8rem;
+    --space-3: 1.2rem;
+    --space-4: 1.6rem;
+    --space-5: 2rem;
+    --space-6: 2.4rem;
+
+    --card-padding: 1.8rem;
+    --padding-1: 1.2rem;
+
+    /* Typography scale */
+    --text-xs: 0.72rem;
+    --text-sm: 0.82rem;
+    --text-base: 0.92rem;
+    --text-lg: 1rem;
+    --text-xl: 1.2rem;
+    --text-2xl: 1.4rem;
+    --text-3xl: 1.8rem;
+
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* Shadow scale — all tint-based so they adapt to the theme via --color-light */
+    --shadow-sm: 0 0.4rem 1rem var(--color-light);
+    --shadow-md: 0 1rem 2rem var(--color-light);
+    --box-shadow: 0 2rem 3rem var(--color-light);
+
+    /* ── Motion scale ────────────────────────────────────────────────
+     Durations are tiered by what the motion is FOR, not picked per
+     component. Everything used to run at one 300ms setting, which is
+     the right length for a modal and three times too long for a hover:
+     a pointer sweeping a grid left a trail of still-settling cards. */
+    --duration-micro: 100ms; /* hover, toggle, focus — must feel instant */
+    --duration-fast: 200ms; /* press, tooltip */
+    --duration-base: 300ms; /* modal, dropdown, panel */
+    --duration-slow: 400ms; /* drawer, page-level transitions */
+
+    /* Enter with ease-out, leave with ease-in, move with ease-in-out. */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    /* One lift distance for the cards that genuinely respond to a click.
+     Was -2px / -3px / -4px / scale(1.02) / scale(1.06) depending on file. */
+    --lift-hover: -2px;
+
+    /* Above every dialog (modals run 1000–1400, the drawer 1200): a select
+     opened inside a modal has to paint over it. */
+    --z-popover: 1500;
+
+    /* Retained: 33 existing uses, and it is the modal/panel tier. */
+    --transition-speed: var(--duration-base);
+  }
+
+  .dark-theme-variables {
+    /* The other half of the native-control fix — see :root. This one
+     declaration is what turns the date picker, its calendar popup, the
+     number spinners, the option list and autofill dark along with the
+     rest of the app. */
+    color-scheme: dark;
+
+    --color-background: #181a1e;
+    --color-white: #202528;
+    --color-dark: #edeffd;
+    --color-dark-variant: #a3bdcc;
+    /* Light mode darkens the muted tier to clear 4.5:1 on white; on these dark
+     surfaces the ORIGINAL, lighter shade is the legible one (4.57:1 on a card,
+     5.14:1 on the page) and the darkened value would drop to 3.19:1. */
+    --color-info-dark: #7d8da1;
+    --color-light: rgba(0, 0, 0, 0.4);
+    /* Lighten rather than darken — see :root. */
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --box-shadow: 0 2rem 3rem var(--color-light);
+
+    /* Brighten readable status shades for dark surfaces (G4) */
+    --color-success-dark: #41f1b6;
+    --color-warning-dark: #ffcf7a;
+    --color-info: #38bdf8;
+    --color-suspension: #fb923c;
+
+    /* Same job for the -text shades: light mode darkens a hue to clear 4.5:1
+     on white, dark mode has to brighten it instead. Ratios below are
+     the worst of the four backgrounds each one meets (card, page, and its
+     tint over each).
+     --*-fill is deliberately NOT overridden — a fill carries white text, so
+     its contrast is a property of the fill itself, not of the theme. */
+    --color-primary-text: #8994ef; /* worst of 4: 4.53 */
+    --color-success-text: #41f1b6; /* worst of 4: 7.34 */
+    --color-warning-text: #ffcf7a; /* worst of 4: 7.56 */
+    --color-danger-text: #ff7782; /* worst of 4: 4.78 */
+    --color-info-text: #38bdf8; /* worst of 4: 5.95 */
+    --color-suspension-text: #fb923c; /* worst of 4: 5.80 */
+  }
+}

@@ -1,0 +1,82 @@
+@layer base {
+  .teacher-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+
+  .teacher-card {
+    background: var(--color-white);
+    padding: 1.8rem;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .teacher-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      var(--color-primary),
+      var(--color-primary-accent)
+    );
+  }
+
+  /* No hover state: teacher cards are not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A2. */
+  .teacher-card .teacher-avatar {
+    width: 3.8rem;
+    height: 3.8rem;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      var(--color-primary),
+      var(--color-primary-accent)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.3rem;
+  }
+
+  .teacher-card .teacher-avatar span {
+    color: #fff;
+    font-size: 2rem;
+  }
+
+  .teacher-card h3 {
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+
+  .teacher-card .teacher-spec {
+    color: var(--color-primary-text);
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .teacher-card .teacher-email {
+    font-size: 0.72rem;
+    color: var(--color-info-dark);
+    word-break: break-all;
+  }
+
+  .teacher-card .teacher-status {
+    margin-top: 0.3rem;
+  }
+}

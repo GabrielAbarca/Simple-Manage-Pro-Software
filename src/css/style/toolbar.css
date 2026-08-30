@@ -1,0 +1,67 @@
+@layer base {
+  /* [SHARED] Toolbar row above a view's content. The student portal uses
+   it for the grading-period selector; admin.css layers search/filter
+   controls on top. */
+  .view-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.2rem 0;
+  }
+
+  .period-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .period-selector label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-dark-variant);
+  }
+
+  /* `appearance: auto` used to be restored here — it was this one select's
+   private workaround for the global reset stripping the dropdown arrow. The
+   controls layer now gives every select a chevron, so the workaround is dead
+   code (and would have painted a second, native arrow beside the new one).
+   font-family/font-size are likewise inherited from the shared control rules
+   and no longer restated. */
+  .period-selector select {
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--border-radius-2);
+    background: var(--color-white);
+    color: var(--color-dark);
+    border: 1px solid var(--border-control);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-micro) var(--ease-out),
+      box-shadow var(--duration-micro) var(--ease-out);
+  }
+
+  /* ─── Shared focus ring for form controls (mirrors the login input ring) ──
+   Form controls get this softer border+ring instead of the global outline —
+   `outline: none` here is legitimate because the ring IS the replacement.
+   The console selects below (.panel-actions, .map-row, .sched-field) were
+   missing from this list while also carrying an unconditional
+   `outline: none`, so they had no focus indicator of any kind. */
+  .period-selector select:focus-visible,
+  .view-toolbar select:focus-visible,
+  .view-toolbar input:focus-visible,
+  .modal-body input:focus-visible,
+  .modal-body select:focus-visible,
+  .modal-body textarea:focus-visible,
+  .data-table input:focus-visible,
+  .data-table select:focus-visible,
+  .panel-actions select:focus-visible,
+  .map-row select:focus-visible,
+  .sched-field select:focus-visible,
+  .settings-field input:focus-visible,
+  .score-input:focus-visible,
+  .search-bar:focus-within {
+    border-color: var(--color-primary-text);
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+}

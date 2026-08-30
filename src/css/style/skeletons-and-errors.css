@@ -1,0 +1,107 @@
+@layer base {
+  @keyframes shimmer {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: 200px 0;
+    }
+  }
+
+  /* Shimmer placeholder. Ready to use; broad rollout into the data views
+   needs the JS render templates (deferred — no-logic batch). */
+  .skeleton {
+    display: block;
+    min-height: 1rem;
+    background: linear-gradient(
+      90deg,
+      var(--color-light) 25%,
+      var(--color-info-light) 50%,
+      var(--color-light) 75%
+    );
+    background-size: 400px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--border-radius-2);
+  }
+
+  /* Skeleton variants used by the loading helpers (src/js/ui.js) */
+  .skeleton-text {
+    display: inline-block;
+    width: 100%;
+    height: 0.95rem;
+    border-radius: var(--border-radius-1);
+  }
+
+  .skeleton-line {
+    height: 0.95rem;
+    margin-bottom: var(--space-2);
+    border-radius: var(--border-radius-1);
+  }
+
+  .skeleton-line:last-child {
+    width: 65%;
+  }
+
+  .skeleton-block {
+    padding: var(--space-3) 0;
+  }
+
+  .skeleton-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+
+  .skeleton-card {
+    height: 7rem;
+  }
+
+  .skeleton-span {
+    grid-column: 1 / -1;
+  }
+
+  .skeleton-row td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  /* A section that failed to load. Deliberately unlike the muted .loading-cell
+     empty states — "nothing here yet" and "we couldn't reach the server" must
+     not look the same. */
+  .load-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-3);
+    text-align: center;
+  }
+
+  .load-error-text {
+    color: var(--color-danger-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    margin: 0;
+  }
+
+  .btn-retry {
+    background: var(--color-primary-fill);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-1);
+    padding: 0.5rem 1.2rem;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .btn-retry:hover {
+    opacity: 0.9;
+  }
+
+  .btn-retry:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}

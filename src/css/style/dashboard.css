@@ -1,0 +1,248 @@
+@layer base {
+  main .dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  main .dashboard > div {
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    margin-top: 1rem;
+    box-shadow: var(--box-shadow);
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
+  }
+
+  main .dashboard > div:hover {
+    box-shadow: none;
+  }
+
+  /* Dashboard summary cards that double as shortcuts to their full section.
+   This is now the ONLY card lift in the app: every other card that used to
+   rise on hover was not clickable and no longer moves. The distance comes
+   from --lift-hover so the three surfaces that do lift agree on how far. */
+  .clickable-card {
+    cursor: pointer;
+  }
+
+  .clickable-card:hover {
+    transform: translateY(var(--lift-hover));
+  }
+
+  .clickable-card:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 3px;
+  }
+
+  main .dashboard > div span {
+    background: var(--color-primary);
+    padding: 0.5rem;
+    border-radius: 50%;
+    color: var(--color-white);
+    font-size: 2rem;
+  }
+
+  main .dashboard > div.grade span {
+    background: var(--color-danger);
+  }
+  main .dashboard > div.next-class-card span {
+    background: var(--color-success);
+  }
+
+  main .dashboard .middle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  main .dashboard h3 {
+    margin: 1rem 0 0.6rem;
+    font-size: 1rem;
+  }
+
+  main .dashboard .progress {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+  }
+
+  /* Scoped to `.progress` (the radial progress ring) so it doesn't hit the
+   inline-SVG icons that now also live inside dashboard cards. */
+  main .dashboard .progress svg {
+    width: 7rem;
+    height: 7rem;
+  }
+
+  main .dashboard .progress svg circle {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 14;
+    stroke-linecap: round;
+    transform: translate(7px, 7px);
+    stroke-dasharray: 232;
+    stroke-dashoffset: 232;
+    transition: stroke-dashoffset 1s ease;
+  }
+
+  main .dashboard .grade .progress svg circle {
+    stroke: var(--color-danger);
+  }
+
+  main .dashboard .progress .number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  main .dashboard small {
+    display: block;
+    margin-top: 1.6rem;
+  }
+
+  .next-class-card .next-class-info p {
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  main .recent-activity {
+    margin-top: 2rem;
+  }
+
+  main .recent-activity h2 {
+    margin-bottom: 0.8rem;
+  }
+
+  main .recent-activity table {
+    background: var(--color-white);
+    width: 100%;
+    border-radius: var(--card-border-radius);
+    padding: var(--card-padding);
+    text-align: left;
+    box-shadow: var(--box-shadow);
+  }
+
+  /* Keep status columns centered (badge is a direct child of its cell) */
+  main table td:has(> .status-badge) {
+    text-align: center;
+  }
+
+  /* No hover state: a <table> is not interactive. Hover feedback is the
+   app's signal that something responds to a click — spending it on a
+   static surface makes the signal meaningless everywhere else, and the
+   default cursor over a lifting card is a contradiction the user has to
+   resolve. Removed with A6. */
+  main table thead th {
+    padding: 0.8rem 1rem;
+    color: var(--color-info-dark);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+
+  main table tbody td {
+    padding: 1rem 1rem;
+    height: 2.8rem;
+    border-bottom: 1px solid var(--color-light);
+    color: var(--color-dark-variant);
+    font-size: 0.85rem;
+  }
+
+  main table tbody tr {
+    transition: background var(--transition-speed) ease;
+  }
+
+  /* A scanning aid, not an affordance: these rows are read-only, and the
+   tint only helps the eye hold its place across a wide row. Deliberately
+   left in place — see the teacher console, where rows that DO open
+   something take the accent tint so the two cases look different. */
+  main table tbody tr:hover {
+    background: var(--color-light);
+  }
+
+  main table tfoot td {
+    padding: 1rem;
+    font-weight: 700;
+    color: var(--color-dark);
+  }
+
+  .loading-cell {
+    text-align: center;
+    padding: var(--space-5) var(--space-3) !important;
+    color: var(--color-info-dark) !important;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.01em;
+  }
+
+  main .show-all {
+    text-align: center;
+    display: block;
+    margin: 1rem auto;
+    color: var(--color-primary-text);
+  }
+
+  .score-high {
+    color: var(--color-success-text);
+    font-weight: 600;
+  }
+  .score-mid {
+    color: var(--color-warning-text);
+    font-weight: 600;
+  }
+  .score-low {
+    color: var(--color-danger-text);
+    font-weight: 600;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--border-radius-3);
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+
+  .status-pass {
+    background: var(--color-success-light);
+    color: var(--color-success-text);
+  }
+  .status-fail {
+    background: var(--color-danger-light);
+    color: var(--color-danger-text);
+  }
+  .status-present {
+    background: var(--color-success-light);
+    color: var(--color-success-text);
+  }
+  .status-absent {
+    background: var(--color-danger-light);
+    color: var(--color-danger-text);
+  }
+  .status-late {
+    background: var(--color-warning-light);
+    color: var(--color-warning-text);
+  }
+  .status-excused {
+    background: var(--color-primary-light);
+    color: var(--color-primary-text);
+  }
+
+  .subject-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+}

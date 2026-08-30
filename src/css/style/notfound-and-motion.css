@@ -1,0 +1,74 @@
+@layer base {
+  /* ── 404 page (404.html) ──────────────────────────────────────────
+   Standalone branded not-found page; self-contained so it renders without the
+   app shell, themable through the shared design tokens. */
+  .notfound-body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: var(--color-background);
+    color: var(--color-dark);
+    font-family: "Poppins", sans-serif;
+  }
+  .notfound {
+    text-align: center;
+    max-width: 26rem;
+  }
+  .notfound-logo {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: var(--border-radius-2);
+    margin-bottom: 1.5rem;
+  }
+  .notfound-code {
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-primary);
+  }
+  .notfound-title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    margin: 0.4rem 0 0.6rem;
+  }
+  .notfound-text {
+    color: var(--color-info-dark);
+    margin-bottom: 2rem;
+  }
+  .notfound-btn {
+    display: inline-block;
+    background: var(--color-primary-fill);
+    color: #fff;
+    padding: 0.8rem 1.6rem;
+    border-radius: var(--border-radius-2);
+    font-weight: var(--weight-semibold);
+    transition: opacity var(--transition-speed);
+  }
+  .notfound-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* ── Reduced motion (A3) ──────────────────────────────────────────
+   Respect the OS "reduce motion" preference. style.css loads on every page
+   (index / admin / login / 404), so this one global damper neutralises the
+   decorative + entrance animations and long transitions across the whole app.
+   Exception: the submit spinner keeps turning — it communicates loading state. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .skeleton {
+      animation: none !important;
+    }
+    .btn-spinner {
+      animation-duration: 0.7s !important;
+      animation-iteration-count: infinite !important;
+    }
+  }
+}

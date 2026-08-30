@@ -99,7 +99,15 @@ test.describe("mobile — teacher console", () => {
     await page.waitForSelector(".class-card");
     await page.locator(".class-card").first().click();
     await page.locator('.class-subtab[data-tab="gradebook"]').click();
-    await page.waitForSelector("#gradebook-period");
+    // initControls() enhances new selects via a MutationObserver batched
+    // through requestAnimationFrame (see controls/index.js), so the native
+    // element can exist a tick before enhanceSelect() actually wraps it —
+    // wait for the enhancement marker itself, not just the raw element.
+    await page.waitForFunction(
+      () =>
+        document.querySelector("#gradebook-period")?.dataset.smpEnhanced ===
+        "true",
+    );
 
     const control = await page.evaluate(() => {
       const native = document.querySelector("#gradebook-period");

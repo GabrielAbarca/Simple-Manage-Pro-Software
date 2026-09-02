@@ -44,12 +44,17 @@ See `.claude/ARCHITECTURE_MAP.md` for a full file-by-file navigation map
 
 `src/js/` splits into two layers:
 
-- **View controllers** — `admin.js`, `teacher.js`, `main.js`, `login.js`. DOM glue. These are **excluded from `typecheck`** (see `tsconfig.json`) and typed incrementally; keep them thin and push logic down into the layer below.
+- **View controllers** — `admin.js`, `teacher.js`, `main.js`, `login.js`. DOM glue, and all four are now thin bootstraps over per-screen modules (`src/js/admin/`, `src/js/views/`). These are **excluded from `typecheck`** (see `tsconfig.json`) and typed incrementally; keep them thin and push logic down into the layer below.
 - **Logic layer** (type-checked, prefer JSDoc on new code):
   - `supabaseClient.js` — the Supabase client. **Throws if `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are missing.**
   - `supabaseQueries.js` — student/teacher data fetching.
   - `adminData.js` — admin console data layer: a generic table `Gateway`
     (Supabase-backed) + `createAdminData(gateway)` declarative CRUD methods.
+    Consumed by `src/js/admin/` — the admin console's own directory of ~40
+    modules (UI kit, domain helpers, one per screen, the schedules tab and
+    the CSV import wizard). It is the only portal with a directory of its
+    own; see `.claude/ARCHITECTURE_MAP.md` for the layout and the
+    no-import-cycles rule that goes with it.
   - `csv.js` — dependency-free CSV/TSV parsing + header auto-mapping for the
     admin console's roster import.
   - `accounts.js` — login-account management: calls the `admin-users` Edge

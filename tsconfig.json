@@ -34,6 +34,11 @@
   // glob directly and checked as their own root files regardless.
   "exclude": [
     "src/js/admin.js",
+    // The admin console's modules (src/js/admin/**) are DOM glue, split out of
+    // admin.js and excluded for the same reason it is. The glob deliberately
+    // does NOT match src/js/adminData.js or src/js/adminDemoDb.js — those are
+    // the checked logic layer and live at the flat top level.
+    "src/js/admin/**",
     "src/js/teacher.js",
     "src/js/main.js",
     "src/js/login.js",

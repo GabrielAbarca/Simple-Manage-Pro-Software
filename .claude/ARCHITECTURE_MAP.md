@@ -151,9 +151,15 @@ bundles are rule-for-rule identical to the pre-split ones.
 
 ## Large files
 
-**There are none left.** No file in `src/js/` exceeds 320 lines. Every
-former monolith has been split; what follows records how, so a future
-session can follow the same template rather than reinvent it.
+**No file exceeds 1,000 lines any more** — `admin.js` was the last one, and
+this table is now empty. What follows records how each monolith was split, so
+a future session can follow the same template rather than reinvent it.
+
+The largest files left in `src/js/` are `demoDb.js` (850), `login.js` (523),
+`settings.js` (420), `scheduleLogic.js` (417), `controls/select.js` (371),
+`controls/datepicker.js` (353) and `adminData.js` (348). None of these has
+been through a splitting pass; they are listed so the next candidate is
+obvious rather than having to be re-derived.
 
 `src/js/i18n/en.js` and `src/js/i18n/es.js` (formerly 1,195 / 1,200 lines)
 were each split into a ~30-line composition root plus 11 per-namespace
@@ -190,9 +196,10 @@ cross-call happens inside an event-handler closure, never at module
 top-level evaluation — the standard case ES modules (and Vite/Rollup) handle
 correctly, and this repo has no `import/no-cycle` lint rule.
 
-`src/js/admin.js` (formerly 5,452 lines) was split into a ~105-line bootstrap
-plus **`src/js/admin/`** — see the Admin console section below. It was the
-last monolith, and the only split to get its own directory.
+`src/js/admin.js` (formerly 5,452 lines) was split into a 105-line bootstrap
+plus **`src/js/admin/`** — 44 modules, largest 318 lines (`schedules/bells.js`),
+see the Admin console section below. It was the last monolith, and the only
+split to get its own directory.
 
 **The two CSS monoliths are split.** `src/css/style.css` (formerly 3,301
 lines) became a ~70-line entry point over `src/css/style/*.css` — 22 partials

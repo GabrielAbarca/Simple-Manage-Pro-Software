@@ -19,6 +19,10 @@ one page controller living directly under `src/js/`.
 
 The only real subdirectories under `src/js/` are:
 
+- `src/js/admin/` — the admin console, split out of `admin.js` (see the
+  Admin console section below). The one portal with its own directory:
+  at ~40 modules it would have swamped the flat top level, and its
+  screens would have swamped the shared `views/` folder.
 - `src/js/controls/` — shared, portal-agnostic custom form-control widgets
   (`select.js`, `datepicker.js`, `popover.js`, `typeahead.js`, `dateUtils.js`,
   `index.js`).
@@ -145,17 +149,11 @@ bundles are rule-for-rule identical to the pre-split ones.
   together the per-namespace fragments under `src/js/i18n/en/` and
   `src/js/i18n/es/`).
 
-## Large files — flagged, not fixed
+## Large files
 
-Files over 1,000 lines, largest first. These are **flagged only** — no split
-plan in this pass, no application code was touched to produce this list.
-
-| File              | Lines | Notes                                                    |
-| ----------------- | ----: | -------------------------------------------------------- |
-| `src/js/admin.js` | 5,092 | **Top candidate for a future dedicated splitting task.** |
-
-`admin.js` is the only file left on this list — every other entry has since
-been split (see below).
+**There are none left.** No file in `src/js/` exceeds 320 lines. Every
+former monolith has been split; what follows records how, so a future
+session can follow the same template rather than reinvent it.
 
 `src/js/i18n/en.js` and `src/js/i18n/es.js` (formerly 1,195 / 1,200 lines)
 were each split into a ~30-line composition root plus 11 per-namespace
@@ -192,15 +190,9 @@ cross-call happens inside an event-handler closure, never at module
 top-level evaluation — the standard case ES modules (and Vite/Rollup) handle
 correctly, and this repo has no `import/no-cycle` lint rule.
 
-**`admin.js` (5,092 lines) — why it's this large:** it's a single monolithic
-controller for the whole admin portal, holding 8+ largely independent feature
-sections inline instead of split per section — auth guard, Supabase/demo data
-gateway, generic UI helpers, navigation, then one section each for overview,
-year & periods, grades & sections, subjects, teachers & accounts, schedules,
-students/enrollment (+ CSV import), and settings. Each section is effectively
-a self-contained mini-page (its own load/render/form/import logic), so the
-file grows linearly with every new admin feature. `teacher.js`'s split above
-is a second template available for this one, in addition to `main.js`'s.
+`src/js/admin.js` (formerly 5,452 lines) was split into a ~105-line bootstrap
+plus **`src/js/admin/`** — see the Admin console section below. It was the
+last monolith, and the only split to get its own directory.
 
 **The two CSS monoliths are split.** `src/css/style.css` (formerly 3,301
 lines) became a ~70-line entry point over `src/css/style/*.css` — 22 partials
@@ -214,16 +206,57 @@ grids), largest ~170 lines. No partial in either split exceeds 300 lines.
 See the CSS paragraph in the Portals section for the cascade-layer and
 import-order rules that make the splits safe.
 
-Note: an earlier assumption referred to "the 6000+ line file" as the top
-splitting candidate. No file in this repo exceeds 6,000 lines — the actual
-largest is `admin.js` at 5,092 lines. Correcting that assumption here so
-future sessions don't go looking for a file that doesn't exist.
+## Admin console (`src/js/admin/`)
+
+`admin.js` is now a ~105-line bootstrap: session guard, theme/i18n/controls,
+and a `{page: loader}` map handed to `admin/nav.js`. Everything else:
+
+| Path               | Holds                                                                                                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin/auth.js`    | `resolveAdminSession()` (guard) + the admin's profile row                                                                                                                                                |
+| `admin/state.js`   | the one shared mutable state object (as `teacherState.js`)                                                                                                                                               |
+| `admin/data.js`    | the demo-aware gateway + `createAdminData`                                                                                                                                                               |
+| `admin/nav.js`     | `showSection`, sidebar/logout wiring; takes a loader map                                                                                                                                                 |
+| `admin/ui/`        | `feedback.js` (toast, confirm/notice), `modal.js` + `modalFields.js` (the generic form dialog), `tables.js`, `format.js`                                                                                 |
+| `admin/domain/`    | `schoolProfile.js`, `lookups.js`, `enums.js`, `references.js`, `accountActions.js`                                                                                                                       |
+| `admin/screens/`   | one module per sidebar screen (overview, years, periods, gradeLevels, rooms, sections, gradesSections, subjects, componentTemplates, templateItems, teachers, assignments, accounts, students, settings) |
+| `admin/schedules/` | the schedules tab: `index.js` (load + rail), `editor.js`, `bells.js`, `forms.js`, `helpers.js`, `tabState.js`                                                                                            |
+| `admin/import/`    | the CSV wizard: `wizard.js`, `rows.js`, `resolvers.js`, `index.js` (button wiring), `descriptors/` (per-entity)                                                                                          |
+
+`src/js/adminData.js` and `src/js/adminDemoDb.js` deliberately **stay flat** at
+the top level — they are the type-checked logic layer, and `adminDemoDb.js` has
+a unit test importing it by path.
+
+**No import cycles.** Unlike the teacher console's gradebook/roster clusters,
+this split injects callbacks instead of importing parents back:
+
+- `nav.js` takes a `{page: loader}` map, so `screens/overview.js` can call
+  `showSection("yearperiods")` without nav importing any screen.
+- `schedules/tabState.js` is a leaf holding the active sub-tab and a
+  `repaint()` that `schedules/index.js` registers itself into once. The
+  panels import `repaint` from there, never `index.js`.
+- `screens/templateItems.js` takes `openTemplateItems(tpl, { onChange })`;
+  `componentTemplates.js` passes its own loader as `onChange`.
+
+**Module-scope wiring.** Each screen attaches its own toolbar button listeners
+at module top level (the way `teacherModal.js` self-registers), and the three
+dialogs register their own keyboard contract. `admin.html` loads the entry with
+`type="module" defer`, so the DOM is parsed before any module body runs.
+
+**typecheck.** `tsconfig.json` excludes `src/js/admin/**` alongside
+`src/js/admin.js` — it is all DOM glue, and TS walks an excluded root's imports
+and checks them anyway (see that file's comment). The glob does not match
+`adminData.js`/`adminDemoDb.js`. `admin/ui/format.js` and
+`admin/domain/enums.js` are pure and would be the natural first candidates for
+a later typing pass.
 
 ## Structural notes for future sessions
 
 - No `admin-console/`, `teacher-console/`, or `student-portal/` directories
-  exist. Don't assume a per-portal folder layout — it's flat `src/js/` with
-  one controller file per page. `src/js/views/` is not an exception to this:
+  exist. `src/js/admin/` is the closest thing, but it holds only the admin
+  console's **JS modules** — `admin.html` and `src/css/admin.css` stay flat,
+  and the teacher/student portals have no equivalent directory at all.
+  `src/js/views/` is not an exception either:
   it groups the student portal's _JS view sections_ only (mirroring
   `controls/`), not a full per-portal directory — the page's HTML/CSS and
   shared session/auth/routing modules stay flat at the top of `src/js/`.

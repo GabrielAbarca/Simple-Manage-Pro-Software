@@ -95,7 +95,9 @@ These are non-negotiable. They override default agent behavior.
 
 5. **Never touch Supabase RLS, Auth, migrations, or the database without asking first.**
 
-6. **Clarify vague prompts.** Identify the underlying intent behind a request before acting. If scope, target, or intent is unclear, **ask** rather than assume — a wrong assumption is more expensive than a question.
+6. **You are only going to write comments in the code when is explicitly necessary.**
+
+7. **Clarify vague prompts.** Identify the underlying intent behind a request before acting. If scope, target, or intent is unclear, **ask** rather than assume — a wrong assumption is more expensive than a question.
 
 ## Conventions
 

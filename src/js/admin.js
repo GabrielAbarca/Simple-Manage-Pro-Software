@@ -15,17 +15,13 @@
 
 import "./errorHandler.js";
 import "./speedInsights.js";
-import { supabase } from "./supabaseClient.js";
-import { signOut, getSession } from "./auth.js";
-import { fetchRole, portalPath, haltForRedirect } from "./role.js";
+import { signOut } from "./auth.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import { initSidebarToggle, errorState, errorRow } from "./ui.js";
 import { registerDialog } from "./dialog.js";
 import { initControls } from "./controls/index.js";
 import { renderSettings } from "./settings.js";
 import { DEMO_MODE } from "./demoMode.js";
-import { supabaseGateway, createAdminData } from "./adminData.js";
-import { createDemoGateway } from "./adminDemoDb.js";
 import { parseCsv, autoMap } from "./csv.js";
 import {
   TARGET_WEIGHT,
@@ -35,7 +31,6 @@ import {
 } from "./gradingPeriods.js";
 import * as sched from "./scheduleLogic.js";
 import * as v from "./validate.js";
-import { mapDbError } from "./dbErrors.js";
 import {
   createAccount,
   resetPassword,
@@ -44,108 +39,34 @@ import {
   generateTempPassword,
 } from "./accounts.js";
 import { initI18n, applyTranslations, t, tn, formatDate } from "./i18n.js";
+import { state } from "./admin/state.js";
+import { data } from "./admin/data.js";
+import { resolveAdminSession, fetchProfile } from "./admin/auth.js";
+import {
+  escapeHtml,
+  num,
+  nullable,
+  fmtDate,
+  todayIso,
+  monthStartIso,
+} from "./admin/ui/format.js";
+import {
+  showToast,
+  errorText,
+  openConfirm,
+  openNotice,
+} from "./admin/ui/feedback.js";
 
 // ───────────────────────────────────────────────────────────────
 //  1. AUTH GUARD + ROLE GATE
 // ───────────────────────────────────────────────────────────────
-const session = await getSession();
-if (!session) haltForRedirect("/login.html", "Unauthenticated");
-
-const role = await fetchRole();
-if (role !== "admin") haltForRedirect(portalPath(role), "Unauthorized");
-
-// ───────────────────────────────────────────────────────────────
-//  2. DATA LAYER
-// ───────────────────────────────────────────────────────────────
-// Demo sandbox: writes land in an in-memory session overlay instead of the
-// shared backend; reads stay live with the overlay applied. A refresh restores
-// pristine data. The first write shows a one-time notice.
-let demoNoticeShown = false;
-const gateway = DEMO_MODE
-  ? createDemoGateway(supabaseGateway, {
-      onWrite: () => {
-        if (demoNoticeShown) return;
-        demoNoticeShown = true;
-        showToast(t("admin.demo.sandboxNotice"));
-      },
-    })
-  : supabaseGateway;
-const data = createAdminData(gateway);
-
-// Reference lists reused across sections, refreshed by the loaders that own them.
-const state = {
-  /** @type {any} */ activeYear: null,
-  /** @type {any[]} */ gradeLevels: [],
-  /** @type {any[]} */ rooms: [],
-  /** @type {any[]} */ teachers: [],
-  /** @type {any[]} */ subjects: [],
-  /** @type {any[]} */ sections: [],
-  /** @type {any[]} */ students: [],
-  /** @type {any[]} */ accounts: [], // login accounts (Accounts screen)
-  /** @type {any[]} */ componentTemplates: [], // MEP grade-component schemes
-  /** @type {Record<number, any[]>} */ templateItems: {}, // template id → items
-  /** @type {any[]} */ schoolYears: [],
-  /** @type {any[]} */ periods: [], // active year's grading periods (weight total)
-  /** @type {any} */ school: null, // school_settings row: name + ID-field label
-  /** @type {string} */ studentFilter: "all", // "all" | "unassigned" | section id
-  // ── Schedules tab ──
-  /** @type {any} */ scheduleConfig: null, // active year's structure + school days
-  /** @type {any[]} */ bellSchedules: [], // time-block templates
-  /** @type {Record<number, any[]>} */ bellBlocks: {}, // template id → its blocks
-  /** @type {any[]} */ yearSchedules: [], // every entry of the active year
-  /** @type {number|null} */ schedSectionId: null, // section being edited
-  /** @type {number|null} */ schedTemplateId: null, // template laying out the grid
-  /** @type {number|null} */ schedBellId: null, // template whose blocks are open
-};
+const { session, role } = await resolveAdminSession();
+state.session = session;
+state.role = role;
 
 // ───────────────────────────────────────────────────────────────
 //  3. UI HELPERS
 // ───────────────────────────────────────────────────────────────
-const toastContainer = document.getElementById("toast-container");
-
-function showToast(message, type = "success") {
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  const icon = type === "success" ? "check_circle" : "error";
-  toast.innerHTML = `<span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${icon}"></use></svg></span>${escapeHtml(message)}`;
-  toastContainer.appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
-}
-
-/**
- * User-facing text for a failed write. Client-side rules catch most bad input
- * before it leaves the browser; whatever still fails at the database is
- * translated here, because a PostgREST message names constraints and columns
- * and means nothing to the person running the school. The raw error is always
- * logged, so nothing is lost for debugging.
- * @param {any} err
- */
-function errorText(err) {
-  console.error("[SMP] Write failed:", err);
-  return t(mapDbError(err).key);
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
-}
-
-function num(v) {
-  return v === "" || v == null ? null : Number(v);
-}
-function nullable(v) {
-  const s = String(v ?? "").trim();
-  return s === "" ? null : s;
-}
 
 // ── Generic modal form ─────────────────────────────────────────
 const modalOverlay = document.getElementById("modal-overlay");
@@ -449,74 +370,6 @@ document
   .getElementById("modal-cancel")
   .addEventListener("click", requestCloseModal);
 
-// ── Confirm modal ──────────────────────────────────────────────
-const confirmOverlay = document.getElementById("confirm-overlay");
-const confirmTitle = document.getElementById("confirm-title");
-const confirmMessage = document.getElementById("confirm-message");
-const confirmDeleteBtn = document.getElementById("confirm-delete");
-const confirmCancelBtn = document.getElementById("confirm-cancel");
-let confirmHandler = null;
-
-/**
- * Ask before an irreversible action. Defaults to the delete wording; `opts`
- * retitles it and relabels the buttons so non-delete decisions (discarding a
- * dirty form, activating an under-weighted year) can reuse the same dialog.
- * @param {string} message
- * @param {() => any} onConfirm
- * @param {{ title?: string, confirmLabel?: string, cancelLabel?: string,
- *   danger?: boolean }} [opts]
- */
-function openConfirm(message, onConfirm, opts = {}) {
-  const danger = opts.danger !== false;
-  confirmTitle.textContent = opts.title ?? t("console.confirm.title");
-  confirmMessage.textContent = message;
-  confirmDeleteBtn.textContent = opts.confirmLabel ?? t("common.delete");
-  confirmDeleteBtn.classList.toggle("btn-danger", danger);
-  confirmDeleteBtn.classList.toggle("btn-primary", !danger);
-  confirmCancelBtn.textContent = opts.cancelLabel ?? t("common.cancel");
-  // Inline display, not the `hidden` attribute: the dialog's own button styling
-  // sets `display`, which outranks the UA sheet's `[hidden] { display: none }`.
-  confirmCancelBtn.style.display = "";
-  confirmHandler = onConfirm;
-  confirmOverlay.classList.add("active");
-}
-
-/**
- * A dismissible notice wearing the confirm dialog's clothes — for an action the
- * console refuses outright, where there is nothing to decide. Drops the cancel
- * button so it reads as information rather than a choice, and outlives a toast,
- * which matters when the message names what the user has to go and remove.
- * @param {string} message
- * @param {{ title?: string, closeLabel?: string }} [opts]
- */
-function openNotice(message, opts = {}) {
-  openConfirm(message, () => {}, {
-    title: opts.title,
-    confirmLabel: opts.closeLabel ?? t("common.close"),
-    danger: false,
-  });
-  confirmCancelBtn.style.display = "none";
-}
-function closeConfirm() {
-  confirmOverlay.classList.remove("active");
-  confirmHandler = null;
-}
-confirmDeleteBtn.addEventListener("click", async () => {
-  if (!confirmHandler) return;
-  confirmDeleteBtn.disabled = true;
-  try {
-    await confirmHandler();
-    closeConfirm();
-  } catch (err) {
-    showToast(errorText(err), "error");
-  } finally {
-    confirmDeleteBtn.disabled = false;
-  }
-});
-confirmCancelBtn.addEventListener("click", closeConfirm);
-// No backdrop-click close on any dialog: a stray click outside must never
-// stand in for a decision. Cancel and the X are the only ways out.
-
 // ── Table helpers ──────────────────────────────────────────────
 function renderMessageRow(tbodyId, colspan, message) {
   const tbody = document.getElementById(tbodyId);
@@ -629,8 +482,6 @@ function tableRow(cells, actionButtons = [], rowId = null) {
 function optionsFrom(list, labelFn, valueKey = "id") {
   return list.map((item) => ({ value: item[valueKey], label: labelFn(item) }));
 }
-
-const fmtDate = (value) => (value ? formatDate(value) : "—");
 
 // ── School profile (name + per-school ID label) ────────────────
 // The default is "Cédula", but Costa Rican schools don't all put the same
@@ -802,15 +653,6 @@ function applySchoolHeading() {
 // breakdown is a report, not something a director needs on a school-wide
 // dashboard).
 const AT_RISK_THRESHOLD = 3;
-function todayIso() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-/** First day of the month `date` falls in, as a local-time `YYYY-MM-DD`. */
-function monthStartIso(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
-}
 
 /**
  * The month's attendance rate, as present+late over every record in the
@@ -997,16 +839,6 @@ async function loadOverviewStats() {
   } catch (err) {
     console.error("loadOverviewStats:", err);
   }
-}
-
-async function fetchProfile() {
-  const { data: row, error } = await supabase
-    .from("profiles")
-    .select("name, role")
-    .eq("id", session.user.id)
-    .single();
-  if (error) throw error;
-  return row;
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -5314,7 +5146,6 @@ document
 // for all three console dialogs. Escape is routed through each dialog's own
 // closer, so the form's unsaved-changes warning still stands in its way.
 registerDialog(modalOverlay, { close: requestCloseModal });
-registerDialog(confirmOverlay, { close: closeConfirm });
 registerDialog(importOverlay, { close: closeImportModal });
 
 // ───────────────────────────────────────────────────────────────

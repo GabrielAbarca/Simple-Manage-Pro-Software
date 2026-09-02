@@ -1,0 +1,164 @@
+@layer page {
+  /* ═══════════════════════════════════════════════════════════════
+   WIDE MODAL + per-student grade entry + manage assignments
+═══════════════════════════════════════════════════════════════════ */
+  .modal-lg {
+    width: min(960px, 95vw);
+  }
+
+  /* The gradebook base modals (#assignments-overlay, #student-grades-overlay)
+   keep the default z-index:1000. The shared form + confirm modals must stack
+   ABOVE them so editing/deleting an assignment from Manage Assignments shows
+   on top (DOM order alone would otherwise paint Manage over them). */
+  #modal-overlay {
+    z-index: 1300;
+  }
+
+  #confirm-overlay {
+    z-index: 1400;
+  }
+
+  /* Manage Assignments list */
+  .manage-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.2rem 0;
+  }
+
+  .manage-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .manage-item-info b {
+    font-size: 0.9rem;
+    color: var(--color-dark);
+  }
+
+  .manage-item-meta {
+    font-size: 0.78rem;
+    color: var(--color-dark-variant);
+  }
+
+  .manage-item-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  /* Per-student grade grid — one row per assignment, clean separate fields */
+  .sg-period {
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+  }
+
+  .sg-grid {
+    min-width: 800px;
+  }
+
+  .sg-row > :first-child,
+  .pg-row > :first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--color-white);
+    box-shadow: 2px 0 0 var(--color-light);
+  }
+
+  .sg-row {
+    display: grid;
+    grid-template-columns:
+      minmax(120px, 1.6fr)
+      52px 96px 124px 96px 104px 104px minmax(140px, 1.5fr);
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .sg-head {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-dark-variant);
+  }
+
+  .sg-cell {
+    font-size: 0.82rem;
+    color: var(--color-dark);
+    min-width: 0;
+  }
+
+  .sg-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sg-num {
+    text-align: center;
+  }
+
+  .sg-muted {
+    color: var(--color-dark-variant);
+    font-size: 0.78rem;
+  }
+
+  /* Win specificity over the generic `.modal-body input` rule for a tight cell. */
+  .sg-grid .sg-score,
+  .sg-grid .sg-note {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: var(--color-background);
+    color: var(--color-dark);
+    font-size: var(--text-sm);
+  }
+
+  .sg-grid .sg-score {
+    text-align: center;
+  }
+
+  /* Score cell holds the input + (when graded) its per-assignment Edit button. */
+  .sg-score-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* Already-graded score: locked/read-only until the Edit button unlocks it. */
+  .sg-grid .sg-score.sg-locked {
+    background: var(--color-light);
+    color: var(--color-dark-variant);
+    cursor: default;
+  }
+
+  .sg-edit-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    padding: 0.2rem;
+    border: none;
+    background: transparent;
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+    color: var(--color-dark-variant);
+  }
+
+  .sg-edit-btn:hover {
+    background: var(--color-background);
+  }
+
+  .sg-edit-btn .material-symbols-outlined {
+    font-size: 1rem;
+  }
+}

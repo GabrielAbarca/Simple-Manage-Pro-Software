@@ -1,0 +1,90 @@
+@layer page {
+  /* ─── Gradebook scoresheet ─────────────────────────────────────── */
+  .scoresheet-wrap {
+    overflow-x: auto;
+  }
+
+  .scoresheet {
+    min-width: max-content;
+  }
+
+  .scoresheet .sticky-col {
+    position: sticky;
+    left: 0;
+    background: var(--color-white);
+    z-index: 1;
+    font-weight: 600;
+    min-width: 180px;
+  }
+
+  .scoresheet tbody tr:hover .sticky-col {
+    background: var(--color-background);
+  }
+
+  .assignment-col {
+    min-width: 160px;
+    max-width: 200px;
+  }
+
+  .assignment-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .assignment-name {
+    display: block;
+    font-weight: 600;
+    color: var(--color-dark);
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .assignment-meta {
+    font-size: 0.72rem;
+    color: var(--color-dark-variant);
+  }
+
+  .assignment-due {
+    font-size: 0.72rem;
+    color: var(--color-info-dark);
+  }
+
+  .assignment-actions {
+    display: flex;
+    gap: 0.1rem;
+    margin-top: 0.2rem;
+  }
+
+  .assignment-actions .btn-icon .material-symbols-outlined {
+    font-size: 1rem;
+  }
+
+  .score-cell {
+    width: 96px;
+  }
+
+  .score-input {
+    text-align: center;
+  }
+
+  .overall-col {
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .overall-score {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary-text);
+  }
+
+  .overall-sub {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--color-dark-variant);
+  }
+}

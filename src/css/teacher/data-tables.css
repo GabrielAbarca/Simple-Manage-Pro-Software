@@ -1,0 +1,104 @@
+@layer page {
+  /* ─── Data tables ──────────────────────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 0.9rem 1rem;
+    font-size: 0.8rem;
+    color: var(--color-dark-variant);
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .data-table td {
+    padding: 1.2rem 1rem;
+    font-size: 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-light);
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr:hover {
+    background: var(--color-background);
+  }
+
+  /* Keep the actions cell a real table cell (display:flex would pull it
+   out of the table's column layout and overlap the previous column).
+   The .btn-icon children are inline-flex, so text-align centers them
+   horizontally and the cell's vertical-align:middle centers them
+   vertically. */
+  .actions-col {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  .data-table td.actions-col .btn-icon + .btn-icon {
+    margin-left: 0.25rem;
+  }
+
+  /* Keep the destructive action off the edge of the benign one. Edit and
+     Delete were 4px apart at ~26px each, so a slip on Edit hit Delete. */
+  .actions-col .btn-icon.danger,
+  .roster-row-rail .btn-icon.danger {
+    margin-left: var(--space-3);
+  }
+
+  /* ─── Status badges (admin-specific states) ──────────────────── */
+  /* .badge-primary / -success / -warning / -danger live in style.css.
+   Only the neutral variant is admin-only. */
+  .badge-neutral {
+    background: var(--color-background);
+    color: var(--color-dark-variant);
+  }
+
+  /* ─── Pagination ───────────────────────────────────────────────── */
+  .table-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+  }
+
+  .table-pagination button {
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    background: var(--color-background);
+    border: none;
+    border-radius: var(--border-radius-1);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+  }
+
+  .table-pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .table-pagination button.active {
+    background: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  /* ─── Grade matrix / inputs inside tables ─────────────────────── */
+  .data-table input[type="text"],
+  .data-table input[type="number"],
+  .data-table select {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: var(--color-background);
+    color: var(--color-dark);
+    font-size: var(--text-sm);
+  }
+
+  /* (Removed unused .status-toggle styles — duplicated the live
+   .attendance-status-btn system; that single system is the source of truth.) */
+}

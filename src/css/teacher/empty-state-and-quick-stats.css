@@ -1,0 +1,44 @@
+@layer page {
+  /* ─── Empty state (matched family with .panel-empty) ───────────── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-6) var(--space-3);
+    text-align: center;
+    color: var(--color-dark-variant);
+  }
+
+  .empty-state .material-symbols-outlined {
+    font-size: 2.4rem;
+    opacity: 0.6;
+  }
+
+  .empty-state .empty-sub {
+    font-size: var(--text-sm);
+    color: var(--color-info-dark);
+  }
+
+  /* ─── Right-panel quick stats list ─────────────────────────────── */
+  .quickstat-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .quickstat-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+  }
+
+  .quickstat-list b {
+    color: var(--color-dark);
+    font-size: var(--text-base);
+  }
+}

@@ -1,0 +1,107 @@
+@layer page {
+  /* ─── Modals ───────────────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--color-white);
+    border-radius: var(--card-border-radius);
+    width: min(560px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-sm {
+    width: min(400px, 92vw);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 1.6rem;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  /* Was the bare glyph at the inherited font size — a ~12px target, and the
+   primary way out of every dialog. */
+  .modal-close {
+    min-width: var(--tap-target);
+    min-height: var(--tap-target);
+    margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1)
+      calc(var(--space-2) * -1) 0;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+    color: var(--color-dark-variant);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover {
+    background: var(--color-background);
+    color: var(--color-dark);
+  }
+
+  .modal-body {
+    padding: 1.4rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .modal-body .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .modal-body label {
+    font-size: 0.82rem;
+    color: var(--color-dark-variant);
+  }
+
+  .modal-body input,
+  .modal-body select,
+  .modal-body textarea {
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-2);
+    background: var(--color-background);
+    color: var(--color-dark);
+  }
+
+  .modal-body .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    padding: 1.4rem 1.6rem;
+    border-top: 1px solid var(--color-light);
+  }
+}

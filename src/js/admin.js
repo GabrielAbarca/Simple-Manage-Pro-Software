@@ -68,6 +68,38 @@ import {
   tableRow,
   optionsFrom,
 } from "./admin/ui/tables.js";
+import {
+  loadSchoolSettings,
+  idLabel,
+  applyIdLabels,
+} from "./admin/domain/schoolProfile.js";
+import {
+  gradeName,
+  roomName,
+  teacherName,
+  subjectName,
+  sectionName,
+  sectionOptions,
+} from "./admin/domain/lookups.js";
+import {
+  ROOM_TYPES,
+  TEACHER_STATUSES,
+  STUDENT_STATUSES,
+  genderLabel,
+  coerceGender,
+  coerceDate,
+  coerceInt,
+  coerceNum,
+  coerceEnum,
+} from "./admin/domain/enums.js";
+import {
+  ensureSchoolYears,
+  ensureActiveYear,
+  ensureGradeLevels,
+  ensureRooms,
+  ensureTeachers,
+} from "./admin/domain/references.js";
+import { accountBtn } from "./admin/domain/accountActions.js";
 
 // ───────────────────────────────────────────────────────────────
 //  1. AUTH GUARD + ROLE GATE
@@ -75,60 +107,6 @@ import {
 const { session, role } = await resolveAdminSession();
 state.session = session;
 state.role = role;
-
-// ───────────────────────────────────────────────────────────────
-//  3. UI HELPERS
-// ───────────────────────────────────────────────────────────────
-// ── School profile (name + per-school ID label) ────────────────
-// The default is "Cédula", but Costa Rican schools don't all put the same
-// number in that column: private colegios with foreign families ask for the
-// DIMEX, and some register students by carné until a cédula exists. So the
-// label comes from school_settings with the translated default as the
-// fallback. Deliberately NOT a general custom-fields system — one
-// configurable label, nothing more.
-
-/** True once the settings row has been read (or found unavailable). */
-let schoolLoaded = false;
-
-/**
- * Read the single school_settings row. A project that predates the table
- * (its schema is applied by hand) must keep working, so a failed read is
- * downgraded to "no settings" and the defaults apply.
- */
-async function loadSchoolSettings() {
-  if (schoolLoaded) return state.school;
-  schoolLoaded = true;
-  try {
-    state.school = await data.getSchoolSettings();
-  } catch (err) {
-    console.warn("loadSchoolSettings: school_settings unavailable:", err);
-    state.school = null;
-  }
-  return state.school;
-}
-
-/**
- * Label for the national-ID field: the school's own wording when set,
- * otherwise the translated default.
- * @param {"teachers" | "students"} scope which form/table is asking
- */
-function idLabel(scope) {
-  const configured = String(state.school?.id_label ?? "").trim();
-  return configured || t(`console.${scope}.nationalId`);
-}
-
-/** Point the two ID column headers at the configured label. */
-function applyIdLabels() {
-  const heads = {
-    "th-teachers-national-id": "teachers",
-    "th-students-national-id": "students",
-  };
-  Object.entries(heads).forEach(([id, scope]) => {
-    const el = document.getElementById(id);
-    if (el)
-      el.textContent = idLabel(/** @type {"teachers"|"students"} */ (scope));
-  });
-}
 
 // ───────────────────────────────────────────────────────────────
 //  4. NAVIGATION
@@ -1009,15 +987,6 @@ async function loadRooms() {
   }
 }
 
-const ROOM_TYPES = [
-  "classroom",
-  "lab",
-  "gym",
-  "library",
-  "auditorium",
-  "office",
-];
-
 function openRoomForm(room = null) {
   openModal({
     title: room ? t("console.rooms.editTitle") : t("console.rooms.addTitle"),
@@ -1101,30 +1070,6 @@ async function loadSections() {
     console.error("loadSections:", err);
     renderErrorRow("sections-body", 6, loadSections);
   }
-}
-
-function gradeName(id) {
-  const g = state.gradeLevels.find((x) => x.id === id);
-  return g ? g.name : "—";
-}
-function roomName(id) {
-  const r = state.rooms.find((x) => x.id === id);
-  return r ? r.name : "—";
-}
-function teacherName(id) {
-  const tch = state.teachers.find((x) => x.id === id);
-  return tch ? `${tch.first_name} ${tch.last_name}` : "—";
-}
-/**
- * Human-readable label for a section — "10th Grade — Section A", the same
- * phrasing the student portal uses. `display_name` is a storage code
- * (numeric level + section, e.g. "1010-1") and reads as noise in a picker,
- * so it is only the fallback for when grade levels aren't loaded yet.
- */
-function sectionName(sec) {
-  const grade = state.gradeLevels.find((g) => g.id === sec.grade_level_id);
-  if (!grade) return sec.display_name || String(sec.section ?? "—");
-  return t("student.classLine", { grade: grade.name, section: sec.section });
 }
 
 function renderSections(list) {
@@ -1817,8 +1762,6 @@ async function loadTeachers() {
   }
 }
 
-const TEACHER_STATUSES = ["active", "inactive", "on_leave"];
-
 function renderTeachers(list) {
   const tbody = document.getElementById("teachers-body");
   tbody.innerHTML = "";
@@ -1862,80 +1805,6 @@ function renderTeachers(list) {
     );
   });
   applySavedFlash("teachers-body");
-}
-
-// ── Login accounts (Edge Function in real mode; simulated in demo) ──
-// A record with a linked auth user shows "reset password"; otherwise
-// "create login". `reload` re-renders the owning section afterward.
-function accountBtn(record, kind, reload) {
-  if (record.auth_user_id) {
-    return iconBtn("lock_reset", t("console.accounts.reset"), () =>
-      openConfirm(
-        t("console.accounts.confirmReset", { email: record.email ?? "" }),
-        async () => {
-          const res = await resetPassword(record.email);
-          showToast(
-            res?.simulated
-              ? t("console.accounts.resetDemo")
-              : t("console.accounts.resetSent"),
-          );
-        },
-      ),
-    );
-  }
-  return iconBtn("person_add", t("console.accounts.create"), () =>
-    openCreateAccount(record, kind, reload),
-  );
-}
-
-function openCreateAccount(record, kind, reload) {
-  const name = `${record.first_name} ${record.last_name}`.trim();
-  openModal({
-    title: t("console.accounts.createTitle", { name }),
-    submitLabel: t("console.accounts.create"),
-    fields: [
-      {
-        name: "email",
-        label: t("console.accounts.email"),
-        type: "email",
-        value: record.email ?? "",
-        required: true,
-        rules: [v.email()],
-      },
-      {
-        name: "password",
-        label: t("console.accounts.tempPassword"),
-        value: generateTempPassword(),
-        required: true,
-        help: t("console.accounts.tempPasswordHelp"),
-        rules: [v.password()],
-      },
-    ],
-    onSubmit: async (v) => {
-      const res = await createAccount({
-        email: v.email.trim(),
-        password: v.password,
-        role: kind,
-        name,
-        linkType: kind,
-        linkId: record.id,
-      });
-      // Demo mode never mints a real user; reflect the link locally so the
-      // row flips to "reset password" (discarded on refresh, like all demo
-      // writes). Real mode already linked server-side; the reload re-fetches.
-      if (res?.simulated) {
-        const patch = { auth_user_id: `demo-${kind}-${record.id}` };
-        if (kind === "teacher") await data.updateTeacher(record.id, patch);
-        else await data.updateStudent(record.id, patch);
-      }
-      showToast(
-        res?.simulated
-          ? t("console.accounts.createdDemo")
-          : t("console.accounts.created"),
-      );
-      reload();
-    },
-  });
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -2260,11 +2129,6 @@ async function loadAssignments() {
     console.error("loadAssignments:", err);
     renderErrorRow("assignments-body", 4, loadAssignments);
   }
-}
-
-function subjectName(id) {
-  const s = state.subjects.find((x) => x.id === id);
-  return s ? s.name : "—";
 }
 
 function renderAssignments(list) {
@@ -3441,38 +3305,6 @@ function openBlockForm(bell, block = null) {
 // ───────────────────────────────────────────────────────────────
 //  5g. STUDENTS & ENROLLMENT (+ CSV roster import)
 // ───────────────────────────────────────────────────────────────
-const STUDENT_STATUSES = [
-  "active",
-  "inactive",
-  "graduated",
-  "transferred",
-  "withdrawn",
-];
-
-function genderLabel(g) {
-  return g ? t(`enums.gender.${g}`) : "—";
-}
-function coerceGender(raw) {
-  const s = String(raw ?? "")
-    .trim()
-    .toLowerCase();
-  if (["m", "male", "masculino", "hombre", "h"].includes(s)) return "M";
-  if (["f", "female", "femenino", "mujer"].includes(s)) return "F";
-  if (s === "o" || s === "other" || s === "otro") return "O";
-  return null;
-}
-/** Normalize a birthdate to ISO yyyy-mm-dd; null if unparseable. */
-function coerceDate(raw) {
-  const s = String(raw ?? "").trim();
-  if (!s) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/); // dd/mm/yyyy
-  if (m) {
-    const [, d, mo, y] = m;
-    return `${y}-${mo.padStart(2, "0")}-${d.padStart(2, "0")}`;
-  }
-  return null;
-}
 
 async function loadStudents() {
   renderMessageRow("students-body", 7, t("common.loading"));
@@ -3607,10 +3439,6 @@ function renderStudents() {
     );
   });
   applySavedFlash("students-body");
-}
-
-function sectionOptions() {
-  return state.sections.map((s) => ({ value: s.id, label: sectionName(s) }));
 }
 
 function openStudentForm(student = null) {
@@ -3771,25 +3599,7 @@ const importOverlay = document.getElementById("import-overlay");
 const importBody = document.getElementById("import-body");
 const importFooter = document.getElementById("import-footer");
 
-// ── value coercion + name→id resolvers ─────────────────────────
-function coerceInt(v) {
-  const s = String(v ?? "").trim();
-  if (!s) return null;
-  const n = parseInt(s, 10);
-  return Number.isNaN(n) ? null : n;
-}
-function coerceNum(v) {
-  const s = String(v ?? "").trim();
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isNaN(n) ? null : n;
-}
-function coerceEnum(v, allowed, dflt) {
-  const s = String(v ?? "")
-    .trim()
-    .toLowerCase();
-  return allowed.find((a) => a.toLowerCase() === s) ?? dflt;
-}
+// ── name→id resolvers ─────────────────────────────────────────
 function resolveGradeLevel(raw) {
   const s = String(raw ?? "")
     .trim()
@@ -3822,25 +3632,6 @@ function resolveRoomId(raw) {
   if (!s) return null;
   const r = state.rooms.find((x) => x.name.toLowerCase() === s);
   return r ? r.id : null;
-}
-
-// ── reference-list loaders used by descriptor prepare() ────────
-async function ensureSchoolYears() {
-  state.schoolYears = await data.listSchoolYears();
-  state.activeYear = state.schoolYears.find((y) => y.is_active) ?? null;
-}
-async function ensureActiveYear() {
-  if (!state.activeYear) await ensureSchoolYears();
-}
-async function ensureGradeLevels() {
-  if (!state.gradeLevels.length)
-    state.gradeLevels = await data.listGradeLevels();
-}
-async function ensureRooms() {
-  if (!state.rooms.length) state.rooms = await data.listRooms();
-}
-async function ensureTeachers() {
-  if (!state.teachers.length) state.teachers = await data.listTeachers();
 }
 
 const REQ = (key) => t("console.import.errRequired", { field: t(key) });

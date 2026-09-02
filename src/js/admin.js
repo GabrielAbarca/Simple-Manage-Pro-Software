@@ -15,7 +15,6 @@
 
 import "./errorHandler.js";
 import "./speedInsights.js";
-import { signOut } from "./auth.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import { initSidebarToggle } from "./ui.js";
 import { registerDialog } from "./dialog.js";
@@ -23,12 +22,7 @@ import { initControls } from "./controls/index.js";
 import { renderSettings } from "./settings.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { parseCsv, autoMap } from "./csv.js";
-import {
-  TARGET_WEIGHT,
-  remainingWeight,
-  totalWeight,
-  weightStatus,
-} from "./gradingPeriods.js";
+import { totalWeight, weightStatus } from "./gradingPeriods.js";
 import * as sched from "./scheduleLogic.js";
 import * as v from "./validate.js";
 import {
@@ -38,24 +32,21 @@ import {
   listAccounts,
   generateTempPassword,
 } from "./accounts.js";
-import { initI18n, applyTranslations, t, tn, formatDate } from "./i18n.js";
+import { initI18n, applyTranslations, t, tn } from "./i18n.js";
 import { state } from "./admin/state.js";
 import { data } from "./admin/data.js";
 import { resolveAdminSession, fetchProfile } from "./admin/auth.js";
+import { initAdminNav, showSection } from "./admin/nav.js";
+import { loadOverview } from "./admin/screens/overview.js";
+import { loadYearPeriods } from "./admin/screens/years.js";
 import {
   escapeHtml,
   num,
   nullable,
   fmtDate,
   todayIso,
-  monthStartIso,
 } from "./admin/ui/format.js";
-import {
-  showToast,
-  errorText,
-  openConfirm,
-  openNotice,
-} from "./admin/ui/feedback.js";
+import { showToast, errorText, openConfirm } from "./admin/ui/feedback.js";
 import { openModal } from "./admin/ui/modal.js";
 import {
   renderMessageRow,
@@ -109,67 +100,25 @@ state.session = session;
 state.role = role;
 
 // ───────────────────────────────────────────────────────────────
-//  4. NAVIGATION
+//  NAVIGATION + PAGE BOOTSTRAP
 // ───────────────────────────────────────────────────────────────
-const sections = document.querySelectorAll(".view-section");
-const navLinks = document.querySelectorAll(".sidebar a[data-page]");
-const loaded = { settings: false };
-let PROFILE = null;
-
-const LOADERS = {
-  overview: loadOverview,
-  yearperiods: loadYearPeriods,
-  gradessections: loadGradesSections,
-  subjects: loadSubjects,
-  schedules: loadSchedulesTab,
-  teachers: loadTeachers,
-  assignments: loadAssignments,
-  students: loadStudents,
-  accounts: loadAccounts,
-  settings: loadSettings,
-};
-
-function showSection(page) {
-  sections.forEach((s) => s.classList.remove("active"));
-  navLinks.forEach((a) => a.classList.remove("active"));
-  document.getElementById(`view-${page}`)?.classList.add("active");
-  document
-    .querySelector(`.sidebar a[data-page="${page}"]`)
-    ?.classList.add("active");
-
-  if (page === "settings") {
-    if (!loaded.settings) {
-      loaded.settings = true;
-      loadSettings();
-    }
-    return;
-  }
-  LOADERS[page]?.();
-}
-
 const closeNav = initSidebarToggle();
-navLinks.forEach((link) => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    showSection(link.dataset.page);
-    closeNav();
-  });
-});
-// preventDefault matters: the button is an <a>, so without it the browser
-// follows the href while signOut() is still in flight. The session is still
-// live when the next page's guard runs, and role routing sends the admin
-// straight back here — the logout silently does nothing.
-document.getElementById("logout-btn")?.addEventListener("click", async (e) => {
-  e.preventDefault();
-  await signOut();
-  window.location.replace("/login.html");
-});
-document.querySelector(".profile-photo")?.addEventListener("click", () => {
-  showSection("settings");
-  document
-    .querySelector('#settings-root .settings-rail-item[data-section="account"]')
-    ?.click();
-});
+
+initAdminNav(
+  {
+    overview: loadOverview,
+    yearperiods: loadYearPeriods,
+    gradessections: loadGradesSections,
+    subjects: loadSubjects,
+    schedules: loadSchedulesTab,
+    teachers: loadTeachers,
+    assignments: loadAssignments,
+    students: loadStudents,
+    accounts: loadAccounts,
+    settings: loadSettings,
+  },
+  closeNav,
+);
 
 initTheme();
 bindThemeToggle(document.querySelector(".theme-toggler"));
@@ -180,666 +129,6 @@ applyTranslations();
 // renders more. Must run AFTER initI18n/applyTranslations: the date picker
 // takes its month names, field order and week start from the active locale.
 initControls();
-
-// ───────────────────────────────────────────────────────────────
-//  5a. OVERVIEW
-// ───────────────────────────────────────────────────────────────
-async function loadOverview() {
-  const welcomeTitle = document.getElementById("overview-welcome-title");
-  const yearText = document.getElementById("overview-year-text");
-  try {
-    const [profile, years] = await Promise.all([
-      PROFILE ? Promise.resolve(PROFILE) : fetchProfile(),
-      data.listSchoolYears(),
-      loadSchoolSettings(),
-    ]);
-    PROFILE = profile;
-    state.activeYear = years.find((y) => y.is_active) ?? null;
-    applySchoolHeading();
-
-    const name = profile?.name ?? "";
-    document.getElementById("admin-name").textContent =
-      name || t("console.profile.admin");
-    welcomeTitle.textContent = name
-      ? t("console.overview.welcome", { name })
-      : t("console.overview.welcomeFallback");
-    yearText.textContent = state.activeYear?.name
-      ? `${t("console.overview.activeYear")}: ${state.activeYear.name}`
-      : t("console.overview.noActiveYear");
-
-    await loadOverviewStats();
-  } catch (err) {
-    console.error("loadOverview:", err);
-    yearText.textContent = t("common.loadFailed");
-  }
-}
-
-/** Title the overview with the school's own name once one is configured. */
-function applySchoolHeading() {
-  const heading = document.getElementById("overview-heading");
-  const name = String(state.school?.name ?? "").trim();
-  if (heading && name) heading.textContent = name;
-}
-
-// Count cards only. Enrollment = active students; the attendance rate =
-// present+late over the current month's records; at-risk = how many students
-// have 3+ recorded absences (a figure, not a roster — the per-student
-// breakdown is a report, not something a director needs on a school-wide
-// dashboard).
-const AT_RISK_THRESHOLD = 3;
-
-/**
- * The month's attendance rate, as present+late over every record in the
- * window — the same numerator the student portal and the teacher console use,
- * so the three never disagree about what "attendance" counts.
- *
- * A month rather than a day because a single date is only meaningful once
- * that day has been taken: before homeroom it reads 0%, and on a holiday or
- * any day nobody recorded, it reads "no data" on a school that is running
- * perfectly well.
- *
- * `date` is a plain `date` column, so lexicographic comparison on
- * `YYYY-MM-DD` is the same as chronological — no parsing needed.
- *
- * @param {Array<{ date?: string, status?: string }>} rows every attendance row
- * @param {string} from inclusive `YYYY-MM-DD`
- * @param {string} to inclusive `YYYY-MM-DD`
- * @returns {{ rate: number, present: number, total: number }}
- */
-function attendanceRate(rows, from, to) {
-  const inWindow = rows.filter(
-    (r) => typeof r.date === "string" && r.date >= from && r.date <= to,
-  );
-  const present = inWindow.filter(
-    (r) => r.status === "present" || r.status === "late",
-  ).length;
-  return {
-    rate: inWindow.length ? Math.round((present / inWindow.length) * 100) : 0,
-    present,
-    total: inWindow.length,
-  };
-}
-
-/** Write a count into a stat card, guarding against markup drift. */
-function setStat(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = String(value);
-}
-
-/**
- * First-run empty state for the overview.
- *
- * Shown only when the school is genuinely untouched — no active year, no
- * students, no teachers, no subjects, no sections. In that state the seven
- * stat cards are all em dashes, which reads as "something is broken" rather
- * than "nothing has been set up yet", and offers no way forward.
- *
- * The one action offered is "Add school year", because every other tab
- * depends on a year existing (that is the dependency order the sidebar is
- * arranged in). One screen, one obvious next step.
- *
- * @returns {boolean} true when the setup panel replaced the stats
- */
-function renderOverviewSetup({ students, teachers, subjects, sectionsList }) {
-  const host = document.getElementById("overview-setup");
-  const stats = document.getElementById("overview-stats");
-  if (!host || !stats) return false;
-
-  const untouched =
-    !state.activeYear &&
-    !students.length &&
-    !teachers.length &&
-    !subjects.length &&
-    !sectionsList.length;
-
-  host.hidden = !untouched;
-  stats.hidden = untouched;
-  if (!untouched) {
-    host.innerHTML = "";
-    return false;
-  }
-
-  host.innerHTML = `
-    <div class="console-placeholder">
-      <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-calendar_month"></use></svg></span>
-      <h2>${escapeHtml(t("console.overview.setupTitle"))}</h2>
-      <p>${escapeHtml(t("console.overview.setupBody"))}</p>
-      <button type="button" class="btn btn-primary" id="overview-setup-cta">
-        <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-add"></use></svg></span>
-        <span>${escapeHtml(t("console.years.add"))}</span>
-      </button>
-    </div>`;
-
-  document
-    .getElementById("overview-setup-cta")
-    ?.addEventListener("click", () => {
-      showSection("yearperiods");
-      openYearForm();
-    });
-  return true;
-}
-
-async function loadOverviewStats() {
-  try {
-    const [students, sectionsList, allAttendance, teachers, subjects, rooms] =
-      await Promise.all([
-        data.listStudents(),
-        state.activeYear
-          ? data.listSections(state.activeYear.id)
-          : Promise.resolve([]),
-        // One unfiltered read serves both attendance figures below: the
-        // at-risk count needs every record anyway, so the month is a filter
-        // over a payload already in hand rather than a second round trip.
-        data.listAllAttendance(),
-        data.listTeachers(),
-        data.listSubjects(),
-        data.listRooms(),
-      ]);
-    state.students = students;
-    state.sections = sectionsList;
-    state.teachers = teachers;
-    state.subjects = subjects;
-    state.rooms = rooms;
-    if (!state.gradeLevels.length)
-      state.gradeLevels = await data.listGradeLevels();
-
-    // A school with nothing in it yet gets guidance instead of seven em
-    // dashes. This is the director's first screen on their first login, and
-    // a grid of blank counters tells them nothing about what to do next.
-    if (renderOverviewSetup({ students, teachers, subjects, sectionsList })) {
-      return;
-    }
-
-    // Enrollment (active students).
-    const active = students.filter((s) => s.status === "active");
-    setStat("stat-enrollment", active.length);
-
-    // Structure counts. Teachers are counted as staff on the books (active
-    // ones); sections belong to the active year.
-    setStat(
-      "stat-teachers",
-      teachers.filter((x) => x.status !== "inactive").length,
-    );
-    setStat("stat-subjects", subjects.length);
-    setStat("stat-sections", sectionsList.length);
-
-    // Room utilization: how many rooms this year's sections actually occupy,
-    // out of all rooms on file — "8/12" answers "do we have room to grow?".
-    const roomsInUse = new Set(
-      sectionsList.map((s) => s.room_id).filter((id) => id != null),
-    );
-    setStat(
-      "stat-rooms",
-      rooms.length
-        ? `${roomsInUse.size}/${rooms.length}`
-        : t("console.overview.noData"),
-    );
-
-    // This month's attendance rate, with the month named on the card so the
-    // percentage is not mistaken for a running total, and the record count
-    // underneath so it reads as a sample rather than a claim.
-    // The card's label is static ("Attendance this month") and translated by
-    // applyTranslations; the month itself goes in the hint, where Intl can
-    // name it per locale without a dictionary entry per month.
-    const monthFrom = monthStartIso();
-    const month = attendanceRate(allAttendance, monthFrom, todayIso());
-    setStat(
-      "stat-attendance",
-      month.total ? `${month.rate}%` : t("console.overview.noData"),
-    );
-    const monthName = formatDate(monthFrom, { month: "long", year: "numeric" });
-    setStat(
-      "stat-attendance-hint",
-      month.total
-        ? `${monthName} · ${tn("console.overview.attendanceRecords", month.total, { count: month.total })}`
-        : monthName,
-    );
-
-    // At-risk: how many students have crossed the absence threshold. Only
-    // students still on the roster count.
-    const absencesByStudent = new Map();
-    allAttendance.forEach((r) => {
-      if (r.status === "absent")
-        absencesByStudent.set(
-          r.student_id,
-          (absencesByStudent.get(r.student_id) ?? 0) + 1,
-        );
-    });
-    const atRiskCount = [...absencesByStudent.entries()].filter(
-      ([studentId, n]) =>
-        n >= AT_RISK_THRESHOLD && students.some((s) => s.id === studentId),
-    ).length;
-    setStat("stat-atrisk", atRiskCount);
-  } catch (err) {
-    console.error("loadOverviewStats:", err);
-  }
-}
-
-// ───────────────────────────────────────────────────────────────
-//  5b. YEAR & PERIODS
-// ───────────────────────────────────────────────────────────────
-async function loadYearPeriods() {
-  renderMessageRow("years-body", 5, t("common.loading"));
-  try {
-    const years = await data.listSchoolYears();
-    state.schoolYears = years; // the year form's name-uniqueness check
-    state.activeYear = years.find((y) => y.is_active) ?? null;
-    renderYears(years);
-    await loadPeriods();
-  } catch (err) {
-    console.error("loadYearPeriods:", err);
-    renderErrorRow("years-body", 5, loadYearPeriods);
-  }
-}
-
-function renderYears(years) {
-  const tbody = document.getElementById("years-body");
-  tbody.innerHTML = "";
-  if (!years.length) {
-    renderEmptyRow("years-body", 5, t("console.years.empty"));
-    return;
-  }
-  const activeIds = years.filter((y) => y.is_active).map((y) => y.id);
-  years.forEach((y) => {
-    const status = y.is_active
-      ? `<span class="badge badge-success">${t("console.years.active")}</span>`
-      : `<span class="badge badge-neutral">${t("console.years.inactive")}</span>`;
-    const actions = [];
-    if (!y.is_active) {
-      actions.push(
-        iconBtn("check_circle", t("console.years.setActive"), () =>
-          activateYear(y, activeIds),
-        ),
-      );
-    }
-    actions.push(iconBtn("edit", t("common.edit"), () => openYearForm(y)));
-    actions.push(
-      iconBtn("delete", t("common.delete"), () => requestDeleteYear(y), true),
-    );
-    tbody.appendChild(
-      tableRow(
-        [
-          escapeHtml(y.name),
-          fmtDate(y.start_date),
-          fmtDate(y.end_date),
-          status,
-        ],
-        actions,
-        y.id,
-      ),
-    );
-  });
-  applySavedFlash("years-body");
-}
-
-/**
- * Delete a school year, but only once nothing hangs off it.
- *
- * Every structural table cascades from school_years — grading_periods, classes
- * and class_subject_teachers directly, and through classes the enrolments,
- * schedules, attendance and grades. Deleting a populated year therefore erases
- * the school in a single click. The dialog has always told the Director its
- * periods and sections must go first; this makes that true.
- * @param {any} year
- */
-async function requestDeleteYear(year) {
-  /** @type {any[]} */
-  let periods;
-  /** @type {any[]} */
-  let sections;
-  try {
-    [periods, sections] = await Promise.all([
-      data.listPeriods(year.id),
-      data.listSections(year.id),
-    ]);
-  } catch (err) {
-    // Deliberately the opposite of activateYear's fall-through below: that one
-    // is harmless when its pre-read fails, this one is irreversible, so a count
-    // we could not verify has to stop the delete rather than wave it through.
-    console.error("requestDeleteYear: could not count dependents:", err);
-    showToast(t("console.years.deleteCheckFailed"), "error");
-    return;
-  }
-
-  if (periods.length || sections.length) {
-    openNotice(
-      t("console.years.deleteBlocked", {
-        name: year.name,
-        periods: periods.length,
-        sections: sections.length,
-      }),
-      { title: t("console.years.deleteBlockedTitle") },
-    );
-    return;
-  }
-
-  openConfirm(
-    t("console.years.confirmDelete", { name: year.name }),
-    async () => {
-      await data.deleteSchoolYear(year.id);
-      showToast(t("console.years.deleted"));
-      loadYearPeriods();
-    },
-  );
-}
-
-/**
- * Make one year the active one. A year whose grading periods don't add up to
- * 100% is the state that silently breaks reporting downstream, so activating
- * one asks for confirmation first (and names the actual total) instead of
- * going through quietly.
- * @param {any} year
- * @param {number[]} previouslyActive
- */
-async function activateYear(year, previouslyActive) {
-  const commit = async () => {
-    try {
-      await data.setActiveYear(year.id, previouslyActive);
-      showToast(t("console.years.activated"));
-      loadYearPeriods();
-    } catch (err) {
-      showToast(errorText(err), "error");
-    }
-  };
-
-  /** @type {any[]} */
-  let periods;
-  try {
-    periods = await data.listPeriods(year.id);
-  } catch (err) {
-    // Can't verify the weights — don't block the activation on a read failure.
-    console.error("activateYear: could not read periods:", err);
-    await commit();
-    return;
-  }
-
-  const total = totalWeight(periods);
-  if (weightStatus(total, periods.length) === "ok") {
-    await commit();
-    return;
-  }
-  openConfirm(t("console.years.activateWeightWarn", { total }), commit, {
-    title: t("console.years.setActive"),
-    confirmLabel: t("console.years.activateAnyway"),
-    danger: false,
-  });
-}
-
-function openYearForm(year = null) {
-  openModal({
-    title: year ? t("console.years.editTitle") : t("console.years.addTitle"),
-    fields: [
-      {
-        name: "name",
-        maxLength: 20,
-        label: t("console.years.name"),
-        value: year?.name,
-        required: true,
-        placeholder: "2025-2026",
-        rules: [
-          v.unique(
-            state.schoolYears.map((y) => y.name),
-            { current: year?.name },
-          ),
-        ],
-      },
-      {
-        name: "start_date",
-        label: t("console.years.start"),
-        type: "date",
-        value: year?.start_date,
-        required: true,
-      },
-      {
-        name: "end_date",
-        label: t("console.years.end"),
-        type: "date",
-        value: year?.end_date,
-        required: true,
-        rules: [v.endAfterStart("start_date")],
-      },
-    ],
-    onSubmit: async (v) => {
-      const payload = {
-        name: v.name.trim(),
-        start_date: v.start_date,
-        end_date: v.end_date,
-      };
-      const saved = year
-        ? await data.updateSchoolYear(year.id, payload).then(() => year)
-        : await data.createSchoolYear({ ...payload, is_active: false });
-      markSaved("years-body", saved?.id ?? year?.id);
-      showToast(t("common.saved"));
-      loadYearPeriods();
-    },
-  });
-}
-
-async function loadPeriods() {
-  const label = document.getElementById("periods-year-label");
-  const addBtn = document.getElementById("btn-add-period");
-  if (!state.activeYear) {
-    label.textContent = t("console.periods.noYear");
-    addBtn.disabled = true;
-    renderWeightTotal([]);
-    renderEmptyRow("periods-body", 6, t("console.periods.noYear"));
-    return;
-  }
-  addBtn.disabled = false;
-  label.textContent = state.activeYear.name;
-  renderMessageRow("periods-body", 6, t("common.loading"));
-  try {
-    const periods = await data.listPeriods(state.activeYear.id);
-    state.periods = periods;
-    renderPeriods(periods);
-    renderWeightTotal(periods);
-  } catch (err) {
-    console.error("loadPeriods:", err);
-    renderErrorRow("periods-body", 6, loadPeriods);
-  }
-}
-
-/**
- * Running weight total for the year on screen. A year is only correctly
- * weighted at exactly 100%, so anything else is badged as a warning — the
- * director can see the shortfall while building the periods up one at a time.
- */
-function renderWeightTotal(periods) {
-  const el = document.getElementById("periods-weight-total");
-  if (!el) return;
-  if (!periods.length) {
-    el.hidden = true;
-    return;
-  }
-  const total = totalWeight(periods);
-  const status = weightStatus(total, periods.length);
-  el.hidden = false;
-  el.textContent = t("console.periods.totalWeight", { total });
-  el.classList.remove("badge-neutral"); // the markup's placeholder styling
-  el.classList.toggle("badge-success", status === "ok");
-  el.classList.toggle("badge-warning", status !== "ok");
-  el.title =
-    status === "ok" ? "" : t("console.periods.weightWarning", { total });
-}
-
-function renderPeriods(periods) {
-  const tbody = document.getElementById("periods-body");
-  tbody.innerHTML = "";
-  if (!periods.length) {
-    renderEmptyRow("periods-body", 6, t("console.periods.empty"));
-    return;
-  }
-  periods.forEach((p) => {
-    const actions = [
-      iconBtn("edit", t("common.edit"), () => openPeriodForm(p)),
-      iconBtn(
-        "delete",
-        t("common.delete"),
-        () =>
-          openConfirm(
-            t("console.periods.confirmDelete", { name: p.name }),
-            async () => {
-              await data.deletePeriod(p.id);
-              showToast(t("console.periods.deleted"));
-              loadPeriods();
-            },
-          ),
-        true,
-      ),
-    ];
-    tbody.appendChild(
-      tableRow(
-        [
-          escapeHtml(p.period_order),
-          escapeHtml(p.name),
-          fmtDate(p.start_date),
-          fmtDate(p.end_date),
-          p.weight != null ? `${escapeHtml(p.weight)}%` : "—",
-        ],
-        actions,
-        p.id,
-      ),
-    );
-  });
-  applySavedFlash("periods-body");
-}
-
-function openPeriodForm(period = null) {
-  // A period belongs to the active year, so its dates are bounded by that
-  // year's range — both as input constraints and as a validation rule (the
-  // matching DB trigger is the backstop for anything bypassing this form).
-  const year = state.activeYear;
-  const bounded = year?.start_date && year?.end_date;
-  const withinYear = bounded
-    ? [
-        v.dateWithin(year.start_date, year.end_date, {
-          start: fmtDate(year.start_date),
-          end: fmtDate(year.end_date),
-        }),
-      ]
-    : [];
-  const dateRange = {
-    min: year?.start_date,
-    max: year?.end_date,
-    help: bounded
-      ? t("validation.dateWithin", {
-          start: fmtDate(year.start_date),
-          end: fmtDate(year.end_date),
-        })
-      : undefined,
-  };
-
-  openModal({
-    title: period
-      ? t("console.periods.editTitle")
-      : t("console.periods.addTitle"),
-    fields: [
-      {
-        name: "name",
-        maxLength: 50,
-        label: t("console.periods.name"),
-        value: period?.name,
-        required: true,
-        placeholder: t("console.periods.namePlaceholder"),
-      },
-      {
-        name: "period_order",
-        label: t("console.periods.order"),
-        type: "number",
-        value: period?.period_order,
-        required: true,
-        min: 1,
-        step: "1",
-        rules: [
-          v.integer(),
-          v.min(1),
-          v.unique(
-            state.periods.map((p) => p.period_order),
-            { current: period?.period_order },
-          ),
-        ],
-      },
-      {
-        name: "start_date",
-        label: t("console.periods.start"),
-        type: "date",
-        value: period?.start_date,
-        required: true,
-        ...dateRange,
-        rules: withinYear,
-      },
-      {
-        name: "end_date",
-        label: t("console.periods.end"),
-        type: "date",
-        value: period?.end_date,
-        required: true,
-        ...dateRange,
-        rules: [...withinYear, v.endAfterStart("start_date")],
-      },
-      {
-        // A new period defaults to whatever weight is still unclaimed, so
-        // building a year lands on 100% without arithmetic: 50/50 for Costa
-        // Rica's two periodos, 33.33/33.33/33.34 for three trimestres. A fixed
-        // default could only ever be right for one period count.
-        name: "weight",
-        label: t("console.periods.weight"),
-        type: "number",
-        value:
-          period?.weight ??
-          remainingWeight(state.periods, { excludeId: period?.id }),
-        min: 0,
-        max: 100,
-        step: "0.01",
-        rules: [v.percent()],
-      },
-    ],
-    // Whole-form rule: the year's weights may never exceed 100% in total.
-    // Falling short is allowed while the year is still being built (it warns
-    // on save instead). Per-field rules above cover everything else.
-    validate: (values) => {
-      const prospective = totalWeight(state.periods, {
-        excludeId: period?.id ?? null,
-        extraWeight: num(values.weight),
-      });
-      return prospective > TARGET_WEIGHT
-        ? { weight: t("console.periods.weightOver", { total: prospective }) }
-        : {};
-    },
-    onSubmit: async (v) => {
-      const payload = {
-        name: v.name.trim(),
-        period_order: num(v.period_order),
-        start_date: v.start_date,
-        end_date: v.end_date,
-        weight: num(v.weight),
-      };
-      const saved = period
-        ? await data.updatePeriod(period.id, payload).then(() => period)
-        : await data.createPeriod({
-            ...payload,
-            school_year_id: state.activeYear.id,
-          });
-      markSaved("periods-body", saved?.id ?? period?.id);
-      showToast(t("common.saved"));
-
-      // Re-read first, then judge the year off the stored rows rather than the
-      // submitted value, and say so loudly when it still isn't 100%.
-      await loadPeriods();
-      const total = totalWeight(state.periods);
-      if (weightStatus(total, state.periods.length) !== "ok") {
-        showToast(t("console.periods.weightWarning", { total }), "error");
-      }
-    },
-  });
-}
-
-document
-  .getElementById("btn-add-year")
-  .addEventListener("click", () => openYearForm());
-document
-  .getElementById("btn-add-period")
-  .addEventListener("click", () => openPeriodForm());
 
 // ───────────────────────────────────────────────────────────────
 //  5c. GRADES & SECTIONS
@@ -4613,14 +3902,14 @@ async function loadSettings() {
   await renderSchoolProfile();
   const root = document.getElementById("settings-root");
   if (!root) return;
-  let profile = PROFILE;
+  let profile = state.profile;
   if (!profile) {
     try {
       profile = await fetchProfile();
-      PROFILE = profile;
+      state.profile = profile;
     } catch (err) {
       console.error("loadSettings:", err);
-      loaded.settings = false;
+      state.loaded.settings = false;
       renderErrorBlock(root, loadSettings);
       return;
     }

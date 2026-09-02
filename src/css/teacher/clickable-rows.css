@@ -1,0 +1,107 @@
+@layer page {
+  /* ═══════════════════════════════════════════════════════════════
+   ROSTER — clickable grid list with a trailing action rail
+   The roster is a CSS-grid list (not a <table>) so the edit/delete
+   rail can sit OUTSIDE the clickable cells. Whole .roster-row-cells
+   block opens the student-360 drawer; the rail reveals on hover/focus.
+═══════════════════════════════════════════════════════════════════ */
+  .roster-head {
+    display: flex;
+    padding-right: 84px; /* reserve the rail width so labels align with rows */
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .roster-head .roster-row-cells {
+    padding: 0.9rem 1rem;
+    font-size: 0.8rem;
+    color: var(--color-dark-variant);
+  }
+
+  .roster-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .roster-row:hover {
+    background: var(--color-background);
+  }
+
+  .roster-row-cells {
+    flex: 1;
+    display: grid;
+    /* --roster-cols = one column per grading period + Overall, set on
+       #roster-list from the loaded periods (teacher.js → rosterColsStyle).
+       The fallback keeps the grid sane if the periods haven't loaded yet. */
+    grid-template-columns: minmax(0, 2fr) repeat(
+        var(--roster-cols, 3),
+        minmax(0, 1fr)
+      );
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    cursor: pointer;
+  }
+
+  .roster-row-cells:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    border-radius: var(--border-radius-1);
+  }
+
+  .roster-name {
+    font-weight: 600;
+    color: var(--color-dark);
+  }
+
+  .roster-grade {
+    font-size: 0.9rem;
+  }
+
+  .roster-row-rail {
+    flex: 0 0 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .roster-row:hover .roster-row-rail,
+  .roster-row:focus-within .roster-row-rail {
+    opacity: 1;
+  }
+
+  /* Touch devices have no hover — keep the actions visible there. */
+  @media (hover: none) {
+    .roster-row-rail {
+      opacity: 1;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+   GRADEBOOK — clickable student rows
+═══════════════════════════════════════════════════════════════════ */
+  /* ── Row hover carries two different meanings; the paint must too ──
+   A plain tint on a table row is a SCANNING AID — it helps the eye hold
+   its place across a wide row, and every table gets it. On the rows that
+   actually open something (gradebook rows, roster rows) the same tint was
+   also the only hover signal, so a read-only row and a clickable row
+   looked identical and only the cursor told them apart.
+
+   Clickable rows take the accent tint on top, so the difference is
+   visible before the pointer arrives. */
+  .gradebook-table tbody tr.row-clickable {
+    cursor: pointer;
+  }
+
+  .gradebook-table tbody tr.row-clickable:hover,
+  .roster-row:hover {
+    background: var(--color-primary-light);
+  }
+
+  .gradebook-table tbody tr.row-clickable:hover .sticky-col {
+    background: var(--color-primary-light);
+  }
+}

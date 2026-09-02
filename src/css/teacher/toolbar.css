@@ -1,0 +1,50 @@
+@layer page {
+  /* ─── Toolbar ──────────────────────────────────────────────────── */
+  /* The .view-toolbar flex container is defined in style.css (shared).
+   Below are the admin-only controls placed inside it. */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--color-white);
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    padding: 0.6rem 1rem;
+    flex: 1 1 240px;
+  }
+
+  .search-bar:focus-within {
+    border-color: var(--color-primary);
+  }
+
+  .search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    color: var(--color-dark);
+  }
+
+  .toolbar-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+  }
+
+  .toolbar-filters label {
+    color: var(--color-dark-variant);
+  }
+
+  .view-toolbar select,
+  .view-toolbar input[type="date"] {
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--border-radius-2);
+    border: 1px solid var(--border-control);
+    background: var(--color-white);
+    color: var(--color-dark);
+  }
+
+  /* ─── Buttons moved to style.css (shared button system) ────────── */
+}

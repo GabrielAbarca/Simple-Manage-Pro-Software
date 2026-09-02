@@ -1,0 +1,73 @@
+@layer page {
+  /* ─── Drawer demographics + header actions ─────────────────────── */
+  .drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .drawer-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .drawer-identity .drawer-contact {
+    width: 100%;
+  }
+
+  .drawer-photo {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--color-background);
+  }
+
+  .drawer-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-info-dark);
+  }
+
+  .drawer-photo-empty .material-symbols-outlined {
+    font-size: 2.4rem;
+  }
+
+  .drawer-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+  }
+
+  .drawer-section-head h3 {
+    margin-bottom: 0;
+  }
+
+  .drawer-card-edit {
+    margin-left: auto;
+  }
+
+  .drawer-card-edit .material-symbols-outlined {
+    font-size: 1rem;
+  }
+  .profile-photo > .material-symbols-outlined {
+    color: var(--color-info-dark);
+  }
+  /* ── Demo-mode badge (added by admin.js when DEMO_MODE is on) ── */
+  .demo-badge {
+    align-self: center;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-white);
+    background: var(--color-danger);
+    cursor: help;
+  }
+}

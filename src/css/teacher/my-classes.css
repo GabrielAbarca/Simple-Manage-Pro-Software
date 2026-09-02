@@ -1,0 +1,85 @@
+@layer page {
+  /* ═══════════════════════════════════════════════════════════════
+   CLASS-FIRST WORKSPACE — the My Classes card grid; the workspace
+   itself continues in ./class-workspace.css.
+═══════════════════════════════════════════════════════════════ */
+
+  /* ─── Section subtitle ─────────────────────────────────────────── */
+  .view-subtitle {
+    color: var(--color-dark-variant);
+    font-size: 0.88rem;
+    margin: 0.2rem 0 1.4rem;
+  }
+
+  /* ─── My Classes card grid ─────────────────────────────────────── */
+  .myclasses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .class-card {
+    --accent: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    text-align: left;
+    background: var(--color-white);
+    border: none;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+      box-shadow var(--duration-micro) var(--ease-out),
+      transform var(--duration-micro) var(--ease-out);
+  }
+
+  .class-card:hover {
+    transform: translateY(var(--lift-hover));
+    box-shadow: var(--shadow-md);
+  }
+
+  .class-card-accent {
+    width: 6px;
+    align-self: stretch;
+    background: var(--accent);
+  }
+
+  .class-card-body {
+    flex: 1;
+    padding: 1.2rem 0.4rem;
+  }
+
+  .class-card-subject {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--color-dark);
+  }
+
+  .class-card-section {
+    margin: 0.2rem 0 0.6rem;
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+  }
+
+  .class-card-count {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-dark-variant);
+  }
+
+  .class-card-count .material-symbols-outlined {
+    font-size: 1.1rem;
+  }
+
+  .class-card-arrow {
+    color: var(--color-info-dark);
+    margin-right: 1rem;
+  }
+}

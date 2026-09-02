@@ -1,0 +1,48 @@
+@layer page {
+  /* ─── Sidebar divider moved to style.css (shared by both surfaces) ─ */
+
+  /* ─── Stat cards (Overview) ───────────────────────────────────── */
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+  }
+
+  .stat-card {
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* No hover state: stat cards are read-only. The admin console's .stat-card
+   — same class name — never had one, so the two consoles behaved differently
+   on the same component. Removed with A7. */
+  .stat-card > .material-symbols-outlined {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-1);
+    font-size: 1.6rem;
+    width: fit-content;
+  }
+
+  .stat-card h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+  }
+
+  .stat-card h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  .stat-card small {
+    margin: 0;
+  }
+}

@@ -1,0 +1,145 @@
+@layer page {
+  /* ═══════════════════════════════════════════════════════════════
+   GRADE ENTRY GRIDS — shared modal helpers, categories,
+   post grades, column entry
+═══════════════════════════════════════════════════════════════ */
+
+  /* Modal field help text (e.g. read-only national_id) */
+  .field-help {
+    font-size: var(--text-xs);
+    color: var(--color-info-dark);
+  }
+
+  .modal-body input:disabled,
+  .modal-body select:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* Admin-only inert control — visual half of the IS_ADMIN gate (the JS adds the
+   no-op click + tooltip). Pointer-events stay enabled so the title tooltip and
+   the no-op click still fire; the native `disabled` attribute is deliberately
+   not used (it would suppress the hover tooltip). */
+  .admin-only {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Categories modal footer total */
+  .cat-total {
+    margin-right: auto;
+    font-size: 0.82rem;
+    color: var(--color-dark-variant);
+  }
+
+  /* ─── Post grades grid (item 1) ────────────────────────────────── */
+  .pg-grid {
+    min-width: 700px;
+  }
+
+  .pg-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1.6fr) 92px 92px 110px minmax(
+        160px,
+        1.6fr
+      );
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .pg-head {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-dark-variant);
+  }
+
+  .pg-cell {
+    font-size: 0.82rem;
+    color: var(--color-dark);
+    min-width: 0;
+  }
+
+  .pg-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pg-center {
+    text-align: center;
+  }
+
+  .pg-grid .pg-score,
+  .pg-grid .pg-note {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: var(--color-background);
+    color: var(--color-dark);
+    font-size: var(--text-sm);
+  }
+
+  .pg-grid .pg-score {
+    text-align: center;
+  }
+
+  .pg-actions {
+    margin-top: 0.9rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ─── Column grade entry grid (item 4) ─────────────────────────── */
+  .cg-grid {
+    min-width: 520px;
+  }
+
+  .cg-row {
+    display: grid;
+    grid-template-columns: minmax(160px, 1.6fr) 110px minmax(180px, 2fr);
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-light);
+  }
+
+  .cg-head {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-dark-variant);
+  }
+
+  .cg-cell {
+    font-size: 0.82rem;
+    color: var(--color-dark);
+    min-width: 0;
+  }
+
+  .cg-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cg-grid .cg-score,
+  .cg-grid .cg-note {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-control);
+    border-radius: var(--border-radius-1);
+    background: var(--color-background);
+    color: var(--color-dark);
+    font-size: var(--text-sm);
+  }
+
+  .cg-grid .cg-score {
+    text-align: center;
+  }
+}

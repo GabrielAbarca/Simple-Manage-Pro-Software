@@ -1,0 +1,48 @@
+@layer page {
+  /* ─── Attendance status buttons ──────────────────────────────── */
+  .attendance-status-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  /* Unselected pill */
+  .attendance-status-btn {
+    background: var(--color-background);
+    color: var(--color-dark-variant);
+    border: 1px solid var(--border-control);
+  }
+  .attendance-status-btn:hover {
+    border-color: var(--color-info-dark);
+  }
+
+  /* Selected pills carry a text label on a colour fill. On the raw brand hues
+   that read at 1.45:1 (present), 2.15:1 (late) and 2.56:1 (absent) — the
+   worst contrast in the app, on the control a teacher uses most. The -fill
+   shades are the same hues at a legible depth (≥4.5:1 with #fff). */
+  .attendance-status-btn.active[data-status="present"] {
+    background: var(--color-success-fill);
+    color: #fff;
+    border-color: var(--color-success-fill);
+  }
+  .attendance-status-btn.active[data-status="absent"] {
+    background: var(--color-danger-fill);
+    color: #fff;
+    border-color: var(--color-danger-fill);
+  }
+  .attendance-status-btn.active[data-status="late"] {
+    background: var(--color-warning-fill);
+    color: #fff;
+    border-color: var(--color-warning-fill);
+  }
+  .attendance-status-btn.active[data-status="excused"] {
+    background: var(--color-primary-fill);
+    color: #fff;
+    border-color: var(--color-primary-fill);
+  }
+}

@@ -1,0 +1,72 @@
+@layer page {
+  /* ─── Right-panel empty states (matched family with .empty-state) ── */
+  .panel-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-3);
+    text-align: center;
+    color: var(--color-info-dark);
+  }
+
+  .panel-empty .material-symbols-outlined {
+    font-size: 2.4rem;
+    opacity: 0.6;
+  }
+
+  .panel-empty p {
+    font-size: var(--text-sm);
+    color: var(--color-info-dark);
+  }
+
+  /* ─── Toasts ───────────────────────────────────────────────────── */
+  /* Top-center: status messages belong where the eye already is during form
+     work, not tucked in a corner. Above the modal overlay's z-index, so a
+     toast raised while a dialog is open is still seen. */
+  .toast-container {
+    position: fixed;
+    top: 1.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: calc(100vw - 2rem);
+    z-index: 1100;
+  }
+
+  .toast {
+    background: var(--color-white);
+    border-radius: var(--border-radius-1);
+    padding: 0.9rem 1.4rem;
+    box-shadow: var(--shadow-md);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 240px;
+    animation: toast-in 0.25s ease-out;
+  }
+
+  .toast.toast-success {
+    border-left: 4px solid var(--color-success);
+  }
+
+  .toast.toast-error {
+    border-left: 4px solid var(--color-danger);
+  }
+
+  @keyframes toast-in {
+    from {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}

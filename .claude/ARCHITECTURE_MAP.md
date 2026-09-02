@@ -53,7 +53,9 @@ The only real subdirectories under `src/js/` are:
   `teacherModal.js`. Unlike a hypothetical `student-portal/`/`teacher-console/`
   directory this only holds JS view sections, not each page's HTML/CSS —
   those still live at the flat top level (`index.html`, `teacher.html`,
-  `src/css/style.css`, `src/css/teacher.css`).
+  `src/css/style.css`, `src/css/teacher.css`), though the two largest
+  stylesheets are themselves thin entry points over `src/css/style/` and
+  `src/css/teacher/` (see the CSS note below).
 - `src/js/teacherData/` — the teacher console's data layer (Supabase
   queries), split by domain: `identity.js`, `classes.js`, `students.js`,
   `gradebook.js`, `categories.js`, `attendance.js`, `schedule.js`,
@@ -86,10 +88,24 @@ list): `auth.js`, `role.js`, `theme.js`, `dialog.js`, `errorHandler.js`,
 `teacherAuth.js`, `teacherState.js`, `teacherNav.js`, `teacherFeedback.js`,
 `teacherModal.js`, `teacherTableHelpers.js`, `teacherFormat.js`.
 
-CSS follows the same flat convention: `src/css/style.css` (shared design
-system + student portal) plus one override file per page (`admin.css`,
-`teacher.css`, `login.css`), composed via CSS cascade layers rather than
-folders.
+CSS keeps the same flat page-level convention: `src/css/style.css` (shared
+design system + student portal) plus one override file per page
+(`admin.css`, `teacher.css`, `login.css`). Load order is made irrelevant by
+CSS cascade layers — every stylesheet repeats the same
+`@layer base, page, controls;` order statement verbatim, `style.css` writes
+into `base` and the per-page files into `page`, so page overrides win no
+matter which file the browser gets first.
+
+The two big ones are now **thin `@import` entry points** over a directory of
+per-domain partials: `style.css` → `src/css/style/*.css` (22 files, each
+wrapping itself in `@layer base`, plus three form-control files in
+`@layer controls`), and `teacher.css` → `src/css/teacher/*.css` (17 files,
+each wrapping itself in `@layer page`). `admin.css` (789) and `login.css`
+(709) are still single files. In both splits the import order reproduces the
+original single-file source order and every partial is a contiguous slice of
+it, so cascade results at equal specificity are unchanged — **do not reorder
+the imports.** Vite inlines the `@import` graph at build time; the shipped
+bundles are rule-for-rule identical to the pre-split ones.
 
 ## Data layer
 
@@ -134,11 +150,12 @@ folders.
 Files over 1,000 lines, largest first. These are **flagged only** — no split
 plan in this pass, no application code was touched to produce this list.
 
-| File                  | Lines | Notes                                                    |
-| --------------------- | ----: | -------------------------------------------------------- |
-| `src/js/admin.js`     | 5,092 | **Top candidate for a future dedicated splitting task.** |
-| `src/css/style.css`   | 3,301 | Shared design system + student portal styles combined.   |
-| `src/css/teacher.css` | 1,660 | Teacher-console-only component styles.                   |
+| File              | Lines | Notes                                                    |
+| ----------------- | ----: | -------------------------------------------------------- |
+| `src/js/admin.js` | 5,092 | **Top candidate for a future dedicated splitting task.** |
+
+`admin.js` is the only file left on this list — every other entry has since
+been split (see below).
 
 `src/js/i18n/en.js` and `src/js/i18n/es.js` (formerly 1,195 / 1,200 lines)
 were each split into a ~30-line composition root plus 11 per-namespace
@@ -185,10 +202,17 @@ a self-contained mini-page (its own load/render/form/import logic), so the
 file grows linearly with every new admin feature. `teacher.js`'s split above
 is a second template available for this one, in addition to `main.js`'s.
 
-**`style.css` (3,301 lines):** carries both the shared design-system tokens
-(used by every page) and the full student-portal layout/chrome in one file,
-rather than separating tokens from student-portal-specific rules the way
-`admin.css`/`teacher.css`/`login.css` are separated out for their portals.
+**The two CSS monoliths are split.** `src/css/style.css` (formerly 3,301
+lines) became a ~70-line entry point over `src/css/style/*.css` — 22 partials
+split by component domain (fonts, design tokens, reset, app shell, student
+views, settings, right panel, legal/404, responsive, native/custom form
+controls), largest ~263 lines. `src/css/teacher.css` (formerly 1,660 lines)
+followed the same template: a ~64-line entry point over
+`src/css/teacher/*.css` — 17 partials (console chrome, the class-first
+workspace, the gradebook, the roster, the student drawer, the grade-entry
+grids), largest ~170 lines. No partial in either split exceeds 300 lines.
+See the CSS paragraph in the Portals section for the cascade-layer and
+import-order rules that make the splits safe.
 
 Note: an earlier assumption referred to "the 6000+ line file" as the top
 splitting candidate. No file in this repo exceeds 6,000 lines — the actual

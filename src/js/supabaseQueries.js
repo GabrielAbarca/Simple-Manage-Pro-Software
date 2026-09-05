@@ -276,22 +276,3 @@ export async function fetchDashboardStats(studentId, classId) {
     allSchedule: schedule,
   };
 }
-
-export async function fetchDisciplineRecords(studentId) {
-  const { data, error } = await supabase
-    .from("discipline_records")
-    .select(
-      `
-      *,
-      teachers:reported_by_teacher ( id, first_name, last_name )
-    `,
-    )
-    .eq("student_id", studentId)
-    .order("date", { ascending: false });
-
-  if (error) {
-    console.error("fetchDisciplineRecords:", error.message);
-    throw error;
-  }
-  return data;
-}

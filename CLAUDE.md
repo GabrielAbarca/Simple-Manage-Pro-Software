@@ -104,6 +104,8 @@ These are non-negotiable. They override default agent behavior.
 
 7. **Clarify vague prompts.** Identify the underlying intent behind a request before acting. If scope, target, or intent is unclear, **ask** rather than assume — a wrong assumption is more expensive than a question.
 
+8. **Scope focused on the task at hand.** This project is a large, complex system. Avoid making unrelated changes or refactors. If you see something that could be improved but is outside the current task, **note it in a comment** for later review rather than changing it, saving tokens and time is priority, if you don't find files related to the task, run sub-agents to retreive the path for you.
+
 ## Conventions
 
 - **Formatting**: Prettier is the source of truth (`.prettierrc.json`); don't hand-format against it.

@@ -49,7 +49,12 @@
 --  Idempotent: safe to re-run.
 -- ═══════════════════════════════════════════════════════════════
 
+-- Two policy names are dropped because school_schema.sql's read loop was
+-- renamed at some point: projects provisioned before the rename carry
+-- "Authenticated users can read teachers", newer ones the shorter form.
+-- Dropping only one leaves the blanket policy — and the PII — in place.
 drop policy if exists "Authenticated can read teachers" on public.teachers;
+drop policy if exists "Authenticated users can read teachers" on public.teachers;
 
 drop policy if exists "Teachers can read their own full record" on public.teachers;
 create policy "Teachers can read their own full record" on public.teachers

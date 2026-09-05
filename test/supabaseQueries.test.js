@@ -55,6 +55,7 @@ const {
   fetchStudentGrades,
   fetchStudentProfile,
   fetchEvents,
+  fetchTeachers,
 } = await import("../src/js/supabaseQueries.js");
 
 function seed() {
@@ -167,5 +168,27 @@ describe("failures propagate instead of looking like empty data", () => {
 
   it("returns data normally when nothing is failing", async () => {
     await expect(fetchStudentGrades(101)).resolves.toHaveLength(3);
+  });
+});
+
+// The student portal's Teachers tab reads the PII-free `teachers_directory`
+// view, never the `teachers` base table — the latter carries national_id,
+// phone, address and hire_date, and its RLS is narrowed to admin + self. These
+// pin the relation name so a refactor cannot silently repoint it.
+describe("fetchTeachers reads the PII-free directory view", () => {
+  it("queries teachers_directory, not the teachers base table", async () => {
+    await fetchTeachers();
+    const tables = calls.map((c) => c.table);
+    expect(tables).toContain("teachers_directory");
+    expect(tables).not.toContain("teachers");
+  });
+
+  it("returns the directory rows", async () => {
+    await expect(fetchTeachers()).resolves.toHaveLength(2);
+  });
+
+  it("rejects when the query fails instead of rendering an empty list", async () => {
+    errors.teachers_directory = { message: "boom" };
+    await expect(fetchTeachers()).rejects.toMatchObject({ message: "boom" });
   });
 });

@@ -66,6 +66,17 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   `teachers`' blanket "any signed-in user" read policy (national_id, phone,
 >   address, hire_date were readable by every student) to admin + self, and
 >   adds `teachers_directory`, a PII-free view for legitimate name lookups.
+>   **Precondition:** populate `teachers.auth_user_id` for every teacher who
+>   signs in _before_ applying this. The self-read policy is
+>   `auth_user_id = auth.uid()`, so where the column is null a `teacher`-role
+>   account loses its own Settings view — only `is_admin()` still reads the
+>   base table. The Teachers tab itself is unaffected either way: the view is
+>   not `security_invoker`, so it serves every authenticated caller.
+>   **The drop statement covers both historical policy names.** Projects
+>   provisioned before the read loop was renamed carry
+>   `Authenticated users can read teachers`; newer ones carry
+>   `Authenticated can read teachers`. Dropping only one name leaves the
+>   blanket policy, and the PII, in place.
 > - [`supabase/schema/incremental_attendance_by_subject.sql`](../supabase/schema/incremental_attendance_by_subject.sql)
 >   — adds `attendance.class_subject_teacher_id` (REAC 2026 needs attendance
 >   per subject, not per day) and replaces the old `unique (student_id, date)`
@@ -74,14 +85,21 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   backfilling existing rows against each class's homeroom teacher.
 >
 > All of them are already included in `school_schema.sql`, so a fresh project
-> does **not** need them separately.
+> does **not** need them separately. Verify this before trusting it on a new
+> project: `incremental_narrow_read_policies.sql` was missing from
+> `school_schema.sql` until 2026-09-05, so every project provisioned before
+> then has no `teachers_directory` view and a broken student Teachers tab.
 > (They live under `supabase/schema/`, not `supabase/migrations/`, so the
 > Supabase↔GitHub integration doesn't try to sync them to the demo project.
 > Apply them with the dashboard SQL editor — do **not** register them as
 > migrations, or the integration reports a history mismatch.)
 >
 > Applied to both existing projects (demo `SMP DataBase` and `SMP Pilot
-School`) as of this milestone. On the demo project, `school_settings` also
+School`) as of this milestone — **except**
+> `incremental_narrow_read_policies.sql`, which was never applied to
+> `SMP DataBase` despite this claim. It was applied there on 2026-09-05.
+> `SMP Pilot School` was `INACTIVE` at the time and still needs it.
+> On the demo project, `school_settings` also
 > carries the restrictive `demo_deny_*` policies the other tables have, so the
 > sandbox stays read-only server-side.
 >

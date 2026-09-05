@@ -477,11 +477,15 @@ begin
   end loop;
 
   -- Authenticated users can read reference/structure tables.
+  -- `teachers` is deliberately absent: RLS filters rows, not columns, so a
+  -- blanket read here would hand every signed-in user each teacher's
+  -- national_id, phone, address and hire_date. It gets admin + self-read
+  -- plus the PII-free `teachers_directory` view at the end of this file.
   -- `schedules` is here so teaching staff can read the timetable of the
   -- classes they teach; the narrower student policy further down stays
   -- (policies are OR'd) and documents the student's own-class read.
   foreach tbl in array array[
-    'app_config','school_settings','school_years','grade_levels','rooms','subjects','teachers',
+    'app_config','school_settings','school_years','grade_levels','rooms','subjects',
     'classes','grade_level_subjects','class_subject_teachers','grading_periods','events',
     'schedules','schedule_configs','bell_schedules','bell_schedule_blocks',
     'grade_component_templates','grade_component_template_items'
@@ -562,3 +566,26 @@ create policy "Students read their guardians" on public.guardians
     where s.auth_user_id = auth.uid()));
 create policy "Students read their class schedule" on public.schedules
   for select using (class_id in (select class_id from public.students where auth_user_id = auth.uid()));
+
+-- Teachers read their own full record.
+-- The read-only Settings view in the teacher console needs national_id, phone,
+-- address and hire_date for the logged-in teacher, and only them. Requires
+-- teachers.auth_user_id to be populated for every teacher who signs in.
+create policy "Teachers can read their own full record" on public.teachers
+  for select to authenticated
+  using (auth_user_id = auth.uid());
+
+-- PII-free teacher directory.
+-- Every legitimate cross-user name lookup reads this instead of the base
+-- table: the student portal's teacher list, homeroom-teacher name, the
+-- discipline/attendance recorder name, and the teacher console's colleague
+-- lookups. Deliberately NOT security_invoker — it must return every teacher
+-- row regardless of caller, which the narrowed base-table policy above would
+-- not allow. Safe because the column list structurally excludes the PII.
+drop view if exists public.teachers_directory;
+create view public.teachers_directory as
+  select id, first_name, last_name, specialization, email, status
+  from public.teachers;
+
+revoke all on public.teachers_directory from anon, public;
+grant select on public.teachers_directory to authenticated;

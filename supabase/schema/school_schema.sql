@@ -589,3 +589,207 @@ create view public.teachers_directory as
 
 revoke all on public.teachers_directory from anon, public;
 grant select on public.teachers_directory to authenticated;
+
+-- ═══════════════════════════════════════════════════════════════
+--  Teacher-scoped RLS + the gradebook's computed-score view.
+--  Kept in sync with supabase/schema/incremental_teacher_policies.sql,
+--  which applies the same objects to an already-provisioned project.
+--  Without these a `teacher` account cannot read a single student and the
+--  teacher console is dead, so a fresh project needs them from the start.
+--  Every policy here is rooted in teacher_id(), which resolves through
+--  teachers.auth_user_id — populate that column for each teacher who signs
+--  in, or all of them match nothing.
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── Helpers ────────────────────────────────────────────────────
+-- SECURITY DEFINER because a policy on `teachers` would otherwise have to
+-- read `teachers` to decide whether you may read `teachers`. Fixed
+-- search_path per the same hardening as is_admin() / handle_new_user().
+-- EXECUTE stays granted to `authenticated` (policies evaluate as the
+-- calling role); `anon` and `public` have no business calling these.
+
+create or replace function public.teacher_id()
+returns integer
+language sql
+stable
+security definer
+set search_path to 'public'
+as $$
+  select id from public.teachers where auth_user_id = auth.uid();
+$$;
+
+revoke execute on function public.teacher_id() from anon, public;
+
+-- Every class the caller teaches: subject assignments plus homeroom.
+create or replace function public.teacher_class_ids()
+returns setof integer
+language sql
+stable
+security definer
+set search_path to 'public'
+as $$
+  select cst.class_id
+    from public.class_subject_teachers cst
+   where cst.teacher_id = public.teacher_id()
+  union
+  select c.id
+    from public.classes c
+   where c.homeroom_teacher_id = public.teacher_id();
+$$;
+
+revoke execute on function public.teacher_class_ids() from anon, public;
+
+-- Every class_subject_teachers row the caller owns. The gradebook tables
+-- hang off this id, so most policies below are one lookup against it.
+create or replace function public.teacher_cst_ids()
+returns setof integer
+language sql
+stable
+security definer
+set search_path to 'public'
+as $$
+  select id from public.class_subject_teachers where teacher_id = public.teacher_id();
+$$;
+
+revoke execute on function public.teacher_cst_ids() from anon, public;
+
+-- ── Students ───────────────────────────────────────────────────
+-- Read-only: rosters are an admin surface. A teacher sees a student only
+-- while that student sits in one of their classes.
+drop policy if exists "Teachers read students in their classes" on public.students;
+create policy "Teachers read students in their classes" on public.students
+  for select to authenticated
+  using (class_id in (select public.teacher_class_ids()));
+
+-- ── Attendance ─────────────────────────────────────────────────
+-- Full write access, scoped by class. `with check` mirrors `using` so a
+-- teacher cannot move a record into a class they don't teach.
+drop policy if exists "Teachers manage attendance for their classes" on public.attendance;
+create policy "Teachers manage attendance for their classes" on public.attendance
+  for all to authenticated
+  using (class_id in (select public.teacher_class_ids()))
+  with check (class_id in (select public.teacher_class_ids()));
+
+-- ── Gradebook ──────────────────────────────────────────────────
+drop policy if exists "Teachers manage their grade categories" on public.grade_categories;
+create policy "Teachers manage their grade categories" on public.grade_categories
+  for all to authenticated
+  using (class_subject_teacher_id in (select public.teacher_cst_ids()))
+  with check (class_subject_teacher_id in (select public.teacher_cst_ids()));
+
+drop policy if exists "Teachers manage their assignments" on public.assignments;
+create policy "Teachers manage their assignments" on public.assignments
+  for all to authenticated
+  using (class_subject_teacher_id in (select public.teacher_cst_ids()))
+  with check (class_subject_teacher_id in (select public.teacher_cst_ids()));
+
+-- Grades reach their owner through the assignment.
+drop policy if exists "Teachers manage grades on their assignments" on public.assignment_grades;
+create policy "Teachers manage grades on their assignments" on public.assignment_grades
+  for all to authenticated
+  using (assignment_id in (
+    select a.id from public.assignments a
+     where a.class_subject_teacher_id in (select public.teacher_cst_ids())))
+  with check (assignment_id in (
+    select a.id from public.assignments a
+     where a.class_subject_teacher_id in (select public.teacher_cst_ids())));
+
+drop policy if exists "Teachers manage period grades for their subjects" on public.student_grades;
+create policy "Teachers manage period grades for their subjects" on public.student_grades
+  for all to authenticated
+  using (class_subject_teacher_id in (select public.teacher_cst_ids()))
+  with check (class_subject_teacher_id in (select public.teacher_cst_ids()));
+
+-- ── Discipline ─────────────────────────────────────────────────
+-- Read anything about their own students; write only in their own name, so
+-- one teacher cannot file or rewrite a report attributed to another.
+drop policy if exists "Teachers read discipline for their students" on public.discipline_records;
+create policy "Teachers read discipline for their students" on public.discipline_records
+  for select to authenticated
+  using (student_id in (
+    select s.id from public.students s
+     where s.class_id in (select public.teacher_class_ids())));
+
+drop policy if exists "Teachers file their own discipline reports" on public.discipline_records;
+create policy "Teachers file their own discipline reports" on public.discipline_records
+  for insert to authenticated
+  with check (
+    reported_by_teacher = public.teacher_id()
+    and student_id in (
+      select s.id from public.students s
+       where s.class_id in (select public.teacher_class_ids())));
+
+drop policy if exists "Teachers update their own discipline reports" on public.discipline_records;
+create policy "Teachers update their own discipline reports" on public.discipline_records
+  for update to authenticated
+  using (reported_by_teacher = public.teacher_id())
+  with check (reported_by_teacher = public.teacher_id());
+
+-- ── student_period_grades ──────────────────────────────────────
+-- The gradebook's computed overall score: weighted by grade category where
+-- categories exist, renormalised over the categories that actually have
+-- graded work, falling back to raw points otherwise.
+-- `security_invoker = true` is load-bearing. A view runs as its owner by
+-- default, which bypasses RLS — a student who can see one row in `students`
+-- could otherwise read every student's grades through it. Requires
+-- Postgres 15+; do not drop this option.
+create or replace view public.student_period_grades
+with (security_invoker = true) as
+with base as (
+  select
+    ag.student_id,
+    a.class_subject_teacher_id,
+    a.grading_period_id,
+    sum(ag.score)   as sum_score,
+    sum(a.max_score) as sum_max,
+    count(ag.score) as graded_count,
+    count(a.id)     as total_assignments
+  from public.assignments a
+  left join public.assignment_grades ag
+         on ag.assignment_id = a.id and ag.score is not null
+  group by ag.student_id, a.class_subject_teacher_id, a.grading_period_id
+),
+-- Only categorised work takes part in the weighted score; the join is inner
+-- on purpose. Uncategorised assignments fall through to the points fallback
+-- in the final select.
+cat as (
+  select
+    ag.student_id,
+    a.class_subject_teacher_id,
+    a.grading_period_id,
+    gc.weight as cat_weight,
+    sum(ag.score) / nullif(sum(a.max_score), 0::numeric) * 100::numeric as cat_pct
+  from public.assignments a
+  join public.grade_categories gc on gc.id = a.category_id
+  join public.assignment_grades ag
+       on ag.assignment_id = a.id and ag.score is not null
+  group by ag.student_id, a.class_subject_teacher_id, a.grading_period_id,
+           a.category_id, gc.weight
+),
+-- Renormalised over the categories that actually have graded work, so a
+-- period with only one category marked still reads out of 100.
+weighted as (
+  select
+    student_id,
+    class_subject_teacher_id,
+    grading_period_id,
+    sum(cat_pct * cat_weight) / nullif(sum(cat_weight), 0::numeric) as w_score
+  from cat
+  group by student_id, class_subject_teacher_id, grading_period_id
+)
+select
+  b.student_id,
+  b.class_subject_teacher_id,
+  b.grading_period_id,
+  round(
+    coalesce(
+      w.w_score,
+      b.sum_score / nullif(b.sum_max, 0::numeric) * 100::numeric
+    ), 2) as period_score,
+  b.graded_count,
+  b.total_assignments
+from base b
+left join weighted w
+       on w.student_id = b.student_id
+      and w.class_subject_teacher_id = b.class_subject_teacher_id
+      and w.grading_period_id = b.grading_period_id;

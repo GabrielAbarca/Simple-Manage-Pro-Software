@@ -61,6 +61,11 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   project cannot read a single student and the teacher console is dead.
 >   **Diff the view against the demo project's existing definition before
 >   applying it there** — see the warning in the file.
+>   **Precondition:** the same `teachers.auth_user_id` link the narrow-read fix
+>   needs. Every one of these policies is rooted in `teacher_id()`, which
+>   resolves through that column, so an unlinked teacher row means a dead
+>   console, not a degraded one. Neither project has a teacher row linked
+>   today.
 > - [`supabase/schema/incremental_narrow_read_policies.sql`](../supabase/schema/incremental_narrow_read_policies.sql)
 >   — **security fix, apply to every project including the demo.** Narrows
 >   `teachers`' blanket "any signed-in user" read policy (national_id, phone,
@@ -86,19 +91,26 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >
 > All of them are already included in `school_schema.sql`, so a fresh project
 > does **not** need them separately. Verify this before trusting it on a new
-> project: `incremental_narrow_read_policies.sql` was missing from
+> project: `incremental_narrow_read_policies.sql` and
+> `incremental_teacher_policies.sql` were both missing from
 > `school_schema.sql` until 2026-09-05, so every project provisioned before
-> then has no `teachers_directory` view and a broken student Teachers tab.
+> then has no `teachers_directory` view (a broken student Teachers tab) and
+> no teacher-scoped RLS (a dead teacher console). Both are folded in now.
 > (They live under `supabase/schema/`, not `supabase/migrations/`, so the
 > Supabase↔GitHub integration doesn't try to sync them to the demo project.
 > Apply them with the dashboard SQL editor — do **not** register them as
 > migrations, or the integration reports a history mismatch.)
 >
-> Applied to both existing projects (demo `SMP DataBase` and `SMP Pilot
-School`) as of this milestone — **except**
-> `incremental_narrow_read_policies.sql`, which was never applied to
-> `SMP DataBase` despite this claim. It was applied there on 2026-09-05.
-> `SMP Pilot School` was `INACTIVE` at the time and still needs it.
+> Per-project state, verified against both databases on 2026-09-05 rather
+> than assumed: `SMP Pilot School` already had every increment, including
+> both `incremental_narrow_read_policies.sql` and
+> `incremental_teacher_policies.sql`. `SMP DataBase` was missing both —
+> the narrow-read fix was applied there on 2026-09-05, and the teacher
+> policies (helper functions plus the nine policies) the same day; its
+> `student_period_grades` view already existed with `security_invoker=true`
+> and was left untouched. Re-verify with the queries in
+> [`supabase/schema/rls_audit.sql`](../supabase/schema/rls_audit.sql) rather
+> than trusting this paragraph.
 > On the demo project, `school_settings` also
 > carries the restrictive `demo_deny_*` policies the other tables have, so the
 > sandbox stays read-only server-side.

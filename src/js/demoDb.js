@@ -15,6 +15,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { supabase } from "./supabaseClient.js";
+import { attendanceRate } from "./attendanceScore.js";
 
 // ── student_period_grades view emulation ────────────────────
 // A port of the SQL view in supabase/schema/incremental_teacher_policies.sql,
@@ -32,8 +33,20 @@ import { supabase } from "./supabaseClient.js";
 //     counts only in the fallback below, matching the view's inner join
 //   · with no weighted categories, the same points ratio over every graded
 //     assignment
+//   · a category with kind === "attendance" is scored from the attendance
+//     record instead of from assignments, via attendanceScore.js — the same
+//     rule the view's att_cat CTE applies. A null rate (nothing counted yet)
+//     drops it exactly as an unmarked category drops out
 //   · null when nothing is graded; rounded to 2dp like the view's round()
-export function computePeriodScore(assignmentList, gradeRows, cats) {
+//
+// `attendanceRows` are this student's attendance rows for this cst, already
+// scoped to the period — [{ status }] is all that is read.
+export function computePeriodScore(
+  assignmentList,
+  gradeRows,
+  cats,
+  attendanceRows = [],
+) {
   const byId = new Map(assignmentList.map((a) => [a.id, a]));
   const weightByCat = new Map(cats.map((c) => [c.id, Number(c.weight) || 0]));
 
@@ -74,6 +87,18 @@ export function computePeriodScore(assignmentList, gradeRows, cats) {
     weightedSum += (bucket.score / bucket.max) * 100 * weight;
     weightTotal += weight;
   });
+
+  // REAC 2026's attendance component. It owns no assignments, so it never
+  // reaches perCat above; the view's att_cat CTE is the counterpart.
+  const rate = attendanceRate(attendanceRows);
+  if (rate != null) {
+    cats.forEach((c) => {
+      if (c.kind !== "attendance") return;
+      const weight = Number(c.weight) || 0;
+      weightedSum += rate * weight;
+      weightTotal += weight;
+    });
+  }
 
   const score =
     weightTotal > 0 ? weightedSum / weightTotal : (allScore / allMax) * 100;
@@ -190,8 +215,20 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     return false;
   }
 
+  // Attendance marks feed the REAC attendance component, so saving one
+  // re-scores the period. The delta key carries a date but not a period, and
+  // this has to stay synchronous, so it invalidates every known period of the
+  // cst rather than resolving the date — the same over-invalidation
+  // categoriesDirty already accepts.
+  function attendanceDirty(cstId) {
+    for (const d of attendanceDeltas.values())
+      if (d.class_subject_teacher_id === cstId) return true;
+    return false;
+  }
+
   // Every period of this cst the session's edits could have re-scored.
-  // `knownPeriodIds` covers the categories case, which touches all periods.
+  // `knownPeriodIds` covers the categories and attendance cases, which touch
+  // all periods.
   function dirtyPeriodsFor(cstId, knownPeriodIds = []) {
     const dirty = new Set();
     const add = (loc) => {
@@ -203,7 +240,8 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     assignments.updates.forEach((_, id) => add(assignmentIndex.get(id)));
     assignments.deletes.forEach((id) => add(assignmentIndex.get(id)));
     gradeDeltas.forEach((row) => add(assignmentPeriod(row.assignment_id)));
-    if (categoriesDirty(cstId)) knownPeriodIds.forEach((p) => dirty.add(p));
+    if (categoriesDirty(cstId) || attendanceDirty(cstId))
+      knownPeriodIds.forEach((p) => dirty.add(p));
     return dirty;
   }
 
@@ -270,6 +308,29 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     const cats = await wrapped.fetchCategories(cstId);
     const total = current.length;
 
+    // Attendance only reaches the score through a kind === "attendance"
+    // category, so skip the read entirely when this gradebook has none.
+    const attendanceByStudent = new Map();
+    if (cats.some((c) => c.kind === "attendance")) {
+      const period = (await realDb.fetchGradingPeriods()).find(
+        (p) => p.id === periodId,
+      );
+      const within = (date) =>
+        !period || (date >= period.start_date && date <= period.end_date);
+      (await wrapped.fetchCstAttendance(cstId)).forEach((r) => {
+        if (!within(r.date)) return;
+        if (!attendanceByStudent.has(r.student_id))
+          attendanceByStudent.set(r.student_id, []);
+        attendanceByStudent.get(r.student_id).push(r);
+      });
+      // A student whose only local change is an attendance mark still needs
+      // re-scoring; their grade rows are untouched so nothing else catches it.
+      attendanceDeltas.forEach((d) => {
+        if (d.class_subject_teacher_id === cstId && within(d.date))
+          affected.add(d.student_id);
+      });
+    }
+
     const out = new Map();
     (serverViewRows ?? []).forEach((r) => {
       if (students.deletes.has(r.student_id)) return;
@@ -280,7 +341,12 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       const rows = rowsByStudent.get(sid) ?? [];
       out.set(sid, {
         student_id: sid,
-        period_score: computePeriodScore(current, rows, cats),
+        period_score: computePeriodScore(
+          current,
+          rows,
+          cats,
+          attendanceByStudent.get(sid) ?? [],
+        ),
         graded_count: rows.filter((g) => g.score != null).length,
         total_assignments: total,
       });
@@ -634,7 +700,11 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
         if (students.deletes.has(r.student_id)) return;
         const key = `${r.student_id}|${cstId}|${r.date}`;
         const d = attendanceDeltas.get(key);
-        out.push({ student_id: r.student_id, status: d ? d.status : r.status });
+        out.push({
+          student_id: r.student_id,
+          status: d ? d.status : r.status,
+          date: r.date,
+        });
         if (d) covered.add(key);
       });
       attendanceDeltas.forEach((d, key) => {
@@ -643,7 +713,11 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
           !covered.has(key) &&
           !students.deletes.has(d.student_id)
         )
-          out.push({ student_id: d.student_id, status: d.status });
+          out.push({
+            student_id: d.student_id,
+            status: d.status,
+            date: d.date,
+          });
       });
       return out;
     },

@@ -383,6 +383,17 @@ test.describe("teacher console", () => {
     await expect(page.locator("#categories-body")).toContainText("Cotidiano");
     await expect(page.locator("#categories-body")).toContainText("Pruebas");
 
+    // The attendance component comes across too, and says it is scored from
+    // the attendance record rather than from assignments — without the `kind`
+    // carried through instantiation it would look like any other category and
+    // its weight would be silently renormalised away.
+    const asistencia = page.locator(".manage-item", { hasText: "Asistencia" });
+    await expect(asistencia).toHaveCount(1);
+    await expect(asistencia).toContainText("scored from attendance");
+    await expect(
+      page.locator(".manage-item", { hasText: "Cotidiano" }),
+    ).not.toContainText("scored from attendance");
+
     expect(errors).toEqual([]);
     expect(writes).toEqual([]);
   });

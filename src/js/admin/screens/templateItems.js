@@ -17,11 +17,13 @@ import { weightBadgeHtml } from "./componentTemplates.js";
 
 /** The MEP-standard components, as a starting scheme an admin can adjust. */
 const MEP_PRESET = [
-  { name: "Cotidiano", weight: 35 },
-  { name: "Pruebas", weight: 40 },
-  { name: "Tareas", weight: 10 },
-  { name: "Proyecto", weight: 10 },
-  { name: "Asistencia", weight: 5 },
+  { name: "Cotidiano", weight: 35, kind: "assignments" },
+  { name: "Pruebas", weight: 40, kind: "assignments" },
+  { name: "Tareas", weight: 10, kind: "assignments" },
+  { name: "Proyecto", weight: 10, kind: "assignments" },
+  // REAC 2026's 5%: scored from the attendance record rather than from
+  // assignments. `kind` is what makes that survive renaming.
+  { name: "Asistencia", weight: 5, kind: "attendance" },
 ];
 
 const templateItemsOverlay = document.getElementById("template-items-overlay");
@@ -205,6 +207,7 @@ async function loadMepPreset() {
         name: c.name,
         weight: c.weight,
         item_order: order,
+        kind: c.kind,
       });
     }
     showToast(t("console.components.presetLoaded"));

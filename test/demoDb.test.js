@@ -243,6 +243,118 @@ describe("computePeriodScore matches the student_period_grades view", () => {
     ];
     expect(computePeriodScore(assignments, grades, [])).toBe(75);
   });
+
+  describe("the attendance component (REAC 2026's 5%)", () => {
+    // Mirrors the view's att_cat CTE: a category with kind "attendance" owns
+    // no assignments and takes its percentage from the attendance record.
+    const mepCats = [
+      { id: 1, weight: 95, kind: "assignments" },
+      { id: 2, weight: 5, kind: "attendance" },
+    ];
+    const assignments = [{ id: 1, max_score: 100, category_id: 1 }];
+    const grades = [{ assignment_id: 1, score: 80 }];
+    const rows = (n, status) => Array.from({ length: n }, () => ({ status }));
+
+    it("scores it from attendance instead of from assignments", () => {
+      // Coursework 80, attendance 18/20 = 90.
+      // → (80*95 + 90*5) / 100 = 80.5
+      const attendance = [...rows(18, "present"), ...rows(2, "absent")];
+      expect(computePeriodScore(assignments, grades, mepCats, attendance)).toBe(
+        80.5,
+      );
+    });
+
+    it("drops the category when no attendance has been taken yet", () => {
+      // Without attendance the 5% renormalises away and coursework stands
+      // alone — it must not be scored as a zero.
+      expect(computePeriodScore(assignments, grades, mepCats, [])).toBe(80);
+    });
+
+    it("applies the three-tardías rule through to the grade", () => {
+      // 8 present + 3 late → floor(3/3)=1 absence → 10/11 = 90.909…
+      // → (80*95 + 90.909…*5) / 100 = 80.55
+      const attendance = [...rows(8, "present"), ...rows(3, "late")];
+      expect(computePeriodScore(assignments, grades, mepCats, attendance)).toBe(
+        80.55,
+      );
+    });
+
+    it("ignores attendance when no category claims it", () => {
+      // The same attendance against an all-assignments scheme changes nothing.
+      const plain = [{ id: 1, weight: 100, kind: "assignments" }];
+      const attendance = [...rows(1, "present"), ...rows(9, "absent")];
+      expect(computePeriodScore(assignments, grades, plain, attendance)).toBe(
+        80,
+      );
+    });
+
+    it("still returns null when nothing is graded, attendance or not", () => {
+      // `base` in the view needs a graded assignment to emit a row at all, so
+      // attendance alone cannot conjure a period score.
+      expect(
+        computePeriodScore(assignments, [], mepCats, rows(10, "present")),
+      ).toBeNull();
+    });
+
+    // Parity against the real thing. These rows were read out of the demo
+    // project (student 83, class_subject_teacher 11, period 2) together with
+    // the number public.student_period_grades returned for them. If the view
+    // and this mirror ever drift, one of these two numbers moves and this
+    // fails — which is the whole point of keeping the fixture verbatim.
+    describe("parity with the live student_period_grades view", () => {
+      const liveAssignments = [
+        { id: 190, max_score: 30, category_id: 41 },
+        { id: 191, max_score: 20, category_id: 42 },
+        { id: 192, max_score: 100, category_id: 43 },
+        { id: 193, max_score: 50, category_id: 44 },
+      ];
+      const liveGrades = [
+        { assignment_id: 193, score: 48 },
+        { assignment_id: 192, score: 94 },
+        { assignment_id: 191, score: 18.4 },
+        { assignment_id: 190, score: 27 },
+      ];
+      const liveCats = [
+        { id: 44, weight: 10, kind: "assignments" },
+        { id: 43, weight: 40, kind: "assignments" },
+        { id: 42, weight: 15, kind: "assignments" },
+        { id: 41, weight: 35, kind: "assignments" },
+      ];
+      // 22 days: 17 present, 1 absent, 4 late.
+      const liveAttendance = [
+        ...rows(17, "present"),
+        ...rows(1, "absent"),
+        ...rows(4, "late"),
+      ];
+
+      it("reproduces the view's score for an all-assignments scheme", () => {
+        // The view returned 92.50 for this student. Attendance is present in
+        // the data but no category claims it, so it must not move the score.
+        expect(
+          computePeriodScore(
+            liveAssignments,
+            liveGrades,
+            liveCats,
+            liveAttendance,
+          ),
+        ).toBe(92.5);
+      });
+
+      it("reproduces the view's score once a 5% attendance component exists", () => {
+        // Same rows with an Asistencia category added. floor(4/3)=1 absence,
+        // so 22-1-1 = 20 of 22 = 90.909…, and the view's att_cat CTE computes
+        // 92.42 overall. Verified against the live database.
+        expect(
+          computePeriodScore(
+            liveAssignments,
+            liveGrades,
+            [...liveCats, { id: 99, weight: 5, kind: "attendance" }],
+            liveAttendance,
+          ),
+        ).toBe(92.42);
+      });
+    });
+  });
 });
 
 // The defect this suite exists to pin: before attendance carried a subject,

@@ -191,11 +191,15 @@ create policy "Teachers update their own discipline reports" on public.disciplin
 --  security_invoker the view is filtered by the caller's own policies.
 --  Requires Postgres 15+. Do not drop this option to match an older project.
 --
---  Known divergence: src/js/demoDb.js computePeriodScore averages
---  per-assignment percentages instead, and its own comment calls itself a
---  best-effort mirror. It only affects students edited during a demo
---  session. Worth reconciling, but it is a demo-overlay bug, not a schema
---  one, and changing it is out of scope here.
+--  src/js/demoDb.js computePeriodScore mirrors this view for students
+--  edited during a demo session, including the attendance component via
+--  src/js/attendanceScore.js. The two are expected to agree exactly and
+--  test/demoDb.test.js pins the arithmetic; a change to either belongs in
+--  the same commit as the other.
+--
+--  (This note previously recorded a divergence — that the mirror averaged
+--  per-assignment percentages rather than taking the points ratio. That
+--  was fixed in the mirror some time ago; the note had gone stale.)
 
 create or replace view public.student_period_grades
 with (security_invoker = true) as
@@ -230,15 +234,58 @@ cat as (
   group by ag.student_id, a.class_subject_teacher_id, a.grading_period_id,
            a.category_id, gc.weight
 ),
+-- The attendance component (REAC 2026's 5%). A category marked
+-- kind = 'attendance' has no assignments, so without this it would drop out
+-- of `cat` and its weight would be silently redistributed across the others.
+--
+-- Three tardías count as one ausencia, MEP's long-standing rule, and an
+-- excused absence is left out of both sides rather than counted as attended.
+-- The `having` keeps a group whose days are ALL excused from reaching the
+-- weighted sum with a null percentage, which would dilute the other
+-- categories. Mirrored in src/js/attendanceScore.js — keep the two in step.
+att_cat as (
+  select
+    att.student_id,
+    att.class_subject_teacher_id,
+    gp.id as grading_period_id,
+    gc.weight as cat_weight,
+    greatest(
+      count(*) filter (where att.status <> 'excused')
+        - count(*) filter (where att.status = 'absent')
+        - floor(count(*) filter (where att.status = 'late') / 3.0),
+      0
+    ) / nullif(count(*) filter (where att.status <> 'excused'), 0)
+      * 100::numeric as cat_pct
+  from public.attendance att
+  join public.grading_periods gp
+    on att.date between gp.start_date and gp.end_date
+  join public.grade_categories gc
+    on gc.class_subject_teacher_id = att.class_subject_teacher_id
+   and gc.kind = 'attendance'
+  -- class_subject_teacher_id is nullable: rows predating the per-subject
+  -- migration carry null and cannot be attributed to a subject's grade.
+  where att.class_subject_teacher_id is not null
+  group by att.student_id, att.class_subject_teacher_id, gp.id, gc.weight
+  having count(*) filter (where att.status <> 'excused') > 0
+),
 -- Renormalised over the categories that actually have graded work, so a
--- period with only one category marked still reads out of 100.
+-- period with only one category marked still reads out of 100. Attendance
+-- joins that renormalisation on the same footing as any other category.
 weighted as (
   select
     student_id,
     class_subject_teacher_id,
     grading_period_id,
     sum(cat_pct * cat_weight) / nullif(sum(cat_weight), 0::numeric) as w_score
-  from cat
+  from (
+    select student_id, class_subject_teacher_id, grading_period_id,
+           cat_weight, cat_pct
+      from cat
+    union all
+    select student_id, class_subject_teacher_id, grading_period_id,
+           cat_weight, cat_pct
+      from att_cat
+  ) every_cat
   group by student_id, class_subject_teacher_id, grading_period_id
 )
 select

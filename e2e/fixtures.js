@@ -299,9 +299,32 @@ export const teacherFix = {
     { id: 5, name: "Plantilla MEP", subject_id: null, is_default: true },
   ],
   grade_component_template_items: [
-    { id: 1, template_id: 5, name: "Cotidiano", weight: 35, item_order: 1 },
-    { id: 2, template_id: 5, name: "Pruebas", weight: 40, item_order: 2 },
-    { id: 3, template_id: 5, name: "Asistencia", weight: 25, item_order: 3 },
+    // `kind` is what survives instantiation: the Asistencia component is
+    // scored from the attendance record, not from assignments.
+    {
+      id: 1,
+      template_id: 5,
+      name: "Cotidiano",
+      weight: 35,
+      item_order: 1,
+      kind: "assignments",
+    },
+    {
+      id: 2,
+      template_id: 5,
+      name: "Pruebas",
+      weight: 40,
+      item_order: 2,
+      kind: "assignments",
+    },
+    {
+      id: 3,
+      template_id: 5,
+      name: "Asistencia",
+      weight: 25,
+      item_order: 3,
+      kind: "attendance",
+    },
   ],
 };
 

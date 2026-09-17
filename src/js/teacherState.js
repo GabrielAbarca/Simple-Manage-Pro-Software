@@ -9,6 +9,7 @@
  *   teacherId: number | null,
  *   activeYear: { id: number, name: string, is_active: boolean } | null,
  *   periods: Array<any>,
+ *   school: any,
  *   myClassesCache: Array<object>,
  *   currentClass: { cstId: number, classId: number, subjectId: number,
  *     className: string, subjectName: string, color: string,
@@ -23,6 +24,10 @@ export const state = {
   teacherId: null,
   activeYear: null,
   periods: [],
+  // school_settings row: school identity + the MEP pass marks. Read once at
+  // bootstrap so the synchronous grade-band helpers can resolve without
+  // awaiting. Null on a project whose schema predates the table.
+  school: null,
   myClassesCache: [],
   currentClass: null,
   loaded: { today: false, subjects: false, settings: false },

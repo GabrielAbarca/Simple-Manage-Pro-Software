@@ -19,6 +19,25 @@ export async function fetchTeachers() {
   return data;
 }
 
+/**
+ * The single school_settings row — school identity and the MEP pass marks.
+ * Schemas are applied by hand, so a project that predates the table (or the
+ * pass-mark columns) must keep working: an unreadable row becomes null and
+ * promotion.js applies its defaults.
+ */
+export async function fetchSchoolSettings() {
+  const { data, error } = await supabase
+    .from("school_settings")
+    .select("*")
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.warn("fetchSchoolSettings:", error.message);
+    return null;
+  }
+  return data;
+}
+
 export async function fetchRooms() {
   const { data, error } = await supabase
     .from("rooms")

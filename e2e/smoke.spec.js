@@ -175,6 +175,43 @@ test.describe("student portal", () => {
     expect(writes).toEqual([]);
   });
 
+  test("grades use the school's MEP pass mark, not a hardcoded 50", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, studentFix);
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+
+    await page.goto("/");
+    await page.waitForFunction(
+      () =>
+        document.getElementById("welcome-name")?.textContent?.includes("Ana"),
+      { timeout: 10_000 },
+    );
+    await page.click('aside a[data-page="grades"]');
+    await page.waitForSelector("#grades-body tr");
+
+    const passing = page.locator("#grades-body tr", { hasText: "Mathematics" });
+    const failing = page.locator("#grades-body tr", { hasText: "Spanish" });
+
+    // 88 promotes, 55 does not. The 55 row is the regression: it read "Pass"
+    // under the old `score >= 50`, while MEP's secondary minimum is 70.
+    await expect(passing.locator(".status-badge")).toHaveClass(/status-pass/);
+    await expect(failing.locator(".status-badge")).toHaveClass(/status-fail/);
+    await expect(failing.locator(".status-badge")).toHaveText("Fail");
+
+    // The colour band moves with the same mark, so a failing score is never
+    // painted as a comfortable one.
+    await expect(failing.locator("span.score-low")).toBeVisible();
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
   test("attendance names the subject, falling back to the section", async ({
     page,
     context,

@@ -80,6 +80,17 @@ export const studentFix = {
     { id: 8, first_name: "Marco", last_name: "López", status: "active" },
   ],
   rooms: [{ id: 41, name: "Room 101" }],
+  // The MEP pass mark the portals band against. 70 is the REAC 2026 minimum
+  // for III ciclo and Diversificada.
+  school_settings: [
+    {
+      id: 1,
+      name: "Demo School",
+      id_label: null,
+      passing_score: 70,
+      conduct_passing_score: 70,
+    },
+  ],
   grading_periods: [
     {
       id: 1,
@@ -105,6 +116,25 @@ export const studentFix = {
           name: "Mathematics",
           code: "MATH7",
           color: "#7380ec",
+        },
+      },
+    },
+    // Sits between the old hardcoded 50 and the real MEP minimum of 70 — the
+    // exact score the portal used to call "Aprobado".
+    {
+      id: 502,
+      student_id: 101,
+      score: 55,
+      submitted_at: "2026-07-01T12:00:00Z",
+      grading_periods: { id: 1, name: "Period 1", period_order: 1 },
+      class_subject_teachers: {
+        id: 12,
+        teacher_id: 8,
+        subjects: {
+          id: 32,
+          name: "Spanish",
+          code: "SPAN7",
+          color: "#41f1b6",
         },
       },
     },

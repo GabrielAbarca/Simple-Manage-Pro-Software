@@ -80,6 +80,12 @@ export default {
     idLabel: "Etiqueta del campo de identificación",
     idLabelHelp:
       'Cómo se llama el campo de identificación en este colegio (p. ej. "Cédula", "Tarjeta de identificación de menores", "DIMEX", "Carné"). Déjelo en blanco para usar el predeterminado.',
+    passingScore: "Nota mínima de aprobación",
+    passingScoreHelp:
+      "La nota mínima para aprobar una materia. El MEP fija 70 para III ciclo y Educación Diversificada, y 65 para I–II ciclo.",
+    conductPassingScore: "Nota mínima de conducta",
+    conductPassingScoreHelp:
+      "La nota mínima de conducta. El MEP fija 70 para secundaria y 65 para primaria.",
     saved: "Perfil del colegio guardado.",
     unavailable:
       "El almacenamiento del perfil del colegio aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",

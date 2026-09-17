@@ -1,4 +1,6 @@
 import { t } from "../i18n.js";
+import { state } from "../studentState.js";
+import { bandClass } from "../promotion.js";
 
 /** Student/teacher status label from the DB status value. */
 export function statusLabel(status) {
@@ -7,9 +9,7 @@ export function statusLabel(status) {
 
 /** A score wrapped in its pass/mid/fail color-coding span. */
 export function scoreHtml(score) {
-  const cls =
-    score >= 70 ? "score-high" : score >= 50 ? "score-mid" : "score-low";
-  return `<span class="${cls}">${score}</span>`;
+  return `<span class="${bandClass(score, state.school)}">${score}</span>`;
 }
 
 /**

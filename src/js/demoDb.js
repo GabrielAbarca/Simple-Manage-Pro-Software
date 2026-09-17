@@ -300,6 +300,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     fetchSubjects: realDb.fetchSubjects,
     fetchTeachers: realDb.fetchTeachers,
     fetchRooms: realDb.fetchRooms,
+    fetchSchoolSettings: realDb.fetchSchoolSettings,
     fetchSubjectsDetailed: realDb.fetchSubjectsDetailed,
     // Admin-owned MEP schemes are read-only reference data for the teacher;
     // instantiating one writes through insertCategory, which the overlay owns.

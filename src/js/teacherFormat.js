@@ -5,6 +5,7 @@
 import { t, formatDate as i18nFormatDate } from "./i18n.js";
 import { dayKey } from "./scheduleLogic.js";
 import { state } from "./teacherState.js";
+import { bandClass } from "./promotion.js";
 
 /**
  * Human-readable label for a class — "10th Grade — Section A".
@@ -48,14 +49,11 @@ export function getCurrentPeriodId() {
   return (inRange ?? state.periods[0])?.id ?? "";
 }
 
-// Grade colour band: red <70, amber 70–74.99, green ≥75. Reuses the
-// shared .score-low / .score-mid / .score-high classes from style.css.
+// Grade colour band, relative to the school's own MEP pass mark: red below
+// it, amber within 5 points of it, green above that. Reuses the shared
+// .score-low / .score-mid / .score-high classes from style.css.
 export function gradeBandClass(score) {
-  if (score == null) return "";
-  const n = Number(score);
-  if (n < 70) return "score-low";
-  if (n < 75) return "score-mid";
-  return "score-high";
+  return bandClass(score, state.school);
 }
 
 // Render one grade cell: colored value, or a neutral placeholder when ungraded

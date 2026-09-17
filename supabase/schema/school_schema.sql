@@ -37,11 +37,18 @@ create table public.app_config (
 -- field is called here — "Cédula", "DIMEX", a school-issued "Carné").
 -- Not a general custom-fields system; `check (id = 1)`
 -- keeps it compatible with the console's id-keyed table gateway.
+--
+-- passing_score / conduct_passing_score are the MEP promotion minimums. REAC
+-- 2026 sets both to 70 for III ciclo and Educación Diversificada; primaria
+-- (I–II ciclo) uses 65, so schools that need it can lower the value here
+-- rather than in code.
 create table public.school_settings (
   id integer primary key default 1 check (id = 1),
   name text,
   logo_url text,
   id_label text,
+  passing_score numeric(5, 2) not null default 70 check (passing_score between 0 and 100),
+  conduct_passing_score numeric(5, 2) not null default 70 check (conduct_passing_score between 0 and 100),
   created_at timestamp with time zone default now()
 );
 insert into public.school_settings (id) values (1) on conflict (id) do nothing;

@@ -223,6 +223,26 @@ export async function fetchTeachers() {
   return data;
 }
 
+/**
+ * The single school_settings row — school identity and the MEP pass marks.
+ * A project whose schema predates the table (they are applied by hand) must
+ * keep working, so an unreadable row is downgraded to null and the callers'
+ * defaults apply. Mirrors the admin console's loadSchoolSettings().
+ */
+export async function fetchSchoolSettings() {
+  const { data, error } = await supabase
+    .from("school_settings")
+    .select("*")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("fetchSchoolSettings:", error.message);
+    return null;
+  }
+  return data;
+}
+
 export async function fetchEvents() {
   const { data, error } = await supabase
     .from("events")

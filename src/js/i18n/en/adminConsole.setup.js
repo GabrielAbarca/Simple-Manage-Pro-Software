@@ -79,6 +79,12 @@ export default {
     idLabel: "ID field label",
     idLabelHelp:
       'What the ID field is called at this school (e.g. "Cédula", "Tarjeta de identificación de menores", "DIMEX", "Carné"). Leave blank for the default.',
+    passingScore: "Passing grade",
+    passingScoreHelp:
+      "The minimum grade that promotes a subject. MEP sets 70 for III ciclo and Educación Diversificada, 65 for I–II ciclo.",
+    conductPassingScore: "Passing conduct grade",
+    conductPassingScoreHelp:
+      "The minimum conduct grade. MEP sets 70 for secondary, 65 for primaria.",
     saved: "School profile saved.",
     unavailable:
       "School profile storage isn't set up on this project yet — default labels are in use.",

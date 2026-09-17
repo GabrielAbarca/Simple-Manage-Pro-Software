@@ -1,10 +1,10 @@
 -- ═══════════════════════════════════════════════════════════════
 --  incremental_school_settings.sql
 --
---  One row per school project holding its identity and the few labels
---  that differ between schools: what the national-ID field is called
---  ("Cédula" by default, "DIMEX" where foreign students are the norm,
---  or a school-issued "Carné").
+--  One row per school project holding its identity, the few labels that
+--  differ between schools (what the national-ID field is called —
+--  "Cédula" by default, "DIMEX" where foreign students are the norm, or
+--  a school-issued "Carné") and the MEP promotion minimums.
 --
 --  Deliberately NOT a general custom-fields system. It is a single row
 --  (`check (id = 1)`), which keeps it compatible with the admin console's
@@ -26,6 +26,37 @@ create table if not exists public.school_settings (
 
 -- Seed the single row so the console only ever needs to UPDATE it.
 insert into public.school_settings (id) values (1) on conflict (id) do nothing;
+
+-- ── MEP promotion minimums ──────────────────────────────────────
+-- Added after the table shipped, so they go on as ALTERs for projects that
+-- already carry it. REAC 2026 sets both to 70 for III ciclo and Educación
+-- Diversificada — the pilot's scope. Primaria (I–II ciclo) uses 65, so a
+-- school that needs it lowers the value here instead of in code.
+--
+-- The portals default to 70 when the column is missing, so a project that
+-- has not run this snippet still renders the correct verdict.
+alter table public.school_settings
+  add column if not exists passing_score numeric(5, 2) not null default 70;
+alter table public.school_settings
+  add column if not exists conduct_passing_score numeric(5, 2) not null default 70;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'school_settings_passing_score_check'
+  ) then
+    alter table public.school_settings
+      add constraint school_settings_passing_score_check
+      check (passing_score between 0 and 100);
+  end if;
+  if not exists (
+    select 1 from pg_constraint where conname = 'school_settings_conduct_passing_score_check'
+  ) then
+    alter table public.school_settings
+      add constraint school_settings_conduct_passing_score_check
+      check (conduct_passing_score between 0 and 100);
+  end if;
+end $$;
 
 alter table public.school_settings enable row level security;
 

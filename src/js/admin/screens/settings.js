@@ -12,6 +12,7 @@ import { escapeHtml, nullable } from "../ui/format.js";
 import { showToast, errorText } from "../ui/feedback.js";
 import { renderErrorBlock } from "../ui/tables.js";
 import { loadSchoolSettings, applyIdLabels } from "../domain/schoolProfile.js";
+import { passingScore, conductPassingScore } from "../../promotion.js";
 
 /**
  * School profile card: the school's name and what it calls the national-ID
@@ -46,6 +47,18 @@ async function renderSchoolProfile() {
             placeholder="${escapeHtml(t("console.teachers.nationalId"))}" />
           <small class="field-help">${escapeHtml(t("console.school.idLabelHelp"))}</small>
         </div>
+        <div class="field-group">
+          <label for="school-passing-score">${escapeHtml(t("console.school.passingScore"))}</label>
+          <input id="school-passing-score" type="number" min="0" max="100" step="0.01"
+            value="${passingScore(state.school)}" />
+          <small class="field-help">${escapeHtml(t("console.school.passingScoreHelp"))}</small>
+        </div>
+        <div class="field-group">
+          <label for="school-conduct-passing-score">${escapeHtml(t("console.school.conductPassingScore"))}</label>
+          <input id="school-conduct-passing-score" type="number" min="0" max="100" step="0.01"
+            value="${conductPassingScore(state.school)}" />
+          <small class="field-help">${escapeHtml(t("console.school.conductPassingScoreHelp"))}</small>
+        </div>
         ${unavailable ? `<p class="field-help">${escapeHtml(t("console.school.unavailable"))}</p>` : ""}
         <div>
           <button type="button" class="btn btn-primary btn-sm" id="btn-save-school"
@@ -66,9 +79,20 @@ async function saveSchoolProfile() {
     nullable(
       /** @type {HTMLInputElement} */ (document.getElementById(id)).value,
     );
+  const rawField = (id) =>
+    /** @type {HTMLInputElement} */ (document.getElementById(id)).value;
+
+  // The pass marks are NOT NULL with a MEP default, so a blank or out-of-range
+  // field resolves back to that default rather than being sent as null.
   const patch = {
     name: readField("school-name"),
     id_label: readField("school-id-label"),
+    passing_score: passingScore({
+      passing_score: rawField("school-passing-score"),
+    }),
+    conduct_passing_score: conductPassingScore({
+      conduct_passing_score: rawField("school-conduct-passing-score"),
+    }),
   };
   try {
     if (state.school?.id != null) {

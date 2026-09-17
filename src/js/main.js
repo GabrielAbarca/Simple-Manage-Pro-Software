@@ -1,7 +1,7 @@
 import "./errorHandler.js";
 import "./speedInsights.js";
 import { resolveStudentSession, bindSessionWatchers } from "./studentAuth.js";
-import { state } from "./studentState.js";
+import { state, loadSchoolSettings } from "./studentState.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import { initSidebarToggle } from "./ui.js";
@@ -20,6 +20,10 @@ const { studentId } = await resolveStudentSession();
 state.studentId = studentId;
 
 bindSessionWatchers();
+
+// The MEP pass mark lives in school_settings and every graded view bands
+// against it, so it has to be on state before the first view renders.
+await loadSchoolSettings();
 
 const closeNav = initSidebarToggle();
 const themeToggler = document.querySelector(".theme-toggler");

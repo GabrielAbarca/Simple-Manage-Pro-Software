@@ -5,6 +5,15 @@ import {
 } from "../supabaseQueries.js";
 import { state, getEvents, getGradingPeriods } from "../studentState.js";
 import { scoreHtml, statusLabel } from "./viewHelpers.js";
+import { bandClass } from "../promotion.js";
+
+// Grade-bar fill per colour band, so the bar and the score beside it always
+// agree about where the school's pass mark sits.
+const BAND_FILL = {
+  "score-high": "var(--color-success)",
+  "score-mid": "var(--color-warning)",
+  "score-low": "var(--color-danger)",
+};
 
 export async function initDashboard() {
   // Warm the events request now so it overlaps the profile + stats fetches
@@ -234,12 +243,8 @@ function renderSubjectAnalytics(grades) {
             ) / 10
           : 0;
       const icon = subjectIcons[subj.name] ?? "book";
-      const fillColor =
-        avg >= 70
-          ? "var(--color-success)"
-          : avg >= 50
-            ? "var(--color-warning)"
-            : "var(--color-danger)";
+      const band = bandClass(avg, state.school);
+      const fillColor = BAND_FILL[band] ?? "var(--color-danger)";
 
       return `<div class="item">
       <div class="icon" style="background:${subj.color}">
@@ -252,7 +257,7 @@ function renderSubjectAnalytics(grades) {
             <div class="grade-fill" style="width:${avg}%; background:${fillColor}"></div>
           </div>
         </div>
-        <span class="score-display ${avg >= 70 ? "score-high" : avg >= 50 ? "score-mid" : "score-low"}">${avg}</span>
+        <span class="score-display ${band}">${avg}</span>
       </div>
     </div>`;
     })

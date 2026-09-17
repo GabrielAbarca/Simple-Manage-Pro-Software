@@ -17,10 +17,12 @@ import { state } from "./teacherState.js";
  * @property {() => Promise<number | null>} getTeacherId
  * @property {() => Promise<{ id: number, name: string, is_active: boolean } | null>} fetchActiveYear
  * @property {(yearId?: number) => Promise<Array<any>>} fetchGradingPeriods
+ * @property {() => Promise<any>} [fetchSchoolSettings]
  */
 
 /**
- * Populate `state.teacherId`, `state.activeYear` and `state.periods`.
+ * Populate `state.teacherId`, `state.activeYear`, `state.periods` and
+ * `state.school`.
  *
  * The identity and the year are resolved in separate try blocks on purpose:
  * a teachers lookup that fails should not also cost a perfectly good school
@@ -46,6 +48,16 @@ export async function resolveTeacherContext(db) {
     state.periods = await db.fetchGradingPeriods(state.activeYear?.id);
   } catch (err) {
     state.contextError ??= err;
+  }
+
+  // The school's pass mark. Deliberately not a context failure: schemas are
+  // applied by hand, so a project without the settings row is an expected
+  // state that promotion.js covers with the MEP defaults.
+  try {
+    state.school = (await db.fetchSchoolSettings?.()) ?? null;
+  } catch (err) {
+    console.warn("resolveTeacherContext: school_settings unavailable:", err);
+    state.school = null;
   }
 
   return state.contextError == null;

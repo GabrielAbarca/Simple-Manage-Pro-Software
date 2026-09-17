@@ -3,6 +3,7 @@ import { fetchStudentProfile, fetchStudentGrades } from "../supabaseQueries.js";
 import { skeletonRows } from "../ui.js";
 import { state, getGradingPeriods } from "../studentState.js";
 import { scoreHtml } from "./viewHelpers.js";
+import { isPassing } from "../promotion.js";
 
 export async function initGrades() {
   if (!state.schoolYearId) {
@@ -46,7 +47,7 @@ async function loadGradesTable() {
       const subj = g.class_subject_teachers?.subjects;
       const teacher = g.class_subject_teachers?.teachers;
       const score = Number(g.score);
-      const pass = score >= 50;
+      const pass = isPassing(score, state.school);
 
       return `<tr>
       <td style="text-align:left;">

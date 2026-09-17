@@ -2,6 +2,38 @@
 
 Working guide for AI agents (and humans) contributing to **SMP Dashboard**. Read this before making changes.
 
+> # ⛔ STOP — READ BEFORE EVERY SINGLE `git commit` ⛔
+>
+> ## Run this first. Every time. No exceptions.
+>
+> ```bash
+> git config user.name && git config user.email
+> ```
+>
+> **If it prints `Claude` or `noreply@anthropic.com`, STOP and fix it before committing:**
+>
+> ```bash
+> git config user.name "Gabriel Zelaya"
+> git config user.email "gzelaya0404@gmail.com"
+> ```
+>
+> ### Why this keeps going wrong
+>
+> The sandbox ships a **global** `/root/.gitconfig` that sets
+> `user.name = Claude`, `user.email = noreply@anthropic.com`. Every fresh
+> container has it. A clean commit **message** is not enough — the author
+> field is separate, it is set from that global config, and **that** is what
+> GitHub shows in the contributor list and on the commit. It has already
+> shipped a `Claude`-authored commit to this repo more than once.
+>
+> Checking for a `Co-Authored-By` trailer does **not** catch this. The only
+> thing that catches it is running the command above **before** you commit.
+> The repo-local value wins over the global one, and it must be set again in
+> every new container or worktree.
+>
+> A `pre-commit` hook now blocks the Claude identity mechanically, but the
+> hook is a backstop, not permission to skip the check.
+
 ## Project overview
 
 SMP Dashboard is a school-management web app for Costa Rican schools. It is a **vanilla JavaScript (ES modules) multi-page app built with Vite** — there is **no frontend framework** (no React/Vue). Data comes from **Supabase** (Postgres, RLS, Auth, Realtime) and it deploys on **Vercel**.
@@ -94,7 +126,22 @@ These are non-negotiable. They override default agent behavior.
 
 2. **Commit finished work to that branch** with a **professional, straightforward commit message** (imperative mood, e.g. `Add attendance export to admin console`). No noise, no emoji-filler, no AI meta-commentary in the message.
 
-3. **Claude is never an author, co-author, or contributor.** All commits are authored by the repository owner's git identity **only**. Do **not** add `Co-Authored-By: Claude …` trailers, `Generated with Claude Code` lines, or any similar attribution to commits or PR bodies. Nothing should surface Claude/AI in GitHub's contributor list or commit metadata. (This deliberately overrides the harness default of adding a co-author trailer.)
+3. **Claude is never an author, co-author, or contributor.** All commits are authored by the repository owner's git identity **only**: `Gabriel Zelaya <gzelaya0404@gmail.com>`. Nothing may surface Claude/AI in GitHub's contributor list, commit metadata, or a PR body.
+
+   This rule has **two halves, and the second one is the one that keeps getting missed:**
+
+   **(a) The commit message.** No `Co-Authored-By: Claude …` trailers, no `Generated with Claude Code` lines, no session URLs, no AI meta-commentary. Same for PR bodies — if the tooling appends a footer server-side, edit the PR body afterwards to strip it. (This deliberately overrides the harness default of adding a co-author trailer.)
+
+   **(b) The git author identity — CHECK THIS EVERY TIME.** The sandbox's global `/root/.gitconfig` sets `user.name = Claude` / `user.email = noreply@anthropic.com`, so a commit made without setting the repo-local identity is **authored by Claude even when the message is spotless**. The message and the author are separate fields; a clean message proves nothing about the author. Before the first commit in any new container, worktree, or clone:
+
+   ```bash
+   git config user.name "Gabriel Zelaya"
+   git config user.email "gzelaya0404@gmail.com"
+   ```
+
+   Then verify with `git log -1 --format='%an <%ae>'` **after** committing — not just before. A `pre-commit` hook (`.husky/pre-commit`) blocks the Claude identity as a backstop, but do not rely on it: hooks are skipped by `--no-verify` and absent in fresh clones until `npm install` runs.
+
+   If a Claude-authored commit has already been made, fix it before it merges: `git commit --amend --reset-author` for the tip commit (or `git rebase --exec 'git commit --amend --reset-author --no-edit'` for several), then force-push **with `--force-with-lease`, and only on a branch you created yourself** — ask first, every time.
 
 4. **Finished branches merge into `main` via PR.**
 

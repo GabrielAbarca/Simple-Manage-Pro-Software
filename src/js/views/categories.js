@@ -58,7 +58,13 @@ function renderCategories() {
     item.className = "manage-item";
     const info = document.createElement("div");
     info.className = "manage-item-info";
-    info.innerHTML = `<b>${escapeHtml(c.name)}</b><span class="manage-item-meta">${t("admin.categories.weight", { weight: Number(c.weight) })}</span>`;
+    // The attendance component is scored from the attendance record, so say
+    // so — a teacher would otherwise wonder why it takes no assignments.
+    const computed =
+      c.kind === "attendance"
+        ? ` · ${escapeHtml(t("admin.categories.fromAttendance"))}`
+        : "";
+    info.innerHTML = `<b>${escapeHtml(c.name)}</b><span class="manage-item-meta">${t("admin.categories.weight", { weight: Number(c.weight) })}${computed}</span>`;
     const actions = document.createElement("div");
     actions.className = "manage-item-actions";
     actions.appendChild(
@@ -211,6 +217,10 @@ async function applyTemplate(templateId) {
     await db.insertCategory({
       name: it.name,
       weight: Number(it.weight),
+      // Carries the attendance component through instantiation. Without it
+      // the category would look like any other, own no assignments, and drop
+      // out of the weighted score with its 5% silently redistributed.
+      kind: it.kind ?? "assignments",
       class_subject_teacher_id: state.currentClass.cstId,
     });
     added += 1;

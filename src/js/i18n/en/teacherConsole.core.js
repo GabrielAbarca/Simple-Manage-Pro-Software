@@ -157,6 +157,7 @@ export default {
     empty:
       "No categories yet. The period grade is a flat points average. Add categories (e.g. Exams 50%, Tasks 30%, Participation 20%) to weight them — assignments you tag with a category are averaged within it, then combined by weight.",
     weight: "Weight: {weight}%",
+    fromAttendance: "scored from attendance",
     total: "Total: ",
     totalOff: " — weights are renormalized, but 100% is clearest.",
     editTitle: "Edit category",

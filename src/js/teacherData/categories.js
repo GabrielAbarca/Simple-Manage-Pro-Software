@@ -4,7 +4,7 @@ import { supabase } from "../supabaseClient.js";
 export async function fetchCategories(cstId) {
   const { data, error } = await supabase
     .from("grade_categories")
-    .select("id, name, weight")
+    .select("id, name, weight, kind")
     .eq("class_subject_teacher_id", cstId)
     .order("name");
   if (error) throw error;
@@ -47,7 +47,7 @@ export async function fetchComponentTemplates() {
 export async function fetchTemplateItems(templateId) {
   const { data, error } = await supabase
     .from("grade_component_template_items")
-    .select("name, weight, item_order")
+    .select("name, weight, item_order, kind")
     .eq("template_id", templateId)
     .order("item_order");
   if (error) throw error;

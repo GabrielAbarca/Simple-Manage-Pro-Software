@@ -92,7 +92,7 @@ export async function upsertAttendance(classId, cstId, date, rows, recordedBy) {
 export async function fetchCstAttendance(cstId) {
   const { data, error } = await supabase
     .from("attendance")
-    .select("student_id, status")
+    .select("student_id, status, date")
     .eq("class_subject_teacher_id", cstId);
   if (error) throw error;
   return data;

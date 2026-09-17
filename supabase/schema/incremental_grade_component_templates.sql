@@ -58,6 +58,10 @@ create table if not exists public.grade_component_template_items (
   name character varying(100) not null,
   weight numeric(5,2) not null default 0 check (weight >= 0),
   item_order integer not null default 0,
+  -- Carried into grade_categories.kind when a teacher applies the template,
+  -- so the attendance component survives instantiation and any later rename.
+  kind text not null default 'assignments'
+    check (kind in ('assignments', 'attendance')),
   unique (template_id, name)
 );
 

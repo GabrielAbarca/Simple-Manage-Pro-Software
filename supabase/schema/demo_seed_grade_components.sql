@@ -60,14 +60,15 @@ begin
   end if;
 
   insert into public.grade_component_template_items
-    (template_id, name, weight, item_order)
+    (template_id, name, weight, item_order, kind)
   values
-    (v_template, 'Cotidiano',  35, 1),
-    (v_template, 'Pruebas',    40, 2),
-    (v_template, 'Tareas',     10, 3),
-    (v_template, 'Proyecto',   10, 4),
-    (v_template, 'Asistencia',  5, 5)
-  on conflict (template_id, name) do nothing;
+    (v_template, 'Cotidiano',  35, 1, 'assignments'),
+    (v_template, 'Pruebas',    40, 2, 'assignments'),
+    (v_template, 'Tareas',     10, 3, 'assignments'),
+    (v_template, 'Proyecto',   10, 4, 'assignments'),
+    -- REAC 2026's 5%: scored from the attendance record, not from assignments.
+    (v_template, 'Asistencia',  5, 5, 'attendance')
+  on conflict (template_id, name) do update set kind = excluded.kind;
 
   raise notice 'Demo MEP template VERIFIED: "Plantilla MEP" (id %) with % item(s).',
     v_template,

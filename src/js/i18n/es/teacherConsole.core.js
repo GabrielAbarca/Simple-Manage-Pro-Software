@@ -158,6 +158,7 @@ export default {
     empty:
       "Aún no hay categorías. La nota del periodo es un promedio simple de puntos. Agregue categorías (p. ej. Exámenes 50%, Tareas 30%, Participación 20%) para ponderarlas: las tareas que etiquete con una categoría se promedian dentro de ella y luego se combinan por ponderación.",
     weight: "Ponderación: {weight}%",
+    fromAttendance: "se califica con la asistencia",
     total: "Total: ",
     totalOff:
       " — las ponderaciones se renormalizan, pero 100% es lo más claro.",

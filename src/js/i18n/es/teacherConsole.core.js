@@ -111,6 +111,38 @@ export default {
     completion: "Completado",
     gradedCount: "{graded}/{total} calificadas",
   },
+  conduct: {
+    title: "Conducta",
+    byStudent: "Por estudiante",
+    allRecords: "Todos los registros",
+    addRecord: "Agregar registro",
+    addFor: "Agregar registro para {name}",
+    student: "Estudiante",
+    grade: "Conducta",
+    records: "Registros",
+    lastRecord: "Último registro",
+    actions: "Acciones",
+    date: "Fecha",
+    severity: "Gravedad",
+    description: "Descripción",
+    points: "Pts",
+    editRecord: "Editar registro",
+    belowMark: "Bajo {mark}",
+    recordCount: {
+      one: "{count} registro este periodo",
+      other: "{count} registros este periodo",
+    },
+    belowCount: {
+      one: "{count} estudiante bajo {mark}",
+      other: "{count} estudiantes bajo {mark}",
+    },
+    empty: "No hay registros de disciplina en esta sección.",
+    emptySub:
+      "Los registros agregados aquí aparecen en el informe de progreso del estudiante.",
+    noStudents: "No hay estudiantes activos en esta sección.",
+    footnote:
+      "La conducta empieza en 100 cada periodo. Los registros aparecen en el informe de progreso del estudiante.",
+  },
   manage: {
     title: "Tareas — {period}",
     empty:

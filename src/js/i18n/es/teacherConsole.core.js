@@ -48,6 +48,7 @@ export default {
   subtabs: {
     roster: "Lista",
     gradebook: "Libro de notas",
+    conduct: "Conducta",
     attendance: "Asistencia",
     schedule: "Horario",
   },

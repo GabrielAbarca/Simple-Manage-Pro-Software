@@ -8,6 +8,7 @@ import { showSection } from "../teacherNav.js";
 import { className } from "../teacherFormat.js";
 import { renderRosterTab } from "./roster.js";
 import { renderGradebookTab } from "./gradebook.js";
+import { renderConductTab } from "./conduct.js";
 import { renderAttendanceTab } from "./teacherAttendance.js";
 import { renderScheduleTab } from "./teacherSchedule.js";
 
@@ -44,6 +45,7 @@ export function openClassTab(tab) {
   const renderers = {
     roster: renderRosterTab,
     gradebook: renderGradebookTab,
+    conduct: renderConductTab,
     attendance: renderAttendanceTab,
     schedule: renderScheduleTab,
   };

@@ -48,6 +48,7 @@ export default {
   subtabs: {
     roster: "Roster",
     gradebook: "Gradebook",
+    conduct: "Conduct",
     attendance: "Attendance",
     schedule: "Schedule",
   },

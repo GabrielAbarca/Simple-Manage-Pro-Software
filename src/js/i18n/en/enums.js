@@ -23,10 +23,6 @@ export default {
     medium: "Medium",
     high: "High",
   },
-  disciplineState: {
-    open: "Open",
-    resolved: "Resolved",
-  },
   pass: {
     pass: "Pass",
     fail: "Fail",

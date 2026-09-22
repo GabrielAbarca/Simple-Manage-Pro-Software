@@ -16,6 +16,7 @@
 
 import { supabase } from "./supabaseClient.js";
 import { attendanceRate } from "./attendanceScore.js";
+import { conductScore, conductDeduction } from "./conduct.js";
 
 // ── student_period_grades view emulation ────────────────────
 // A port of the SQL view in supabase/schema/incremental_teacher_policies.sql,
@@ -130,12 +131,14 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
   const gradeDeltas = new Map(); //  "assignmentId|studentId"
   const attendanceDeltas = new Map(); //  "studentId|cstId|date"
   const postedDeltas = new Map(); //  "studentId|cstId|periodId"
+  const conductDeltas = new Map(); //  "studentId|periodId"
 
   // ── Context caches (filled as reads pass through) ───────────
   const assignmentIndex = new Map(); // assignment id → { cstId, periodId }
   const categoryIndex = new Map(); // category id → cstId
   const deletedCategoryIds = new Set(); // emulate assignments.category_id ON DELETE SET NULL
   const seenStudents = new Map(); // student id → { class_id, status } (pristine)
+  const seenDiscipline = new Map(); // discipline id → student id
   const cstSubjects = new Map(); // cst id → { name, color }
 
   // ── Delta bookkeeping ───────────────────────────────────────
@@ -352,6 +355,59 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       });
     });
     return [...out.values()];
+  }
+
+  // ── Conducta recompute ──────────────────────────────────────
+  // The live conducta comes from public.student_period_conduct, so a local
+  // discipline delta has to be re-scored here the way computePeriodScore
+  // mirrors student_period_grades. Both go through conduct.js, which is the
+  // only place the arithmetic lives.
+  function disciplineDirty() {
+    return (
+      discipline.inserts.length > 0 ||
+      discipline.updates.size > 0 ||
+      discipline.deletes.size > 0
+    );
+  }
+
+  // Students whose conducta a local delta could have moved. Updates and
+  // deletes are keyed by record id, so they resolve through the id → student
+  // cache the discipline read fills — the same bargain assignmentIndex makes.
+  function conductAffected() {
+    const ids = new Set();
+    discipline.inserts.forEach((r) => {
+      if (r.student_id != null) ids.add(r.student_id);
+    });
+    discipline.updates.forEach((_patch, id) => {
+      const sid = seenDiscipline.get(id);
+      if (sid != null) ids.add(sid);
+    });
+    discipline.deletes.forEach((id) => {
+      const sid = seenDiscipline.get(id);
+      if (sid != null) ids.add(sid);
+    });
+    return ids;
+  }
+
+  // One student's overlay-applied records, re-scored per period. Read-only:
+  // it reaches Supabase for reference rows and never writes.
+  async function conductRowsFor(studentId) {
+    const [records, periods] = await Promise.all([
+      wrapped.fetchStudentDiscipline(studentId),
+      realDb.fetchGradingPeriods(),
+    ]);
+    return periods.map((p) => {
+      const inPeriod = records.filter(
+        (r) => r.date != null && r.date >= p.start_date && r.date <= p.end_date,
+      );
+      return {
+        student_id: studentId,
+        grading_period_id: p.id,
+        conduct_score: conductScore(inPeriod),
+        deduction: conductDeduction(inPeriod),
+        incident_count: inPeriod.length,
+      };
+    });
   }
 
   // ── The wrapped data layer ──────────────────────────────────
@@ -744,6 +800,9 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     // ── Discipline ──────────────────────────────────────────
     async fetchStudentDiscipline(studentId) {
       const server = await realDb.fetchStudentDiscipline(studentId);
+      // The wrapped select omits student_id, so remember whose each record is:
+      // a conducta recompute has to resolve an edited record back to a student.
+      server.forEach((r) => seenDiscipline.set(r.id, studentId));
       const rows = applyDelta(
         server,
         discipline,
@@ -755,13 +814,144 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     async insertDiscipline(payload) {
       recordInsert(discipline, {
         id: newId(),
-        resolved: false,
-        resolution: null,
+        conduct_points: 0,
         ...payload,
       });
     },
     async updateDiscipline(id, payload) {
       recordUpdate(discipline, id, payload);
+    },
+
+    // ── Conducta ────────────────────────────────────────────
+    async fetchPeriodConduct(classId, periodId) {
+      const server = await realDb.fetchPeriodConduct(classId, periodId);
+      let rows = server;
+      if (disciplineDirty()) {
+        const affected = conductAffected();
+        const fresh = new Map();
+        for (const sid of affected) {
+          const recomputed = await conductRowsFor(sid);
+          const hit = recomputed.find((r) => r.grading_period_id === periodId);
+          if (hit) fresh.set(sid, hit);
+        }
+        rows = server.map((r) => {
+          const f = fresh.get(r.student_id);
+          return f
+            ? {
+                student_id: r.student_id,
+                conduct_score: f.conduct_score,
+                deduction: f.deduction,
+                incident_count: f.incident_count,
+              }
+            : r;
+        });
+        // A student added in this session has no server row to overlay.
+        fresh.forEach((f, sid) => {
+          if (server.some((r) => r.student_id === sid)) return;
+          if (seenStudents.get(sid)?.class_id !== classId) return;
+          rows.push({
+            student_id: sid,
+            conduct_score: f.conduct_score,
+            deduction: f.deduction,
+            incident_count: f.incident_count,
+          });
+        });
+      }
+      return rows.filter((r) => !students.deletes.has(r.student_id));
+    },
+
+    async fetchStudentConduct(studentId) {
+      const server = await realDb.fetchStudentConduct(studentId);
+      if (!disciplineDirty() || !conductAffected().has(studentId))
+        return server;
+      const recomputed = await conductRowsFor(studentId);
+      const byPeriod = new Map(recomputed.map((r) => [r.grading_period_id, r]));
+      return server.map((r) => {
+        const f = byPeriod.get(r.grading_period_id);
+        return f
+          ? {
+              grading_period_id: r.grading_period_id,
+              conduct_score: f.conduct_score,
+              deduction: f.deduction,
+              incident_count: f.incident_count,
+            }
+          : r;
+      });
+    },
+
+    async fetchPostedConduct(classId, periodId) {
+      const server = await realDb.fetchPostedConduct(classId, periodId);
+      const out = [];
+      const covered = new Set();
+      server.forEach((r) => {
+        const key = `${r.student_id}|${periodId}`;
+        const d = conductDeltas.get(key);
+        out.push(
+          d
+            ? {
+                ...r,
+                score: d.score,
+                notes: d.notes,
+                submitted_at: d.submitted_at,
+              }
+            : r,
+        );
+        if (d) covered.add(key);
+      });
+      conductDeltas.forEach((d, key) => {
+        if (d.grading_period_id !== periodId || covered.has(key)) return;
+        if (seenStudents.get(d.student_id)?.class_id !== classId) return;
+        out.push({
+          student_id: d.student_id,
+          score: d.score,
+          notes: d.notes,
+          submitted_at: d.submitted_at,
+        });
+      });
+      return out.filter((r) => !students.deletes.has(r.student_id));
+    },
+
+    async fetchStudentPostedConduct(studentId) {
+      const server = await realDb.fetchStudentPostedConduct(studentId);
+      const out = [];
+      const covered = new Set();
+      server.forEach((r) => {
+        const key = `${studentId}|${r.grading_period_id}`;
+        const d = conductDeltas.get(key);
+        out.push(
+          d
+            ? {
+                ...r,
+                score: d.score,
+                notes: d.notes,
+                submitted_at: d.submitted_at,
+              }
+            : r,
+        );
+        if (d) covered.add(key);
+      });
+      conductDeltas.forEach((d, key) => {
+        if (d.student_id !== studentId || covered.has(key)) return;
+        out.push({
+          grading_period_id: d.grading_period_id,
+          score: d.score,
+          notes: d.notes,
+          submitted_at: d.submitted_at,
+        });
+      });
+      return out;
+    },
+
+    // Posting in the demo records a delta and nothing else. No Supabase call
+    // on any path — the demo project's demo_deny_* policies would veto it
+    // anyway, and this is the half that keeps the panel working.
+    async upsertConductGrades(rows) {
+      rows.forEach((row) => {
+        conductDeltas.set(`${row.student_id}|${row.grading_period_id}`, {
+          ...row,
+        });
+      });
+      onWrite();
     },
 
     // ── Posted period grades (student_grades) ───────────────

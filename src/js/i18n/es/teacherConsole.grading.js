@@ -16,6 +16,7 @@ export default {
     addRecord: "Agregar registro",
     editTitle: "Editar registro de disciplina",
     typePlaceholder: "p. ej. Tardanza, Indisciplina, Uniforme",
+    conductPreview: "La conducta pasaría de {from} a {to}.",
   },
   absence: {
     title: "Resumen de ausencias",
@@ -48,7 +49,7 @@ export default {
     date: "Fecha",
     type: "Tipo",
     severity: "Gravedad",
-    statusCol: "Estado",
+    conductPoints: "Puntos",
     description: "Descripción",
     noDiscipline: "Sin registros de disciplina.",
     teacher: "Docente:",
@@ -85,9 +86,12 @@ export default {
     room: "Aula",
     date: "Fecha",
     type: "Tipo",
+    reason: "Motivo",
     severity: "Gravedad",
+    severityHelp: "Solo para el registro — no afecta la nota.",
     description: "Descripción",
-    resolutionIf: "Resolución (si está resuelto)",
+    conductPoints: "Puntos de conducta a rebajar",
+    conductPointsHelp: "Puntos que se rebajan de la conducta de este periodo.",
     addStudentTitle: "Agregar estudiante — {class}",
     editStudentTitle: "Editar estudiante",
     addAssignmentTitle: "Agregar tarea — {subject} {class}",
@@ -112,6 +116,7 @@ export default {
     addAssignment: "Agregar tarea",
     addCategory: "Agregar categoría",
     postGrades: "Publicar notas",
+    postConduct: "Publicar conducta",
     saveScores: "Guardar notas",
   },
   demo: {
@@ -140,6 +145,10 @@ export default {
     gradesPosted: {
       one: "Se publicó {count} nota en el boletín.",
       other: "Se publicaron {count} notas en el boletín.",
+    },
+    conductPosted: {
+      one: "Se publicó la conducta de {count} estudiante.",
+      other: "Se publicó la conducta de {count} estudiantes.",
     },
     scoresSaved: {
       one: "Se guardó {count} nota.",

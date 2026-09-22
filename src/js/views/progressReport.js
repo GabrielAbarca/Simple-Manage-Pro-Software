@@ -80,7 +80,7 @@ function buildReportHtml(student, grades, attendance, discipline) {
           (d) =>
             `<tr><td>${esc(formatDate(d.date))}</td><td>${esc(d.type ?? "")}</td><td>${esc(
               d.severity ? t(`enums.disciplineSeverity.${d.severity}`) : "",
-            )}</td><td>${d.resolved ? t("enums.disciplineState.resolved") : t("enums.disciplineState.open")}</td><td>${esc(
+            )}</td><td>${Number(d.conduct_points ?? 0) || "—"}</td><td>${esc(
               d.description ?? "",
             )}</td></tr>`,
         )
@@ -150,7 +150,7 @@ function buildReportHtml(student, grades, attendance, discipline) {
   </div>
 
   <h2>${t("admin.report.discipline")}</h2>
-  <table><thead><tr><th>${t("admin.report.date")}</th><th>${t("admin.report.type")}</th><th>${t("admin.report.severity")}</th><th>${t("admin.report.statusCol")}</th><th>${t("admin.report.description")}</th></tr></thead><tbody>${discRows}</tbody></table>
+  <table><thead><tr><th>${t("admin.report.date")}</th><th>${t("admin.report.type")}</th><th>${t("admin.report.severity")}</th><th>${t("admin.report.conductPoints")}</th><th>${t("admin.report.description")}</th></tr></thead><tbody>${discRows}</tbody></table>
 
   <footer>
     <span>${t("admin.report.teacher")} ${esc(teacherName)}</span>

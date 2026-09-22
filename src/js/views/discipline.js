@@ -3,12 +3,18 @@
 //  the student drawer. Takes the student and a save callback as parameters
 //  rather than reaching into the drawer's state, so this module has no
 //  dependency on studentDrawer.js.
+//
+//  The points a teacher enters here ARE the conducta deduction (see
+//  conduct.js). `severity` is kept for the register and carries no weight,
+//  which the form says out loud so nobody expects it to move the grade.
 // ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
+import * as v from "../validate.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { openModal } from "../teacherModal.js";
 import { showToast } from "../teacherFeedback.js";
+import { CONDUCT_MAX, conductAfter } from "../conduct.js";
 
 // Discipline severity options, built at call time so labels follow the language.
 function disciplineSeverityOptions() {
@@ -19,47 +25,120 @@ function disciplineSeverityOptions() {
   ];
 }
 
+/** Up to two decimals, without a trailing .0 on a whole mark. */
+function fmtScore(n) {
+  return String(Math.round(Number(n) * 100) / 100);
+}
+
+/**
+ * The conducta this record is measured against: the period's mark with this
+ * record's own points added back, so editing 5 down to 2 previews correctly.
+ * Derived from the view's `deduction` rather than from the score, because a
+ * score that floored at 0 cannot be un-floored by adding points back.
+ * @param {{ deduction?: unknown } | null | undefined} conduct view row
+ * @param {unknown} excludePoints this record's current points, when editing
+ */
+function baseConduct(conduct, excludePoints = 0) {
+  const deducted = Number(conduct?.deduction);
+  if (!Number.isFinite(deducted)) return CONDUCT_MAX;
+  const own = Number(excludePoints);
+  const without = deducted - (Number.isFinite(own) ? own : 0);
+  return Math.max(CONDUCT_MAX - Math.max(without, 0), 0);
+}
+
+/**
+ * Live "conducta would go from X to Y" under the points input. The modal
+ * renders its fields synchronously, so the input exists by the time
+ * openModal returns and no modal-level hook is needed.
+ */
+function bindConductPreview(base) {
+  const input = /** @type {HTMLInputElement | null} */ (
+    document.getElementById("modal-field-conduct_points")
+  );
+  const help = input?.parentElement?.querySelector(".field-help");
+  if (!input || !help) return;
+  const render = () => {
+    help.textContent = t("admin.discipline.conductPreview", {
+      from: fmtScore(base),
+      to: fmtScore(conductAfter(base, input.value)),
+    });
+  };
+  input.addEventListener("input", render);
+  render();
+}
+
+/**
+ * The shared field list — add and edit must offer exactly the same record,
+ * or a teacher can only set points on one of the two paths.
+ */
+function disciplineFields(record = {}) {
+  return [
+    {
+      name: "date",
+      label: t("admin.form.date"),
+      type: "date",
+      required: true,
+      value: record.date ?? new Date().toISOString().split("T")[0],
+    },
+    {
+      name: "type",
+      label: t("admin.form.reason"),
+      type: "text",
+      required: true,
+      value: record.type ?? "",
+      placeholder: t("admin.discipline.typePlaceholder"),
+    },
+    {
+      name: "severity",
+      label: t("admin.form.severity"),
+      type: "select",
+      required: true,
+      value: record.severity ?? "low",
+      options: disciplineSeverityOptions(),
+      help: t("admin.form.severityHelp"),
+    },
+    {
+      name: "description",
+      label: t("admin.form.description"),
+      type: "textarea",
+      value: record.description ?? "",
+    },
+    {
+      name: "conduct_points",
+      label: t("admin.form.conductPoints"),
+      type: "number",
+      min: 0,
+      max: 100,
+      step: 0.01,
+      value: record.conduct_points ?? 0,
+      rules: [v.percent()],
+      // Replaced by bindConductPreview the moment the modal is open; the
+      // static text is what a reader sees if the input never gets focus.
+      help: t("admin.form.conductPointsHelp"),
+    },
+  ];
+}
+
+/** Blank or unusable points cost nothing, matching conduct.js. */
+function pointsFrom(formData) {
+  const n = Number(formData.conduct_points);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 /**
  * @param {any} student
+ * @param {{ deduction?: unknown } | null} conduct the student's view row for
+ *   the period being looked at, for the live preview
  * @param {() => any} onSaved called after a successful insert (e.g. to
  *   refresh the drawer the record was added from)
  */
-export function openAddDiscipline(student, onSaved) {
-  const today = new Date().toISOString().split("T")[0];
+export function openAddDiscipline(student, conduct, onSaved) {
   openModal({
     title: t("admin.discipline.addTitle", {
       name: `${student.first_name} ${student.last_name}`,
     }),
     submitLabel: t("admin.discipline.addRecord"),
-    fields: [
-      {
-        name: "date",
-        label: t("admin.form.date"),
-        type: "date",
-        required: true,
-        value: today,
-      },
-      {
-        name: "type",
-        label: t("admin.form.type"),
-        type: "text",
-        required: true,
-        placeholder: t("admin.discipline.typePlaceholder"),
-      },
-      {
-        name: "severity",
-        label: t("admin.form.severity"),
-        type: "select",
-        required: true,
-        value: "low",
-        options: disciplineSeverityOptions(),
-      },
-      {
-        name: "description",
-        label: t("admin.form.description"),
-        type: "textarea",
-      },
-    ],
+    fields: disciplineFields(),
     onSubmit: async (formData) => {
       await db.insertDiscipline({
         student_id: student.id,
@@ -67,80 +146,37 @@ export function openAddDiscipline(student, onSaved) {
         type: formData.type.trim(),
         severity: formData.severity,
         description: formData.description?.trim() || null,
+        conduct_points: pointsFrom(formData),
         reported_by_teacher: state.teacherId,
       });
       showToast(t("admin.toast.disciplineAdded"));
       await onSaved?.();
     },
   });
+  bindConductPreview(baseConduct(conduct));
 }
 
 /**
  * @param {any} record
+ * @param {{ deduction?: unknown } | null} conduct
  * @param {() => any} onSaved called after a successful update
  */
-export function openEditDiscipline(record, onSaved) {
+export function openEditDiscipline(record, conduct, onSaved) {
   openModal({
     title: t("admin.discipline.editTitle"),
     submitLabel: t("common.save"),
-    fields: [
-      {
-        name: "date",
-        label: t("admin.form.date"),
-        type: "date",
-        required: true,
-        value: record.date ?? "",
-      },
-      {
-        name: "type",
-        label: t("admin.form.type"),
-        type: "text",
-        required: true,
-        value: record.type ?? "",
-      },
-      {
-        name: "severity",
-        label: t("admin.form.severity"),
-        type: "select",
-        required: true,
-        value: record.severity ?? "low",
-        options: disciplineSeverityOptions(),
-      },
-      {
-        name: "description",
-        label: t("admin.form.description"),
-        type: "textarea",
-        value: record.description ?? "",
-      },
-      {
-        name: "resolved",
-        label: t("admin.form.status"),
-        type: "select",
-        value: record.resolved ? "yes" : "no",
-        options: [
-          { value: "no", label: t("enums.disciplineState.open") },
-          { value: "yes", label: t("enums.disciplineState.resolved") },
-        ],
-      },
-      {
-        name: "resolution",
-        label: t("admin.form.resolutionIf"),
-        type: "textarea",
-        value: record.resolution ?? "",
-      },
-    ],
+    fields: disciplineFields(record),
     onSubmit: async (formData) => {
-      const resolved = formData.resolved === "yes";
       await db.updateDiscipline(record.id, {
         date: formData.date,
         type: formData.type.trim(),
         severity: formData.severity,
         description: formData.description?.trim() || null,
-        resolved,
-        resolution: resolved ? formData.resolution?.trim() || null : null,
+        conduct_points: pointsFrom(formData),
       });
       showToast(t("admin.toast.disciplineUpdated"));
       await onSaved?.();
     },
   });
+  bindConductPreview(baseConduct(conduct, record.conduct_points));
 }

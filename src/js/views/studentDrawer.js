@@ -12,10 +12,12 @@ import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import {
   gradeBandClass,
+  conductCellHtml,
   formatDate,
   genderLabel,
   getCurrentPeriodId,
 } from "../teacherFormat.js";
+import { isConductPassing } from "../promotion.js";
 import { escapeHtml } from "../teacherTableHelpers.js";
 import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
 import { printStudentReport } from "./progressReport.js";
@@ -53,13 +55,35 @@ export async function openStudentDrawer(student) {
   const periodName = state.periods.find((p) => p.id === periodId)?.name ?? "";
 
   // Each section degrades independently — one failure shouldn't blank the rest.
-  const [contacts, attendance, discipline, subjectGrades] = await Promise.all([
+  const [
+    contacts,
+    attendance,
+    discipline,
+    subjectGrades,
+    conduct,
+    postedConduct,
+  ] = await Promise.all([
     db.fetchStudentContacts(student.id).catch(() => []),
     db.fetchStudentAttendance(student.id).catch(() => []),
     db.fetchStudentDiscipline(student.id).catch(() => []),
     db.fetchStudentSubjectGrades(student.id, periodId).catch(() => []),
+    db.fetchStudentConduct(student.id).catch(() => []),
+    db.fetchStudentPostedConduct(student.id).catch(() => []),
   ]);
-  _drawerData = { contacts, attendance, discipline, subjectGrades };
+  // The period the drawer is showing, so the conducta section and the
+  // incident form's preview agree with the grades above them.
+  const conductRow =
+    conduct.find((r) => r.grading_period_id === periodId) ?? null;
+  const postedRow =
+    postedConduct.find((r) => r.grading_period_id === periodId) ?? null;
+  _drawerData = {
+    contacts,
+    attendance,
+    discipline,
+    subjectGrades,
+    conduct: conductRow,
+    postedConduct: postedRow,
+  };
 
   const photo = student.photo_url
     ? `<img class="drawer-photo" src="${escapeHtml(student.photo_url)}" alt="" referrerpolicy="no-referrer" />`
@@ -86,6 +110,10 @@ export async function openStudentDrawer(student) {
     <div class="drawer-section">
       <h3>${periodName ? t("admin.drawer.gradesWithPeriod", { period: escapeHtml(periodName) }) : t("admin.drawer.grades")}</h3>
       ${renderDrawerSubjectGrades(subjectGrades)}
+    </div>
+    <div class="drawer-section">
+      <h3>${periodName ? t("admin.drawer.conductWithPeriod", { period: escapeHtml(periodName) }) : t("admin.drawer.conduct")}</h3>
+      ${renderDrawerConduct(conductRow, postedRow)}
     </div>
     <div class="drawer-section">
       <div class="drawer-section-head">
@@ -161,6 +189,32 @@ function renderDrawerSubjectGrades(rows) {
     .join("")}</ul>`;
 }
 
+/**
+ * The period's conducta: the live mark, what is posted if anything, and the
+ * aplazado verdict. Deliberately banded against the conduct floor, not the
+ * subject pass mark — a school may set the two apart.
+ */
+function renderDrawerConduct(live, posted) {
+  if (!live)
+    return `<p class="drawer-muted">${t("admin.drawer.noConduct")}</p>`;
+  const score = live.conduct_score;
+  const failing = !isConductPassing(score, state.school);
+  const verdict = failing
+    ? `<span class="badge badge-danger">${t("admin.drawer.conductFailed")}</span>`
+    : "";
+  const postedChip =
+    posted && posted.score != null
+      ? `<span class="badge badge-success">${t("admin.drawer.conductPosted", { score: String(Number(posted.score)) })}</span>`
+      : `<span class="badge badge-warning">${t("admin.drawer.conductUnposted")}</span>`;
+  return `
+    <div class="drawer-attendance">
+      ${conductCellHtml(score)}
+      ${postedChip}
+      ${verdict}
+    </div>
+    <p class="drawer-muted">${tn("admin.drawer.conductIncidents", live.incident_count, { count: live.incident_count, points: Number(live.deduction ?? 0) })}</p>`;
+}
+
 function renderDrawerDiscipline(rows) {
   if (!rows.length)
     return `<p class="drawer-muted">${t("admin.drawer.noDiscipline")}</p>`;
@@ -175,22 +229,23 @@ function renderDrawerDiscipline(rows) {
       const sevLabel = r.severity
         ? t(`enums.disciplineSeverity.${r.severity}`)
         : "—";
-      const stateBadge = r.resolved
-        ? `<span class="badge badge-success">${t("enums.disciplineState.resolved")}</span>`
-        : `<span class="badge badge-warning">${t("enums.disciplineState.open")}</span>`;
+      const points = Number(r.conduct_points ?? 0);
+      const pointsBadge =
+        points > 0
+          ? `<span class="badge badge-danger">${t("admin.drawer.conductPointsOff", { points })}</span>`
+          : `<span class="badge badge-neutral">${t("admin.drawer.conductNoPoints")}</span>`;
       return `
       <div class="drawer-card">
         <div class="drawer-card-head">
           <b>${escapeHtml(r.type ?? t("admin.drawer.incident"))}</b>
           <span class="badge ${sev}">${escapeHtml(sevLabel)}</span>
-          ${stateBadge}
+          ${pointsBadge}
           <button type="button" class="btn-icon drawer-card-edit" title="${t("common.edit")}"
             data-action="edit-discipline" data-id="${r.id}">
             <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-edit"></use></svg></span>
           </button>
         </div>
         <p class="drawer-muted">${escapeHtml(r.date ?? "")}${r.description ? " · " + escapeHtml(r.description) : ""}</p>
-        ${r.resolved && r.resolution ? `<p class="drawer-muted">${t("admin.drawer.resolutionPrefix")}${escapeHtml(r.resolution)}</p>` : ""}
       </div>`;
     })
     .join("");
@@ -214,13 +269,14 @@ drawerBody.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn) return;
   const refresh = () => openStudentDrawer(_drawerStudent);
+  const conduct = _drawerData.conduct ?? null;
   if (btn.dataset.action === "add-discipline") {
-    if (_drawerStudent) openAddDiscipline(_drawerStudent, refresh);
+    if (_drawerStudent) openAddDiscipline(_drawerStudent, conduct, refresh);
   } else if (btn.dataset.action === "edit-discipline") {
     const rec = (_drawerData.discipline ?? []).find(
       (r) => String(r.id) === btn.dataset.id,
     );
-    if (rec) openEditDiscipline(rec, refresh);
+    if (rec) openEditDiscipline(rec, conduct, refresh);
   }
 });
 

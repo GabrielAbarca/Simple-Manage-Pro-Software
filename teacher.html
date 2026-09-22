@@ -679,6 +679,53 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════
+         POST CONDUCTA MODAL — freezes a period's conducta to the record
+         the report card reads. Class-scoped, not subject-scoped: conducta
+         is one institutional mark per period.
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="post-conduct-overlay">
+      <div
+        class="modal modal-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pc-title"
+      >
+        <div class="modal-header">
+          <h2 id="pc-title">Post conducta</h2>
+          <button
+            class="modal-close"
+            id="pc-close"
+            aria-label="Close"
+            data-i18n-aria-label="common.close"
+          >
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true"><use href="#icon-close"></use></svg
+            ></span>
+          </button>
+        </div>
+        <div class="modal-body" id="pc-body"></div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            id="pc-cancel"
+            data-i18n="common.cancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="pc-save"
+            data-i18n="admin.modal.postConduct"
+          >
+            Post conducta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
          COLUMN GRADE ENTRY MODAL — one assignment, every student (item 4)
     ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal-overlay" id="column-grades-overlay">

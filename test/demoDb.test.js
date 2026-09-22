@@ -6,6 +6,7 @@ vi.mock("../src/js/supabaseClient.js", () => ({ supabase: {} }));
 
 const { wrapDbForDemo, computePeriodScore } =
   await import("../src/js/demoDb.js");
+const { conductScore, conductDeduction } = await import("../src/js/conduct.js");
 
 let realDb;
 let writes;
@@ -420,5 +421,187 @@ describe("demoDb attendance overlay — one register per subject", () => {
       db.upsertAttendance(21, null, DATE, [{ id: 101, status: "absent" }], 7),
     ).rejects.toThrow(/class_subject_teacher_id/);
     expect(writes).toBe(0);
+  });
+});
+
+// ── Conducta ────────────────────────────────────────────────────
+describe("conducta", () => {
+  // Parity against the real thing. These records and the number beside them
+  // were read out of the demo project (student 4, grading period 2) from
+  // public.student_period_conduct itself. If the view and this mirror ever
+  // drift, one of the two moves and this fails — the whole point of keeping
+  // the fixture verbatim.
+  describe("parity with the live student_period_conduct view", () => {
+    const liveRecords = [
+      { id: 1, date: "2026-08-05", severity: "low", conduct_points: 2.5 },
+      { id: 3, date: "2026-08-04", severity: "medium", conduct_points: 10 },
+    ];
+
+    it("reproduces the conducta the view returned", () => {
+      // The view returned conduct_score 87.50 and deduction 12.50 for these.
+      expect(conductScore(liveRecords)).toBe(87.5);
+      expect(conductDeduction(liveRecords)).toBe(12.5);
+    });
+
+    it("ignores severity, exactly as the view's sum does", () => {
+      // The view sums conduct_points and never reads severity. Swapping the
+      // labels must not move the number.
+      const swapped = liveRecords.map((r) => ({
+        ...r,
+        severity: r.severity === "low" ? "high" : "low",
+      }));
+      expect(conductScore(swapped)).toBe(87.5);
+    });
+  });
+
+  const PERIOD = 2;
+  const CLASS = 21;
+  let cwrites;
+  let cdb;
+
+  beforeEach(() => {
+    cwrites = 0;
+    const serverDiscipline = [
+      { id: 1, date: "2026-08-05", severity: "low", conduct_points: 2.5 },
+      { id: 3, date: "2026-08-04", severity: "medium", conduct_points: 10 },
+    ];
+    const creal = {
+      fetchRoster: async () => [
+        { id: 4, first_name: "Ana", last_name: "García", status: "active" },
+      ],
+      fetchGradingPeriods: async () => [
+        { id: PERIOD, start_date: "2026-08-01", end_date: "2026-08-31" },
+      ],
+      fetchStudentDiscipline: async () =>
+        serverDiscipline.map((r) => ({ ...r })),
+      fetchPeriodConduct: async () => [
+        {
+          student_id: 4,
+          conduct_score: 87.5,
+          deduction: 12.5,
+          incident_count: 2,
+        },
+      ],
+      fetchStudentConduct: async () => [
+        {
+          grading_period_id: PERIOD,
+          conduct_score: 87.5,
+          deduction: 12.5,
+          incident_count: 2,
+        },
+      ],
+      fetchPostedConduct: async () => [],
+      fetchStudentPostedConduct: async () => [],
+      upsertConductGrades: async () => {
+        throw new Error("a demo write reached Supabase");
+      },
+      insertDiscipline: async () => {
+        throw new Error("a demo write reached Supabase");
+      },
+      updateDiscipline: async () => {
+        throw new Error("a demo write reached Supabase");
+      },
+    };
+    cdb = wrapDbForDemo(creal, { onWrite: () => cwrites++ });
+  });
+
+  it("serves the server's conducta untouched when nothing was filed", async () => {
+    const rows = await cdb.fetchPeriodConduct(CLASS, PERIOD);
+    expect(rows).toEqual([
+      {
+        student_id: 4,
+        conduct_score: 87.5,
+        deduction: 12.5,
+        incident_count: 2,
+      },
+    ]);
+    expect(cwrites).toBe(0);
+  });
+
+  it("re-scores the period when a deduction is filed in the session", async () => {
+    await cdb.fetchStudentDiscipline(4); // warms the id → student cache
+    await cdb.insertDiscipline({
+      student_id: 4,
+      date: "2026-08-10",
+      type: "Demo",
+      severity: "low",
+      conduct_points: 7.5,
+    });
+    const rows = await cdb.fetchPeriodConduct(CLASS, PERIOD);
+    // 100 − (2.5 + 10 + 7.5) = 80, and a third incident on the record.
+    expect(rows[0].conduct_score).toBe(80);
+    expect(rows[0].deduction).toBe(20);
+    expect(rows[0].incident_count).toBe(3);
+  });
+
+  it("re-scores when an existing record's points are edited", async () => {
+    await cdb.fetchStudentDiscipline(4);
+    await cdb.updateDiscipline(3, { conduct_points: 20 });
+    const rows = await cdb.fetchPeriodConduct(CLASS, PERIOD);
+    // The medium record's 10 becomes 20: 100 − (2.5 + 20) = 77.5.
+    expect(rows[0].conduct_score).toBe(77.5);
+  });
+
+  it("leaves a deduction dated outside the period alone", async () => {
+    await cdb.fetchStudentDiscipline(4);
+    await cdb.insertDiscipline({
+      student_id: 4,
+      date: "2026-09-15",
+      type: "Next period",
+      conduct_points: 30,
+    });
+    const rows = await cdb.fetchPeriodConduct(CLASS, PERIOD);
+    expect(rows[0].conduct_score).toBe(87.5);
+  });
+
+  it("serves a posted conducta back from the overlay", async () => {
+    await cdb.fetchRoster(CLASS); // the posted read filters deltas by class
+    await cdb.upsertConductGrades([
+      { student_id: 4, grading_period_id: PERIOD, score: 91, notes: "ok" },
+    ]);
+    const posted = await cdb.fetchPostedConduct(CLASS, PERIOD);
+    expect(posted).toEqual([
+      expect.objectContaining({ student_id: 4, score: 91, notes: "ok" }),
+    ]);
+    const byStudent = await cdb.fetchStudentPostedConduct(4);
+    expect(byStudent[0].score).toBe(91);
+  });
+
+  it("never lets a demo write reach Supabase", async () => {
+    // Every real writer above throws if called. Posting and filing must both
+    // land in the overlay instead.
+    await cdb.fetchStudentDiscipline(4);
+    await expect(
+      cdb.upsertConductGrades([
+        { student_id: 4, grading_period_id: PERIOD, score: 60 },
+      ]),
+    ).resolves.toBeUndefined();
+    await expect(
+      cdb.insertDiscipline({
+        student_id: 4,
+        date: "2026-08-11",
+        conduct_points: 1,
+      }),
+    ).resolves.toBeUndefined();
+    expect(cwrites).toBe(2);
+  });
+
+  it("keeps a posted conducta fixed when a later deduction is filed", async () => {
+    // The reason posting exists: a record filed after the report card went
+    // home must not rewrite the mark that went with it.
+    await cdb.fetchRoster(CLASS);
+    await cdb.fetchStudentDiscipline(4);
+    await cdb.upsertConductGrades([
+      { student_id: 4, grading_period_id: PERIOD, score: 87.5 },
+    ]);
+    await cdb.insertDiscipline({
+      student_id: 4,
+      date: "2026-08-20",
+      conduct_points: 40,
+    });
+    const live = await cdb.fetchPeriodConduct(CLASS, PERIOD);
+    const posted = await cdb.fetchPostedConduct(CLASS, PERIOD);
+    expect(live[0].conduct_score).toBe(47.5); // the computed mark moved
+    expect(posted[0].score).toBe(87.5); // the posted one did not
   });
 });

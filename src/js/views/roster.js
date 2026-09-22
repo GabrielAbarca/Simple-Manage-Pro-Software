@@ -13,8 +13,14 @@ import {
   makeActionBtn,
   escapeHtml,
 } from "../teacherTableHelpers.js";
-import { weightedOverall, gradeCellHtml } from "../teacherFormat.js";
+import {
+  weightedOverall,
+  gradeCellHtml,
+  conductCellHtml,
+  getCurrentPeriodId,
+} from "../teacherFormat.js";
 import { openStudentDrawer } from "./studentDrawer.js";
+import { openPostConduct } from "./postConduct.js";
 import {
   openAddStudent,
   openEditStudent,
@@ -26,8 +32,10 @@ import {
 // Costa Rica's MEP year runs two periodos, but a private colegio on three
 // trimestres is equally valid — so the count comes from the data, never a
 // literal. Kept in sync with the header/row cells, which map over state.periods.
+// The +2 is Overall and Conducta; conducta is one mark for the period, not one
+// per subject, so it sits beside the subject columns rather than among them.
 function rosterColsStyle() {
-  return `--roster-cols: ${state.periods.length + 1}`;
+  return `--roster-cols: ${state.periods.length + 2}`;
 }
 
 export function renderRosterTab(content) {
@@ -37,6 +45,9 @@ export function renderRosterTab(content) {
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-search"></use></svg></span>
         <input type="search" id="roster-search" placeholder="${t("admin.roster.searchPlaceholder")}" aria-label="${t("admin.roster.searchLabel")}" />
       </div>
+      <button class="btn btn-secondary" id="btn-post-conduct">
+        <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-grading"></use></svg></span> ${t("admin.roster.postConduct")}
+      </button>
       <button class="btn btn-primary" id="btn-add-student">
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-person_add"></use></svg></span> ${t("admin.roster.addStudent")}
       </button>
@@ -48,6 +59,7 @@ export function renderRosterTab(content) {
             <span>${t("admin.roster.name")}</span>
             ${state.periods.map((p) => `<span>${escapeHtml(p.name)}</span>`).join("")}
             <span>${t("admin.roster.overall")}</span>
+            <span>${t("admin.roster.conduct")}</span>
           </div>
         </div>
         <div id="roster-body">
@@ -57,6 +69,9 @@ export function renderRosterTab(content) {
     </div>`;
 
   bindAdminAction(document.getElementById("btn-add-student"), openAddStudent);
+  document
+    .getElementById("btn-post-conduct")
+    ?.addEventListener("click", () => openPostConduct(loadRoster));
 
   let searchTimeout;
   document.getElementById("roster-search").addEventListener("input", (e) => {
@@ -70,14 +85,27 @@ export function renderRosterTab(content) {
 
 let _rosterCache = [];
 let _rosterPeriodGrades = {}; // student_id → { [period_order]: period_score }
+let _rosterConduct = {}; // student_id → conduct_score for the current period
 
 export async function loadRoster() {
   try {
-    const [roster, periodGrades] = await Promise.all([
+    // Conducta is per student per period, so the column shows the period the
+    // console is currently on rather than one cell per period.
+    const conductPeriodId = getCurrentPeriodId();
+    const [roster, periodGrades, conduct] = await Promise.all([
       db.fetchRoster(state.currentClass.classId),
       db.fetchAllPeriodGrades(state.currentClass.cstId),
+      conductPeriodId
+        ? db
+            .fetchPeriodConduct(state.currentClass.classId, conductPeriodId)
+            .catch(() => [])
+        : Promise.resolve([]),
     ]);
     _rosterCache = roster;
+    _rosterConduct = {};
+    conduct.forEach((c) => {
+      _rosterConduct[c.student_id] = c.conduct_score;
+    });
 
     const orderByPeriodId = Object.fromEntries(
       state.periods.map((p) => [p.id, p.period_order]),
@@ -137,7 +165,8 @@ function renderRosterTable(students) {
             `<span class="roster-grade">${gradeCellHtml(scores[p.period_order])}</span>`,
         )
         .join("")}
-      <span class="roster-grade">${gradeCellHtml(overall)}</span>`;
+      <span class="roster-grade">${gradeCellHtml(overall)}</span>
+      <span class="roster-grade">${conductCellHtml(_rosterConduct[student.id])}</span>`;
     cells.addEventListener("click", () => openStudentDrawer(student));
     cells.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {

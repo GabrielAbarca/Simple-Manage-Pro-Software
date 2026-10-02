@@ -25,7 +25,7 @@ export function renderConductTab(content) {
 
   content.innerHTML = `
     <div class="view-toolbar">
-        <div class="toolbar-filters"
+        <div class="toolbar-filters">
             <label for="conduct-period">${t("admin.gradebook.period")}</label>
             <select id="conduct-period">${periodOptions}</select>
         </div>

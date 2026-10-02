@@ -89,3 +89,17 @@ export function conductAfter(current, points) {
   const taken = Number.isFinite(off) && off > 0 ? off : 0;
   return round2(Math.max(base - taken, 0));
 }
+
+/**
+ * @param {any[]} records
+ * @returns {Map<number, any[]>} student id → that student's records
+ */
+export function groupRecordsByStudent(records) {
+  const byStudent = new Map();
+  for (const record of records ?? []) {
+    const own = byStudent.get(record.student_id);
+    if (own) own.push(record);
+    else byStudent.set(record.student_id, [record]);
+  }
+  return byStudent;
+}

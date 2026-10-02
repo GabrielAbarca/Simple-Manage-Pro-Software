@@ -4,6 +4,7 @@ import {
   conductScore,
   conductDeduction,
   conductAfter,
+  groupRecordsByStudent,
 } from "../src/js/conduct.js";
 
 /** A discipline record as conductScore reads it. */
@@ -131,5 +132,25 @@ describe("conductDeduction", () => {
 
   it("ignores the same unusable values conductScore ignores", () => {
     expect(conductDeduction([rec(null), rec("abc"), rec(-5), {}])).toBe(0);
+  });
+});
+
+describe("groupRecordsByStudent", () => {
+  it("groups records by student and keeps them in newest-first order", () => {
+    const records = [
+      { id: 3, student_id: 2, date: "2026-09-25" },
+      { id: 2, student_id: 1, date: "2026-09-18" },
+      { id: 1, student_id: 2, date: "2026-08-20" },
+    ];
+    const byStudent = groupRecordsByStudent(records);
+    expect(byStudent.size).toBe(2);
+    expect(byStudent.get(2).map((r) => r.id)).toEqual([3, 1]);
+    expect(byStudent.get(1).map((r) => r.id)).toEqual([2]);
+  });
+
+  it("returns an empty map when there are no records", () => {
+    expect(groupRecordsByStudent([]).size).toBe(0);
+    expect(groupRecordsByStudent(null).size).toBe(0);
+    expect(groupRecordsByStudent([]).get(1)).toBeUndefined();
   });
 });

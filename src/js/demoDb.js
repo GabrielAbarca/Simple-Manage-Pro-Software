@@ -799,6 +799,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
 
     // ── Discipline ──────────────────────────────────────────
     async fetchStudentDiscipline(studentId) {
+      // Single student's discipline records.
       const server = await realDb.fetchStudentDiscipline(studentId);
       // The wrapped select omits student_id, so remember whose each record is:
       // a conducta recompute has to resolve an edited record back to a student.
@@ -809,6 +810,20 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
         (r) => r.student_id === studentId,
       );
       return rows.sort(byDateDesc);
+    },
+
+    async fetchClassDiscipline(studentIds, period) {
+      // Section's students discipline records depending on one grading period.
+      const server = await realDb.fetchClassDiscipline(studentIds, period);
+      server.forEach((r) => seenDiscipline.set(r.id, r.student_id));
+      const ids = new Set(studentIds);
+      const inPeriod = (r) =>
+        r.date != null &&
+        r.date >= period.start_date &&
+        r.date <= period.end_date;
+      return applyDelta(server, discipline, (r) => ids.has(r.student_id))
+        .filter(inPeriod)
+        .sort(byDateDesc);
     },
 
     async insertDiscipline(payload) {

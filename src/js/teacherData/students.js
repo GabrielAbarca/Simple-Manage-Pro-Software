@@ -58,6 +58,7 @@ export async function fetchStudentAttendance(studentId) {
 }
 
 export async function fetchStudentDiscipline(studentId) {
+  // Single student's discipline records.
   const { data, error } = await supabase
     .from("discipline_records")
     .select("id, date, type, severity, description, conduct_points")
@@ -65,6 +66,27 @@ export async function fetchStudentDiscipline(studentId) {
     .order("date", { ascending: false });
   if (error) throw error;
   return data;
+}
+
+/**
+ * @param {number[]} studentIds
+ * @param {{ start_date: string, end_date: string }} period
+ */
+export async function fetchClassDiscipline(studentIds, period) {
+  // Section's students discipline records depending on one grading period.
+  if (!studentIds.length) return [];
+  const { data, error } = await supabase
+    .from("discipline_records")
+    .select(
+      "id, student_id, date, type, description, severity, conduct_points, reported_by_teacher",
+    )
+    .in("student_id", studentIds)
+    .gte("date", period.start_date)
+    .lte("date", period.end_date)
+    .order("date", { ascending: false });
+  if (error) throw error;
+
+  return data; // Array with selected columns' data.
 }
 
 // ── Discipline (write — item 2) ─────────────────────────────

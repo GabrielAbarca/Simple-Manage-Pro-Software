@@ -30,7 +30,7 @@ export function renderConductTab(content) {
             <select id="conduct-period">${periodOptions}</select>
         </div>
         <div class="toolbar-actions">
-            <button class="btn btn-secondary" id="btn-conduct-students" aria-pressed="true">
+            <button type="button" class="btn btn-secondary" id="btn-conduct-students" aria-pressed="true">
                 ${icon("group")} ${t("admin.conduct.byStudent")}
             </button>
             <button type="button" class="btn btn-ghost" id="btn-conduct-records" aria-pressed="false">

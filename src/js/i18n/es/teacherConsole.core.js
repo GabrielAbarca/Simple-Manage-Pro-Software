@@ -142,6 +142,8 @@ export default {
     noStudents: "No hay estudiantes activos en esta sección.",
     footnote:
       "La conducta empieza en 100 cada periodo. Los registros aparecen en el informe de progreso del estudiante.",
+    noPeriod:
+      "No hay periodos de evaluación configurados para este curso lectivo.",
   },
   manage: {
     title: "Tareas — {period}",

@@ -141,6 +141,7 @@ export default {
     noStudents: "No active students in this section.",
     footnote:
       "Conduct starts at 100 each period. Records appear on the student's progress report.",
+    noPeriod: "No grading periods are set up for this school year.",
   },
   manage: {
     title: "Assignments — {period}",

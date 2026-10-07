@@ -12,6 +12,7 @@ export default {
   percent: "Ingrese un porcentaje entre 0 y 100.",
   dateWithin: "Debe estar entre {start} y {end}.",
   endAfterStart: "La fecha de fin debe ser posterior a la fecha de inicio.",
+  endBeforeStart: "La fecha de fin no puede ser anterior a la fecha de inicio.",
   futureDate: "La fecha no puede estar en el futuro.",
   unique: '"{value}" ya está en uso.',
   enrollmentTaken: "El número de matrícula {value} ya está en uso.",

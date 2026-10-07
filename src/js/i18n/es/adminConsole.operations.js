@@ -177,6 +177,24 @@ export default {
       gradingPeriods: "Importar periodos (CSV)",
     },
   },
+  events: {
+    title: "Eventos",
+    subtitle:
+      "Feriados, exámenes, actividades y reuniones de padres. Los estudiantes los ven en su portal.",
+    add: "Agregar evento",
+    addTitle: "Agregar evento",
+    editTitle: "Editar evento",
+    name: "Título",
+    dates: "Fechas",
+    type: "Tipo",
+    start: "Inicio",
+    end: "Fin",
+    endHelp: "Déjelo en blanco para un evento de un solo día.",
+    description: "Descripción",
+    empty:
+      "Aún no hay eventos. Agregue uno para mostrarlo en el portal del estudiante.",
+    confirmDelete: '¿Eliminar el evento "{name}"?',
+  },
   accounts: {
     create: "Crear acceso",
     reset: "Restablecer contraseña",

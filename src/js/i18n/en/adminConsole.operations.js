@@ -174,6 +174,23 @@ export default {
       gradingPeriods: "Import grading periods (CSV)",
     },
   },
+  events: {
+    title: "Events",
+    subtitle:
+      "Holidays, exams, activities and parent meetings. Students see them in their portal.",
+    add: "Add event",
+    addTitle: "Add event",
+    editTitle: "Edit event",
+    name: "Title",
+    dates: "Dates",
+    type: "Type",
+    start: "Starts",
+    end: "Ends",
+    endHelp: "Leave blank for a one-day event.",
+    description: "Description",
+    empty: "No events yet. Add one to show it in the student portal.",
+    confirmDelete: 'Delete the event "{name}"?',
+  },
   accounts: {
     create: "Create login",
     reset: "Reset password",

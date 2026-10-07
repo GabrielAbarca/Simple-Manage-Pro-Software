@@ -20,6 +20,15 @@ export const ROOM_TYPES = [
 
 export const TEACHER_STATUSES = ["active", "inactive", "on_leave"];
 
+export const EVENT_TYPES = [
+  "general",
+  "activity",
+  "exam_period",
+  "holiday",
+  "parent_meeting",
+  "suspension",
+];
+
 export const STUDENT_STATUSES = [
   "active",
   "inactive",

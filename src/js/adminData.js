@@ -12,41 +12,116 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { supabase } from "./supabaseClient.js";
+import { MISSED_LESSON_STATUSES } from "./atRisk.js";
 
 /**
  * @typedef {Object} SelectOpts
  * @property {Record<string, string|number|boolean>} [match] equality filters (col → value)
  * @property {{ column: string, values: Array<string|number> }} [inList] membership filter
  * @property {{ column: string, ascending?: boolean }} [order] sort (ascending defaults true)
+ * @property {{ column: string, from?: string, to?: string }} [between] inclusive range filter
+ * @property {string} [columns] select list (defaults to every column)
  */
 
 /**
  * A minimal table access contract. The real gateway talks to Supabase; the
  * demo gateway (adminDemoDb.js) records writes locally and overlays reads.
  * @typedef {Object} Gateway
- * @property {(table: string, opts?: SelectOpts) => Promise<any[]>} select
+ * @property {(table: string, opts?: SelectOpts) => Promise<any[]>} select every matching row
+ * @property {(table: string, opts?: SelectOpts) => Promise<number>} count matching rows, without fetching them
  * @property {(table: string, row: object) => Promise<any>} insert returns the created row (with id)
  * @property {(table: string, rows: object[]) => Promise<any[]>} insertMany bulk insert (CSV import)
  * @property {(table: string, id: number, patch: object) => Promise<void>} update
  * @property {(table: string, id: number) => Promise<void>} remove
  */
 
+// The API returns at most a project-configured number of rows per request
+// (1,000 by default), so reads page through with .range() until the
+// count reported on the first page is reached.
+const PAGE_SIZE = 1000;
+const PARALLEL_PAGES = 4;
+
+/**
+ * @param {any} q a PostgREST filter builder
+ * @param {SelectOpts} opts
+ */
+function applyFilters(q, opts) {
+  if (opts.match) {
+    for (const [col, val] of Object.entries(opts.match)) q = q.eq(col, val);
+  }
+  if (opts.inList) q = q.in(opts.inList.column, opts.inList.values);
+  if (opts.between?.from != null)
+    q = q.gte(opts.between.column, opts.between.from);
+  if (opts.between?.to != null) q = q.lte(opts.between.column, opts.between.to);
+  return q;
+}
+
+/**
+ * Drop repeats of a row id. Offset paging can return a row twice when a
+ * concurrent write shifts a page boundary.
+ * @param {any[]} rows
+ */
+function uniqueById(rows) {
+  const seen = new Set();
+  return rows.filter((r) => {
+    if (r?.id == null) return true;
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+}
+
 /** Supabase-backed gateway (real writes). @type {Gateway} */
 export const supabaseGateway = {
   async select(table, opts = {}) {
-    let q = supabase.from(table).select("*");
-    if (opts.match) {
-      for (const [col, val] of Object.entries(opts.match)) q = q.eq(col, val);
+    const page = async (/** @type {number} */ from, withCount = false) => {
+      let q = applyFilters(
+        supabase
+          .from(table)
+          .select(opts.columns ?? "*", withCount ? { count: "exact" } : {}),
+        opts,
+      );
+      if (opts.order) {
+        q = q.order(opts.order.column, {
+          ascending: opts.order.ascending !== false,
+        });
+      }
+      if (opts.order?.column !== "id") q = q.order("id", { ascending: true });
+      const { data, error, count } = await q.range(from, from + PAGE_SIZE - 1);
+      if (error) throw error;
+      return { rows: data ?? [], count };
+    };
+
+    const first = await page(0, true);
+    const pages = [first.rows];
+    const step = first.rows.length;
+    if (step && first.count == null) {
+      let last = first.rows;
+      while (last.length === step) {
+        last = (await page(pages.flat().length)).rows;
+        pages.push(last);
+      }
+    } else if (step) {
+      const offsets = [];
+      for (let from = step; from < first.count; from += step)
+        offsets.push(from);
+      for (let i = 0; i < offsets.length; i += PARALLEL_PAGES) {
+        const batch = await Promise.all(
+          offsets.slice(i, i + PARALLEL_PAGES).map((from) => page(from)),
+        );
+        pages.push(...batch.map((b) => b.rows));
+      }
     }
-    if (opts.inList) q = q.in(opts.inList.column, opts.inList.values);
-    if (opts.order) {
-      q = q.order(opts.order.column, {
-        ascending: opts.order.ascending !== false,
-      });
-    }
-    const { data, error } = await q;
+    return uniqueById(pages.flat());
+  },
+
+  async count(table, opts = {}) {
+    const { count, error } = await applyFilters(
+      supabase.from(table).select("*", { count: "exact", head: true }),
+      opts,
+    );
     if (error) throw error;
-    return data ?? [];
+    return count ?? 0;
   },
 
   async insert(table, row) {
@@ -327,6 +402,16 @@ export function createAdminData(gateway) {
      */
     bulkInsert: (table, rows) => gateway.insertMany(table, rows),
 
+    // ── Events (school calendar shown in the student portal) ──
+    listEvents: () =>
+      gateway.select("events", {
+        order: { column: "start_date", ascending: false },
+      }),
+    createEvent: (/** @type {object} */ row) => gateway.insert("events", row),
+    updateEvent: (/** @type {number} */ id, /** @type {object} */ patch) =>
+      gateway.update("events", id, patch),
+    deleteEvent: (/** @type {number} */ id) => gateway.remove("events", id),
+
     // ── Guardians (encargados) and their links to students ────
     listGuardians: () =>
       gateway.select("guardians", { order: { column: "last_name" } }),
@@ -385,8 +470,46 @@ export function createAdminData(gateway) {
     ) => gateway.update("school_settings", id, patch),
 
     // ── Overview (school-wide reads) ──────────────────────────
-    /** All attendance rows. Aggregated client-side into both overview
-     *  figures: the month's rate and the at-risk count. */
-    listAllAttendance: () => gateway.select("attendance"),
+    /** @param {string} [status] only students with this status */
+    countStudents: (status) =>
+      gateway.count("students", status ? { match: { status } } : {}),
+
+    /**
+     * Active students placed in one of `sectionIds`.
+     * @param {Array<number|string>} sectionIds
+     */
+    countEnrolled: (sectionIds) =>
+      sectionIds.length
+        ? gateway.count("students", {
+            match: { status: "active" },
+            inList: { column: "class_id", values: sectionIds },
+          })
+        : Promise.resolve(0),
+
+    /**
+     * Attendance rows dated `from`..`to` (inclusive), optionally only those
+     * with one of `statuses`.
+     * @param {string} from `YYYY-MM-DD`
+     * @param {string} to `YYYY-MM-DD`
+     * @param {string[]} [statuses]
+     */
+    countAttendance: (from, to, statuses) =>
+      gateway.count("attendance", {
+        between: { column: "date", from, to },
+        ...(statuses ? { inList: { column: "status", values: statuses } } : {}),
+      }),
+
+    /**
+     * The absences and tardías dated `from`..`to`, narrowed to the columns
+     * the at-risk rule needs.
+     * @param {string} from `YYYY-MM-DD`
+     * @param {string} to `YYYY-MM-DD`
+     */
+    listMissedLessons: (from, to) =>
+      gateway.select("attendance", {
+        columns: "id, student_id, class_subject_teacher_id, status, date",
+        inList: { column: "status", values: MISSED_LESSON_STATUSES },
+        between: { column: "date", from, to },
+      }),
   };
 }

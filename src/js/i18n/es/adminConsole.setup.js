@@ -13,6 +13,7 @@ export default {
     teachers: "Docentes",
     assignments: "Asignaciones",
     students: "Estudiantes y matrícula",
+    events: "Eventos",
     accounts: "Cuentas",
     settings: "Configuración",
     viewTeacherConsole: "Ver consola docente",
@@ -27,6 +28,7 @@ export default {
     teachers: "Docentes",
     assignments: "Asignación de clases",
     students: "Estudiantes y matrícula",
+    events: "Eventos escolares",
     accounts: "Cuentas de acceso",
     settings: "Configuración",
   },
@@ -38,8 +40,54 @@ export default {
       "En esta consola la dirección y la coordinación configuran y operan el colegio: estructura académica, personas, matrícula y un resumen general.",
     activeYear: "Curso lectivo activo",
     setupTitle: "Configuremos su colegio",
-    setupBody:
-      "Todavía no hay nada configurado. Empiece agregando un curso lectivo: los periodos, las secciones, las materias y las matrículas dependen de él.",
+    setup: {
+      progress: "{done} de {total} pasos listos",
+      hide: "Ocultar",
+      hideLabel: "Ocultar la lista de configuración",
+      show: {
+        one: "Mostrar la lista de configuración (falta {count})",
+        other: "Mostrar la lista de configuración (faltan {count})",
+      },
+      go: "Ir a {page}",
+      goLogins: "Crear accesos de docentes",
+      stepDone: "Listo",
+      steps: {
+        year: {
+          title: "Agregue y active el curso lectivo",
+          hint: "Todo lo demás pertenece a un curso lectivo.",
+          activateHint:
+            "Hay un curso lectivo, pero ninguno está activo: actívelo desde su fila.",
+        },
+        periods: {
+          title: "Defina los periodos de evaluación",
+          hint: "Sus pesos deben sumar 100%.",
+        },
+        sections: {
+          title: "Cree los grados y las secciones",
+          hint: "Por ejemplo 7-1 y 7-2.",
+        },
+        subjects: {
+          title: "Agregue las materias",
+          hint: "Y qué grados lleva cada una.",
+        },
+        teachers: {
+          title: "Agregue a los docentes",
+          hint: "Uno por uno o desde una hoja de cálculo.",
+        },
+        assignments: {
+          title: "Asigne docentes a secciones y materias",
+          hint: "Quién imparte qué y en qué sección.",
+        },
+        students: {
+          title: "Matricule a los estudiantes en secciones",
+          hint: "Uno por uno o desde una hoja de cálculo, cada uno en una sección.",
+        },
+        logins: {
+          title: "Cree el acceso de cada docente asignado",
+          hint: "Desde la tabla de Docentes, un acceso por docente.",
+        },
+      },
+    },
     noActiveYear: "Aún no hay un curso lectivo activo",
     loading: "Cargando resumen…",
     enrollment: "Matrícula total",
@@ -49,7 +97,8 @@ export default {
       other: "{count} registros",
     },
     atRisk: "Estudiantes en riesgo",
-    atRiskHint: "3 o más ausencias registradas",
+    atRiskHint:
+      "{threshold} o más ausencias o tardías en una materia en este curso lectivo",
     teachers: "Docentes",
     subjects: "Materias",
     sections: "Secciones",
@@ -233,13 +282,21 @@ export default {
     defaultSet: '"{name}" es ahora el esquema predeterminado.',
     confirmDelete: '¿Eliminar el esquema "{name}"?',
     itemsTitle: "Componentes — {name}",
-    itemsHelp: "Las ponderaciones deben sumar 100%.",
+    itemsHelp:
+      "Las ponderaciones deben sumar 100% para que el esquema pueda ser el predeterminado o aplicarse a un libro de notas.",
     componentName: "Componente",
     addComponent: "Agregar componente",
     editComponent: "Editar componente",
     confirmDeleteItem: '¿Quitar el componente "{name}"?',
     loadPreset: "Cargar preajuste MEP",
     presetLoaded: "Componentes MEP agregados.",
+    weightOver: "Los componentes sumarían {total}%, más de 100%.",
+    presetOver:
+      "El preajuste MEP llevaría este esquema a {total}%. Primero ajuste los componentes existentes.",
+    defaultNeeds100:
+      "Un esquema debe sumar 100% para ser el predeterminado. Este suma {total}%.",
+    defaultIncomplete:
+      "Este es el esquema predeterminado y ahora suma {total}%. Los docentes no podrán aplicarlo hasta que sume 100%.",
   },
   teachers: {
     title: "Docentes",
@@ -254,6 +311,7 @@ export default {
     phone: "Teléfono",
     specialization: "Especialización",
     status: "Estado",
+    statusHelp: "Inactivo también desactiva el acceso del docente.",
     empty: "Aún no hay docentes.",
     confirmDelete: "¿Eliminar al docente {name}?",
     statuses: {

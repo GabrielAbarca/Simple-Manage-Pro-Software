@@ -1,5 +1,6 @@
 import { t, formatDate } from "../i18n.js";
 import { getEvents } from "../studentState.js";
+import { escapeHtml } from "./viewHelpers.js";
 
 export async function initEventsView() {
   const events = await getEvents();
@@ -26,13 +27,13 @@ export async function initEventsView() {
         ? `${formatDate(ev.start_date)} → ${formatDate(ev.end_date)}`
         : formatDate(ev.start_date);
 
-      return `<div class="event-card event-${ev.type}">
+      return `<div class="event-card event-${escapeHtml(ev.type)}">
       <div class="event-icon">
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${icon}"></use></svg></span>
       </div>
       <div class="event-body">
-        <h3>${ev.title}</h3>
-        <p>${ev.description ?? ""}</p>
+        <h3>${escapeHtml(ev.title)}</h3>
+        <p>${escapeHtml(ev.description ?? "")}</p>
         <div class="event-dates">
           <span class="material-symbols-outlined" style="font-size:.85rem;vertical-align:middle;"><svg aria-hidden="true"><use href="#icon-calendar_today"></use></svg></span>
           ${dateStr}
@@ -65,5 +66,5 @@ function formatEventType(type) {
     "suspension",
     "general",
   ];
-  return known.includes(type) ? t(`enums.eventType.${type}`) : type;
+  return known.includes(type) ? t(`enums.eventType.${type}`) : escapeHtml(type);
 }

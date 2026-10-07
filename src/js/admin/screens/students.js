@@ -21,7 +21,8 @@ import {
 import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
-import { accountBtn } from "../domain/accountActions.js";
+import { dateCell, exportTable, formatField } from "../../tableExport.js";
+import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";
 import { openGuardians } from "./guardians.js";
 
 export async function loadStudents() {
@@ -89,27 +90,50 @@ function filteredStudents() {
   );
 }
 
-/** The student's section, named the way the rest of the console names it. */
-function studentSectionName(student) {
-  if (!student.class_id) return "—";
+/**
+ * The student's section, named the way the rest of the console names it.
+ * @param {any} student
+ * @param {string | null} [missing] shown when there is no section to name
+ */
+function studentSectionName(student, missing = "—") {
+  if (!student.class_id) return missing;
   const sec = state.sections.find((x) => x.id === student.class_id);
-  return sec ? sectionName(sec) : "—";
+  return sec ? sectionName(sec) : missing;
 }
 
 function statusToggleBtn(student) {
   const active = student.status === "active";
-  return iconBtn(
-    active ? "block" : "check_circle",
-    active
-      ? t("console.students.deactivate")
-      : t("console.students.reactivate"),
-    async () => {
-      await data.updateStudent(student.id, {
-        status: active ? "inactive" : "active",
-      });
-      showToast(t("common.saved"));
-      loadStudents();
-    },
+  const status = active ? "inactive" : "active";
+  const name = `${student.first_name} ${student.last_name}`;
+  const label = active
+    ? t("console.students.deactivate")
+    : t("console.students.reactivate");
+  const run = async () => {
+    await data.updateStudent(student.id, { status });
+    await syncLoginWithStatus(student, "student", status);
+    loadStudents();
+  };
+  return iconBtn(active ? "block" : "check_circle", label, () =>
+    student.auth_user_id
+      ? openConfirm(
+          t(
+            active
+              ? "console.students.confirmDeactivateLogin"
+              : "console.students.confirmReactivateLogin",
+            { name },
+          ),
+          run,
+          {
+            title: t(
+              active
+                ? "console.students.deactivateTitle"
+                : "console.students.reactivateTitle",
+            ),
+            confirmLabel: label,
+            danger: active,
+          },
+        )
+      : run(),
   );
 }
 
@@ -262,6 +286,7 @@ export function openStudentForm(student = null) {
         type: "select",
         value: student?.status ?? "active",
         required: true,
+        help: t("console.students.statusHelp"),
         options: STUDENT_STATUSES.map((status) => ({
           value: status,
           label: t(`enums.studentStatus.${status}`),
@@ -287,7 +312,7 @@ export function openStudentForm(student = null) {
         ? await data.updateStudent(student.id, payload).then(() => student)
         : await data.createStudent(payload);
       markSaved("students-body", saved?.id ?? student?.id);
-      showToast(t("common.saved"));
+      await syncLoginWithStatus(student, "student", payload.status);
       loadStudents();
     },
   });
@@ -307,6 +332,53 @@ function generateEnrollment(student) {
   return candidate;
 }
 
+/** Save the students the table is showing, under its current filter. */
+function openStudentExport() {
+  const list = filteredStudents();
+  openModal({
+    title: t("common.export.title"),
+    submitLabel: t("common.export.download"),
+    confirmDiscard: false,
+    fields: [formatField(t("console.export.rowsHelp", { count: list.length }))],
+    onSubmit: (values) => {
+      const rows = [
+        [
+          t("console.students.enrollmentNumber"),
+          t("console.students.lastName"),
+          t("console.students.firstName"),
+          idLabel("students"),
+          t("console.students.dateOfBirth"),
+          t("console.students.gender"),
+          t("console.students.section"),
+          t("console.students.status"),
+          t("console.students.email"),
+          t("console.students.phone"),
+        ],
+        ...list.map((s) => [
+          s.enrollment_number,
+          s.last_name,
+          s.first_name,
+          s.national_id,
+          dateCell(s.date_of_birth),
+          s.gender ? genderLabel(s.gender) : null,
+          studentSectionName(s, null),
+          t(`enums.studentStatus.${s.status ?? "active"}`),
+          s.email,
+          s.phone,
+        ]),
+      ];
+      exportTable(rows, {
+        filename: `${t("console.students.exportFile")}-${todayIso()}`,
+        sheetName: t("console.students.title"),
+        format: values.format,
+      });
+    },
+  });
+}
+
+document
+  .getElementById("btn-export-students")
+  .addEventListener("click", openStudentExport);
 document
   .getElementById("btn-add-student")
   .addEventListener("click", () => openStudentForm());

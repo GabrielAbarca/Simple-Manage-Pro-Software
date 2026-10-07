@@ -14,6 +14,7 @@ export const state = {
   /** @type {any} */ activeYear: null,
   /** @type {any[]} */ gradeLevels: [],
   /** @type {any[]} */ rooms: [],
+  /** @type {any[]} */ events: [],
   /** @type {any[]} */ teachers: [],
   /** @type {any[]} */ subjects: [],
   /** @type {any[]} */ sections: [],

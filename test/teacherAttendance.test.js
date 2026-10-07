@@ -14,6 +14,8 @@ const { fixtures, calls, upserts, errors } = vi.hoisted(() => ({
 vi.mock("../src/js/supabaseClient.js", () => {
   function make(table) {
     const filters = [];
+    let range = null;
+    let counted = false;
     const resolve = () => {
       if (errors[table]) {
         calls.push({ table, filters: [...filters] });
@@ -24,11 +26,16 @@ vi.mock("../src/js/supabaseClient.js", () => {
           op === "eq" ? String(row[col]) === String(val) : true,
         ),
       );
-      calls.push({ table, filters: [...filters] });
-      return Promise.resolve({ data: rows, error: null });
+      calls.push({ table, filters: [...filters], range });
+      return Promise.resolve({
+        data: range ? rows.slice(range[0], range[1] + 1) : rows,
+        count: counted ? rows.length : null,
+        error: null,
+      });
     };
     const b = {
-      select: () => b,
+      select: (_cols, opts) => ((counted = opts?.count === "exact"), b),
+      range: (from, to) => ((range = [from, to]), b),
       order: () => b,
       eq: (col, val) => (filters.push(["eq", col, val]), b),
       upsert: (rows, opts) => {
@@ -217,5 +224,24 @@ describe("fetchCstAttendance — the absence summary", () => {
     await fetchCstAttendance(11);
     const q = calls.find((c) => c.table === "attendance");
     expect(q.filters).toEqual([["eq", "class_subject_teacher_id", 11]]);
+  });
+
+  it("reads a year's register past the API's 1000-row cap, a page at a time", async () => {
+    fixtures.attendance = Array.from({ length: 2345 }, (_, i) => ({
+      id: i + 1,
+      student_id: 101,
+      class_subject_teacher_id: 11,
+      date: "2026-03-02",
+      status: "present",
+    }));
+    const rows = await fetchCstAttendance(11);
+    expect(rows).toHaveLength(2345);
+    expect(
+      calls.filter((c) => c.table === "attendance").map((c) => c.range),
+    ).toEqual([
+      [0, 999],
+      [1000, 1999],
+      [2000, 2999],
+    ]);
   });
 });

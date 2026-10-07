@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import {
   REF,
+  SUPA,
+  studentFix,
   teacherFix,
   routeSupabase,
   seedLang,
@@ -331,4 +333,234 @@ test.describe("conducta", () => {
     expect(errors).toEqual([]);
     expect(writes).toEqual([]);
   });
+});
+
+// The student portal reads the same conducta the teacher console scores: the
+// posted mark once a teacher publishes it, the live score until then. Dates
+// are relative to today so "started" and "not started yet" stay stable.
+const day = (offset) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
+const conductPeriods = [
+  {
+    id: 1,
+    school_year_id: 1,
+    name: "Period 1",
+    period_order: 1,
+    start_date: day(-90),
+    end_date: day(-31),
+  },
+  {
+    id: 2,
+    school_year_id: 1,
+    name: "Period 2",
+    period_order: 2,
+    start_date: day(-20),
+    end_date: day(30),
+  },
+  {
+    id: 3,
+    school_year_id: 1,
+    name: "Period 3",
+    period_order: 3,
+    start_date: day(31),
+    end_date: day(90),
+  },
+];
+const studentConductFix = {
+  ...studentFix,
+  grading_periods: conductPeriods,
+  student_period_conduct: [
+    { student_id: 101, grading_period_id: 1, conduct_score: 90 },
+    { student_id: 101, grading_period_id: 2, conduct_score: 65 },
+    { student_id: 101, grading_period_id: 3, conduct_score: 100 },
+  ],
+  student_conduct_grades: [
+    { student_id: 101, grading_period_id: 1, score: 88 },
+    { student_id: 101, grading_period_id: 2, score: null },
+  ],
+  discipline_records: [
+    {
+      id: 1,
+      student_id: 101,
+      date: day(-5),
+      type: "Disrespect",
+      description: "Spoke over the teacher repeatedly.",
+      conduct_points: 25,
+    },
+    {
+      id: 2,
+      student_id: 101,
+      date: day(-25),
+      type: "Uniform",
+      description: null,
+      conduct_points: 10,
+    },
+    {
+      id: 3,
+      student_id: 101,
+      date: day(-60),
+      type: "Late to class",
+      description: "Third tardy.",
+      conduct_points: 10,
+    },
+    {
+      id: 4,
+      student_id: 101,
+      date: day(-400),
+      type: "Last year",
+      description: "Before this school year.",
+      conduct_points: 30,
+    },
+  ],
+};
+
+async function openStudentConduct(page, context, fix, lang) {
+  const writes = await routeSupabase(context, fix);
+  if (lang) await seedLang(context, lang);
+  await context.addInitScript(
+    ([key, value]) => localStorage.setItem(key, value),
+    [`sb-${REF}-auth-token`, sessionSeed()],
+  );
+  const errors = trackErrors(page);
+  await page.goto("/");
+  await page.click('aside a[data-page="conduct"]');
+  return { writes, errors };
+}
+
+test.describe("student portal conducta", () => {
+  test("shows each period's mark and the records behind it", async ({
+    page,
+    context,
+  }) => {
+    const { writes, errors } = await openStudentConduct(
+      page,
+      context,
+      studentConductFix,
+    );
+
+    const periods = page.locator("#conduct-periods-table tbody tr");
+    await expect(periods).toHaveCount(3);
+    // Period 1 was posted at 88, so the live 90 must not show.
+    await expect(periods.nth(0)).toContainText("88");
+    await expect(periods.nth(0)).toContainText("Posted");
+    await expect(periods.nth(0)).not.toContainText("90");
+    await expect(periods.nth(0)).toContainText("Pass");
+    await expect(periods.nth(0).locator("td").nth(3)).toHaveText("1");
+    // Period 2 has a posted row with no score yet: the live score shows, as
+    // provisional, and below the floor it warns rather than fails.
+    await expect(periods.nth(1)).toContainText("65");
+    await expect(periods.nth(1)).toContainText("Provisional");
+    await expect(periods.nth(1)).toContainText("Below 70");
+    await expect(periods.nth(1)).not.toContainText("Fail");
+    await expect(periods.nth(1).locator("td").nth(3)).toHaveText("1");
+    // Period 3 has not started.
+    await expect(periods.nth(2).locator("td").nth(1)).toHaveText("—");
+    await expect(periods.nth(2).locator("td").nth(2)).toHaveText("—");
+
+    // Last year's record is left out; one dated between periods belongs to
+    // none of them.
+    const records = page.locator("#conduct-records-table tbody tr");
+    await expect(records).toHaveCount(3);
+    await expect(records.nth(0)).toContainText("Disrespect");
+    await expect(records.nth(0)).toContainText("Period 2");
+    await expect(records.nth(0)).toContainText("−25");
+    await expect(records.nth(1).locator("td").nth(1)).toHaveText("—");
+    await expect(records.nth(1).locator("td").nth(3)).toHaveText("—");
+    await expect(page.locator("#conduct-records-table")).not.toContainText(
+      "Last year",
+    );
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
+  test("a posted mark below the floor reads as aplazado in Spanish", async ({
+    page,
+    context,
+  }) => {
+    await openStudentConduct(
+      page,
+      context,
+      {
+        ...studentConductFix,
+        student_conduct_grades: [
+          { student_id: 101, grading_period_id: 1, score: 60 },
+        ],
+      },
+      "es",
+    );
+    await expect(page.locator("#view-conduct h1")).toHaveText("Conducta");
+    const periods = page.locator("#conduct-periods-table tbody tr");
+    await expect(periods.nth(0)).toContainText("Publicada");
+    await expect(periods.nth(0)).toContainText("Aplazado por conducta");
+    await expect(periods.nth(1)).toContainText("Preliminar");
+    await expect(periods.nth(1)).toContainText("Bajo 70");
+  });
+
+  test("a clean record still reads 100", async ({ page, context }) => {
+    await openStudentConduct(page, context, {
+      ...studentConductFix,
+      student_period_conduct: [
+        { student_id: 101, grading_period_id: 2, conduct_score: 100 },
+      ],
+      student_conduct_grades: [],
+      discipline_records: [],
+    });
+    const periods = page.locator("#conduct-periods-table tbody tr");
+    await expect(periods.nth(1)).toContainText("100");
+    await expect(periods.nth(1)).toContainText("Provisional");
+    await expect(periods.nth(1).locator("td").nth(2)).toHaveText("—");
+    await expect(page.locator("#conduct-records-table tbody")).toContainText(
+      "No discipline records.",
+    );
+  });
+
+  test("a student without a section sees no periods instead of an error", async ({
+    page,
+    context,
+  }) => {
+    const { errors } = await openStudentConduct(page, context, {
+      ...studentConductFix,
+      students: studentFix.students.map((s) => ({
+        ...s,
+        class_id: null,
+        classes: null,
+      })),
+    });
+    await expect(page.locator("#conduct-root")).toContainText(
+      "There are no grading periods for this school year yet.",
+    );
+    await expect(page.locator("#conduct-root [data-retry]")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  for (const table of ["discipline_records", "grading_periods"]) {
+    test(`a failed ${table} read offers a retry that recovers`, async ({
+      page,
+      context,
+    }) => {
+      await routeSupabase(context, studentConductFix);
+      let fail = true;
+      await context.route(`${SUPA}/rest/v1/${table}**`, (route) =>
+        fail ? route.fulfill({ status: 500, body: "{}" }) : route.fallback(),
+      );
+      await context.addInitScript(
+        ([key, value]) => localStorage.setItem(key, value),
+        [`sb-${REF}-auth-token`, sessionSeed()],
+      );
+      await page.goto("/");
+      await page.click('aside a[data-page="conduct"]');
+      const retry = page.locator("#conduct-root [data-retry]");
+      await expect(retry).toBeVisible();
+      fail = false;
+      await retry.click();
+      await expect(page.locator("#conduct-records-table tbody tr")).toHaveCount(
+        3,
+      );
+    });
+  }
 });

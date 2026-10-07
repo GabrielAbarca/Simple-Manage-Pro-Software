@@ -30,7 +30,7 @@ export default {
       empty:
         "Aún no hay clases. Haga clic en un espacio de la cuadrícula para agregar una.",
       noYear: "Active un curso lectivo para armar horarios.",
-      needSections: "Primero agrega secciones, materias y docentes.",
+      needSections: "Primero agregue secciones, materias y docentes.",
       pickSection: "Elija una sección para ver su semana.",
       confirmDelete: "¿Quitar esta clase del horario?",
       added: "Clase agregada.",
@@ -51,7 +51,7 @@ export default {
     days: {
       configure: "Días de clase",
       title: "Días de la semana escolar",
-      help: "Solo los días que elijas aquí aparecen en la cuadrícula del horario.",
+      help: "Solo los días que elija aquí aparecen en la cuadrícula del horario.",
       atLeastOne: "Elija al menos un día.",
       saved: "Días de clase actualizados.",
     },
@@ -138,7 +138,7 @@ export default {
     noData:
       "No se encontraron filas — revise que el archivo tenga encabezados y datos.",
     mapHelp:
-      "Asocia cada campo a una columna. Se encontraron {count} filas de datos.",
+      "Asocie cada campo a una columna. Se encontraron {count} filas de datos.",
     fields: {
       first_name: "Nombre",
       last_name: "Apellidos",
@@ -184,7 +184,7 @@ export default {
     email: "Correo",
     tempPassword: "Contraseña temporal",
     tempPasswordHelp:
-      "Compártela con la persona; podrá cambiarla al iniciar sesión.",
+      "Compártala con la persona; podrá cambiarla al iniciar sesión.",
     created: "Cuenta de acceso creada.",
     createdDemo: "Acceso creado (demo — no es una cuenta real).",
     confirmReset: "¿Enviar un restablecimiento de contraseña a {email}?",

@@ -48,7 +48,7 @@ export default {
     faq3q: "¿Por qué no puedo editar mi perfil?",
     faq3a:
       "Esta es una versión de demostración: Cuenta y perfil es de solo lectura para explorar con seguridad.",
-    needHand: "¿Necesitas ayuda?",
+    needHand: "¿Necesita ayuda?",
     needHandText:
       "Use el menú lateral para navegar entre secciones. Cada tarjeta del panel es un acceso directo a su vista completa.",
     contactPrefix: "Contactar a soporte — ",

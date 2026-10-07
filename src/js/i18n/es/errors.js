@@ -6,7 +6,7 @@ export default {
     missingRequired:
       "Falta un campo obligatorio. Complételo e inténtelo de nuevo.",
     stillReferenced:
-      "Este registro todavía se usa en otro lugar, así que no se puede eliminar. Primero elimina o reasigna lo que depende de él.",
+      "Este registro todavía se usa en otro lugar, así que no se puede eliminar. Primero elimine o reasigne lo que depende de él.",
     duplicate: "Ese valor ya lo usa otro registro.",
     notAllowedValue:
       "Ese valor no se permite aquí. Revíselo e inténtelo de nuevo.",

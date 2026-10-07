@@ -31,7 +31,7 @@ that still holds its own screen logic.
 
 | Path                  | Holds                                                                                                                                                                    |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/js/admin/`       | 45 modules — the admin console. `auth.js`, `state.js`, `data.js`, `nav.js`, plus `ui/` (5), `domain/` (5), `screens/` (16), `schedules/` (6), `import/` (8)              |
+| `src/js/admin/`       | 47 modules — the admin console. `auth.js`, `state.js`, `data.js`, `nav.js`, plus `ui/` (5), `domain/` (6), `screens/` (17), `schedules/` (6), `import/` (9)              |
 | `src/js/views/`       | 27 view modules — **both** the student portal (8) and the teacher console (18), plus `viewHelpers.js`                                                                    |
 | `src/js/teacherData/` | 9 modules — the teacher console's Supabase query layer, split by domain, composed by `index.js` into one `db`                                                            |
 | `src/js/controls/`    | 6 modules — portal-agnostic custom form-control widgets                                                                                                                  |
@@ -191,7 +191,7 @@ wrong.)
 
 Everything else in `admin/` genuinely avoids cycles by injecting callbacks:
 
-- `nav.js` takes a `{page: loader}` map, so `screens/overview.js` can call
+- `nav.js` takes a `{page: loader}` map, so `screens/setupChecklist.js` can call
   `showSection("yearperiods")` without nav importing any screen.
 - `schedules/tabState.js` is a leaf holding the active sub-tab and a
   `repaint()` that `schedules/index.js` registers itself into once. The panels

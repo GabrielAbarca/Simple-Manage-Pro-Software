@@ -431,6 +431,18 @@ export function createAdminData(gateway) {
       gateway.count("students", status ? { match: { status } } : {}),
 
     /**
+     * Active students placed in one of `sectionIds`.
+     * @param {Array<number|string>} sectionIds
+     */
+    countEnrolled: (sectionIds) =>
+      sectionIds.length
+        ? gateway.count("students", {
+            match: { status: "active" },
+            inList: { column: "class_id", values: sectionIds },
+          })
+        : Promise.resolve(0),
+
+    /**
      * Attendance rows dated `from`..`to` (inclusive), optionally only those
      * with one of `statuses`.
      * @param {string} from `YYYY-MM-DD`

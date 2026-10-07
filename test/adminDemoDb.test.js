@@ -318,4 +318,39 @@ describe("adminData — createAdminData over a gateway", () => {
       ],
     ]);
   });
+
+  it("counts the active students in the year's sections, without a read when there are none", async () => {
+    const calls = [];
+    /** @type {any} */
+    const gateway = {
+      count: async (table, opts) => (calls.push([table, opts]), 3),
+    };
+    const data = createAdminData(gateway);
+    expect(await data.countEnrolled([])).toBe(0);
+    expect(calls).toEqual([]);
+    expect(await data.countEnrolled([21, 22])).toBe(3);
+    expect(calls).toEqual([
+      [
+        "students",
+        {
+          match: { status: "active" },
+          inList: { column: "class_id", values: [21, 22] },
+        },
+      ],
+    ]);
+  });
+
+  it("counts a student placed in a section in the demo", async () => {
+    const real = fakeRealGateway({
+      students: [
+        { id: 1, status: "active", class_id: null },
+        { id: 2, status: "active", class_id: 21 },
+        { id: 3, status: "inactive", class_id: 21 },
+      ],
+    });
+    const gateway = createDemoGateway(real);
+    await gateway.update("students", 1, { class_id: 22 });
+    expect(await createAdminData(gateway).countEnrolled([21, 22])).toBe(2);
+    expect(real.writes).toEqual([]);
+  });
 });

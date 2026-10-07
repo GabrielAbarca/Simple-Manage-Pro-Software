@@ -5,11 +5,11 @@ export default {
   // panel describes the system instead of addressing any one role.
   tagline1: "The school's management system.",
   tagline2: "Grades, attendance, schedules and records in one place.",
-  // Order follows the icons in login.html: school, calendar, fact_check, event.
+  // Order follows the icons in login.html: school, calendar, fact_check, gavel.
   feature1: "Grades by subject and term",
   feature2: "Weekly schedule",
   feature3: "Daily attendance",
-  feature4: "Events and announcements",
+  feature4: "Conduct and discipline",
   // The demo swaps in these (see login.js): its visitor is a director
   // evaluating the product, and the panel's job is to orient them — the
   // three portals are reachable, and nothing they touch is saved.

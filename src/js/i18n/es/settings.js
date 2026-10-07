@@ -58,7 +58,6 @@ export default {
     text: "Simple Manage Pro (SMP) es un portal de gestión escolar para estudiantes, docentes y personal: notas, asistencia, horarios e información de clases en un solo lugar.",
     version: "Versión",
     links: "Enlaces",
-    documentation: "Documentación",
     privacy: "Política de privacidad",
     terms: "Términos de servicio",
   },

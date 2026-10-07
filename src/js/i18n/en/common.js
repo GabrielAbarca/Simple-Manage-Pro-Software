@@ -24,7 +24,6 @@ export default {
   couldNotLoadProfile: "Could not load your profile.",
   adminOnly: "Only an administrator can perform this action.",
   darkMode: "Dark mode",
-  comingSoon: "Coming soon",
   days: {
     monday: "Monday",
     tuesday: "Tuesday",

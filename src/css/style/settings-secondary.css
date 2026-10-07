@@ -77,16 +77,6 @@
     color: #fff;
   }
 
-  .settings-coming-soon {
-    font-size: var(--text-xs);
-    font-weight: var(--weight-semibold);
-    color: var(--color-info-text);
-    background: var(--color-info-bg);
-    padding: 0.15rem 0.55rem;
-    border-radius: var(--border-radius-3);
-    letter-spacing: 0.02em;
-  }
-
   /* ── Help ── */
   .settings-faq {
     display: flex;
@@ -148,10 +138,6 @@
   .settings-links .material-symbols-outlined {
     font-size: 1.15rem;
     color: var(--color-info-dark);
-  }
-
-  .settings-links .settings-coming-soon {
-    margin-left: auto;
   }
 
   .settings-links a {

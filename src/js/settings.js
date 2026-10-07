@@ -8,7 +8,7 @@
 //
 //  DEMO SCOPE: display only. Everything in Account & Profile is
 //  natively `disabled` (greyed inputs + inert buttons); Preferences is
-//  a styled shell (Language stub is a no-op, flagged "Coming soon").
+//  a styled shell (Language stub is a no-op).
 //
 //  The one exception is "Change password" in the Login security card,
 //  which is live outside demo mode — a signed-in user otherwise has no
@@ -412,7 +412,6 @@ function renderMoreInfo() {
     <div class="settings-card">
       <h4 class="settings-card-title">${t("settings.about.links")}</h4>
       <ul class="settings-links">
-        <li><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-description"></use></svg></span> ${t("settings.about.documentation")} <span class="settings-coming-soon">${t("common.comingSoon")}</span></li>
         <li><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-policy"></use></svg></span> <a href="/privacy.html" target="_blank" rel="noopener">${t("settings.about.privacy")}</a></li>
         <li><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-gavel"></use></svg></span> <a href="/terms.html" target="_blank" rel="noopener">${t("settings.about.terms")}</a></li>
       </ul>

@@ -4,11 +4,11 @@ export default {
   // panel describes the system instead of addressing any one role.
   tagline1: "El sistema de gestión del colegio.",
   tagline2: "Notas, asistencia, horarios y expedientes en un solo lugar.",
-  // Order follows the icons in login.html: school, calendar, fact_check, event.
+  // Order follows the icons in login.html: school, calendar, fact_check, gavel.
   feature1: "Notas por materia y periodo",
   feature2: "Horario semanal",
   feature3: "Asistencia diaria",
-  feature4: "Eventos y comunicados",
+  feature4: "Conducta y disciplina",
   // The demo swaps in these (see login.js): its visitor is a director
   // evaluating the product, and the panel's job is to orient them — the
   // three portals are reachable, and nothing they touch is saved.

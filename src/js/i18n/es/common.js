@@ -26,7 +26,6 @@ export default {
   couldNotLoadProfile: "No se pudo cargar su perfil.",
   adminOnly: "Solo la dirección puede realizar esta acción.",
   darkMode: "Modo oscuro",
-  comingSoon: "Próximamente",
   days: {
     monday: "Lunes",
     tuesday: "Martes",

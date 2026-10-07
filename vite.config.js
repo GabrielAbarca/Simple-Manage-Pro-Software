@@ -45,13 +45,37 @@ const injectSupabasePreconnect = (origin) => ({
   },
 });
 
+// The HTML writes share and canonical URLs against the demo domain; each Vercel
+// build (demo, pilot, previews) points them at the host that actually serves it.
+const DEMO_ORIGIN = "https://demo.simplemanagepro.com";
+
+export const siteOrigin = (env) => {
+  const host =
+    env.VERCEL_ENV === "production"
+      ? env.VERCEL_PROJECT_PRODUCTION_URL
+      : env.VERCEL_BRANCH_URL || env.VERCEL_URL;
+  return host ? `https://${host}` : DEMO_ORIGIN;
+};
+
+const injectSiteOrigin = (origin) => ({
+  name: "inject-site-origin",
+  transformIndexHtml: {
+    order: "pre",
+    handler: (html) => html.replaceAll(DEMO_ORIGIN, origin),
+  },
+});
+
 export default defineConfig(({ mode }) => {
   // Load VITE_* env so the preconnect origin tracks the configured backend.
   const env = loadEnv(mode, process.cwd(), "");
   const supabaseOrigin = env.VITE_SUPABASE_URL || "";
 
   return {
-    plugins: [inlineSvgSprite(), injectSupabasePreconnect(supabaseOrigin)],
+    plugins: [
+      injectSiteOrigin(siteOrigin(env)),
+      inlineSvgSprite(),
+      injectSupabasePreconnect(supabaseOrigin),
+    ],
     server: {
       port: 3000,
       open: true,

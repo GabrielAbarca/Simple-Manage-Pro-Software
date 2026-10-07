@@ -1,6 +1,6 @@
 <div align="center">
-  <img width="715" height="206" alt="SMP-dashboard-logo" src="https://github.com/user-attachments/assets/f16f1a37-397e-4341-ae79-e2bc69ba6c7a" />
-  <h1>SMP Dashboard</h1>
+  <img width="715" height="206" alt="Simple Manage Pro logo" src="https://github.com/user-attachments/assets/f16f1a37-397e-4341-ae79-e2bc69ba6c7a" />
+  <h1>Simple Manage Pro</h1>
   <p><strong>A full-featured school management dashboard for Costa Rican schools —<br/>built on a 27-table PostgreSQL schema with real-time data via Supabase.</strong></p>
 
   <br/>
@@ -31,7 +31,7 @@
 
 ## 🧩 What is SMP?
 
-SMP Dashboard is a web-based school management platform designed around the operational structure of Costa Rican secondary schools (colegios). It gives administrators and staff a centralized view of everything happening across an institution. From class schedules and teacher assignments to student grades, attendance records, and upcoming events.
+Simple Manage Pro (SMP) is a web-based school management platform designed around the operational structure of Costa Rican secondary schools (colegios). It gives administrators and staff a centralized view of everything happening across an institution. From class schedules and teacher assignments to student grades, attendance records, and upcoming events.
 
 The project targets real data complexity: the underlying PostgreSQL schema spans **27 tables** to model grading periods, course sections and enrollment. All served in real time through Supabase.
 

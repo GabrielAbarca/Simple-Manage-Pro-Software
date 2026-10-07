@@ -116,6 +116,14 @@ export default {
     section: "Section",
     status: "Status",
     deactivate: "Deactivate",
+    statusHelp:
+      "Saving any status other than Active here also deactivates the student's sign-in.",
+    confirmDeactivateLogin:
+      "Deactivate {name}? Their sign-in will be deactivated too.",
+    deactivateTitle: "Deactivate student?",
+    reactivateTitle: "Reactivate student?",
+    confirmReactivateLogin:
+      "Reactivate {name}? Their sign-in will be restored too.",
     reactivate: "Reactivate",
     allStudents: "All students",
     unassigned: "No section assigned",
@@ -176,6 +184,23 @@ export default {
       gradingPeriods: "Import grading periods (CSV)",
     },
   },
+  events: {
+    title: "Events",
+    subtitle:
+      "Holidays, exams, activities and parent meetings. Students see them in their portal.",
+    add: "Add event",
+    addTitle: "Add event",
+    editTitle: "Edit event",
+    name: "Title",
+    dates: "Dates",
+    type: "Type",
+    start: "Starts",
+    end: "Ends",
+    endHelp: "Leave blank for a one-day event.",
+    description: "Description",
+    empty: "No events yet. Add one to show it in the student portal.",
+    confirmDelete: 'Delete the event "{name}"?',
+  },
   export: {
     rowsHelp: "Rows to export: {count}, as filtered on screen.",
   },
@@ -220,5 +245,16 @@ export default {
     deactivatedDemo: "Sign-in deactivated (demo — no real change).",
     activated: "Sign-in restored.",
     activatedDemo: "Sign-in restored (demo — no real change).",
+    loginDisabledWithStatus: "Saved. Their sign-in is deactivated too.",
+    loginDisabledWithStatusDemo:
+      "Saved. Their sign-in would be deactivated too (demo — no real change).",
+    loginRestoredWithStatus: "Saved. Their sign-in is restored too.",
+    loginRestoredWithStatusDemo:
+      "Saved. Their sign-in would be restored too (demo — no real change).",
+    loginSyncFailed:
+      "The record was saved, but its sign-in could not be changed. Change it from User Accounts.",
+    loginNoticeTitle: "Sign-in not changed",
+    adminLoginKept:
+      "Saved. This login belongs to an administrator, so its sign-in was not deactivated. Change it from User Accounts if needed.",
   },
 };

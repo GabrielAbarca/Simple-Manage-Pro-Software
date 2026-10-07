@@ -12,6 +12,7 @@ export default {
     teachers: "Teachers",
     assignments: "Assignments",
     students: "Students & Enrollment",
+    events: "Events",
     accounts: "Accounts",
     settings: "Settings",
     viewTeacherConsole: "View Teacher Console",
@@ -26,6 +27,7 @@ export default {
     teachers: "Teachers",
     assignments: "Class Assignments",
     students: "Students & Enrollment",
+    events: "School Events",
     accounts: "User Accounts",
     settings: "Settings",
   },
@@ -37,8 +39,54 @@ export default {
       "This console is where the school is configured and operated: academic structure, people, enrollment and a school-wide overview.",
     activeYear: "Active school year",
     setupTitle: "Let's set up your school",
-    setupBody:
-      "Nothing has been configured yet. Start by adding a school year — grading periods, sections, subjects and enrollment all hang off it.",
+    setup: {
+      progress: "{done} of {total} steps done",
+      hide: "Hide",
+      hideLabel: "Hide the setup checklist",
+      show: {
+        one: "Show the setup checklist ({count} left)",
+        other: "Show the setup checklist ({count} left)",
+      },
+      go: "Go to {page}",
+      goLogins: "Create teacher logins",
+      stepDone: "Done",
+      steps: {
+        year: {
+          title: "Add and activate the school year",
+          hint: "Everything else belongs to a school year.",
+          activateHint:
+            "A school year exists but none is active: activate it from its row.",
+        },
+        periods: {
+          title: "Set the grading periods",
+          hint: "Their weights must total 100%.",
+        },
+        sections: {
+          title: "Create the grade levels and sections",
+          hint: "For example 7-1 and 7-2.",
+        },
+        subjects: {
+          title: "Add the subjects",
+          hint: "And which grade levels take each one.",
+        },
+        teachers: {
+          title: "Add the teachers",
+          hint: "One by one or from a spreadsheet.",
+        },
+        assignments: {
+          title: "Assign teachers to sections and subjects",
+          hint: "Who teaches what, and where.",
+        },
+        students: {
+          title: "Enroll the students in sections",
+          hint: "One by one or from a spreadsheet, each in a section.",
+        },
+        logins: {
+          title: "Give every assigned teacher a sign-in",
+          hint: "From the Teachers table, one login per teacher.",
+        },
+      },
+    },
     noActiveYear: "No active school year yet",
     loading: "Loading overview…",
     enrollment: "Total enrollment",
@@ -48,7 +96,8 @@ export default {
       other: "{count} records",
     },
     atRisk: "At-risk students",
-    atRiskHint: "3 or more recorded absences",
+    atRiskHint:
+      "{threshold} or more absences or lates in one subject this year",
     teachers: "Teachers",
     subjects: "Subjects",
     sections: "Sections",
@@ -228,13 +277,21 @@ export default {
     defaultSet: '"{name}" is now the default scheme.',
     confirmDelete: 'Delete the "{name}" scheme?',
     itemsTitle: "Components — {name}",
-    itemsHelp: "Weights should total 100%.",
+    itemsHelp:
+      "Weights must total 100% before the scheme can be the default or applied to a gradebook.",
     componentName: "Component",
     addComponent: "Add component",
     editComponent: "Edit component",
     confirmDeleteItem: 'Remove the "{name}" component?',
     loadPreset: "Load MEP preset",
     presetLoaded: "MEP components added.",
+    weightOver: "Components would total {total}%, over 100%.",
+    presetOver:
+      "The MEP preset would bring this scheme to {total}%. Adjust the existing components first.",
+    defaultNeeds100:
+      "A scheme must total 100% to be the default. This one totals {total}%.",
+    defaultIncomplete:
+      "This is the default scheme and now totals {total}%. Teachers cannot apply it until it totals 100%.",
   },
   teachers: {
     title: "Teachers",
@@ -249,6 +306,7 @@ export default {
     phone: "Phone",
     specialization: "Specialization",
     status: "Status",
+    statusHelp: "Inactive also deactivates the teacher's sign-in.",
     empty: "No teachers yet.",
     confirmDelete: "Delete teacher {name}?",
     statuses: {

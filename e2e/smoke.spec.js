@@ -8,6 +8,7 @@ import {
   SUPA,
   routeSupabase,
   sessionSeed,
+  inDays,
   accessTokenSeed,
 } from "./fixtures.js";
 
@@ -136,6 +137,58 @@ test.describe("login", () => {
 });
 
 test.describe("student portal", () => {
+  test("the dashboard lists only events that have not ended", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, {
+      ...studentFix,
+      events: [
+        {
+          id: 1,
+          title: "Last term's fair",
+          type: "activity",
+          start_date: inDays(-40),
+          end_date: null,
+        },
+        {
+          id: 2,
+          title: "Exam week",
+          type: "exam_period",
+          start_date: inDays(-2),
+          end_date: inDays(3),
+        },
+        {
+          id: 3,
+          title: "Assembly today",
+          type: "general",
+          start_date: inDays(0),
+          end_date: null,
+        },
+        {
+          id: 4,
+          title: "Parent meeting",
+          type: "parent_meeting",
+          start_date: inDays(10),
+          end_date: null,
+        },
+      ],
+    });
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+    await page.goto("/");
+    const card = page.locator("#upcoming-events-card");
+    await expect(card).toContainText("Exam week");
+    await expect(card).toContainText("Assembly today");
+    await expect(card).toContainText("Parent meeting");
+    await expect(card).not.toContainText("Last term's fair");
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
   test("dashboard renders mocked data and the theme toggles", async ({
     page,
     context,
@@ -780,8 +833,28 @@ test.describe("admin console", () => {
     const monthStart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
     const lastMonth = (day) =>
       iso(new Date(now.getFullYear(), now.getMonth() - 1, day));
+    const yearStart = lastMonth(1);
+    const beforeYear = iso(new Date(now.getFullYear(), now.getMonth() - 1, -5));
+    const yearEnd = iso(new Date(now.getFullYear(), now.getMonth() + 2, 0));
+    const row = (id, student_id, class_subject_teacher_id, date, status) => ({
+      id,
+      student_id,
+      class_id: 21,
+      class_subject_teacher_id,
+      date,
+      status,
+    });
     const seeded = {
       ...consoleFix,
+      school_years: [
+        {
+          id: 1,
+          name: "2025-2026",
+          is_active: true,
+          start_date: yearStart,
+          end_date: yearEnd,
+        },
+      ],
       school_settings: [{ id: 1, name: "Colegio San José", id_label: null }],
       grade_levels: [{ id: 1, name: "7th Grade", numeric_level: 7 }],
       teachers: [
@@ -829,54 +902,28 @@ test.describe("admin console", () => {
           class_id: 21,
         },
       ],
-      // Four rows inside the current month — 3 present/late of 4 = 75% — and
-      // three absences in the month before it. The older rows still feed the
-      // at-risk count (which spans the whole record) but must stay out of the
-      // month's rate, which is what separates this from the old daily figure.
+      // Four rows inside the current month — 3 present/late of 4 = 75%. The
+      // older rows stay out of the month's rate and feed only the at-risk
+      // count: Ana misses 5 Mathematics lessons (flagged); Luis misses 5
+      // lessons too, but split 2 + 3 across two subjects (not flagged), and
+      // his three Mathematics absences dated before the year opened are
+      // outside the window (counted, they would flag him).
       attendance: [
-        {
-          id: 1,
-          student_id: 101,
-          class_id: 21,
-          date: today,
-          status: "present",
-        },
-        { id: 2, student_id: 102, class_id: 21, date: today, status: "absent" },
-        {
-          id: 6,
-          student_id: 101,
-          class_id: 21,
-          date: monthStart,
-          status: "present",
-        },
-        {
-          id: 7,
-          student_id: 102,
-          class_id: 21,
-          date: monthStart,
-          status: "late",
-        },
-        {
-          id: 3,
-          student_id: 101,
-          class_id: 21,
-          date: lastMonth(10),
-          status: "absent",
-        },
-        {
-          id: 4,
-          student_id: 101,
-          class_id: 21,
-          date: lastMonth(11),
-          status: "absent",
-        },
-        {
-          id: 5,
-          student_id: 101,
-          class_id: 21,
-          date: lastMonth(12),
-          status: "absent",
-        },
+        row(1, 101, 501, today, "present"),
+        row(2, 102, 501, today, "absent"),
+        row(6, 101, 501, monthStart, "present"),
+        row(7, 102, 501, monthStart, "late"),
+        row(3, 101, 501, lastMonth(10), "absent"),
+        row(4, 101, 501, lastMonth(11), "absent"),
+        row(5, 101, 501, lastMonth(12), "absent"),
+        row(8, 101, 501, lastMonth(13), "late"),
+        row(9, 101, 501, lastMonth(14), "late"),
+        row(10, 102, 502, lastMonth(10), "absent"),
+        row(11, 102, 502, lastMonth(11), "absent"),
+        row(12, 102, 502, lastMonth(12), "absent"),
+        row(13, 102, 501, beforeYear, "absent"),
+        row(14, 102, 501, beforeYear, "absent"),
+        row(15, 102, 501, beforeYear, "absent"),
       ],
     };
     const writes = await routeSupabase(context, seeded);
@@ -902,6 +949,9 @@ test.describe("admin console", () => {
     // At-risk is a summary figure now — the per-student table it used to sit
     // above was demoted off the dashboard.
     await expect(page.locator("#stat-atrisk")).toHaveText("1");
+    await expect(page.locator("#stat-atrisk-hint")).toHaveText(
+      "5 or more absences or lates in one subject this year",
+    );
     await expect(page.locator("#atrisk-body")).toHaveCount(0);
 
     // Structure counts: active teachers, subjects, this year's sections, and

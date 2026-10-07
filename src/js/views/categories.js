@@ -4,12 +4,14 @@
 // ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t } from "../i18n.js";
+import * as v from "../validate.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { openModal } from "../teacherModal.js";
 import { showToast, openConfirm, errorText } from "../teacherFeedback.js";
 import { makeActionBtn, escapeHtml } from "../teacherTableHelpers.js";
 import { getGradebookState, loadGradebook } from "./gradebook.js";
+import { totalWeight, weightStatus, TARGET_WEIGHT } from "../gradingPeriods.js";
 
 // ── Grade categories modal (item 8) ────────────────────────────
 const categoriesOverlay = document.getElementById("categories-overlay");
@@ -82,8 +84,8 @@ function renderCategories() {
     categoriesBody.appendChild(item);
   });
 
-  const total = cats.reduce((s, c) => s + Number(c.weight || 0), 0);
-  const off = Math.round(total * 100) / 100 !== 100;
+  const total = totalWeight(cats);
+  const off = weightStatus(total, cats.length) !== "ok";
   categoriesTotal.innerHTML = `${t("admin.categories.total")}<b class="${off ? "score-mid" : "score-high"}">${total}%</b>${
     off ? t("admin.categories.totalOff") : ""
   }`;
@@ -112,9 +114,23 @@ function openCategoryForm(category = null) {
         required: true,
         value: category?.weight ?? "",
         min: 0,
+        max: TARGET_WEIGHT,
         step: "0.01",
+        rules: [v.percent()],
       },
     ],
+    validate: (formData) => {
+      const cats = getGradebookState()?.categories ?? [];
+      const total = totalWeight(cats, {
+        excludeId: category?.id ?? null,
+        extraWeight: Number(formData.weight),
+      });
+      // Refuse only a save that makes an over-100% set worse, so a gradebook
+      // that is already over can still be brought down.
+      return total > TARGET_WEIGHT && total > totalWeight(cats)
+        ? { weight: t("admin.categories.weightOver", { total }) }
+        : {};
+    },
     onSubmit: async (formData) => {
       const payload = {
         name: formData.name.trim(),
@@ -199,21 +215,39 @@ async function openApplyTemplate() {
       },
     ],
     onSubmit: async (formData) => {
-      await applyTemplate(Number(formData.templateId));
+      const id = Number(formData.templateId);
+      await applyTemplate(id, relevant.find((tpl) => tpl.id === id)?.name);
     },
   });
 }
 
-async function applyTemplate(templateId) {
-  const items = await db.fetchTemplateItems(templateId);
+async function applyTemplate(templateId, templateName) {
+  const items = (await db.fetchTemplateItems(templateId)) ?? [];
+  const schemeTotal = totalWeight(items);
+  if (weightStatus(schemeTotal, items.length) !== "ok") {
+    showToast(
+      t("admin.categories.templateIncomplete", {
+        name: templateName,
+        total: schemeTotal,
+      }),
+      "error",
+    );
+    return;
+  }
+  const cats = getGradebookState()?.categories ?? [];
   const existing = new Set(
-    (getGradebookState()?.categories ?? []).map((c) =>
-      String(c.name).trim().toLowerCase(),
-    ),
+    cats.map((c) => String(c.name).trim().toLowerCase()),
   );
+  const missing = items.filter(
+    (it) => !existing.has(String(it.name).trim().toLowerCase()),
+  );
+  const total = totalWeight([...cats, ...missing]);
+  if (total > TARGET_WEIGHT) {
+    showToast(t("admin.categories.applyOver", { total }), "error");
+    return;
+  }
   let added = 0;
-  for (const it of items ?? []) {
-    if (existing.has(String(it.name).trim().toLowerCase())) continue;
+  for (const it of missing) {
     await db.insertCategory({
       name: it.name,
       weight: Number(it.weight),

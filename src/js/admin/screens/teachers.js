@@ -19,7 +19,7 @@ import {
 } from "../ui/tables.js";
 import { TEACHER_STATUSES } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
-import { accountBtn } from "../domain/accountActions.js";
+import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";
 
 export async function loadTeachers() {
   renderMessageRow("teachers-body", 6, t("common.loading"));
@@ -142,6 +142,7 @@ export function openTeacherForm(teacher = null) {
         type: "select",
         value: teacher?.status ?? "active",
         required: true,
+        help: t("console.teachers.statusHelp"),
         options: TEACHER_STATUSES.map((status) => ({
           value: status,
           label: t(`console.teachers.statuses.${status}`),
@@ -162,7 +163,7 @@ export function openTeacherForm(teacher = null) {
         ? await data.updateTeacher(teacher.id, payload).then(() => teacher)
         : await data.createTeacher(payload);
       markSaved("teachers-body", saved?.id ?? teacher?.id);
-      showToast(t("common.saved"));
+      await syncLoginWithStatus(teacher, "teacher", payload.status);
       loadTeachers();
     },
   });

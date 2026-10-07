@@ -43,7 +43,7 @@ export function createDemoGateway(realGateway, { onWrite = () => {} } = {}) {
     return d;
   };
 
-  /** Does a row satisfy a select's match / inList filters? */
+  /** Does a row satisfy a select's match / inList / between filters? */
   function rowMatches(/** @type {any} */ row, /** @type {SelectOpts} */ opts) {
     if (opts.match) {
       for (const [col, val] of Object.entries(opts.match)) {
@@ -53,6 +53,13 @@ export function createDemoGateway(realGateway, { onWrite = () => {} } = {}) {
     if (opts.inList) {
       const set = new Set(opts.inList.values.map(String));
       if (!set.has(String(row[opts.inList.column]))) return false;
+    }
+    if (opts.between) {
+      const { column, from, to } = opts.between;
+      const value = row[column];
+      if (value == null) return false;
+      if (from != null && String(value) < from) return false;
+      if (to != null && String(value) > to) return false;
     }
     return true;
   }
@@ -77,27 +84,44 @@ export function createDemoGateway(realGateway, { onWrite = () => {} } = {}) {
     };
   }
 
+  /** @type {Gateway["select"]} */
+  async function select(table, opts = {}) {
+    // Whole rows, whatever `columns` asks for: the overlay below re-filters
+    // and patches by columns the narrowed read may not include.
+    const { columns: _columns, ...serverOpts } = opts;
+    const serverRows = await realGateway.select(table, serverOpts);
+    const delta = deltas.get(table);
+
+    let rows = serverRows.map((r) => ({ ...r }));
+    if (delta) {
+      rows = rows
+        .filter((r) => !delta.deletes.has(r.id))
+        .map((r) => {
+          const patch = delta.updates.get(r.id);
+          return patch ? { ...r, ...patch } : r;
+        });
+      rows.push(...delta.inserts.map((r) => ({ ...r })));
+    }
+
+    // Re-apply the read's filters (an update may have changed a filtered
+    // column) and its ordering across the merged set.
+    rows = rows.filter((r) => rowMatches(r, opts));
+    if (opts.order) rows.sort(makeComparator(opts.order));
+    return rows;
+  }
+
   return {
-    async select(table, opts = {}) {
-      const serverRows = await realGateway.select(table, opts);
+    select,
+
+    async count(table, opts = {}) {
       const delta = deltas.get(table);
-
-      let rows = serverRows.map((r) => ({ ...r }));
-      if (delta) {
-        rows = rows
-          .filter((r) => !delta.deletes.has(r.id))
-          .map((r) => {
-            const patch = delta.updates.get(r.id);
-            return patch ? { ...r, ...patch } : r;
-          });
-        rows.push(...delta.inserts.map((r) => ({ ...r })));
-      }
-
-      // Re-apply the read's filters (an update may have changed a filtered
-      // column) and its ordering across the merged set.
-      rows = rows.filter((r) => rowMatches(r, opts));
-      if (opts.order) rows.sort(makeComparator(opts.order));
-      return rows;
+      const touched =
+        delta &&
+        (delta.inserts.length || delta.updates.size || delta.deletes.size);
+      if (!touched) return realGateway.count(table, opts);
+      // Read the table unfiltered: a row the server would filter out can
+      // match once a local update applies.
+      return (await select(table)).filter((r) => rowMatches(r, opts)).length;
     },
 
     async insert(table, row) {

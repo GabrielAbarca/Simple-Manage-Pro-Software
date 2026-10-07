@@ -13,6 +13,7 @@ import { initGrades } from "./views/grades.js";
 import { initSchedule } from "./views/schedule.js";
 import { initTeachersView } from "./views/teachers.js";
 import { initAttendanceView } from "./views/attendance.js";
+import { initConductView } from "./views/conductView.js";
 import { initEventsView } from "./views/events.js";
 import { initSettings } from "./views/settingsView.js";
 
@@ -65,6 +66,7 @@ const { navigateTo } = initNav(
     schedule: initSchedule,
     teachers: initTeachersView,
     attendance: initAttendanceView,
+    conduct: initConductView,
     events: initEventsView,
     settings: initSettings,
   },

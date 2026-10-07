@@ -4,8 +4,9 @@ import {
   fetchDashboardStats,
 } from "../supabaseQueries.js";
 import { state, getEvents, getGradingPeriods } from "../studentState.js";
-import { scoreHtml, statusLabel } from "./viewHelpers.js";
+import { scoreHtml, statusLabel, escapeHtml } from "./viewHelpers.js";
 import { bandClass } from "../promotion.js";
+import { upcomingEvents } from "../upcomingEvents.js";
 
 // Grade-bar fill per colour band, so the bar and the score beside it always
 // agree about where the school's pass mark sits.
@@ -171,7 +172,7 @@ async function renderUpcomingEvents() {
   const events = await getEvents();
   const card = document.getElementById("upcoming-events-card");
 
-  const upcoming = events.slice(0, 4);
+  const upcoming = upcomingEvents(events).slice(0, 4);
 
   if (upcoming.length === 0) {
     card.innerHTML = `<div class="update">
@@ -189,7 +190,7 @@ async function renderUpcomingEvents() {
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-event"></use></svg></span>
       </div>
       <div class="message">
-        <p><b>${ev.title}</b></p>
+        <p><b>${escapeHtml(ev.title)}</b></p>
         <small class="text-muted">${formatDate(ev.start_date)}${ev.end_date ? " → " + formatDate(ev.end_date) : ""}</small>
       </div>
     </div>

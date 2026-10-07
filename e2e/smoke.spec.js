@@ -8,6 +8,7 @@ import {
   SUPA,
   routeSupabase,
   sessionSeed,
+  inDays,
   accessTokenSeed,
 } from "./fixtures.js";
 
@@ -136,6 +137,58 @@ test.describe("login", () => {
 });
 
 test.describe("student portal", () => {
+  test("the dashboard lists only events that have not ended", async ({
+    page,
+    context,
+  }) => {
+    const writes = await routeSupabase(context, {
+      ...studentFix,
+      events: [
+        {
+          id: 1,
+          title: "Last term's fair",
+          type: "activity",
+          start_date: inDays(-40),
+          end_date: null,
+        },
+        {
+          id: 2,
+          title: "Exam week",
+          type: "exam_period",
+          start_date: inDays(-2),
+          end_date: inDays(3),
+        },
+        {
+          id: 3,
+          title: "Assembly today",
+          type: "general",
+          start_date: inDays(0),
+          end_date: null,
+        },
+        {
+          id: 4,
+          title: "Parent meeting",
+          type: "parent_meeting",
+          start_date: inDays(10),
+          end_date: null,
+        },
+      ],
+    });
+    await context.addInitScript(
+      ([key, value]) => localStorage.setItem(key, value),
+      [`sb-${REF}-auth-token`, sessionSeed()],
+    );
+    const errors = trackErrors(page);
+    await page.goto("/");
+    const card = page.locator("#upcoming-events-card");
+    await expect(card).toContainText("Exam week");
+    await expect(card).toContainText("Assembly today");
+    await expect(card).toContainText("Parent meeting");
+    await expect(card).not.toContainText("Last term's fair");
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
   test("dashboard renders mocked data and the theme toggles", async ({
     page,
     context,

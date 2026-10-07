@@ -37,7 +37,7 @@ vi.mock("../src/js/supabaseClient.js", () => {
     };
     const b = {
       select: () => b,
-      order: () => b,
+      order: (col, opts) => (filters.push(["order", col, opts]), b),
       eq: (col, val) => (filters.push(["eq", col, val]), b),
       in: (col, val) => (filters.push(["in", col, val]), b),
       maybeSingle: () => resolve(true),
@@ -52,6 +52,7 @@ vi.mock("../src/js/supabaseClient.js", () => {
 const {
   fetchDashboardStats,
   fetchStudentAttendance,
+  fetchOwnConduct,
   fetchStudentGrades,
   fetchStudentProfile,
   fetchEvents,
@@ -254,5 +255,43 @@ describe("fetchTeachers reads the PII-free directory view", () => {
   it("rejects when the query fails instead of rendering an empty list", async () => {
     errors.teachers_directory = { message: "boom" };
     await expect(fetchTeachers()).rejects.toMatchObject({ message: "boom" });
+  });
+});
+
+describe("fetchOwnConduct", () => {
+  beforeEach(() => {
+    fixtures.student_period_conduct = [
+      { student_id: 101, grading_period_id: 1, conduct_score: 90 },
+      { student_id: 102, grading_period_id: 1, conduct_score: 60 },
+    ];
+    fixtures.student_conduct_grades = [
+      { student_id: 101, grading_period_id: 1, score: 88 },
+    ];
+    fixtures.discipline_records = [
+      { id: 5, student_id: 101, type: "Tardanza", conduct_points: 10 },
+      { id: 6, student_id: 102, type: "Agresión", conduct_points: 40 },
+    ];
+  });
+
+  it("returns only the student's own live scores, posted marks and records", async () => {
+    const conduct = await fetchOwnConduct(101);
+    expect(conduct.live.map((r) => r.conduct_score)).toEqual([90]);
+    expect(conduct.posted.map((r) => r.score)).toEqual([88]);
+    expect(conduct.records.map((r) => r.id)).toEqual([5]);
+    expect(calls.map((c) => c.table).sort()).toEqual([
+      "discipline_records",
+      "student_conduct_grades",
+      "student_period_conduct",
+    ]);
+    expect(
+      calls.find((c) => c.table === "discipline_records").filters,
+    ).toContainEqual(["order", "date", { ascending: false }]);
+  });
+
+  it("rejects when any one of its reads fails", async () => {
+    errors.student_conduct_grades = { message: "boom" };
+    await expect(fetchOwnConduct(101)).rejects.toMatchObject({
+      message: "boom",
+    });
   });
 });

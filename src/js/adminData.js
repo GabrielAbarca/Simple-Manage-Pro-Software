@@ -402,6 +402,16 @@ export function createAdminData(gateway) {
      */
     bulkInsert: (table, rows) => gateway.insertMany(table, rows),
 
+    // ── Events (school calendar shown in the student portal) ──
+    listEvents: () =>
+      gateway.select("events", {
+        order: { column: "start_date", ascending: false },
+      }),
+    createEvent: (/** @type {object} */ row) => gateway.insert("events", row),
+    updateEvent: (/** @type {number} */ id, /** @type {object} */ patch) =>
+      gateway.update("events", id, patch),
+    deleteEvent: (/** @type {number} */ id) => gateway.remove("events", id),
+
     // ── School settings (single row: name, logo, ID label) ────
     /** The settings row, or null when the table is empty. */
     async getSchoolSettings() {

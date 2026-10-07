@@ -132,10 +132,10 @@ export default {
     },
     empty: "No hay registros de disciplina en esta sección.",
     emptySub:
-      "Los registros agregados aquí aparecen en el informe de progreso del estudiante.",
+      "Los registros agregados aquí aparecen en el portal del estudiante y en su informe de progreso.",
     noStudents: "No hay estudiantes activos en esta sección.",
     footnote:
-      "La conducta empieza en 100 cada periodo. Los registros aparecen en el informe de progreso del estudiante.",
+      "La conducta empieza en 100 cada periodo. Los registros aparecen en el portal del estudiante y en su informe de progreso.",
     noPeriod:
       "No hay periodos de evaluación configurados para este curso lectivo.",
     unknownReporter: "Docente desconocido",
@@ -203,12 +203,25 @@ export default {
     weight: "Ponderación: {weight}%",
     fromAttendance: "se califica con la asistencia",
     total: "Total: ",
-    totalOff:
-      " — las ponderaciones se renormalizan, pero 100% es lo más claro.",
+    totalOff: " — deben sumar 100% antes de publicar notas.",
     editTitle: "Editar categoría",
     addTitle: "Agregar categoría",
     add: "Agregar categoría",
     namePlaceholder: "p. ej. Exámenes",
+    weightOver: "Las categorías sumarían {total}%, más de 100%.",
+    templateIncomplete:
+      '"{name}" suma {total}%, no 100%. Pida a la administración que lo complete antes de aplicarlo.',
+    applyOver:
+      "Aplicarlo llevaría las categorías a {total}%. Primero ajuste las categorías actuales.",
+    applyTemplate: "Aplicar plantilla MEP",
+    applyTitle: "Aplicar un esquema de componentes",
+    apply: "Aplicar",
+    pickTemplate: "Esquema",
+    schoolWide: "todas las materias",
+    noTemplates:
+      "Aún no hay esquemas de componentes. Pida a la administración que agregue uno.",
+    applied: "{count} componente(s) agregado(s).",
+    alreadyApplied: "Esos componentes ya están en este libro de notas.",
   },
   pc: {
     title: "Publicar conducta — {period}",
@@ -236,5 +249,7 @@ export default {
     comment: "Comentario",
     commentPlaceholder: "Comentario (opcional)…",
     reset: "Restablecer todo a lo calculado",
+    weightsOff:
+      "Las categorías de este libro de notas suman {total}%. Ajústelas para que sumen 100% antes de publicar notas.",
   },
 };

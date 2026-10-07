@@ -109,6 +109,7 @@ function disciplineFields(record = {}) {
       label: t("admin.form.description"),
       type: "textarea",
       value: record.description ?? "",
+      help: t("admin.form.descriptionHelp"),
     },
     {
       name: "conduct_points",

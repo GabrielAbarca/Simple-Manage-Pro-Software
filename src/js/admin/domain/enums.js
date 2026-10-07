@@ -28,6 +28,17 @@ export const STUDENT_STATUSES = [
   "withdrawn",
 ];
 
+/**
+ * Whether a record with this status keeps a working sign-in. A student
+ * signs in only while active; a teacher keeps signing in on leave.
+ * @param {"teacher" | "student"} kind
+ * @param {string | null | undefined} status
+ */
+export function statusAllowsSignIn(kind, status) {
+  const s = status ?? "active";
+  return kind === "student" ? s === "active" : s !== "inactive";
+}
+
 export function genderLabel(g) {
   return g ? t(`enums.gender.${g}`) : "—";
 }

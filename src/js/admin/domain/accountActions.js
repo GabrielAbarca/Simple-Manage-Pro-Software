@@ -13,11 +13,15 @@ import {
   createAccount,
   resetPassword,
   generateTempPassword,
+  setAccountActive,
+  listAccounts,
 } from "../../accounts.js";
 import { data } from "../data.js";
-import { showToast, openConfirm } from "../ui/feedback.js";
+import { showToast, openConfirm, openNotice } from "../ui/feedback.js";
+import { state } from "../state.js";
 import { iconBtn } from "../ui/tables.js";
 import { openModal } from "../ui/modal.js";
+import { statusAllowsSignIn } from "./enums.js";
 
 /**
  * @param {any} record the teachers/students row the login belongs to
@@ -93,4 +97,60 @@ export function openCreateAccount(record, kind, reload) {
       reload();
     },
   });
+}
+
+const LOGIN_SYNC_TOASTS = {
+  restored: "console.accounts.loginRestoredWithStatus",
+  restoredDemo: "console.accounts.loginRestoredWithStatusDemo",
+  disabled: "console.accounts.loginDisabledWithStatus",
+  disabledDemo: "console.accounts.loginDisabledWithStatusDemo",
+};
+
+// Deferred so a confirm dialog that triggered the save closes first and
+// does not take the notice down with it.
+function noticeLater(key) {
+  setTimeout(() =>
+    openNotice(t(key), { title: t("console.accounts.loginNoticeTitle") }),
+  );
+}
+
+/** Whether a login belongs to the signed-in user or to any administrator. */
+async function isAdminLogin(userId) {
+  if (userId === state.session?.user?.id) return true;
+  const { accounts } = await listAccounts();
+  return accounts.some((a) => a.id === userId && a.role === "admin");
+}
+
+/**
+ * After a teacher or student record is saved with `nextStatus`, turn its
+ * login off or back on when the status change crosses the sign-in line,
+ * and report the outcome in place of the plain "Saved" toast. An
+ * administrator's login is never turned off this way.
+ * @param {any} record the record as it was before the save
+ * @param {"teacher" | "student"} kind
+ * @param {string} nextStatus
+ */
+export async function syncLoginWithStatus(record, kind, nextStatus) {
+  const before = statusAllowsSignIn(kind, record?.status);
+  const after = statusAllowsSignIn(kind, nextStatus);
+  if (!record?.auth_user_id || before === after) {
+    showToast(t("common.saved"));
+    return;
+  }
+  try {
+    if (!after && (await isAdminLogin(record.auth_user_id))) {
+      showToast(t("common.saved"));
+      noticeLater("console.accounts.adminLoginKept");
+      return;
+    }
+    const res = await setAccountActive(record.auth_user_id, after);
+    const outcome = after ? "restored" : "disabled";
+    showToast(
+      t(LOGIN_SYNC_TOASTS[res?.simulated ? `${outcome}Demo` : outcome]),
+    );
+  } catch (err) {
+    console.error("syncLoginWithStatus:", err);
+    showToast(t("common.saved"));
+    noticeLater("console.accounts.loginSyncFailed");
+  }
 }

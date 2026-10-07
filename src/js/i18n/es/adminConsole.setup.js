@@ -262,6 +262,7 @@ export default {
     phone: "Teléfono",
     specialization: "Especialización",
     status: "Estado",
+    statusHelp: "Inactivo también desactiva el acceso del docente.",
     empty: "Aún no hay docentes.",
     confirmDelete: "¿Eliminar al docente {name}?",
     statuses: {

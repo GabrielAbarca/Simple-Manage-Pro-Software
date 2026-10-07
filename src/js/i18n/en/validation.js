@@ -12,6 +12,7 @@ export default {
   percent: "Enter a percentage between 0 and 100.",
   dateWithin: "Must be within {start} – {end}.",
   endAfterStart: "End date must be after the start date.",
+  endBeforeStart: "End date can't be before the start date.",
   futureDate: "The date can't be in the future.",
   unique: '"{value}" is already in use.',
   enrollmentTaken: "Enrollment number {value} is already in use.",

@@ -108,7 +108,7 @@ export function renderSettings(rootEl, adapter) {
 
   rootEl.innerHTML = `
     <div class="settings">
-      <nav class="settings-rail" role="tablist" aria-label="Settings sections">
+      <nav class="settings-rail" role="tablist" aria-label="${t("settings.rail.label")}">
         ${rail}
       </nav>
       <div class="settings-panels">

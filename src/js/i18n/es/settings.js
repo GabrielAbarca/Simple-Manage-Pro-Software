@@ -1,5 +1,6 @@
 export default {
   rail: {
+    label: "Secciones de configuración",
     account: "Cuenta y perfil",
     preferences: "Preferencias",
     help: "Ayuda",

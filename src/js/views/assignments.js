@@ -190,7 +190,9 @@ function renderManageAssignments() {
     info.innerHTML = `
       <b>${escapeHtml(a.name)}</b>
       <span class="manage-item-meta">/ ${a.max_score}${
-        a.due_date ? " · due " + formatDate(a.due_date) : ""
+        a.due_date
+          ? " · " + t("admin.cg.dueOn", { date: formatDate(a.due_date) })
+          : ""
       }${catName ? " · " + escapeHtml(catName) : ""}</span>`;
 
     const actions = document.createElement("div");

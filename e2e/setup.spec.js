@@ -226,6 +226,26 @@ test("a failed checklist read leaves the figures in place", async ({
   await expect(page.locator("#overview-setup")).toBeHidden();
 });
 
+test("a failed enrolment count leaves the figures in place", async ({
+  page,
+  context,
+}) => {
+  await routeSupabase(context, partly);
+  await context.route(`${SUPA}/rest/v1/students**`, (route) =>
+    route.request().url().includes("class_id=in.")
+      ? route.fulfill({ status: 500, body: "{}" })
+      : route.fallback(),
+  );
+  await context.addInitScript(
+    ([key, value]) => localStorage.setItem(key, value),
+    [`sb-${REF}-auth-token`, sessionSeed()],
+  );
+  await page.goto("/admin.html");
+  await expect(page.locator("#stat-teachers")).toHaveText("1");
+  await expect(page.locator("#stat-enrollment")).toHaveText("0");
+  await expect(page.locator("#overview-setup")).toBeHidden();
+});
+
 test("a fully set-up school does not see the checklist", async ({
   page,
   context,

@@ -14,6 +14,11 @@ import { escapeHtml } from "../ui/format.js";
 import { showToast, errorText, openConfirm } from "../ui/feedback.js";
 import { openModal } from "../ui/modal.js";
 import { weightBadgeHtml } from "./componentTemplates.js";
+import {
+  totalWeight,
+  weightStatus,
+  TARGET_WEIGHT,
+} from "../../gradingPeriods.js";
 
 /** The MEP-standard components, as a starting scheme an admin can adjust. */
 const MEP_PRESET = [
@@ -62,6 +67,16 @@ async function refreshTemplateItems() {
   const items = await data.listTemplateItems(currentTemplate.id);
   state.templateItems[currentTemplate.id] = items;
   renderTemplateItems(items);
+}
+
+/** After a component write: a default scheme off 100% cannot be applied. */
+function warnIfDefaultIncomplete() {
+  if (!currentTemplate?.is_default) return;
+  const items = state.templateItems[currentTemplate.id] ?? [];
+  const total = totalWeight(items);
+  if (weightStatus(total, items.length) !== "ok") {
+    showToast(t("console.components.defaultIncomplete", { total }), "error");
+  }
 }
 
 function renderTemplateItems(items) {
@@ -132,6 +147,7 @@ function bindItemRowActions(body, items) {
         async () => {
           await data.deleteTemplateItem(id);
           await refreshTemplateItems();
+          warnIfDefaultIncomplete();
           onItemsChanged();
         },
       ),
@@ -164,6 +180,18 @@ function openTemplateItemForm(item = null) {
         rules: [v.required(), v.percent()],
       },
     ],
+    validate: (values) => {
+      const items = state.templateItems[currentTemplate.id] ?? [];
+      const total = totalWeight(items, {
+        excludeId: item?.id ?? null,
+        extraWeight: Number(values.weight),
+      });
+      // Refuse only a save that makes an over-100% scheme worse, so one that
+      // is already over can still be brought down.
+      return total > TARGET_WEIGHT && total > totalWeight(items)
+        ? { weight: t("console.components.weightOver", { total }) }
+        : {};
+    },
     onSubmit: async (values) => {
       const items = state.templateItems[currentTemplate.id] ?? [];
       const payload = {
@@ -181,6 +209,7 @@ function openTemplateItemForm(item = null) {
       }
       showToast(t("common.saved"));
       await refreshTemplateItems();
+      warnIfDefaultIncomplete();
       onItemsChanged();
     },
   });
@@ -198,9 +227,16 @@ async function loadMepPreset() {
     const existing = new Set(
       items.map((x) => String(x.name).trim().toLowerCase()),
     );
+    const missing = MEP_PRESET.filter(
+      (c) => !existing.has(c.name.toLowerCase()),
+    );
+    const total = totalWeight([...items, ...missing]);
+    if (total > TARGET_WEIGHT) {
+      showToast(t("console.components.presetOver", { total }), "error");
+      return;
+    }
     let order = items.reduce((m, x) => Math.max(m, x.item_order ?? 0), 0);
-    for (const c of MEP_PRESET) {
-      if (existing.has(c.name.toLowerCase())) continue;
+    for (const c of missing) {
       order += 1;
       await data.createTemplateItem({
         template_id: currentTemplate.id,
@@ -212,6 +248,7 @@ async function loadMepPreset() {
     }
     showToast(t("console.components.presetLoaded"));
     await refreshTemplateItems();
+    warnIfDefaultIncomplete();
     onItemsChanged();
   } catch (err) {
     showToast(errorText(err), "error");

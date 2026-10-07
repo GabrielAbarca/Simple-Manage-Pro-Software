@@ -89,6 +89,7 @@ export default {
     reason: "Motivo",
     severity: "Gravedad",
     severityHelp: "Solo para el registro — no afecta la nota.",
+    descriptionHelp: "El estudiante puede leer esto en su portal.",
     description: "Descripción",
     conductPoints: "Puntos de conducta a rebajar",
     conductPointsHelp: "Puntos que se rebajan de la conducta de este periodo.",

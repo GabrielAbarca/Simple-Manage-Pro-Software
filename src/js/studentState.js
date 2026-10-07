@@ -50,7 +50,10 @@ let periodsPromise = null;
 /** @returns {Promise<Array<object>>} */
 export function getGradingPeriods() {
   if (!periodsPromise) {
-    periodsPromise = fetchGradingPeriods(state.schoolYearId);
+    periodsPromise = fetchGradingPeriods(state.schoolYearId).catch((err) => {
+      periodsPromise = null;
+      throw err;
+    });
   }
   return periodsPromise;
 }

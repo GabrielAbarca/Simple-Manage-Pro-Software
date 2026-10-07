@@ -249,6 +249,7 @@ export default {
     phone: "Phone",
     specialization: "Specialization",
     status: "Status",
+    statusHelp: "Inactive also deactivates the teacher's sign-in.",
     empty: "No teachers yet.",
     confirmDelete: "Delete teacher {name}?",
     statuses: {

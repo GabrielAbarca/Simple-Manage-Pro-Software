@@ -4,6 +4,7 @@
 //  handled by delegation in views/conduct.js through data-action.
 // ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
+import { skeletonBlock } from "../ui.js";
 import { escapeHtml } from "../teacherTableHelpers.js";
 import { conductCellHtml, formatDate } from "../teacherFormat.js";
 import { isConductPassing, conductPassingScore } from "../promotion.js";
@@ -16,6 +17,35 @@ const SEVERITY_BADGE = {
 
 function icon(name) {
   return `<span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${name}"></use></svg></span>`;
+}
+
+export function conductShellHtml(periods) {
+  const periodOptions = periods
+    .map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
+    .join("");
+  return `
+    <div class="view-toolbar">
+      <div class="toolbar-filters">
+        <label for="conduct-period">${t("admin.gradebook.period")}</label>
+        <select id="conduct-period">${periodOptions}</select>
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="btn btn-secondary" id="btn-conduct-students" aria-pressed="true">
+          ${icon("group")} ${t("admin.conduct.byStudent")}
+        </button>
+        <button type="button" class="btn btn-ghost" id="btn-conduct-records" aria-pressed="false">
+          ${icon("list_alt")} ${t("admin.conduct.allRecords")}
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-conduct-add">
+          ${icon("add")} ${t("admin.conduct.addRecord")}
+        </button>
+      </div>
+    </div>
+    <p class="text-muted" id="conduct-summary"></p>
+    <div class="recent-activity">
+      <div id="conduct-grid">${skeletonBlock(4)}</div>
+    </div>
+    <p class="text-muted">${icon("info")} ${t("admin.conduct.footnote")}</p>`;
 }
 
 export function severityBadgeHtml(severity) {
@@ -175,5 +205,8 @@ export function emptyStateHtml() {
       ${icon("gavel")}
       <p>${t("admin.conduct.empty")}</p>
       <p class="empty-sub">${t("admin.conduct.emptySub")}</p>
+      <button type="button" class="btn btn-primary" data-action="add-record-any">
+        ${icon("add")} ${t("admin.conduct.addRecord")}
+      </button>
     </div>`;
 }

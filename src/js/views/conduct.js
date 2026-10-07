@@ -6,18 +6,24 @@
 // ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
-import { escapeHtml, renderErrorBlock } from "../teacherTableHelpers.js";
+import { renderErrorBlock } from "../teacherTableHelpers.js";
+import { showToast } from "../teacherFeedback.js";
 import { state } from "../teacherState.js";
 import { getCurrentPeriodId } from "../teacherFormat.js";
 import { db } from "../teacherData/index.js";
 import { CONDUCT_MAX, groupRecordsByStudent } from "../conduct.js";
 import { conductPassingScore, isConductPassing } from "../promotion.js";
 import {
+  conductShellHtml,
   studentTableHtml,
   emptyStateHtml,
   recordsTableHtml,
 } from "./conductTables.js";
-import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
+import {
+  openAddDiscipline,
+  openAddDisciplineFor,
+  openEditDiscipline,
+} from "./discipline.js";
 
 let conductState = null;
 let latestLoad = 0;
@@ -50,14 +56,6 @@ async function conductLoad() {
     console.error(err);
     if (thisLoad === latestLoad) renderErrorBlock(grid, conductLoad);
   }
-}
-
-function icon(name) {
-  return `<span class="material-symbols-outlined">
-                <svg aria-hidden="true">
-                    <use href="#icon-${name}"></use>
-                </svg>
-            </span>`;
 }
 
 function getSelectedPeriod() {
@@ -163,6 +161,7 @@ const GRID_ACTIONS = {
   "add-record": (button) => openAddRecordFor(Number(button.dataset.student)),
   "toggle-student": (button) => toggleStudent(Number(button.dataset.student)),
   "edit-record": (button) => openEditRecord(Number(button.dataset.record)),
+  "add-record-any": () => openAddRecordPicker(),
 };
 
 function onGridClick(event) {
@@ -202,6 +201,19 @@ function openAddRecordFor(studentId) {
   openAddDiscipline(student, conductRow, conductLoad);
 }
 
+function openAddRecordPicker() {
+  if (!conductState) return;
+  if (!conductState.students.length) {
+    showToast(t("admin.conduct.noStudents"));
+    return;
+  }
+  openAddDisciplineFor(
+    conductState.students,
+    conductState.conductByStudent,
+    conductLoad,
+  );
+}
+
 function scoreOf(studentId) {
   return (
     conductState.conductByStudent.get(studentId)?.conduct_score ?? CONDUCT_MAX
@@ -223,33 +235,7 @@ function renderSummary() {
 }
 
 export function renderConductTab(content) {
-  const periodOptions = state.periods
-    .map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
-    .join("");
-
-  content.innerHTML = `
-    <div class="view-toolbar">
-        <div class="toolbar-filters">
-            <label for="conduct-period">${t("admin.gradebook.period")}</label>
-            <select id="conduct-period">${periodOptions}</select>
-        </div>
-        <div class="toolbar-actions">
-            <button type="button" class="btn btn-secondary" id="btn-conduct-students" aria-pressed="true">
-                ${icon("group")} ${t("admin.conduct.byStudent")}
-            </button>
-            <button type="button" class="btn btn-ghost" id="btn-conduct-records" aria-pressed="false">
-            ${icon("list_alt")} ${t("admin.conduct.allRecords")}
-            </button>
-            <button type="button" class="btn btn-primary" id="btn-conduct-add">
-            ${icon("add")} ${t("admin.conduct.addRecord")}
-            </button>
-        </div>
-    </div>
-    <p class="text-muted" id="conduct-summary"></p>
-     <div class="recent-activity">
-      <div id="conduct-grid">${skeletonBlock(4)}</div>
-    </div>
-    <p class="text-muted">${icon("info")} ${t("admin.conduct.footnote")}</p>`;
+  content.innerHTML = conductShellHtml(state.periods);
 
   const periodSelect = /** @type {HTMLSelectElement} */ (
     document.getElementById("conduct-period")
@@ -259,6 +245,9 @@ export function renderConductTab(content) {
   document
     .getElementById("conduct-grid")
     .addEventListener("click", onGridClick);
+  document
+    .getElementById("btn-conduct-add")
+    .addEventListener("click", openAddRecordPicker);
   for (const [view, buttonId] of Object.entries(VIEW_BUTTONS)) {
     document
       .getElementById(buttonId)

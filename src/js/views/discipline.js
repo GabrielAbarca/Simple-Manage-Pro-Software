@@ -49,21 +49,28 @@ function baseConduct(conduct, excludePoints = 0) {
 /**
  * Live "conducta would go from X to Y" under the points input. The modal
  * renders its fields synchronously, so the input exists by the time
- * openModal returns and no modal-level hook is needed.
+ * openModal returns and no modal-level hook is needed. Takes a getter rather
+ * than a number because the starting conducta can change while the form is
+ * open: the Conduct tab's picker swaps the student.
+ * @param {() => number} getBase
  */
-function bindConductPreview(base) {
+function bindConductPreview(getBase) {
   const input = /** @type {HTMLInputElement | null} */ (
     document.getElementById("modal-field-conduct_points")
   );
   const help = input?.parentElement?.querySelector(".field-help");
   if (!input || !help) return;
   const render = () => {
+    const base = getBase();
     help.textContent = t("admin.discipline.conductPreview", {
       from: fmtScore(base),
       to: fmtScore(conductAfter(base, input.value)),
     });
   };
   input.addEventListener("input", render);
+  document
+    .getElementById("modal-field-student_id")
+    ?.addEventListener("change", render);
   render();
 }
 
@@ -125,6 +132,19 @@ function pointsFrom(formData) {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
+/** The row both add paths insert, so a new column is added in one place. */
+function insertPayload(studentId, formData) {
+  return {
+    student_id: studentId,
+    date: formData.date,
+    type: formData.type.trim(),
+    severity: formData.severity,
+    description: formData.description?.trim() || null,
+    conduct_points: pointsFrom(formData),
+    reported_by_teacher: state.teacherId,
+  };
+}
+
 /**
  * @param {any} student
  * @param {{ deduction?: unknown } | null} conduct the student's view row for
@@ -140,20 +160,12 @@ export function openAddDiscipline(student, conduct, onSaved) {
     submitLabel: t("admin.discipline.addRecord"),
     fields: disciplineFields(),
     onSubmit: async (formData) => {
-      await db.insertDiscipline({
-        student_id: student.id,
-        date: formData.date,
-        type: formData.type.trim(),
-        severity: formData.severity,
-        description: formData.description?.trim() || null,
-        conduct_points: pointsFrom(formData),
-        reported_by_teacher: state.teacherId,
-      });
+      await db.insertDiscipline(insertPayload(student.id, formData));
       showToast(t("admin.toast.disciplineAdded"));
       await onSaved?.();
     },
   });
-  bindConductPreview(baseConduct(conduct));
+  bindConductPreview(() => baseConduct(conduct));
 }
 
 /**
@@ -178,5 +190,45 @@ export function openEditDiscipline(record, conduct, onSaved) {
       await onSaved?.();
     },
   });
-  bindConductPreview(baseConduct(conduct, record.conduct_points));
+  bindConductPreview(() => baseConduct(conduct, record.conduct_points));
+}
+
+function studentField(students) {
+  return {
+    name: "student_id",
+    label: t("admin.conduct.student"),
+    type: "select",
+    required: true,
+    options: students.map((s) => ({
+      value: s.id,
+      label: `${s.last_name}, ${s.first_name}`,
+    })),
+  };
+}
+
+/**
+ * Add a record when the student is not known up front (the Conduct tab's
+ * toolbar). Same fields as openAddDiscipline, plus a student picker.
+ * @param {any[]} students
+ * @param {Map<number, { deduction?: unknown }>} conductByStudent
+ * @param {() => any} onSaved
+ */
+export function openAddDisciplineFor(students, conductByStudent, onSaved) {
+  openModal({
+    title: t("admin.conduct.addRecord"),
+    submitLabel: t("admin.discipline.addRecord"),
+    fields: [studentField(students), ...disciplineFields()],
+    onSubmit: async (formData) => {
+      const studentId = Number(formData.student_id);
+      await db.insertDiscipline(insertPayload(studentId, formData));
+      showToast(t("admin.toast.disciplineAdded"));
+      await onSaved?.();
+    },
+  });
+  bindConductPreview(() => {
+    const select = /** @type {HTMLSelectElement | null} */ (
+      document.getElementById("modal-field-student_id")
+    );
+    return baseConduct(conductByStudent.get(Number(select?.value)) ?? null);
+  });
 }

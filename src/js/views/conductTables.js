@@ -55,11 +55,21 @@ function editButtonHtml(record, teacherId) {
     </button>`;
 }
 
-function recordCardHtml(record, context) {
-  const reporter =
+function reporterName(record, context) {
+  return (
     context.teacherNames.get(record.reported_by_teacher) ??
-    t("admin.conduct.unknownReporter");
+    t("admin.conduct.unknownReporter")
+  );
+}
+
+function pointsHtml(record) {
   const points = Number(record.conduct_points ?? 0);
+  return points > 0
+    ? `<span class="conduct-record-points">−${points}</span>`
+    : "";
+}
+
+function recordCardHtml(record, context) {
   const description = record.description
     ? `<p class="text-muted">${escapeHtml(record.description)}</p>`
     : "";
@@ -69,12 +79,12 @@ function recordCardHtml(record, context) {
         <div class="conduct-record-head">
           ${severityBadgeHtml(record.severity)}
           <b>${escapeHtml(record.type ?? "")}</b>
-          <span class="text-muted">${formatDate(record.date)} · ${escapeHtml(reporter)}</span>
+          <span class="text-muted">${formatDate(record.date)} · ${escapeHtml(reporterName(record, context))}</span>
         </div>
         ${description}
       </div>
       <div class="conduct-record-side">
-        ${points > 0 ? `<span class="conduct-record-points">−${points}</span>` : ""}
+        ${pointsHtml(record)}
         ${editButtonHtml(record, context.teacherId)}
       </div>
     </div>`;
@@ -114,6 +124,44 @@ export function studentTableHtml(rows, context) {
           <th>${t("admin.conduct.grade")}</th>
           <th>${t("admin.conduct.records")}</th>
           <th>${t("admin.conduct.lastRecord")}</th>
+          <th class="actions-col">${t("admin.conduct.actions")}</th>
+        </tr>
+      </thead>
+      <tbody>${body}</tbody>
+    </table>`;
+}
+
+function recordRowHtml(record, context) {
+  const studentName = context.studentNames.get(record.student_id) ?? "";
+  const description = record.description
+    ? `<div class="text-muted">${escapeHtml(record.description)}</div>`
+    : "";
+  return `
+    <tr>
+      <td>${formatDate(record.date)}</td>
+      <td>${escapeHtml(studentName)}</td>
+      <td>${severityBadgeHtml(record.severity)}</td>
+      <td>
+        <b>${escapeHtml(record.type ?? "")}</b>
+        ${description}
+        <div class="conduct-reporter">${escapeHtml(reporterName(record, context))}</div>
+      </td>
+      <td>${pointsHtml(record)}</td>
+      <td class="actions-col">${editButtonHtml(record, context.teacherId)}</td>
+    </tr>`;
+}
+
+export function recordsTableHtml(records, context) {
+  const body = records.map((r) => recordRowHtml(r, context)).join("");
+  return `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>${t("admin.conduct.date")}</th>
+          <th>${t("admin.conduct.student")}</th>
+          <th>${t("admin.conduct.severity")}</th>
+          <th>${t("admin.conduct.description")}</th>
+          <th>${t("admin.conduct.points")}</th>
           <th class="actions-col">${t("admin.conduct.actions")}</th>
         </tr>
       </thead>

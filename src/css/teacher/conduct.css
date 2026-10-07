@@ -12,6 +12,10 @@
     color: inherit;
     text-align: left;
     cursor: pointer;
+    .conduct-reporter {
+      font-size: 0.75rem;
+      color: var(--color-dark-variant);
+    }
   }
 
   .conduct-toggle .material-symbols-outlined {

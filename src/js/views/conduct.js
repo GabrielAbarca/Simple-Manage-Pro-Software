@@ -12,11 +12,22 @@ import { getCurrentPeriodId } from "../teacherFormat.js";
 import { db } from "../teacherData/index.js";
 import { CONDUCT_MAX, groupRecordsByStudent } from "../conduct.js";
 import { conductPassingScore, isConductPassing } from "../promotion.js";
-import { studentTableHtml, emptyStateHtml } from "./conductTables.js";
+import {
+  studentTableHtml,
+  emptyStateHtml,
+  recordsTableHtml,
+} from "./conductTables.js";
 import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
 
 let conductState = null;
 let latestLoad = 0;
+
+let conductView = "students";
+
+const VIEW_BUTTONS = {
+  students: "btn-conduct-students",
+  records: "btn-conduct-records",
+};
 
 async function conductLoad() {
   const grid = document.getElementById("conduct-grid");
@@ -84,7 +95,9 @@ function buildConductState(
     teacherNames: new Map(
       teachers.map((t) => [t.id, `${t.first_name} ${t.last_name}`]),
     ),
-    view: conductState?.view ?? "students",
+    studentNames: new Map(
+      students.map((s) => [s.id, `${s.last_name}, ${s.first_name}`]),
+    ),
     expanded: conductState?.scope === scope ? conductState.expanded : new Set(),
   };
 }
@@ -104,8 +117,14 @@ function tableContext() {
     school: state.school,
     teacherId: state.teacherId,
     teacherNames: conductState.teacherNames,
+    studentNames: conductState.studentNames,
   };
 }
+
+const VIEW_RENDERERS = {
+  students: () => studentTableHtml(studentRows(), tableContext()),
+  records: () => recordsTableHtml(conductState.allRecords, tableContext()),
+};
 
 function renderConduct() {
   const grid = document.getElementById("conduct-grid");
@@ -119,7 +138,25 @@ function renderConduct() {
     grid.innerHTML = emptyStateHtml();
     return;
   }
-  grid.innerHTML = studentTableHtml(studentRows(), tableContext());
+  grid.innerHTML = VIEW_RENDERERS[conductView]();
+}
+
+function setView(view) {
+  if (view === conductView) return;
+  conductView = view;
+  syncViewButtons();
+  if (conductState) renderConduct();
+}
+
+function syncViewButtons() {
+  for (const [view, buttonId] of Object.entries(VIEW_BUTTONS)) {
+    const button = document.getElementById(buttonId);
+    if (!button) continue;
+    const isActive = view === conductView;
+    button.classList.toggle("btn-secondary", isActive);
+    button.classList.toggle("btn-ghost", !isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  }
 }
 
 const GRID_ACTIONS = {
@@ -222,5 +259,11 @@ export function renderConductTab(content) {
   document
     .getElementById("conduct-grid")
     .addEventListener("click", onGridClick);
+  for (const [view, buttonId] of Object.entries(VIEW_BUTTONS)) {
+    document
+      .getElementById(buttonId)
+      .addEventListener("click", () => setView(view));
+  }
+  syncViewButtons();
   conductLoad();
 }

@@ -99,6 +99,8 @@ export default {
     title: "Estudiantes",
     add: "Agregar estudiante",
     import: "Importar CSV",
+    export: "Exportar",
+    exportFile: "estudiantes",
     addTitle: "Agregar estudiante",
     editTitle: "Editar estudiante",
     name: "Nombre",
@@ -176,6 +178,19 @@ export default {
       schoolYears: "Importar cursos lectivos (CSV)",
       gradingPeriods: "Importar periodos (CSV)",
     },
+  },
+  export: {
+    title: "Exportar",
+    format: "Formato",
+    formats: {
+      xlsx: "Libro de Excel (.xlsx)",
+      csv: "Archivo CSV (.csv), para otros sistemas",
+    },
+    rowsHelp:
+      "Filas por exportar: {count}, según el filtro en pantalla. Para abrir el archivo en Excel, elija Libro de Excel.",
+    privacyHelp:
+      "El archivo contiene datos personales: resguárdelo y compártalo solo con quien lo necesite.",
+    download: "Descargar",
   },
   accounts: {
     create: "Crear acceso",

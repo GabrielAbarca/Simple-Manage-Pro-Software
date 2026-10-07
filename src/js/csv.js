@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────────
-//  csv.js — dependency-free CSV/TSV parsing for the roster import.
+//  csv.js — dependency-free CSV/TSV parsing for the roster import, and
+//  the serializer behind the console's exports.
 //
 //  Handles quoted fields (commas/newlines inside quotes), escaped
 //  quotes ("" → "), CRLF or LF line endings, and auto-detects the
@@ -82,6 +83,10 @@ export function parseRows(text, delimiter = detectDelimiter(text)) {
   return rows;
 }
 
+// The apostrophes toCsv puts before a formula character come off again, so an
+// exported file imports back unchanged.
+const GUARDED_FORMULA = /(^|[,;\r\n][\s"]*)'(?=[=+\-@])/g;
+
 /**
  * Parse into { headers, rows } where each row is an object keyed by the
  * trimmed header. Fully blank lines are dropped.
@@ -99,7 +104,7 @@ export function parseCsv(text) {
     /** @type {Record<string, string>} */
     const obj = {};
     headers.forEach((h, i) => {
-      obj[h] = (cells[i] ?? "").trim();
+      obj[h] = (cells[i] ?? "").trim().replace(GUARDED_FORMULA, "$1");
     });
     return obj;
   });
@@ -129,4 +134,50 @@ export function autoMap(headers, aliases) {
     mapping[target] = hit ? hit.raw : "";
   }
   return mapping;
+}
+
+// A spreadsheet runs a cell that starts with one of these as a formula, so
+// exported text that does is prefixed with an apostrophe (CSV injection).
+// Excel splits a .csv on the reader's list separator, a comma or a semicolon,
+// so one of these after either inside a field would start a cell of its own.
+const FORMULA_START = /^[=+\-@\t\r]/;
+const FORMULA_AFTER_SEPARATOR = /([,;\r\n][\s"]*)([=+\-@])/g;
+
+/** @param {Date} date */
+function isoDate(date) {
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+}
+
+/**
+ * One cell as CSV text. Numbers stay numbers; text that a spreadsheet would
+ * read as a formula is neutralised; anything holding the delimiter, a quote
+ * or a line break is quoted.
+ * @param {unknown} value
+ * @param {string} delimiter
+ */
+function csvCell(value, delimiter) {
+  if (value == null) return "";
+  if (typeof value === "number")
+    return Number.isFinite(value) ? String(value) : "";
+  if (value instanceof Date) return isoDate(value);
+  let text = String(value);
+  if (FORMULA_START.test(text)) text = `'${text}`;
+  text = text.replace(FORMULA_AFTER_SEPARATOR, "$1'$2");
+  return /["\r\n]/.test(text) || text.includes(delimiter)
+    ? `"${text.replace(/"/g, '""')}"`
+    : text;
+}
+
+/**
+ * Serialize rows to CSV, with a UTF-8 byte-order mark so Excel reads
+ * accented names correctly.
+ * @param {Array<Array<unknown>>} rows the header row first
+ * @param {{ delimiter?: string, bom?: boolean }} [opts]
+ * @returns {string}
+ */
+export function toCsv(rows, { delimiter = ",", bom = true } = {}) {
+  const body = rows
+    .map((row) => row.map((cell) => csvCell(cell, delimiter)).join(delimiter))
+    .join("\r\n");
+  return (bom ? "\uFEFF" : "") + body + "\r\n";
 }

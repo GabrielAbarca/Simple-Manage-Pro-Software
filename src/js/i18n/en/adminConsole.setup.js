@@ -48,7 +48,8 @@ export default {
       other: "{count} records",
     },
     atRisk: "At-risk students",
-    atRiskHint: "3 or more recorded absences",
+    atRiskHint:
+      "{threshold} or more absences or lates in one subject this year",
     teachers: "Teachers",
     subjects: "Subjects",
     sections: "Sections",

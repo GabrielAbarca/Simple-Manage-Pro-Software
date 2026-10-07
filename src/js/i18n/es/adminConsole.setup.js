@@ -49,7 +49,8 @@ export default {
       other: "{count} registros",
     },
     atRisk: "Estudiantes en riesgo",
-    atRiskHint: "3 o más ausencias registradas",
+    atRiskHint:
+      "{threshold} o más ausencias o tardías en una materia en este curso lectivo",
     teachers: "Docentes",
     subjects: "Materias",
     sections: "Secciones",

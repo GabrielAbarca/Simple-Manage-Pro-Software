@@ -3,6 +3,7 @@
 //  sheet plus the at-risk absence summary (item 3) shown above it.
 // ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
+import { AT_RISK_MISSED_LESSONS } from "../atRisk.js";
 import { skeletonRows, skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
@@ -176,7 +177,6 @@ async function saveAttendance() {
 }
 
 // ── Absence summary (item 3) ────────────────────────────────
-const ABSENCE_THRESHOLD = 5; // absent + late at/above this flags an at-risk student
 
 async function loadAbsenceSummary() {
   const container = document.getElementById("absence-summary");
@@ -210,7 +210,7 @@ function renderAbsenceSummary(rows, roster, container) {
 
   const flagged = Object.entries(counts)
     .map(([id, c]) => ({ id: Number(id), ...c, missed: c.absent + c.late }))
-    .filter((s) => s.missed >= ABSENCE_THRESHOLD)
+    .filter((s) => s.missed >= AT_RISK_MISSED_LESSONS)
     .sort((a, b) => b.missed - a.missed);
 
   if (!flagged.length) {
@@ -218,14 +218,14 @@ function renderAbsenceSummary(rows, roster, container) {
       <div class="absence-summary-head">
         <h3><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-monitoring"></use></svg></span> ${t("admin.absence.title")}</h3>
       </div>
-      <p class="drawer-muted">${t("admin.absence.empty", { threshold: ABSENCE_THRESHOLD })}</p>`;
+      <p class="drawer-muted">${t("admin.absence.empty", { threshold: AT_RISK_MISSED_LESSONS })}</p>`;
     return;
   }
 
   const chips = flagged
     .map(
       (s) => `
-      <div class="absence-chip${s.absent >= ABSENCE_THRESHOLD ? " absence-high" : ""}">
+      <div class="absence-chip${s.absent >= AT_RISK_MISSED_LESSONS ? " absence-high" : ""}">
         <b>${escapeHtml(nameById[s.id] ?? t("admin.absence.studentFallback", { id: s.id }))}</b>
         <span>${s.absent} ${t("enums.attendanceWord.absent")} · ${s.late} ${t("enums.attendanceWord.late")}${s.excused ? " · " + s.excused + " " + t("enums.attendanceWord.excused") : ""}</span>
       </div>`,
@@ -235,7 +235,7 @@ function renderAbsenceSummary(rows, roster, container) {
   container.innerHTML = `
     <div class="absence-summary-head">
       <h3><span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-monitoring"></use></svg></span> ${t("admin.absence.title")}</h3>
-      <span class="badge badge-warning">${t("admin.absence.atRisk", { count: flagged.length, threshold: ABSENCE_THRESHOLD })}</span>
+      <span class="badge badge-warning">${t("admin.absence.atRisk", { count: flagged.length, threshold: AT_RISK_MISSED_LESSONS })}</span>
     </div>
     <div class="absence-grid">${chips}</div>`;
 }

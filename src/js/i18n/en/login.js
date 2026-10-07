@@ -41,6 +41,7 @@ export default {
   noAccount: "Don't have an account?",
   privacy: "Privacy policy",
   terms: "Terms of service",
+  support: "Need help?",
   haveAccount: "Already have an account?",
   forgotPassword: "Forgot password?",
   resetLinkSent:

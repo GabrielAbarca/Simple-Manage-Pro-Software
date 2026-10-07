@@ -57,6 +57,23 @@
     border-radius: var(--border-radius-1);
   }
 
+  .right .top .top-support {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: var(--tap-target);
+    padding: 0 0.8rem;
+    border-radius: var(--border-radius-1);
+    background: var(--color-light);
+    color: var(--color-primary-text);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+  }
+
+  .right .top .top-support .material-symbols-outlined {
+    font-size: 1.2rem;
+  }
+
   .right .top .profile {
     display: flex;
     gap: 1rem;

@@ -620,6 +620,21 @@
     text-decoration: underline;
   }
 
+  .auth-support {
+    margin-top: 0.4rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--color-info-dark);
+  }
+
+  .auth-support a {
+    color: var(--color-primary-text);
+  }
+
+  .auth-support a:hover {
+    text-decoration: underline;
+  }
+
   .btn-switch {
     background: none;
     border: none;

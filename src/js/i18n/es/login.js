@@ -41,6 +41,7 @@ export default {
   noAccount: "¿No tiene una cuenta?",
   privacy: "Política de privacidad",
   terms: "Términos del servicio",
+  support: "¿Necesita ayuda?",
   haveAccount: "¿Ya tiene una cuenta?",
   forgotPassword: "¿Olvidó su contraseña?",
   resetLinkSent:

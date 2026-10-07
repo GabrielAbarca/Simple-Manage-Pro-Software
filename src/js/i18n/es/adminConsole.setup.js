@@ -71,6 +71,8 @@ export default {
   profile: {
     signedInAs: "Sesión iniciada como",
     admin: "Administrador",
+    support: "Soporte",
+    supportLabel: "Escribir a soporte",
   },
   school: {
     title: "Perfil del colegio",

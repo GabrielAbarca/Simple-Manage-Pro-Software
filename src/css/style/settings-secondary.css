@@ -122,6 +122,10 @@
     color: var(--color-primary-text);
   }
 
+  .settings-contact a {
+    color: var(--color-primary-text);
+  }
+
   /* ── More info ── */
   .settings-meta-row {
     display: flex;

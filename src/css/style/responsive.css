@@ -177,6 +177,18 @@
       display: none;
     }
 
+    .right .top .top-support {
+      position: absolute;
+      left: calc(66% - var(--tap-target) - 0.75rem);
+      width: var(--tap-target);
+      padding: 0;
+      justify-content: center;
+    }
+
+    .right .top .top-support-text {
+      display: none;
+    }
+
     .right .top #menu-btn {
       display: inline-block;
       background: transparent;

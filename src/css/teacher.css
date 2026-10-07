@@ -52,6 +52,7 @@
 @import "./teacher/gradebook-scoresheet.css";
 @import "./teacher/empty-state-and-quick-stats.css";
 @import "./teacher/student-drawer.css";
+@import "./teacher/conduct.css";
 
 /* ── Desktop/responsive overrides + clickable row lists ──────────── */
 @import "./teacher/desktop-tables.css";

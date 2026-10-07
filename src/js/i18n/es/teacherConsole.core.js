@@ -144,6 +144,7 @@ export default {
       "La conducta empieza en 100 cada periodo. Los registros aparecen en el informe de progreso del estudiante.",
     noPeriod:
       "No hay periodos de evaluación configurados para este curso lectivo.",
+    unknownReporter: "Docente desconocido",
   },
   manage: {
     title: "Tareas — {period}",

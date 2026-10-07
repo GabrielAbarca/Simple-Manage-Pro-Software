@@ -12,6 +12,8 @@ import { getCurrentPeriodId } from "../teacherFormat.js";
 import { db } from "../teacherData/index.js";
 import { CONDUCT_MAX, groupRecordsByStudent } from "../conduct.js";
 import { conductPassingScore, isConductPassing } from "../promotion.js";
+import { studentTableHtml, emptyStateHtml } from "./conductTables.js";
+import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
 
 let conductState = null;
 let latestLoad = 0;
@@ -28,7 +30,10 @@ async function conductLoad() {
   try {
     const data = await fetchConductData(state.currentClass.classId, period);
     if (thisLoad !== latestLoad) return;
-    conductState = buildConductState(data);
+    conductState = buildConductState(
+      data,
+      `${state.currentClass.classId}|${period.id}`,
+    );
     renderConduct();
   } catch (err) {
     console.error(err);
@@ -66,8 +71,12 @@ async function fetchConductData(classId, period) {
   return { students, conductRows, records, teachers };
 }
 
-function buildConductState({ students, conductRows, records, teachers }) {
+function buildConductState(
+  { students, conductRows, records, teachers },
+  scope,
+) {
   return {
+    scope,
     students,
     conductByStudent: new Map(conductRows.map((row) => [row.student_id, row])),
     recordsByStudent: groupRecordsByStudent(records),
@@ -76,7 +85,25 @@ function buildConductState({ students, conductRows, records, teachers }) {
       teachers.map((t) => [t.id, `${t.first_name} ${t.last_name}`]),
     ),
     view: conductState?.view ?? "students",
-    expanded: new Set(),
+    expanded: conductState?.scope === scope ? conductState.expanded : new Set(),
+  };
+}
+
+function studentRows() {
+  const { students, recordsByStudent, expanded } = conductState;
+  return students.map((student) => ({
+    student,
+    score: scoreOf(student.id),
+    records: recordsByStudent.get(student.id) ?? [],
+    isExpanded: expanded.has(student.id),
+  }));
+}
+
+function tableContext() {
+  return {
+    school: state.school,
+    teacherId: state.teacherId,
+    teacherNames: conductState.teacherNames,
   };
 }
 
@@ -84,7 +111,58 @@ function renderConduct() {
   const grid = document.getElementById("conduct-grid");
   if (!grid) return;
   renderSummary();
-  grid.innerHTML = `<div class="loading-cell">${conductState.students.length} students, ${conductState.allRecords.length} records loaded.</div>`;
+  if (!conductState.students.length) {
+    grid.innerHTML = `<div class="loading-cell">${t("admin.conduct.noStudents")}</div>`;
+    return;
+  }
+  if (!conductState.allRecords.length) {
+    grid.innerHTML = emptyStateHtml();
+    return;
+  }
+  grid.innerHTML = studentTableHtml(studentRows(), tableContext());
+}
+
+const GRID_ACTIONS = {
+  "add-record": (button) => openAddRecordFor(Number(button.dataset.student)),
+  "toggle-student": (button) => toggleStudent(Number(button.dataset.student)),
+  "edit-record": (button) => openEditRecord(Number(button.dataset.record)),
+};
+
+function onGridClick(event) {
+  const target = /** @type {Element | null} */ (event.target);
+  if (!target) return;
+  const button = /** @type {HTMLElement | null} */ (
+    target.closest("[data-action]")
+  );
+  if (!button || !conductState) return;
+  GRID_ACTIONS[button.dataset.action]?.(button);
+}
+
+function toggleStudent(studentId) {
+  const { expanded } = conductState;
+  if (expanded.has(studentId)) expanded.delete(studentId);
+  else expanded.add(studentId);
+  renderConduct();
+  document
+    .querySelector(
+      `[data-action="toggle-student"][data-student="${studentId}"]`,
+    )
+    ?.focus();
+}
+
+function openEditRecord(recordId) {
+  const record = conductState.allRecords.find((r) => r.id === recordId);
+  if (!record) return;
+  const conductRow =
+    conductState.conductByStudent.get(record.student_id) ?? null;
+  openEditDiscipline(record, conductRow, conductLoad);
+}
+
+function openAddRecordFor(studentId) {
+  const student = conductState.students.find((s) => s.id === studentId);
+  if (!student) return;
+  const conductRow = conductState.conductByStudent.get(studentId) ?? null;
+  openAddDiscipline(student, conductRow, conductLoad);
 }
 
 function scoreOf(studentId) {
@@ -141,5 +219,8 @@ export function renderConductTab(content) {
   );
   periodSelect.value = String(getCurrentPeriodId());
   periodSelect.addEventListener("change", conductLoad);
+  document
+    .getElementById("conduct-grid")
+    .addEventListener("click", onGridClick);
   conductLoad();
 }

@@ -215,11 +215,10 @@
             </div>
           </div>
 
-          <!-- First-run guidance. Rendered by admin.js only when the school
-               has no year, no people and no structure yet: on a director's
-               very first login every figure below is an em dash, which is a
-               void rather than a starting point. Hidden the moment the
-               school has any data. -->
+          <!-- The setup checklist (screens/setupChecklist.js). On an
+               untouched school it replaces the figures below, which would
+               all be em dashes; afterwards it sits above them until every
+               step is done or the director hides it. -->
           <div id="overview-setup" hidden></div>
 
           <div class="overview-stats" id="overview-stats">

@@ -38,8 +38,54 @@ export default {
       "En esta consola la dirección y la coordinación configuran y operan el colegio: estructura académica, personas, matrícula y un resumen general.",
     activeYear: "Curso lectivo activo",
     setupTitle: "Configuremos su colegio",
-    setupBody:
-      "Todavía no hay nada configurado. Empiece agregando un curso lectivo: los periodos, las secciones, las materias y las matrículas dependen de él.",
+    setup: {
+      progress: "{done} de {total} pasos listos",
+      hide: "Ocultar",
+      hideLabel: "Ocultar la lista de configuración",
+      show: {
+        one: "Mostrar la lista de configuración (falta {count})",
+        other: "Mostrar la lista de configuración (faltan {count})",
+      },
+      go: "Ir a {page}",
+      goLogins: "Crear accesos de docentes",
+      stepDone: "Listo",
+      steps: {
+        year: {
+          title: "Agregue y active el curso lectivo",
+          hint: "Todo lo demás pertenece a un curso lectivo.",
+          activateHint:
+            "Hay un curso lectivo, pero ninguno está activo: actívelo desde su fila.",
+        },
+        periods: {
+          title: "Defina los periodos de evaluación",
+          hint: "Sus pesos deben sumar 100%.",
+        },
+        sections: {
+          title: "Cree los grados y las secciones",
+          hint: "Por ejemplo 7-1 y 7-2.",
+        },
+        subjects: {
+          title: "Agregue las materias",
+          hint: "Y qué grados lleva cada una.",
+        },
+        teachers: {
+          title: "Agregue a los docentes",
+          hint: "Uno por uno o desde una hoja de cálculo.",
+        },
+        assignments: {
+          title: "Asigne docentes a secciones y materias",
+          hint: "Quién imparte qué y en qué sección.",
+        },
+        students: {
+          title: "Matricule a los estudiantes en secciones",
+          hint: "Uno por uno o desde una hoja de cálculo, cada uno en una sección.",
+        },
+        logins: {
+          title: "Cree el acceso de cada docente asignado",
+          hint: "Desde la tabla de Docentes, un acceso por docente.",
+        },
+      },
+    },
     noActiveYear: "Aún no hay un curso lectivo activo",
     loading: "Cargando resumen…",
     enrollment: "Matrícula total",

@@ -22,6 +22,7 @@ import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
 import { accountBtn } from "../domain/accountActions.js";
+import { openGuardians } from "./guardians.js";
 
 export async function loadStudents() {
   renderMessageRow("students-body", 7, t("common.loading"));
@@ -152,6 +153,9 @@ export function renderStudents() {
         ],
         [
           accountBtn(s, "student", loadStudents),
+          iconBtn("group", t("console.guardians.action"), () =>
+            openGuardians(s),
+          ),
           iconBtn("edit", t("common.edit"), () => openStudentForm(s)),
           statusToggleBtn(s),
           iconBtn("delete", t("common.delete"), () => confirmDelete(s), true),

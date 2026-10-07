@@ -183,6 +183,12 @@ function deactivate(overlay) {
   const trigger = entry.trigger;
   if (trigger instanceof HTMLElement && document.contains(trigger)) {
     trigger.focus();
+  } else if (top()) {
+    // The trigger was re-rendered away under a nested dialog; stay in the
+    // dialog underneath rather than fall to the page behind it.
+    /** @type {HTMLElement | null} */ (
+      top().overlay.querySelector('[role="dialog"], [role="alertdialog"]')
+    )?.focus();
   }
 }
 

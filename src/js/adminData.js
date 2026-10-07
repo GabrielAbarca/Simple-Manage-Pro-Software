@@ -327,6 +327,50 @@ export function createAdminData(gateway) {
      */
     bulkInsert: (table, rows) => gateway.insertMany(table, rows),
 
+    // ── Guardians (encargados) and their links to students ────
+    listGuardians: () =>
+      gateway.select("guardians", { order: { column: "last_name" } }),
+    /** @param {number[]} ids */
+    listGuardiansByIds: (ids) =>
+      gateway.select("guardians", { inList: { column: "id", values: ids } }),
+    createGuardian: (/** @type {object} */ row) =>
+      gateway.insert("guardians", row),
+    updateGuardian: (/** @type {number} */ id, /** @type {object} */ patch) =>
+      gateway.update("guardians", id, patch),
+    deleteGuardian: (/** @type {number} */ id) =>
+      gateway.remove("guardians", id),
+    listStudentGuardians: (/** @type {number} */ studentId) =>
+      gateway.select("student_guardians", {
+        match: { student_id: studentId },
+        order: { column: "id" },
+      }),
+    /** Every student a guardian is linked to. @param {number} guardianId */
+    listGuardianLinks: (guardianId) =>
+      gateway.select("student_guardians", {
+        match: { guardian_id: guardianId },
+      }),
+    /**
+     * Make one link a student's primary contact. The new primary is set
+     * first, so a failure part-way leaves two primaries rather than none.
+     * @param {number} linkId
+     * @param {number[]} previousPrimaryIds the student's other primary links
+     */
+    async setPrimaryGuardian(linkId, previousPrimaryIds = []) {
+      await gateway.update("student_guardians", linkId, { is_primary: true });
+      for (const id of previousPrimaryIds) {
+        if (id !== linkId)
+          await gateway.update("student_guardians", id, { is_primary: false });
+      }
+    },
+    linkGuardian: (/** @type {object} */ row) =>
+      gateway.insert("student_guardians", row),
+    updateGuardianLink: (
+      /** @type {number} */ id,
+      /** @type {object} */ patch,
+    ) => gateway.update("student_guardians", id, patch),
+    unlinkGuardian: (/** @type {number} */ id) =>
+      gateway.remove("student_guardians", id),
+
     // ── School settings (single row: name, logo, ID label) ────
     /** The settings row, or null when the table is empty. */
     async getSchoolSettings() {

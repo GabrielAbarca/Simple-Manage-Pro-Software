@@ -461,9 +461,28 @@ function rowMatches(row, params) {
       if (!vals.includes(String(row[k]))) return false;
     } else if (v === "not.is.null") {
       if (row[k] == null) return false;
+    } else if (v.startsWith("gte.")) {
+      if (row[k] == null || String(row[k]) < v.slice(4)) return false;
+    } else if (v.startsWith("lte.")) {
+      if (row[k] == null || String(row[k]) > v.slice(4)) return false;
     }
   }
   return true;
+}
+
+/**
+ * Narrow a row to a plain `select=a,b,c` list, as PostgREST does. Embeds,
+ * aliases and `*` pass the row through whole.
+ */
+function project(row, select) {
+  if (!select || /[(*:]/.test(select)) return row;
+  return Object.fromEntries(
+    select
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean)
+      .map((c) => [c, row[c]]),
+  );
 }
 
 /**
@@ -498,7 +517,9 @@ export async function seedLang(context, lang = "en") {
 
 /**
  * Route the Supabase origin against `fix`. Returns a `writes` array that
- * captures any non-GET request reaching the backend (must stay empty in demo).
+ * captures any request other than a read (GET or HEAD) reaching the backend
+ * (must stay empty in demo). Reads honour `offset`/`limit` and answer
+ * `Prefer: count=exact` with a Content-Range header, as PostgREST does.
  *
  * Also pins the interface language: every spec that renders the app calls
  * this, so it is the one place that keeps text assertions stable.
@@ -509,8 +530,8 @@ export async function routeSupabase(context, fix) {
   await context.route(`${SUPA}/**`, async (route) => {
     const req = route.request();
     const url = new URL(req.url());
-    const isRead =
-      req.method() === "GET" || url.pathname.endsWith("/rpc/demo_teacher_id");
+    const isGetOrHead = req.method() === "GET" || req.method() === "HEAD";
+    const isRead = isGetOrHead || url.pathname.endsWith("/rpc/demo_teacher_id");
     if (!isRead) writes.push(`${req.method()} ${url.pathname}`);
 
     if (url.pathname.endsWith("/rpc/demo_teacher_id")) {
@@ -520,11 +541,26 @@ export async function routeSupabase(context, fix) {
         body: "7",
       });
     }
-    if (url.pathname.startsWith("/rest/v1/") && req.method() === "GET") {
+    if (url.pathname.startsWith("/rest/v1/") && isGetOrHead) {
       const table = url.pathname.replace("/rest/v1/", "");
-      const rows = (fix[table] ?? []).filter((r) =>
+      const matched = (fix[table] ?? []).filter((r) =>
         rowMatches(r, url.searchParams),
       );
+      const offset = Number(url.searchParams.get("offset") ?? 0);
+      const limit = url.searchParams.get("limit");
+      const rows = matched
+        .slice(offset, limit == null ? undefined : offset + Number(limit))
+        .map((r) => project(r, url.searchParams.get("select")));
+      const headers = {};
+      if ((req.headers()["prefer"] ?? "").includes("count=exact")) {
+        headers["access-control-expose-headers"] = "Content-Range";
+        headers["content-range"] = rows.length
+          ? `${offset}-${offset + rows.length - 1}/${matched.length}`
+          : `*/${matched.length}`;
+      }
+      if (req.method() === "HEAD") {
+        return route.fulfill({ status: 200, headers, body: "" });
+      }
       const wantsObject = (req.headers()["accept"] ?? "").includes(
         "vnd.pgrst.object",
       );
@@ -544,6 +580,7 @@ export async function routeSupabase(context, fix) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
+        headers,
         body: JSON.stringify(rows),
       });
     }

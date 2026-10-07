@@ -398,6 +398,17 @@
     display: flex;
   }
 
+  /* The shared form and confirm dialogs also open from inside another
+     overlay (a scheme's components), so they stack above it; the confirm
+     can open over the form. */
+  #modal-overlay {
+    z-index: 1010;
+  }
+
+  #confirm-overlay {
+    z-index: 1020;
+  }
+
   .modal {
     background: var(--color-white);
     border-radius: var(--card-border-radius);

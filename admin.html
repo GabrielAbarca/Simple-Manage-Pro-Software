@@ -143,6 +143,12 @@
             ></span>
             <h3 data-i18n="console.nav.students">Students &amp; Enrollment</h3>
           </a>
+          <a href="/admin" data-page="events">
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true"><use href="#icon-event"></use></svg
+            ></span>
+            <h3 data-i18n="console.nav.events">Events</h3>
+          </a>
           <a href="/admin" data-page="accounts">
             <span class="material-symbols-outlined"
               ><svg aria-hidden="true">
@@ -261,9 +267,7 @@
                   At-risk students
                 </p>
                 <h2 class="stat-value" id="stat-atrisk">—</h2>
-                <p class="stat-hint" data-i18n="console.overview.atRiskHint">
-                  3 or more recorded absences
-                </p>
+                <p class="stat-hint" id="stat-atrisk-hint"></p>
               </div>
             </div>
             <div class="stat-card">
@@ -729,6 +733,43 @@
                   </tr>
                 </thead>
                 <tbody id="students-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── EVENTS (the calendar students see) ───────────── -->
+        <section class="view-section" id="view-events">
+          <h1 data-i18n="console.heading.events">School Events</h1>
+          <div class="console-panel">
+            <div class="panel-head">
+              <div>
+                <h2 data-i18n="console.events.title">Events</h2>
+                <p class="panel-sub" data-i18n="console.events.subtitle">
+                  Holidays, exams, activities and parent meetings. Students see
+                  them in their portal.
+                </p>
+              </div>
+              <div class="panel-actions">
+                <button class="btn btn-primary btn-sm" id="btn-add-event">
+                  <span class="material-symbols-outlined"
+                    ><svg aria-hidden="true"><use href="#icon-add"></use></svg
+                  ></span>
+                  <span data-i18n="console.events.add">Add event</span>
+                </button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="console.events.name">Title</th>
+                    <th data-i18n="console.events.dates">Dates</th>
+                    <th data-i18n="console.events.type">Type</th>
+                    <th class="actions-col"></th>
+                  </tr>
+                </thead>
+                <tbody id="events-body"></tbody>
               </table>
             </div>
           </div>

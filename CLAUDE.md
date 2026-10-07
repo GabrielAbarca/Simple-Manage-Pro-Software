@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Working guide for AI agents (and humans) contributing to **SMP Dashboard**. Read this before making changes.
+Working guide for AI agents (and humans) contributing to **Simple Manage Pro**. Read this before making changes.
 
 > # ⛔ STOP — READ BEFORE EVERY SINGLE `git commit` ⛔
 >
@@ -36,7 +36,7 @@ Working guide for AI agents (and humans) contributing to **SMP Dashboard**. Read
 
 ## Project overview
 
-SMP Dashboard is a school-management web app for Costa Rican schools. It is a **vanilla JavaScript (ES modules) multi-page app built with Vite** — there is **no frontend framework** (no React/Vue). Data comes from **Supabase** (Postgres, RLS, Auth, Realtime) and it deploys on **Vercel**.
+Simple Manage Pro (SMP) is a school-management web app for Costa Rican schools. It is a **vanilla JavaScript (ES modules) multi-page app built with Vite** — there is **no frontend framework** (no React/Vue). Data comes from **Supabase** (Postgres, RLS, Auth, Edge Functions) and it deploys on **Vercel**.
 
 Four HTML entry points, each with its own controller in `src/js/`:
 
@@ -162,7 +162,7 @@ These are non-negotiable. They override default agent behavior.
 
 ## Verification
 
-For user-facing changes, verify in a real browser (dev server + Playwright, with the Supabase backend mocked for the admin console) — the `verify` skill documents the exact recipe. For logic changes, a Vitest unit test is preferred over a manual check.
+For user-facing changes, verify in a real browser (dev server + Playwright, with the Supabase backend mocked) — the `verify` skill documents the exact recipe. For logic changes, a Vitest unit test is preferred over a manual check.
 
 ## Environment
 

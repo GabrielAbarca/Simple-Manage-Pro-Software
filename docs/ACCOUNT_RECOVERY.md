@@ -111,22 +111,42 @@ it part of onboarding.
 
 Two different things, often confused:
 
-- **Deactivate the record** (admin console) flips the person's `status` to
-  inactive. They stop appearing in active lists. **Their login still works.**
-- **Disable the login** blocks sign-in. Available through the Edge Function's
-  `setActive` action; there is no button for it yet.
+- **The record's status** (admin console → Teachers / Students &
+  Enrollment) says whether the person is still at the school. Saving a
+  student with any status other than Active, or a teacher as Inactive, also
+  **deactivates their sign-in**; saving them back to Active re-enables it,
+  even if the login had been deactivated from User Accounts. A teacher on
+  leave keeps signing in. An administrator's login is never deactivated this
+  way, so a director linked to their own teacher record cannot lock
+  themselves out.
+- **The login itself** can be turned off or back on directly from **User
+  Accounts** (Deactivate / Reactivate sign-in), without touching the record.
 
-When someone leaves, deactivating the record alone is not enough — their
-account can still sign in and read what their role allows. Until the UI exists,
-disable the login from the dashboard: Authentication → Users → the account →
-ban, or delete it.
+When someone leaves, change their record's status in the admin console and
+the login follows. If the login could not be changed, the console says so;
+use User Accounts. Editing a student's status from the teacher console does
+not change their sign-in.
 
-> **Known gap.** `setActive` is implemented in the Edge Function
-> (`supabase/functions/admin-users/index.ts`) and in the client
-> (`src/js/accounts.js`) but nothing calls it. Wiring a deactivate-login
-> control into the admin console is a worthwhile follow-up: leavers are a
-> routine event and this is the one part of the flow that still needs the
-> dashboard.
+Deactivating a login stops new sign-ins and token refreshes. A session that
+is already open keeps working until its access token expires (one hour by
+default).
+
+> **Records deactivated before this behaviour existed** still have a working
+> login. The operator can list them from the SQL editor (read-only):
+>
+> ```sql
+> select 'student' as kind, s.first_name, s.last_name, s.status, u.email
+> from public.students s join auth.users u on u.id = s.auth_user_id
+> where s.status <> 'active'
+>   and (u.banned_until is null or u.banned_until < now())
+> union all
+> select 'teacher', t.first_name, t.last_name, t.status, u.email
+> from public.teachers t join auth.users u on u.id = t.auth_user_id
+> where t.status = 'inactive'
+>   and (u.banned_until is null or u.banned_until < now());
+> ```
+>
+> and deactivate each one's sign-in from User Accounts.
 
 ---
 

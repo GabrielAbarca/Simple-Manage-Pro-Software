@@ -39,6 +39,7 @@ import { loadGradesSections } from "./admin/screens/gradesSections.js";
 import { loadSubjects } from "./admin/screens/subjects.js";
 import { loadTeachers } from "./admin/screens/teachers.js";
 import { loadAssignments } from "./admin/screens/assignments.js";
+import { loadEvents } from "./admin/screens/events.js";
 import { loadAccounts } from "./admin/screens/accounts.js";
 import { loadStudents } from "./admin/screens/students.js";
 import { loadSettings } from "./admin/screens/settings.js";
@@ -64,6 +65,7 @@ initAdminNav(
     teachers: loadTeachers,
     assignments: loadAssignments,
     students: loadStudents,
+    events: loadEvents,
     accounts: loadAccounts,
     settings: loadSettings,
   },

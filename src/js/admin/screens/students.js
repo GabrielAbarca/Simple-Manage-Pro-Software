@@ -21,7 +21,7 @@ import {
 import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
-import { accountBtn } from "../domain/accountActions.js";
+import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";
 
 export async function loadStudents() {
   renderMessageRow("students-body", 7, t("common.loading"));
@@ -97,18 +97,37 @@ function studentSectionName(student) {
 
 function statusToggleBtn(student) {
   const active = student.status === "active";
-  return iconBtn(
-    active ? "block" : "check_circle",
-    active
-      ? t("console.students.deactivate")
-      : t("console.students.reactivate"),
-    async () => {
-      await data.updateStudent(student.id, {
-        status: active ? "inactive" : "active",
-      });
-      showToast(t("common.saved"));
-      loadStudents();
-    },
+  const status = active ? "inactive" : "active";
+  const name = `${student.first_name} ${student.last_name}`;
+  const label = active
+    ? t("console.students.deactivate")
+    : t("console.students.reactivate");
+  const run = async () => {
+    await data.updateStudent(student.id, { status });
+    await syncLoginWithStatus(student, "student", status);
+    loadStudents();
+  };
+  return iconBtn(active ? "block" : "check_circle", label, () =>
+    student.auth_user_id
+      ? openConfirm(
+          t(
+            active
+              ? "console.students.confirmDeactivateLogin"
+              : "console.students.confirmReactivateLogin",
+            { name },
+          ),
+          run,
+          {
+            title: t(
+              active
+                ? "console.students.deactivateTitle"
+                : "console.students.reactivateTitle",
+            ),
+            confirmLabel: label,
+            danger: active,
+          },
+        )
+      : run(),
   );
 }
 
@@ -258,6 +277,7 @@ export function openStudentForm(student = null) {
         type: "select",
         value: student?.status ?? "active",
         required: true,
+        help: t("console.students.statusHelp"),
         options: STUDENT_STATUSES.map((status) => ({
           value: status,
           label: t(`enums.studentStatus.${status}`),
@@ -283,7 +303,7 @@ export function openStudentForm(student = null) {
         ? await data.updateStudent(student.id, payload).then(() => student)
         : await data.createStudent(payload);
       markSaved("students-body", saved?.id ?? student?.id);
-      showToast(t("common.saved"));
+      await syncLoginWithStatus(student, "student", payload.status);
       loadStudents();
     },
   });

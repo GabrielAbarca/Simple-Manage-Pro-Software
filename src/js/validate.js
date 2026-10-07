@@ -187,6 +187,19 @@ export const endAfterStart = (startField) => (v, values) => {
 };
 
 /**
+ * This field (an end date) may not come before another field's value; the
+ * same day is allowed.
+ * @param {string} startField name of the sibling start-date field
+ * @returns {Rule}
+ */
+export const endNotBeforeStart = (startField) => (v, values) => {
+  const end = normalize(v);
+  const start = normalize(values?.[startField]);
+  if (!end || !start) return null;
+  return end < start ? msg("validation.endBeforeStart") : null;
+};
+
+/**
  * Date may not be in the future (a birthdate, a hire date).
  * @param {string} [todayIso] defaults to today — passed explicitly in tests
  * @returns {Rule}

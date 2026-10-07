@@ -11,6 +11,7 @@ import {
   percent,
   dateWithin,
   endAfterStart,
+  endNotBeforeStart,
   notFuture,
   unique,
   password,
@@ -162,6 +163,23 @@ describe("dateWithin", () => {
     expect(keyOf(failure)).toBe("validation.dateWithin");
     expect(failure.vars).toEqual({ start: "Sep 1, 2025", end: "Jun 30, 2026" });
     expect(keyOf(rule("2025-08-31", {}))).toBe("validation.dateWithin");
+  });
+});
+
+describe("endNotBeforeStart", () => {
+  const rule = endNotBeforeStart("start_date");
+  it("allows the same day and a later day", () => {
+    expect(rule("2026-09-15", { start_date: "2026-09-15" })).toBeNull();
+    expect(rule("2026-09-16", { start_date: "2026-09-15" })).toBeNull();
+  });
+  it("rejects an end before the start", () => {
+    expect(keyOf(rule("2026-09-14", { start_date: "2026-09-15" }))).toBe(
+      "validation.endBeforeStart",
+    );
+  });
+  it("passes when either date is missing", () => {
+    expect(rule("", { start_date: "2026-09-15" })).toBeNull();
+    expect(rule("2026-09-14", {})).toBeNull();
   });
 });
 

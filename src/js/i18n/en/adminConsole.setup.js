@@ -12,6 +12,7 @@ export default {
     teachers: "Teachers",
     assignments: "Assignments",
     students: "Students & Enrollment",
+    events: "Events",
     accounts: "Accounts",
     settings: "Settings",
     viewTeacherConsole: "View Teacher Console",
@@ -26,6 +27,7 @@ export default {
     teachers: "Teachers",
     assignments: "Class Assignments",
     students: "Students & Enrollment",
+    events: "School Events",
     accounts: "User Accounts",
     settings: "Settings",
   },
@@ -94,7 +96,8 @@ export default {
       other: "{count} records",
     },
     atRisk: "At-risk students",
-    atRiskHint: "3 or more recorded absences",
+    atRiskHint:
+      "{threshold} or more absences or lates in one subject this year",
     teachers: "Teachers",
     subjects: "Subjects",
     sections: "Sections",
@@ -274,13 +277,21 @@ export default {
     defaultSet: '"{name}" is now the default scheme.',
     confirmDelete: 'Delete the "{name}" scheme?',
     itemsTitle: "Components — {name}",
-    itemsHelp: "Weights should total 100%.",
+    itemsHelp:
+      "Weights must total 100% before the scheme can be the default or applied to a gradebook.",
     componentName: "Component",
     addComponent: "Add component",
     editComponent: "Edit component",
     confirmDeleteItem: 'Remove the "{name}" component?',
     loadPreset: "Load MEP preset",
     presetLoaded: "MEP components added.",
+    weightOver: "Components would total {total}%, over 100%.",
+    presetOver:
+      "The MEP preset would bring this scheme to {total}%. Adjust the existing components first.",
+    defaultNeeds100:
+      "A scheme must total 100% to be the default. This one totals {total}%.",
+    defaultIncomplete:
+      "This is the default scheme and now totals {total}%. Teachers cannot apply it until it totals 100%.",
   },
   teachers: {
     title: "Teachers",
@@ -295,6 +306,7 @@ export default {
     phone: "Phone",
     specialization: "Specialization",
     status: "Status",
+    statusHelp: "Inactive also deactivates the teacher's sign-in.",
     empty: "No teachers yet.",
     confirmDelete: "Delete teacher {name}?",
     statuses: {

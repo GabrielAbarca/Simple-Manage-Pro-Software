@@ -13,6 +13,7 @@ export default {
     teachers: "Docentes",
     assignments: "Asignaciones",
     students: "Estudiantes y matrícula",
+    events: "Eventos",
     accounts: "Cuentas",
     settings: "Configuración",
     viewTeacherConsole: "Ver consola docente",
@@ -27,6 +28,7 @@ export default {
     teachers: "Docentes",
     assignments: "Asignación de clases",
     students: "Estudiantes y matrícula",
+    events: "Eventos escolares",
     accounts: "Cuentas de acceso",
     settings: "Configuración",
   },
@@ -95,7 +97,8 @@ export default {
       other: "{count} registros",
     },
     atRisk: "Estudiantes en riesgo",
-    atRiskHint: "3 o más ausencias registradas",
+    atRiskHint:
+      "{threshold} o más ausencias o tardías en una materia en este curso lectivo",
     teachers: "Docentes",
     subjects: "Materias",
     sections: "Secciones",
@@ -279,13 +282,21 @@ export default {
     defaultSet: '"{name}" es ahora el esquema predeterminado.',
     confirmDelete: '¿Eliminar el esquema "{name}"?',
     itemsTitle: "Componentes — {name}",
-    itemsHelp: "Las ponderaciones deben sumar 100%.",
+    itemsHelp:
+      "Las ponderaciones deben sumar 100% para que el esquema pueda ser el predeterminado o aplicarse a un libro de notas.",
     componentName: "Componente",
     addComponent: "Agregar componente",
     editComponent: "Editar componente",
     confirmDeleteItem: '¿Quitar el componente "{name}"?',
     loadPreset: "Cargar preajuste MEP",
     presetLoaded: "Componentes MEP agregados.",
+    weightOver: "Los componentes sumarían {total}%, más de 100%.",
+    presetOver:
+      "El preajuste MEP llevaría este esquema a {total}%. Primero ajuste los componentes existentes.",
+    defaultNeeds100:
+      "Un esquema debe sumar 100% para ser el predeterminado. Este suma {total}%.",
+    defaultIncomplete:
+      "Este es el esquema predeterminado y ahora suma {total}%. Los docentes no podrán aplicarlo hasta que sume 100%.",
   },
   teachers: {
     title: "Docentes",
@@ -300,6 +311,7 @@ export default {
     phone: "Teléfono",
     specialization: "Especialización",
     status: "Estado",
+    statusHelp: "Inactivo también desactiva el acceso del docente.",
     empty: "Aún no hay docentes.",
     confirmDelete: "¿Eliminar al docente {name}?",
     statuses: {

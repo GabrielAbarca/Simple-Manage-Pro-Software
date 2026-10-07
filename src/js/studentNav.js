@@ -15,6 +15,7 @@ const VIEW_ERROR_TARGETS = {
   },
   grades: { selector: "#grades-body", colspan: 6 },
   attendance: { selector: "#attendance-body", colspan: 5 },
+  conduct: { selector: "#conduct-root" },
   schedule: { selector: "#schedule-grid" },
   teachers: { selector: "#teacher-cards" },
   events: { selector: "#events-timeline" },

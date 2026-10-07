@@ -223,8 +223,14 @@ begin
     (student_id, class_subject_teacher_id, grading_period_id, score)
     values (v_student_a, v_cst_a, v_period, 80);
 
-  insert into public.discipline_records (student_id, date, type, description, reported_by_teacher)
-    values (v_student_a, date '2400-03-02', 'RLS Audit', 'fixture', v_teacher);
+  -- 10 points off, so student A's conducta reads 90 and a 100 anywhere in
+  -- the assertions below would mean the deduction never reached the view.
+  insert into public.discipline_records
+    (student_id, date, type, description, reported_by_teacher, conduct_points)
+    values (v_student_a, date '2400-03-02', 'RLS Audit', 'fixture', v_teacher, 10);
+
+  insert into public.student_conduct_grades (student_id, grading_period_id, score)
+    values (v_student_a, v_period, 90);
 
   -- A component template + one item, to prove admins own it while every
   -- signed-in user (teacher, student) may read it and no one else may write.
@@ -308,6 +314,10 @@ begin
     'select 1 from public.profiles', 0);
   perform pg_temp._expect_rows('anon cannot read discipline',
     'select 1 from public.discipline_records', 0);
+  perform pg_temp._expect_rows('anon cannot read conducta',
+    'select 1 from public.student_period_conduct', 0);
+  perform pg_temp._expect_rows('anon cannot read posted conducta',
+    'select 1 from public.student_conduct_grades', 0);
   perform pg_temp._expect_denied('anon cannot insert a student',
     'insert into public.students (first_name, last_name, enrollment_number)
        values (''Anon'', ''Intruder'', ''RLS-X-999'')');
@@ -326,8 +336,10 @@ set local role authenticated;
 
 do $$
 declare
+  student_a int := (select v from _audit_fx where k = 'student_a');
   student_b int := (select v from _audit_fx where k = 'student_b');
   class_a    int := (select v from _audit_fx where k = 'class_a');
+  period     int := (select v from _audit_fx where k = 'period');
   teacher    int := (select v from _audit_fx where k = 'teacher');
   ctemplate  int := (select v from _audit_fx where k = 'component_template');
 begin
@@ -346,6 +358,23 @@ begin
     'select 1 from public.student_grades', 1);
   perform pg_temp._expect_rows('student sees their own discipline only',
     'select 1 from public.discipline_records', 1);
+
+  -- The conducta view is dense — one row per period of this student's own
+  -- year — so a student sees their own rows and nobody else's. The mark
+  -- itself must carry the deduction, not read a clean 100.
+  perform pg_temp._expect_rows('student sees their own conducta only',
+    format('select 1 from public.student_period_conduct where student_id <> %s',
+           student_a), 0);
+  perform pg_temp._expect_rows('student sees the period conducta the deduction produced',
+    format('select 1 from public.student_period_conduct
+             where grading_period_id = %s and conduct_score = 90', period), 1);
+  perform pg_temp._expect_rows('student sees their own posted conducta only',
+    'select 1 from public.student_conduct_grades', 1);
+  -- A conducta is a teacher's to set. No policy grants a student the write,
+  -- so this must be refused on every project, demo lockdown or not.
+  perform pg_temp._expect_denied('student cannot post their own conducta',
+    format('update public.student_conduct_grades set score = 100
+             where student_id = %s', student_a));
   perform pg_temp._expect_rows('student sees only their own profile',
     'select 1 from public.profiles', 1);
 
@@ -393,7 +422,7 @@ begin
   perform pg_temp._expect_denied('student cannot record attendance',
     format('insert into public.attendance (student_id, class_id, date, status)
               values (%s, %s, date ''2400-04-01'', ''present'')',
-           (select v from _audit_fx where k = 'student_a'), class_a));
+           student_a, class_a));
   perform pg_temp._expect_denied('student cannot create a subject',
     'insert into public.subjects (name) values (''Student Made This'')');
   perform pg_temp._expect_denied('student cannot delete their discipline record',
@@ -447,6 +476,18 @@ begin
   perform pg_temp._expect_rows('teacher sees only their own rows in student_period_grades',
     format('select 1 from public.student_period_grades where class_subject_teacher_id = %s', cst_b), 0);
 
+  -- And so must conducta: their own students' rows, never class B's.
+  perform pg_temp._expect_rows('teacher reads conducta for their students only',
+    format('select 1 from public.student_period_conduct where student_id = %s', student_b), 0);
+  perform pg_temp._expect_rows('teacher reads the conducta their deduction produced',
+    format('select 1 from public.student_period_conduct
+             where student_id = %s and grading_period_id = %s and conduct_score = 90',
+           student_a, period), 1);
+  perform pg_temp._expect_denied('teacher cannot post conducta for another class',
+    format('insert into public.student_conduct_grades
+              (student_id, grading_period_id, score) values (%s, %s, 50)',
+           student_b, period));
+
   -- Self-read on `teachers` must survive the narrowed policy (the Settings
   -- view reads their own national_id/phone/address/hire_date) — but a
   -- colleague's PII must stay just as invisible as a student's would be.
@@ -470,6 +511,9 @@ begin
     perform pg_temp._expect_denied('demo lockdown blocks teacher grading',
       format('update public.student_grades set score = 91
                where class_subject_teacher_id = %s', cst_a));
+    perform pg_temp._expect_denied('demo lockdown blocks teacher conducta posting',
+      format('update public.student_conduct_grades set score = 75
+               where student_id = %s', student_a));
   else
     perform pg_temp._expect_allowed('teacher records attendance for their class',
       format('insert into public.attendance (student_id, class_id, date, status)

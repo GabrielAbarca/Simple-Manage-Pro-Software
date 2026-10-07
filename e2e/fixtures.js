@@ -292,8 +292,39 @@ export const teacherFix = {
   assignments: [],
   assignment_grades: [],
   student_period_grades: [],
-  discipline_records: [],
+  // Conducta: Ana has one costly record (100 − 12.5), Luis has enough
+  // deducted to sit below the 70 floor — the aplazado case the UI must show.
+  student_period_conduct: [
+    {
+      student_id: 101,
+      class_id: 21,
+      grading_period_id: 1,
+      conduct_score: 87.5,
+      deduction: 12.5,
+      incident_count: 1,
+    },
+    {
+      student_id: 102,
+      class_id: 21,
+      grading_period_id: 1,
+      conduct_score: 65,
+      deduction: 35,
+      incident_count: 2,
+    },
+  ],
+  discipline_records: [
+    {
+      id: 901,
+      student_id: 101,
+      date: "2026-06-15",
+      type: "Tardiness",
+      severity: "low",
+      description: "Late three times this week",
+      conduct_points: 12.5,
+    },
+  ],
   student_grades: [],
+  student_conduct_grades: [],
   grade_categories: [],
   grade_component_templates: [
     { id: 5, name: "Plantilla MEP", subject_id: null, is_default: true },

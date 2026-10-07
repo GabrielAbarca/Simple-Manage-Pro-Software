@@ -101,6 +101,20 @@ write. Id columns use identity (equivalent to the demo's sequences).
 >   Verify afterwards that `attendance` has exactly one unique constraint:
 >   `select conname, pg_get_constraintdef(oid) from pg_constraint
 where conrelid = 'public.attendance'::regclass and contype = 'u';`
+> - [`supabase/schema/incremental_conducta.sql`](../supabase/schema/incremental_conducta.sql)
+>   — **required before deploying the app version that grades conducta.**
+>   Adds `discipline_records.conduct_points` (the deduction a teacher enters
+>   on each record), the `student_period_conduct` view that turns those into
+>   a mark, and `student_conduct_grades`, the posted mark a report card
+>   reads. Existing records default to 0 points, so no student's conducta
+>   moves on deploy — verify with
+>   `select count(*) from public.student_period_conduct where conduct_score <> 100;`
+>   which must return 0 immediately after applying.
+>   **It adds a new table, so `demo_lockdown.sql` must be re-run on the demo
+>   project afterwards** — without it `student_conduct_grades` is writable
+>   through the anon key. Check with
+>   `select count(*) from pg_policies where tablename = 'student_conduct_grades'
+and policyname like 'demo\_deny\_%';` which must return 3.
 >
 > All of them are already included in `school_schema.sql`, so a fresh project
 > does **not** need them separately. Verify this before trusting it on a new

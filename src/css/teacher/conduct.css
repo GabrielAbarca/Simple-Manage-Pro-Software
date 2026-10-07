@@ -1,0 +1,70 @@
+@layer page {
+  /* ─── Conduct tab: expandable student rows + record cards ──────── */
+  .conduct-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: var(--tap-target);
+    padding: 0;
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    .conduct-reporter {
+      font-size: 0.75rem;
+      color: var(--color-dark-variant);
+    }
+  }
+
+  .conduct-toggle .material-symbols-outlined {
+    transition: transform 0.15s ease;
+  }
+
+  .conduct-toggle[aria-expanded="true"] .material-symbols-outlined {
+    transform: rotate(90deg);
+  }
+
+  .conduct-toggle:disabled {
+    cursor: default;
+  }
+
+  .conduct-toggle:disabled .material-symbols-outlined {
+    visibility: hidden;
+  }
+
+  .data-table tbody tr.conduct-detail:hover {
+    background: none;
+  }
+
+  .conduct-record {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--color-background);
+    border-radius: var(--border-radius-2);
+  }
+
+  .conduct-record-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .conduct-record-side {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .conduct-record-points {
+    font-weight: 700;
+    color: var(--color-danger-text);
+  }
+}

@@ -5,7 +5,7 @@
 import { t, formatDate as i18nFormatDate } from "./i18n.js";
 import { dayKey } from "./scheduleLogic.js";
 import { state } from "./teacherState.js";
-import { bandClass } from "./promotion.js";
+import { bandClass, conductBandClass } from "./promotion.js";
 
 /**
  * Human-readable label for a class — "10th Grade — Section A".
@@ -64,8 +64,28 @@ export function gradeCellHtml(score) {
     : `<b class="${gradeBandClass(score)}">${Number(score).toFixed(1)}</b>`;
 }
 
+// Conducta colour band. Separate from gradeBandClass because conducta has its
+// own floor in school_settings — banding it against the subject pass mark
+// would colour it against the wrong number.
+export function conductBand(score) {
+  return conductBandClass(score, state.school);
+}
+
+// Render one conducta cell. Whole numbers are the norm for a mark that counts
+// down from 100, so it shows no decimal unless there is one to show.
+export function conductCellHtml(score) {
+  if (score == null) return '<span class="text-muted">—</span>';
+  const n = Number(score);
+  const shown = Number.isInteger(n)
+    ? String(n)
+    : n.toFixed(2).replace(/0+$/, "");
+  return `<b class="${conductBand(score)}">${shown}</b>`;
+}
+
 // Weighted Overall across the periods that have a grade, renormalizing the
 // grading_periods.weight values so a missing period is excluded (never 0).
+// Conducta is deliberately NOT part of this: REAC 2026 reports it as its own
+// mark on the report card, not as a component of the subject average.
 export function weightedOverall(scoreByOrder) {
   let sum = 0;
   let wTot = 0;

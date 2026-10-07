@@ -73,19 +73,53 @@ export function isPassing(score, settings) {
 }
 
 /**
- * Colour band for a score, relative to the school's pass mark. Returns the
- * shared .score-low / .score-mid / .score-high classes from style.css, or
- * "" when there is no score to colour (never a coloured zero).
+ * Colour band for a score against an arbitrary pass mark. Returns the shared
+ * .score-low / .score-mid / .score-high classes from style.css, or "" when
+ * there is no score to colour (never a coloured zero). Exported so conducta
+ * can band against its own floor without duplicating MERIT_MARGIN.
+ * @param {unknown} score
+ * @param {number} mark
+ * @returns {string}
+ */
+export function bandForMark(score, mark) {
+  if (score === null || score === undefined || score === "") return "";
+  const n = Number(score);
+  if (!Number.isFinite(n)) return "";
+  if (n < mark) return "score-low";
+  if (n < mark + MERIT_MARGIN) return "score-mid";
+  return "score-high";
+}
+
+/**
+ * Colour band for a score, relative to the school's pass mark.
  * @param {unknown} score
  * @param {{ passing_score?: unknown } | null | undefined} settings
  * @returns {string}
  */
 export function bandClass(score, settings) {
-  if (score === null || score === undefined || score === "") return "";
+  return bandForMark(score, passingScore(settings));
+}
+
+/**
+ * Whether a conducta mark promotes. Below it the student is aplazado por
+ * conducta, which is a separate verdict from a failed subject — hence the
+ * separate floor rather than reusing isPassing.
+ * @param {unknown} score
+ * @param {{ conduct_passing_score?: unknown } | null | undefined} settings
+ * @returns {boolean}
+ */
+export function isConductPassing(score, settings) {
+  if (score === null || score === undefined || score === "") return false;
   const n = Number(score);
-  if (!Number.isFinite(n)) return "";
-  const mark = passingScore(settings);
-  if (n < mark) return "score-low";
-  if (n < mark + MERIT_MARGIN) return "score-mid";
-  return "score-high";
+  return Number.isFinite(n) && n >= conductPassingScore(settings);
+}
+
+/**
+ * Colour band for a conducta mark, relative to the school's conduct floor.
+ * @param {unknown} score
+ * @param {{ conduct_passing_score?: unknown } | null | undefined} settings
+ * @returns {string}
+ */
+export function conductBandClass(score, settings) {
+  return bandForMark(score, conductPassingScore(settings));
 }

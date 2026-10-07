@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────
 //  studentDrawer.js — the student-360 read-only detail drawer, opened
-//  from the roster. Owns the discipline add/edit trigger (passing the
-//  current student + a refresh callback into discipline.js) and the print
-//  trigger (passing the loaded data into progressReport.js), so neither of
-//  those modules needs to import this one back.
+//  from the roster. Discipline records are filed and edited from the
+//  Conduct tab; the drawer still loads them for the print trigger, which
+//  passes the loaded data into progressReport.js so that module never
+//  imports this one back.
 // ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
@@ -12,12 +12,13 @@ import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import {
   gradeBandClass,
+  conductCellHtml,
   formatDate,
   genderLabel,
   getCurrentPeriodId,
 } from "../teacherFormat.js";
+import { isConductPassing } from "../promotion.js";
 import { escapeHtml } from "../teacherTableHelpers.js";
-import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
 import { printStudentReport } from "./progressReport.js";
 
 // ── Student drawer ─────────────────────────────────────────────
@@ -53,13 +54,35 @@ export async function openStudentDrawer(student) {
   const periodName = state.periods.find((p) => p.id === periodId)?.name ?? "";
 
   // Each section degrades independently — one failure shouldn't blank the rest.
-  const [contacts, attendance, discipline, subjectGrades] = await Promise.all([
+  const [
+    contacts,
+    attendance,
+    discipline,
+    subjectGrades,
+    conduct,
+    postedConduct,
+  ] = await Promise.all([
     db.fetchStudentContacts(student.id).catch(() => []),
     db.fetchStudentAttendance(student.id).catch(() => []),
     db.fetchStudentDiscipline(student.id).catch(() => []),
     db.fetchStudentSubjectGrades(student.id, periodId).catch(() => []),
+    db.fetchStudentConduct(student.id).catch(() => []),
+    db.fetchStudentPostedConduct(student.id).catch(() => []),
   ]);
-  _drawerData = { contacts, attendance, discipline, subjectGrades };
+  // The period the drawer is showing, so the conducta section agrees with
+  // the grades above it.
+  const conductRow =
+    conduct.find((r) => r.grading_period_id === periodId) ?? null;
+  const postedRow =
+    postedConduct.find((r) => r.grading_period_id === periodId) ?? null;
+  _drawerData = {
+    contacts,
+    attendance,
+    discipline,
+    subjectGrades,
+    conduct: conductRow,
+    postedConduct: postedRow,
+  };
 
   const photo = student.photo_url
     ? `<img class="drawer-photo" src="${escapeHtml(student.photo_url)}" alt="" referrerpolicy="no-referrer" />`
@@ -88,11 +111,8 @@ export async function openStudentDrawer(student) {
       ${renderDrawerSubjectGrades(subjectGrades)}
     </div>
     <div class="drawer-section">
-      <div class="drawer-section-head">
-        <h3>${t("admin.drawer.discipline")}</h3>
-        <button type="button" class="link-btn" data-action="add-discipline">${t("admin.drawer.addRecord")}</button>
-      </div>
-      ${renderDrawerDiscipline(discipline)}
+      <h3>${periodName ? t("admin.drawer.conductWithPeriod", { period: escapeHtml(periodName) }) : t("admin.drawer.conduct")}</h3>
+      ${renderDrawerConduct(conductRow, postedRow)}
     </div>
     <div class="drawer-section">
       <h3>${t("admin.drawer.guardians")}</h3>
@@ -161,39 +181,30 @@ function renderDrawerSubjectGrades(rows) {
     .join("")}</ul>`;
 }
 
-function renderDrawerDiscipline(rows) {
-  if (!rows.length)
-    return `<p class="drawer-muted">${t("admin.drawer.noDiscipline")}</p>`;
-  const sevBadge = {
-    low: "badge-neutral",
-    medium: "badge-warning",
-    high: "badge-danger",
-  };
-  return rows
-    .map((r) => {
-      const sev = sevBadge[r.severity] ?? "badge-neutral";
-      const sevLabel = r.severity
-        ? t(`enums.disciplineSeverity.${r.severity}`)
-        : "—";
-      const stateBadge = r.resolved
-        ? `<span class="badge badge-success">${t("enums.disciplineState.resolved")}</span>`
-        : `<span class="badge badge-warning">${t("enums.disciplineState.open")}</span>`;
-      return `
-      <div class="drawer-card">
-        <div class="drawer-card-head">
-          <b>${escapeHtml(r.type ?? t("admin.drawer.incident"))}</b>
-          <span class="badge ${sev}">${escapeHtml(sevLabel)}</span>
-          ${stateBadge}
-          <button type="button" class="btn-icon drawer-card-edit" title="${t("common.edit")}"
-            data-action="edit-discipline" data-id="${r.id}">
-            <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-edit"></use></svg></span>
-          </button>
-        </div>
-        <p class="drawer-muted">${escapeHtml(r.date ?? "")}${r.description ? " · " + escapeHtml(r.description) : ""}</p>
-        ${r.resolved && r.resolution ? `<p class="drawer-muted">${t("admin.drawer.resolutionPrefix")}${escapeHtml(r.resolution)}</p>` : ""}
-      </div>`;
-    })
-    .join("");
+/**
+ * The period's conducta: the live mark, what is posted if anything, and the
+ * aplazado verdict. Deliberately banded against the conduct floor, not the
+ * subject pass mark — a school may set the two apart.
+ */
+function renderDrawerConduct(live, posted) {
+  if (!live)
+    return `<p class="drawer-muted">${t("admin.drawer.noConduct")}</p>`;
+  const score = live.conduct_score;
+  const failing = !isConductPassing(score, state.school);
+  const verdict = failing
+    ? `<span class="badge badge-danger">${t("admin.drawer.conductFailed")}</span>`
+    : "";
+  const postedChip =
+    posted && posted.score != null
+      ? `<span class="badge badge-success">${t("admin.drawer.conductPosted", { score: String(Number(posted.score)) })}</span>`
+      : `<span class="badge badge-warning">${t("admin.drawer.conductUnposted")}</span>`;
+  return `
+    <div class="drawer-attendance">
+      ${conductCellHtml(score)}
+      ${postedChip}
+      ${verdict}
+    </div>
+    <p class="drawer-muted">${tn("admin.drawer.conductIncidents", live.incident_count, { count: live.incident_count, points: Number(live.deduction ?? 0) })}</p>`;
 }
 
 // Print progress report from the open student drawer (item 6).
@@ -204,24 +215,6 @@ document.getElementById("drawer-print").addEventListener("click", () => {
     _drawerData.attendance ?? [],
     _drawerData.discipline ?? [],
   );
-});
-
-// Discipline add/edit launched from the drawer (item 2). Delegated because the
-// drawer body is re-rendered on every open. Neither discipline.js call needs to
-// know about this drawer: the student and the "refresh when saved" callback are
-// both passed in explicitly.
-drawerBody.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-action]");
-  if (!btn) return;
-  const refresh = () => openStudentDrawer(_drawerStudent);
-  if (btn.dataset.action === "add-discipline") {
-    if (_drawerStudent) openAddDiscipline(_drawerStudent, refresh);
-  } else if (btn.dataset.action === "edit-discipline") {
-    const rec = (_drawerData.discipline ?? []).find(
-      (r) => String(r.id) === btn.dataset.id,
-    );
-    if (rec) openEditDiscipline(rec, refresh);
-  }
 });
 
 registerDialog(drawerOverlay, { close: closeDrawer });

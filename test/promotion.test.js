@@ -6,6 +6,9 @@ import {
   conductPassingScore,
   isPassing,
   bandClass,
+  bandForMark,
+  isConductPassing,
+  conductBandClass,
 } from "../src/js/promotion.js";
 
 const secondary = { passing_score: 70, conduct_passing_score: 70 };
@@ -103,5 +106,58 @@ describe("bandClass", () => {
     expect(bandClass("", secondary)).toBe("");
     expect(bandClass("abc", secondary)).toBe("");
     expect(bandClass(0, secondary)).toBe("score-low");
+  });
+});
+
+// Conducta carries its own floor, so a school may set the two marks apart.
+const splitMarks = { passing_score: 60, conduct_passing_score: 70 };
+
+describe("isConductPassing", () => {
+  it("judges against the conduct floor, not the subject mark", () => {
+    // The whole point of a separate verdict: 68 promotes academically at a
+    // 60 mark while still being aplazado por conducta at a 70 floor.
+    expect(isPassing(68, splitMarks)).toBe(true);
+    expect(isConductPassing(68, splitMarks)).toBe(false);
+    expect(isConductPassing(70, splitMarks)).toBe(true);
+  });
+
+  it("falls back to the MEP conduct minimum", () => {
+    expect(isConductPassing(69, null)).toBe(false);
+    expect(isConductPassing(70, null)).toBe(true);
+  });
+
+  it("treats an unset conducta as not passing", () => {
+    expect(isConductPassing(null, secondary)).toBe(false);
+    expect(isConductPassing(undefined, secondary)).toBe(false);
+    expect(isConductPassing("", secondary)).toBe(false);
+  });
+});
+
+describe("conductBandClass", () => {
+  it("bands against the conduct floor, not the subject mark", () => {
+    expect(bandClass(68, splitMarks)).toBe("score-high");
+    expect(conductBandClass(68, splitMarks)).toBe("score-low");
+  });
+
+  it("keeps the same below/borderline/comfortable split", () => {
+    expect(conductBandClass(69.99, secondary)).toBe("score-low");
+    expect(conductBandClass(70, secondary)).toBe("score-mid");
+    expect(conductBandClass(75, secondary)).toBe("score-high");
+  });
+
+  it("returns no class for an unset conducta", () => {
+    expect(conductBandClass(null, secondary)).toBe("");
+    expect(conductBandClass("", secondary)).toBe("");
+  });
+});
+
+describe("bandForMark", () => {
+  it("is the shared banding both marks resolve through", () => {
+    // bandClass and conductBandClass are this function plus a mark, so the
+    // MERIT_MARGIN split lives in exactly one place.
+    expect(bandForMark(69, 70)).toBe("score-low");
+    expect(bandForMark(70, 70)).toBe("score-mid");
+    expect(bandForMark(75, 70)).toBe("score-high");
+    expect(bandForMark(null, 70)).toBe("");
   });
 });

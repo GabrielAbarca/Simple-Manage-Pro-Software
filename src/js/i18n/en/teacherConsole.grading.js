@@ -16,6 +16,7 @@ export default {
     addRecord: "Add record",
     editTitle: "Edit discipline record",
     typePlaceholder: "e.g. Tardiness, Disruption, Uniform",
+    conductPreview: "Conducta would go from {from} to {to}.",
   },
   absence: {
     title: "Absence summary",
@@ -48,7 +49,7 @@ export default {
     date: "Date",
     type: "Type",
     severity: "Severity",
-    statusCol: "Status",
+    conductPoints: "Points",
     description: "Description",
     noDiscipline: "No discipline records.",
     teacher: "Teacher:",
@@ -85,9 +86,12 @@ export default {
     room: "Room",
     date: "Date",
     type: "Type",
+    reason: "Reason",
     severity: "Severity",
+    severityHelp: "For the register only — it does not affect the grade.",
     description: "Description",
-    resolutionIf: "Resolution (if resolved)",
+    conductPoints: "Conducta points off",
+    conductPointsHelp: "Points deducted from this period's conducta.",
     addStudentTitle: "Add Student — {class}",
     editStudentTitle: "Edit Student",
     addAssignmentTitle: "Add Assignment — {subject} {class}",
@@ -112,6 +116,7 @@ export default {
     addAssignment: "Add Assignment",
     addCategory: "Add category",
     postGrades: "Post grades",
+    postConduct: "Post conducta",
     saveScores: "Save scores",
   },
   demo: {
@@ -140,6 +145,10 @@ export default {
     gradesPosted: {
       one: "Posted {count} grade to the report card.",
       other: "Posted {count} grades to the report card.",
+    },
+    conductPosted: {
+      one: "Posted conducta for {count} student.",
+      other: "Posted conducta for {count} students.",
     },
     scoresSaved: {
       one: "Saved {count} score.",

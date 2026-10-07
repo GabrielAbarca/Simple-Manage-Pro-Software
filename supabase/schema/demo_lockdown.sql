@@ -27,7 +27,7 @@
 --   grade_level_subjects, class_subject_teachers, grading_periods, schedules,
 --   schedule_configs, bell_schedules, bell_schedule_blocks, attendance,
 --   grade_categories, assignments, assignment_grades, student_grades,
---   discipline_records, events
+--   discipline_records, student_conduct_grades, events
 --
 -- HOW TO RUN
 --   Supabase Dashboard → SQL Editor → paste → Run, on the DEMO project.

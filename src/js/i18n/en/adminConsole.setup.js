@@ -70,6 +70,8 @@ export default {
   profile: {
     signedInAs: "Signed in as",
     admin: "Administrator",
+    support: "Support",
+    supportLabel: "Email support",
   },
   school: {
     title: "School profile",

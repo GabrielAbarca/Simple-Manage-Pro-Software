@@ -387,7 +387,7 @@ function renderHelp() {
       </p>
       <div class="settings-contact">
         <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-support_agent"></use></svg></span>
-        <span>${t("settings.help.contactPrefix")}<span class="settings-muted">contact@gzelaya.com</span></span>
+        <span>${t("settings.help.contactPrefix")}<a href="mailto:contact@gzelaya.com">contact@gzelaya.com</a></span>
       </div>
     </div>`;
 }

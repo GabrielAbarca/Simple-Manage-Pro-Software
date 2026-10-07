@@ -131,10 +131,11 @@ export default {
       other: "{count} students below {mark}",
     },
     empty: "No discipline records for this section.",
-    emptySub: "Records added here appear on the student's progress report.",
+    emptySub:
+      "Records added here appear in the student's portal and on their progress report.",
     noStudents: "No active students in this section.",
     footnote:
-      "Conduct starts at 100 each period. Records appear on the student's progress report.",
+      "Conduct starts at 100 each period. Records appear in the student's portal and on their progress report.",
     noPeriod: "No grading periods are set up for this school year.",
     unknownReporter: "Unknown teacher",
   },

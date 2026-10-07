@@ -132,10 +132,10 @@ export default {
     },
     empty: "No hay registros de disciplina en esta sección.",
     emptySub:
-      "Los registros agregados aquí aparecen en el informe de progreso del estudiante.",
+      "Los registros agregados aquí aparecen en el portal del estudiante y en su informe de progreso.",
     noStudents: "No hay estudiantes activos en esta sección.",
     footnote:
-      "La conducta empieza en 100 cada periodo. Los registros aparecen en el informe de progreso del estudiante.",
+      "La conducta empieza en 100 cada periodo. Los registros aparecen en el portal del estudiante y en su informe de progreso.",
     noPeriod:
       "No hay periodos de evaluación configurados para este curso lectivo.",
     unknownReporter: "Docente desconocido",

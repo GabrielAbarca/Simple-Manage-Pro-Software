@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────
 //  studentDrawer.js — the student-360 read-only detail drawer, opened
-//  from the roster. Owns the discipline add/edit trigger (passing the
-//  current student + a refresh callback into discipline.js) and the print
-//  trigger (passing the loaded data into progressReport.js), so neither of
-//  those modules needs to import this one back.
+//  from the roster. Discipline records are filed and edited from the
+//  Conduct tab; the drawer still loads them for the print trigger, which
+//  passes the loaded data into progressReport.js so that module never
+//  imports this one back.
 // ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
@@ -19,7 +19,6 @@ import {
 } from "../teacherFormat.js";
 import { isConductPassing } from "../promotion.js";
 import { escapeHtml } from "../teacherTableHelpers.js";
-import { openAddDiscipline, openEditDiscipline } from "./discipline.js";
 import { printStudentReport } from "./progressReport.js";
 
 // ── Student drawer ─────────────────────────────────────────────
@@ -70,8 +69,8 @@ export async function openStudentDrawer(student) {
     db.fetchStudentConduct(student.id).catch(() => []),
     db.fetchStudentPostedConduct(student.id).catch(() => []),
   ]);
-  // The period the drawer is showing, so the conducta section and the
-  // incident form's preview agree with the grades above them.
+  // The period the drawer is showing, so the conducta section agrees with
+  // the grades above it.
   const conductRow =
     conduct.find((r) => r.grading_period_id === periodId) ?? null;
   const postedRow =
@@ -114,13 +113,6 @@ export async function openStudentDrawer(student) {
     <div class="drawer-section">
       <h3>${periodName ? t("admin.drawer.conductWithPeriod", { period: escapeHtml(periodName) }) : t("admin.drawer.conduct")}</h3>
       ${renderDrawerConduct(conductRow, postedRow)}
-    </div>
-    <div class="drawer-section">
-      <div class="drawer-section-head">
-        <h3>${t("admin.drawer.discipline")}</h3>
-        <button type="button" class="link-btn" data-action="add-discipline">${t("admin.drawer.addRecord")}</button>
-      </div>
-      ${renderDrawerDiscipline(discipline)}
     </div>
     <div class="drawer-section">
       <h3>${t("admin.drawer.guardians")}</h3>
@@ -215,42 +207,6 @@ function renderDrawerConduct(live, posted) {
     <p class="drawer-muted">${tn("admin.drawer.conductIncidents", live.incident_count, { count: live.incident_count, points: Number(live.deduction ?? 0) })}</p>`;
 }
 
-function renderDrawerDiscipline(rows) {
-  if (!rows.length)
-    return `<p class="drawer-muted">${t("admin.drawer.noDiscipline")}</p>`;
-  const sevBadge = {
-    low: "badge-neutral",
-    medium: "badge-warning",
-    high: "badge-danger",
-  };
-  return rows
-    .map((r) => {
-      const sev = sevBadge[r.severity] ?? "badge-neutral";
-      const sevLabel = r.severity
-        ? t(`enums.disciplineSeverity.${r.severity}`)
-        : "—";
-      const points = Number(r.conduct_points ?? 0);
-      const pointsBadge =
-        points > 0
-          ? `<span class="badge badge-danger">${t("admin.drawer.conductPointsOff", { points })}</span>`
-          : `<span class="badge badge-neutral">${t("admin.drawer.conductNoPoints")}</span>`;
-      return `
-      <div class="drawer-card">
-        <div class="drawer-card-head">
-          <b>${escapeHtml(r.type ?? t("admin.drawer.incident"))}</b>
-          <span class="badge ${sev}">${escapeHtml(sevLabel)}</span>
-          ${pointsBadge}
-          <button type="button" class="btn-icon drawer-card-edit" title="${t("common.edit")}"
-            data-action="edit-discipline" data-id="${r.id}">
-            <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-edit"></use></svg></span>
-          </button>
-        </div>
-        <p class="drawer-muted">${escapeHtml(r.date ?? "")}${r.description ? " · " + escapeHtml(r.description) : ""}</p>
-      </div>`;
-    })
-    .join("");
-}
-
 // Print progress report from the open student drawer (item 6).
 document.getElementById("drawer-print").addEventListener("click", () => {
   if (!_drawerStudent) return;
@@ -259,25 +215,6 @@ document.getElementById("drawer-print").addEventListener("click", () => {
     _drawerData.attendance ?? [],
     _drawerData.discipline ?? [],
   );
-});
-
-// Discipline add/edit launched from the drawer (item 2). Delegated because the
-// drawer body is re-rendered on every open. Neither discipline.js call needs to
-// know about this drawer: the student and the "refresh when saved" callback are
-// both passed in explicitly.
-drawerBody.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-action]");
-  if (!btn) return;
-  const refresh = () => openStudentDrawer(_drawerStudent);
-  const conduct = _drawerData.conduct ?? null;
-  if (btn.dataset.action === "add-discipline") {
-    if (_drawerStudent) openAddDiscipline(_drawerStudent, conduct, refresh);
-  } else if (btn.dataset.action === "edit-discipline") {
-    const rec = (_drawerData.discipline ?? []).find(
-      (r) => String(r.id) === btn.dataset.id,
-    );
-    if (rec) openEditDiscipline(rec, conduct, refresh);
-  }
 });
 
 registerDialog(drawerOverlay, { close: closeDrawer });

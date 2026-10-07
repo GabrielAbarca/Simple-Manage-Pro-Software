@@ -33,12 +33,45 @@ async function openTeacherConsole(page, context, lang) {
   return { writes, errors };
 }
 
-async function openRoster(page) {
+async function openClass(page) {
   await page.click('aside a[data-page="myclasses"]');
   await page.waitForSelector(".class-card");
   await page.locator(".class-card", { hasText: "Mathematics" }).click();
+}
+
+async function showRoster(page) {
   await page.locator('.class-subtab[data-tab="roster"]').click();
   await page.waitForSelector(".roster-row .roster-row-cells");
+}
+
+async function openRoster(page) {
+  await openClass(page);
+  await showRoster(page);
+}
+
+async function showConductTab(page) {
+  await page.locator('.class-subtab[data-tab="conduct"]').click();
+  await page.waitForSelector("#conduct-grid table");
+}
+
+async function openConductTab(page) {
+  await openClass(page);
+  await showConductTab(page);
+}
+
+/** The By student row for one student, found by their "Last, First" name. */
+function studentRow(page, name) {
+  return page.locator("#conduct-grid tbody tr", { hasText: name });
+}
+
+/** File a record for Ana from her row in the Conduct tab's By student table. */
+async function fileForAna(page, { date, reason, points }) {
+  await page.click('[data-action="add-record"][data-student="101"]');
+  await page.waitForSelector("#modal-field-conduct_points");
+  await page.fill("#modal-field-date", date);
+  await page.fill("#modal-field-type", reason);
+  await page.fill("#modal-field-conduct_points", points);
+  await page.click("#modal-submit");
 }
 
 test.describe("conducta", () => {
@@ -63,7 +96,7 @@ test.describe("conducta", () => {
     expect(writes).toEqual([]);
   });
 
-  test("the drawer shows the period's conducta and each record's points", async ({
+  test("the drawer keeps the conducta summary without a discipline list", async ({
     page,
     context,
   }) => {
@@ -76,12 +109,42 @@ test.describe("conducta", () => {
     await expect(body).toContainText("Conducta");
     await expect(body).toContainText("87.5");
     await expect(body).toContainText("Not posted");
-    // The record that produced the deduction says what it cost.
-    await expect(body).toContainText("Tardiness");
-    await expect(body).toContainText("−12.5 conducta");
-    // The retired Resolved/Open badge must be gone for good.
-    await expect(body).not.toContainText("Resolved");
-    await expect(body).not.toContainText("Open");
+    // Records are filed and listed in the Conduct tab now, not here.
+    await expect(body).not.toContainText("Tardiness");
+    await expect(page.locator('[data-action="add-discipline"]')).toHaveCount(0);
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
+  test("the Conduct tab shows each student's conducta and their records", async ({
+    page,
+    context,
+  }) => {
+    const { writes, errors } = await openTeacherConsole(page, context);
+    await openConductTab(page);
+
+    const ana = studentRow(page, "García, Ana");
+    await expect(ana).toContainText("87.5");
+    await expect(ana.locator("td").nth(2)).toHaveText("1");
+    // Luis sits below the conduct floor and says so.
+    await expect(studentRow(page, "Martínez, Luis")).toContainText("Below 70");
+
+    // Expanding Ana lists the record behind her deduction.
+    await page.click('[data-action="toggle-student"][data-student="101"]');
+    const detail = page.locator("#conduct-grid .conduct-detail");
+    await expect(detail).toContainText("Tardiness");
+    await expect(detail).toContainText("−12.5");
+
+    // The All records view carries the same record, with whose it is.
+    await page.click("#btn-conduct-records");
+    await expect(page.locator("#btn-conduct-records")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    const all = page.locator("#conduct-grid table");
+    await expect(all).toContainText("García, Ana");
+    await expect(all).toContainText("Tardiness");
 
     expect(errors).toEqual([]);
     expect(writes).toEqual([]);
@@ -92,10 +155,8 @@ test.describe("conducta", () => {
     context,
   }) => {
     const { writes, errors } = await openTeacherConsole(page, context);
-    await openRoster(page);
-    await page.locator(".roster-row .roster-row-cells").first().click();
-    await page.waitForSelector('[data-action="add-discipline"]');
-    await page.click('[data-action="add-discipline"]');
+    await openConductTab(page);
+    await page.click('[data-action="add-record"][data-student="101"]');
     await page.waitForSelector("#modal-field-conduct_points");
 
     const help = page.locator(
@@ -128,22 +189,24 @@ test.describe("conducta", () => {
     context,
   }) => {
     const { writes, errors } = await openTeacherConsole(page, context);
-    await openRoster(page);
-    await page.locator(".roster-row .roster-row-cells").first().click();
-    await page.waitForSelector('[data-action="add-discipline"]');
-    await page.click('[data-action="add-discipline"]');
-    await page.waitForSelector("#modal-field-conduct_points");
+    await openConductTab(page);
 
     // The form defaults to today, which sits outside the fixture's period —
     // date it inside so the deduction actually lands in this period's mark.
-    await page.fill("#modal-field-date", "2026-07-15");
-    await page.fill("#modal-field-type", "Disruption");
-    await page.fill("#modal-field-conduct_points", "7.5");
-    await page.click("#modal-submit");
+    await fileForAna(page, {
+      date: "2026-07-15",
+      reason: "Disruption",
+      points: "7.5",
+    });
 
-    // The drawer reloads on save: 87.5 − 7.5 = 80.
-    await expect(page.locator("#drawer-body")).toContainText("80");
-    await expect(page.locator("#drawer-body")).toContainText("Disruption");
+    // The tab reloads on save: 87.5 − 7.5 = 80.
+    const ana = studentRow(page, "García, Ana");
+    await expect(ana).toContainText("80");
+    await expect(ana.locator("td").nth(2)).toHaveText("2");
+    await page.click('[data-action="toggle-student"][data-student="101"]');
+    await expect(page.locator("#conduct-grid .conduct-detail")).toContainText(
+      "Disruption",
+    );
 
     expect(errors).toEqual([]);
     // Demo mode: the deduction is an overlay delta and never left the browser.
@@ -168,17 +231,18 @@ test.describe("conducta", () => {
       /active/,
     );
 
-    // Now file a deduction after posting.
-    await page.locator(".roster-row .roster-row-cells").first().click();
-    await page.waitForSelector('[data-action="add-discipline"]');
-    await page.click('[data-action="add-discipline"]');
-    await page.waitForSelector("#modal-field-conduct_points");
-    await page.fill("#modal-field-date", "2026-07-20");
-    await page.fill("#modal-field-type", "Late filing");
-    await page.fill("#modal-field-conduct_points", "40");
-    await page.click("#modal-submit");
+    // Now file a deduction after posting, from the Conduct tab.
+    await showConductTab(page);
+    await fileForAna(page, {
+      date: "2026-07-20",
+      reason: "Late filing",
+      points: "40",
+    });
+    await expect(studentRow(page, "García, Ana")).toContainText("47.5");
 
     // The computed mark moved; the posted one is what was frozen.
+    await showRoster(page);
+    await page.locator(".roster-row .roster-row-cells").first().click();
     const body = page.locator("#drawer-body");
     await expect(body).toContainText("47.5");
     await expect(body).toContainText("Posted: 87.5");
@@ -192,23 +256,59 @@ test.describe("conducta", () => {
     context,
   }) => {
     // The view attaches a record to a period by its date, so one filed with a
-    // date no period covers is recorded but scores nothing. The drawer's
-    // incident count comes from the view for exactly this reason.
+    // date no period covers is recorded but scores nothing, and the tab,
+    // which lists one period at a time, does not show it either.
     const { writes, errors } = await openTeacherConsole(page, context);
-    await openRoster(page);
-    await page.locator(".roster-row .roster-row-cells").first().click();
-    await page.waitForSelector('[data-action="add-discipline"]');
-    await page.click('[data-action="add-discipline"]');
-    await page.waitForSelector("#modal-field-conduct_points");
+    await openConductTab(page);
 
-    await page.fill("#modal-field-date", "2027-01-15");
-    await page.fill("#modal-field-type", "Out of period");
-    await page.fill("#modal-field-conduct_points", "50");
+    await fileForAna(page, {
+      date: "2027-01-15",
+      reason: "Out of period",
+      points: "50",
+    });
+
+    const ana = studentRow(page, "García, Ana");
+    await expect(ana).toContainText("87.5");
+    await expect(ana.locator("td").nth(2)).toHaveText("1");
+    await page.click("#btn-conduct-records");
+    await expect(page.locator("#conduct-grid table")).not.toContainText(
+      "Out of period",
+    );
+
+    expect(errors).toEqual([]);
+    expect(writes).toEqual([]);
+  });
+
+  test("the toolbar's Add record asks which student first", async ({
+    page,
+    context,
+  }) => {
+    const { writes, errors } = await openTeacherConsole(page, context);
+    await openConductTab(page);
+
+    await page.click("#btn-conduct-add");
+    await page.waitForSelector("#modal-field-student_id");
+    await page.selectOption("#modal-field-student_id", {
+      label: "Martínez, Luis",
+    });
+
+    // The preview starts from the picked student's own conducta.
+    const help = page.locator(
+      ".field-group:has(#modal-field-conduct_points) .field-help",
+    );
+    await expect(help.first()).toContainText("from 65");
+
+    await page.fill("#modal-field-date", "2026-07-15");
+    await page.fill("#modal-field-type", "Phone in class");
+    await page.fill("#modal-field-conduct_points", "5");
     await page.click("#modal-submit");
 
-    const body = page.locator("#drawer-body");
-    await expect(body).toContainText("Out of period");
-    await expect(body).toContainText("87.5");
+    const luis = studentRow(page, "Martínez, Luis");
+    await expect(luis.locator("td").nth(2)).toHaveText("1");
+    await page.click('[data-action="toggle-student"][data-student="102"]');
+    await expect(page.locator("#conduct-grid .conduct-detail")).toContainText(
+      "Phone in class",
+    );
 
     expect(errors).toEqual([]);
     expect(writes).toEqual([]);

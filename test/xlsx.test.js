@@ -228,6 +228,8 @@ describe("xlsx", () => {
     expect(sheetName("07/10/2026")).toBe("07 10 2026");
     expect(sheetName("")).toBe("Sheet1");
     expect(sheetName("*?")).toBe("Sheet1");
+    expect(sheetName("History")).toBe("History (1)");
+    expect(sheetName("Historia")).toBe("Historia");
     expect(sheetName("a".repeat(40))).toBe("a".repeat(31));
     expect(sheetName(`${"a".repeat(30)}😀`)).toBe("a".repeat(30));
     const { entries } = unzip(toXlsx([["a"]], { sheetName: "A/B" }));

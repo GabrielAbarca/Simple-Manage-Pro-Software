@@ -96,7 +96,8 @@ function serialDay(date) {
 
 /**
  * A sheet name Excel accepts: none of : \ / ? * [ ], no apostrophe at
- * either end, at most 31 characters and never empty.
+ * either end, at most 31 characters, never empty, and never "History",
+ * which Excel keeps for itself.
  * @param {string} name
  */
 export function sheetName(name) {
@@ -104,7 +105,8 @@ export function sheetName(name) {
   const clean = String(name ?? "")
     .replace(/[\\/?*[\]:]/g, " ")
     .replace(/\s+/g, " ");
-  return ends(cut(ends(clean), 31)) || "Sheet1";
+  const named = ends(cut(ends(clean), 31)) || "Sheet1";
+  return named.toLowerCase() === "history" ? `${named} (1)` : named;
 }
 
 /** Style indexes into styles.xml's cellXfs. */

@@ -21,6 +21,9 @@ const modalSubmit = /** @type {HTMLButtonElement} */ (
 
 let currentSubmitHandler = null;
 let modalDirty = false;
+let tracksEdits = true;
+// Bumped whenever a dialog opens or closes.
+let generation = 0;
 
 /** Inline validation message bound to its field (see admin.js for the rationale). */
 function setFieldError(name, message) {
@@ -92,17 +95,35 @@ function translateMessages(messages) {
   return out;
 }
 
+/**
+ * `confirmDiscard: false` closes without the unsaved-changes warning, for a
+ * dialog whose fields are only choices about the action. `onSubmit` is also
+ * handed an `isCurrent()` that turns false once this dialog is closed or
+ * replaced, so slow work can stop when the user has moved on.
+ * @param {{
+ *   title: string,
+ *   fields: any[],
+ *   onSubmit: (values: any, isCurrent: () => boolean) => any,
+ *   validate?: (values: any) => any,
+ *   submitLabel?: string,
+ *   confirmDiscard?: boolean,
+ * }} opts
+ */
 export function openModal({
   title,
   fields,
   onSubmit,
   validate,
   submitLabel = t("common.save"),
+  confirmDiscard = true,
 }) {
+  generation++;
   modalTitle.textContent = title;
   modalSubmit.textContent = submitLabel;
+  modalSubmit.disabled = false;
   modalForm.innerHTML = "";
   modalDirty = false;
+  tracksEdits = confirmDiscard;
   // This console still handed validation to the browser, which answers with a
   // native popup: always English, unstyleable, one field at a time, and gone
   // the moment focus moves. The admin console stopped doing that; this brings
@@ -200,13 +221,16 @@ export function openModal({
     }
 
     modalSubmit.disabled = true;
+    const opened = generation;
+    const isCurrent = () => generation === opened;
     try {
-      await onSubmit(formData);
-      closeModal();
+      await onSubmit(formData, isCurrent);
+      // Closing a dialog the user has since replaced would close theirs.
+      if (isCurrent()) closeModal();
     } catch (err) {
       showToast(errorText(err), "error");
     } finally {
-      modalSubmit.disabled = false;
+      if (isCurrent()) modalSubmit.disabled = false;
     }
   };
 
@@ -215,6 +239,7 @@ export function openModal({
 }
 
 export function closeModal() {
+  generation++;
   modalOverlay.classList.remove("active");
   modalForm.innerHTML = "";
   modalDirty = false;
@@ -246,7 +271,7 @@ export function requestCloseModal() {
 // that field's error so a correction clears the message immediately.
 ["input", "change"].forEach((evt) =>
   modalForm.addEventListener(evt, (e) => {
-    modalDirty = true;
+    if (tracksEdits) modalDirty = true;
     const name = /** @type {any} */ (e.target)?.name;
     if (name) clearFieldError(name);
   }),

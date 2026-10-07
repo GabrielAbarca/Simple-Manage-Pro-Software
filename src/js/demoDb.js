@@ -745,11 +745,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     },
 
     async fetchCstAttendance(cstId) {
-      const { data, error } = await supabase
-        .from("attendance")
-        .select("student_id, status, date")
-        .eq("class_subject_teacher_id", cstId);
-      if (error) throw error;
+      const data = await realDb.fetchCstAttendance(cstId);
       const out = [];
       const covered = new Set();
       (data ?? []).forEach((r) => {

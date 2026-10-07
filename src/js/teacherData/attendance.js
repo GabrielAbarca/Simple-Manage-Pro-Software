@@ -82,18 +82,33 @@ export async function upsertAttendance(classId, cstId, date, rows, recordedBy) {
 }
 
 // ── Absence summary (item 3) ────────────────────────────────
+/** Rows asked for per request; the API answers at most 1000 at a time. */
+const PAGE = 1000;
+
 /**
  * Raw status rows for one class-subject; aggregated client-side into
  * per-student counts. Scoped to the subject, so a student absent all day
- * counts once here rather than once per subject they take.
+ * counts once here rather than once per subject they take. A subject's year
+ * runs to thousands of rows, past the API's row cap, so they are read a page
+ * at a time.
  * @param {number} cstId class_subject_teachers.id
- * @returns {Promise<Array<{ student_id: number, status: string }>>}
+ * @returns {Promise<Array<{ student_id: number, status: string, date: string }>>}
  */
 export async function fetchCstAttendance(cstId) {
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("student_id, status, date")
-    .eq("class_subject_teacher_id", cstId);
-  if (error) throw error;
-  return data;
+  /** @type {Array<{ student_id: number, status: string, date: string }>} */
+  const rows = [];
+  for (;;) {
+    const { data, error, count } = await supabase
+      .from("attendance")
+      .select("student_id, status, date", { count: "exact" })
+      .eq("class_subject_teacher_id", cstId)
+      .order("date")
+      .order("id")
+      .range(rows.length, rows.length + PAGE - 1);
+    if (error) throw error;
+    rows.push(...(data ?? []));
+    const done =
+      count != null ? rows.length >= count : (data?.length ?? 0) < PAGE;
+    if (done || !data?.length) return rows;
+  }
 }

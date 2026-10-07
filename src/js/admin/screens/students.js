@@ -21,7 +21,7 @@ import {
 import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
-import { EXPORT_FORMATS, dateCell, exportTable } from "../../tableExport.js";
+import { dateCell, exportTable, formatField } from "../../tableExport.js";
 import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";
 
 export async function loadStudents() {
@@ -332,23 +332,10 @@ function generateEnrollment(student) {
 function openStudentExport() {
   const list = filteredStudents();
   openModal({
-    title: t("console.export.title"),
-    submitLabel: t("console.export.download"),
+    title: t("common.export.title"),
+    submitLabel: t("common.export.download"),
     confirmDiscard: false,
-    fields: [
-      {
-        name: "format",
-        type: "select",
-        label: t("console.export.format"),
-        value: "xlsx",
-        required: true,
-        help: `${t("console.export.rowsHelp", { count: list.length })} ${t("console.export.privacyHelp")}`,
-        options: EXPORT_FORMATS.map((format) => ({
-          value: format,
-          label: t(`console.export.formats.${format}`),
-        })),
-      },
-    ],
+    fields: [formatField(t("console.export.rowsHelp", { count: list.length }))],
     onSubmit: (values) => {
       const rows = [
         [

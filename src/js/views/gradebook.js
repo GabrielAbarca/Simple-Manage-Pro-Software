@@ -22,8 +22,12 @@ import {
 import { openStudentGradesModal } from "./studentGrades.js";
 import { openCategoriesModal } from "./categories.js";
 import { openPostGrades } from "./postGrades.js";
+import { openGradebookExport } from "./classExports.js";
 
 let gradebookState = null; // { cstId, periodId, assignments, students, categories }
+// False while a load is in flight or after one failed, so nothing acts on a
+// gradebook the screen is no longer showing.
+let gradebookReady = false;
 
 export function getGradebookState() {
   return gradebookState;
@@ -49,6 +53,9 @@ export function renderGradebookTab(content) {
         <select id="gradebook-period">${periodOptions}</select>
       </div>
       <div class="toolbar-actions">
+        <button class="btn btn-ghost" id="btn-export-gradebook">
+          <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-download"></use></svg></span> ${t("admin.export.button")}
+        </button>
         <button class="btn btn-ghost" id="btn-categories">
           <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-category"></use></svg></span> ${t("admin.gradebook.categories")}
         </button>
@@ -83,6 +90,15 @@ export function renderGradebookTab(content) {
   document
     .getElementById("btn-post-grades")
     .addEventListener("click", openPostGrades);
+  document
+    .getElementById("btn-export-gradebook")
+    .addEventListener("click", () => {
+      const shown =
+        gradebookReady &&
+        gradebookState?.cstId === state.currentClass.cstId &&
+        gradebookState.periodId === Number(periodSelect.value);
+      openGradebookExport(shown ? gradebookState : null);
+    });
 
   loadGradebook();
 }
@@ -92,6 +108,7 @@ export async function loadGradebook() {
   const periodId = Number(document.getElementById("gradebook-period").value);
   const cstId = state.currentClass.cstId;
   grid.innerHTML = skeletonBlock(4);
+  gradebookReady = false;
 
   try {
     const [assignments, roster, periodGrades, categories] = await Promise.all([
@@ -104,6 +121,7 @@ export async function loadGradebook() {
 
     gradebookState = { cstId, periodId, assignments, students, categories };
     renderGradebook(assignments, students, periodGrades);
+    gradebookReady = true;
 
     // Keep an open Manage Assignments list in sync after add/edit/delete.
     renderManageAssignmentsIfOpen();

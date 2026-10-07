@@ -11,6 +11,7 @@ import { showToast, errorText } from "../teacherFeedback.js";
 import { renderErrorBlock, escapeHtml } from "../teacherTableHelpers.js";
 import { gradeCellHtml, gradeBandClass } from "../teacherFormat.js";
 import { getGradebookState } from "./gradebook.js";
+import { totalWeight, weightStatus } from "../gradingPeriods.js";
 
 // ── Post grades modal (item 1) ─────────────────────────────────
 const pgOverlay = document.getElementById("post-grades-overlay");
@@ -29,7 +30,12 @@ let _postGradesState = null;
 export async function openPostGrades() {
   const gbState = getGradebookState();
   if (!gbState) return;
-  const { cstId, periodId, students } = gbState;
+  const { cstId, periodId, students, categories = [] } = gbState;
+  const total = totalWeight(categories);
+  if (categories.length && weightStatus(total, categories.length) !== "ok") {
+    showToast(t("admin.pg.weightsOff", { total }), "error");
+    return;
+  }
   const periodName = state.periods.find((p) => p.id === periodId)?.name ?? "";
   pgTitle.textContent = t("admin.pg.title", { period: periodName });
   pgBody.innerHTML = skeletonBlock();

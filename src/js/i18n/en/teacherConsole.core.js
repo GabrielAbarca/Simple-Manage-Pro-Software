@@ -200,11 +200,25 @@ export default {
     weight: "Weight: {weight}%",
     fromAttendance: "scored from attendance",
     total: "Total: ",
-    totalOff: " — weights are renormalized, but 100% is clearest.",
+    totalOff: " — they must total 100% before grades can be posted.",
     editTitle: "Edit category",
     addTitle: "Add category",
     add: "Add category",
     namePlaceholder: "e.g. Exams",
+    weightOver: "Categories would total {total}%, over 100%.",
+    templateIncomplete:
+      '"{name}" totals {total}%, not 100%. Ask the administration to complete it before applying it.',
+    applyOver:
+      "Applying it would bring the categories to {total}%. Adjust the current categories first.",
+    applyTemplate: "Apply MEP template",
+    applyTitle: "Apply a component scheme",
+    apply: "Apply",
+    pickTemplate: "Scheme",
+    schoolWide: "all subjects",
+    noTemplates:
+      "No component schemes are set up yet. Ask the administration to add one.",
+    applied: "{count} component(s) added.",
+    alreadyApplied: "Those components are already in this gradebook.",
   },
   pc: {
     title: "Post conducta — {period}",
@@ -232,5 +246,7 @@ export default {
     comment: "Comment",
     commentPlaceholder: "Comment (optional)…",
     reset: "Reset all to computed",
+    weightsOff:
+      "This gradebook's categories total {total}%. Adjust them to 100% before posting grades.",
   },
 };

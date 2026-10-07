@@ -4,9 +4,11 @@
 //
 //  Admin-owned evaluative-component schemes. A teacher applies one to
 //  a gradebook, copying its items into that gradebook's
-//  grade_categories. Weights are validated to total 100% with the same
-//  helpers and rule that grading periods use — warned, not blocked, so
-//  a scheme can be built up one component at a time.
+//  grade_categories. Weights are checked with the same helpers grading
+//  periods use. A scheme is built one component at a time, so it may sit
+//  under 100% while being edited, but a save may not push it over; it
+//  takes exactly 100% to become the default or to be applied, and editing
+//  the default off 100% warns that teachers cannot apply it.
 // ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
@@ -125,6 +127,12 @@ function confirmDelete(tpl) {
 
 async function setTemplateDefault(tpl) {
   if (tpl.is_default) return;
+  const items = state.templateItems[tpl.id] ?? [];
+  const total = totalWeight(items);
+  if (weightStatus(total, items.length) !== "ok") {
+    showToast(t("console.components.defaultNeeds100", { total }), "error");
+    return;
+  }
   try {
     const previouslyDefault = state.componentTemplates
       .filter((x) => x.is_default)

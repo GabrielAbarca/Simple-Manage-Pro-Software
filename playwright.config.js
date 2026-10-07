@@ -15,6 +15,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
+    // Under a POSIX locale Chromium saves a download with an accented name as
+    // "download"; pin the UTF-8 locale every real browser runs in.
+    launchOptions: { env: { ...process.env, LANG: "C.UTF-8" } },
   },
   projects: [
     {

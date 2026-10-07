@@ -177,17 +177,7 @@ export default {
     },
   },
   export: {
-    title: "Export",
-    format: "Format",
-    formats: {
-      xlsx: "Excel workbook (.xlsx)",
-      csv: "CSV file (.csv), for other systems",
-    },
-    rowsHelp:
-      "Rows to export: {count}, as filtered on screen. To open the file in Excel, choose Excel workbook.",
-    privacyHelp:
-      "The file holds personal data: keep it safe and share it only with whoever needs it.",
-    download: "Download",
+    rowsHelp: "Rows to export: {count}, as filtered on screen.",
   },
   accounts: {
     create: "Create login",

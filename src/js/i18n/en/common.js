@@ -24,6 +24,18 @@ export default {
   couldNotLoadProfile: "Could not load your profile.",
   adminOnly: "Only an administrator can perform this action.",
   darkMode: "Dark mode",
+  export: {
+    title: "Export",
+    format: "Format",
+    formats: {
+      xlsx: "Excel workbook (.xlsx)",
+      csv: "CSV file (.csv), for other systems",
+    },
+    excelHint: "To open the file in Excel, choose Excel workbook.",
+    privacyHelp:
+      "The file holds personal data: keep it safe and share it only with whoever needs it.",
+    download: "Download",
+  },
   days: {
     monday: "Monday",
     tuesday: "Tuesday",

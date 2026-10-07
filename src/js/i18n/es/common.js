@@ -26,6 +26,18 @@ export default {
   couldNotLoadProfile: "No se pudo cargar su perfil.",
   adminOnly: "Solo la dirección puede realizar esta acción.",
   darkMode: "Modo oscuro",
+  export: {
+    title: "Exportar",
+    format: "Formato",
+    formats: {
+      xlsx: "Libro de Excel (.xlsx)",
+      csv: "Archivo CSV (.csv), para otros sistemas",
+    },
+    excelHint: "Para abrir el archivo en Excel, elija Libro de Excel.",
+    privacyHelp:
+      "El archivo contiene datos personales: resguárdelo y compártalo solo con quien lo necesite.",
+    download: "Descargar",
+  },
   days: {
     monday: "Lunes",
     tuesday: "Martes",

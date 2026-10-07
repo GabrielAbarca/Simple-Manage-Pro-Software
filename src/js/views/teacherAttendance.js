@@ -12,6 +12,7 @@ import {
   renderErrorBlock,
   escapeHtml,
 } from "../teacherTableHelpers.js";
+import { openAttendanceExport } from "./classExports.js";
 
 let _attendanceRows = [];
 
@@ -26,9 +27,14 @@ export function renderAttendanceTab(content) {
         <label for="attendance-date">${t("admin.attendance.date")}</label>
         <input type="date" id="attendance-date" value="${today}" />
       </div>
-      <button class="btn btn-secondary" id="btn-save-attendance">
-        <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-save"></use></svg></span> ${t("admin.attendance.save")}
-      </button>
+      <div class="toolbar-actions">
+        <button class="btn btn-ghost" id="btn-export-attendance">
+          <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-download"></use></svg></span> ${t("admin.export.button")}
+        </button>
+        <button class="btn btn-secondary" id="btn-save-attendance">
+          <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-save"></use></svg></span> ${t("admin.attendance.save")}
+        </button>
+      </div>
     </div>
     <div class="recent-activity">
       <table class="data-table" id="attendance-table">
@@ -67,6 +73,9 @@ export function renderAttendanceTab(content) {
   document
     .getElementById("btn-save-attendance")
     .addEventListener("click", saveAttendance);
+  document
+    .getElementById("btn-export-attendance")
+    .addEventListener("click", openAttendanceExport);
 
   loadAttendanceSheet(today);
   loadAbsenceSummary();

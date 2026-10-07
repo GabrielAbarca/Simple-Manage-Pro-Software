@@ -236,6 +236,11 @@ VITE_DEMO_MODE=false
 Supabase instead of the in-browser demo overlay), routes logins by role, and
 resolves teachers by `auth_user_id`.
 
+The Content-Security-Policy in `vercel.json` only lets the app reach
+`https://*.supabase.co`. A project served from any other host (a Supabase
+custom domain, a self-hosted instance) needs that host added to `connect-src`,
+or every request is blocked.
+
 Then point the project back at the app — Dashboard → Authentication → **URL
 Configuration**. Supabase defaults Site URL to `http://localhost:3000`, and
 that default is where every password-recovery email lands until it's changed:

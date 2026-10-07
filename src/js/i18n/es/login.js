@@ -62,7 +62,7 @@ export default {
   },
   error: {
     demoSignupDisabled:
-      "El registro está deshabilitado en la demo en vivo — usa el acceso de demostración.",
+      "El registro está deshabilitado en la demo en vivo — use el acceso de demostración.",
     recoveryDemoDisabled:
       "Los cambios de contraseña están deshabilitados en la demo en vivo.",
     linkExpired:

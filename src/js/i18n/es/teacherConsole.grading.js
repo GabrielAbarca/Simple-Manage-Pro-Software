@@ -76,7 +76,7 @@ export default {
     maxScore: "Puntaje máximo",
     category: "Categoría (opcional)",
     categoryHelp:
-      "Las categorías permiten ponderar exámenes y tareas. Gestiónalas con el botón Categorías.",
+      "Las categorías permiten ponderar exámenes y tareas. Gestiónelas con el botón Categorías.",
     note: "Nota (opcional)",
     assignmentNamePlaceholder: "p. ej. Prueba 1 — Fracciones",
     weightPct: "Ponderación (%)",
@@ -156,7 +156,7 @@ export default {
     },
     disciplineAdded: "Registro de disciplina agregado.",
     disciplineUpdated: "Registro de disciplina actualizado.",
-    popupBlocked: "Permite las ventanas emergentes para imprimir el informe.",
+    popupBlocked: "Permita las ventanas emergentes para imprimir el informe.",
     contextFailed: "No se pudo cargar el contexto del docente.",
   },
   validation: {

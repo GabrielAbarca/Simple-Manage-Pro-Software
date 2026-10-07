@@ -270,7 +270,7 @@ export default {
     teacher: "Docente",
     empty: "Aún no hay asignaciones para este curso lectivo.",
     noYear: "Active un curso lectivo para gestionar asignaciones.",
-    needData: "Primero agrega secciones, materias y docentes.",
+    needData: "Primero agregue secciones, materias y docentes.",
     confirmDelete:
       "¿Quitar esta asignación? También se eliminarán todas las notas y tareas de los estudiantes asociadas a ella.",
   },

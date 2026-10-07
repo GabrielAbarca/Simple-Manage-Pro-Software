@@ -171,6 +171,39 @@ export async function fetchStudentAttendance(studentId) {
   return data;
 }
 
+/**
+ * The student's conducta: the live score per period, the posted marks, and
+ * the discipline records behind them.
+ * @param {number} studentId
+ */
+export async function fetchOwnConduct(studentId) {
+  const [live, posted, records] = await Promise.all([
+    supabase
+      .from("student_period_conduct")
+      .select("grading_period_id, conduct_score")
+      .eq("student_id", studentId),
+    supabase
+      .from("student_conduct_grades")
+      .select("grading_period_id, score")
+      .eq("student_id", studentId),
+    supabase
+      .from("discipline_records")
+      .select("id, date, type, description, conduct_points")
+      .eq("student_id", studentId)
+      .order("date", { ascending: false }),
+  ]);
+  const failed = live.error ?? posted.error ?? records.error;
+  if (failed) {
+    console.error("fetchOwnConduct:", failed.message);
+    throw failed;
+  }
+  return {
+    live: live.data ?? [],
+    posted: posted.data ?? [],
+    records: records.data ?? [],
+  };
+}
+
 export async function fetchClassSchedule(classId) {
   const { data, error } = await supabase
     .from("schedules")

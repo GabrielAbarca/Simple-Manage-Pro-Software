@@ -235,13 +235,21 @@ export default {
     defaultSet: '"{name}" es ahora el esquema predeterminado.',
     confirmDelete: '¿Eliminar el esquema "{name}"?',
     itemsTitle: "Componentes — {name}",
-    itemsHelp: "Las ponderaciones deben sumar 100%.",
+    itemsHelp:
+      "Las ponderaciones deben sumar 100% para que el esquema pueda ser el predeterminado o aplicarse a un libro de notas.",
     componentName: "Componente",
     addComponent: "Agregar componente",
     editComponent: "Editar componente",
     confirmDeleteItem: '¿Quitar el componente "{name}"?',
     loadPreset: "Cargar preajuste MEP",
     presetLoaded: "Componentes MEP agregados.",
+    weightOver: "Los componentes sumarían {total}%, más de 100%.",
+    presetOver:
+      "El preajuste MEP llevaría este esquema a {total}%. Primero ajuste los componentes existentes.",
+    defaultNeeds100:
+      "Un esquema debe sumar 100% para ser el predeterminado. Este suma {total}%.",
+    defaultIncomplete:
+      "Este es el esquema predeterminado y ahora suma {total}%. Los docentes no podrán aplicarlo hasta que sume 100%.",
   },
   teachers: {
     title: "Docentes",
@@ -256,6 +264,7 @@ export default {
     phone: "Teléfono",
     specialization: "Especialización",
     status: "Estado",
+    statusHelp: "Inactivo también desactiva el acceso del docente.",
     empty: "Aún no hay docentes.",
     confirmDelete: "¿Eliminar al docente {name}?",
     statuses: {

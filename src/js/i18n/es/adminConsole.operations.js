@@ -114,6 +114,14 @@ export default {
     section: "Sección",
     status: "Estado",
     deactivate: "Desactivar",
+    statusHelp:
+      "Guardar aquí cualquier estado distinto de Activo también desactiva el acceso del estudiante.",
+    confirmDeactivateLogin:
+      "¿Desactivar a {name}? Su acceso también se desactivará.",
+    deactivateTitle: "¿Desactivar estudiante?",
+    reactivateTitle: "¿Reactivar estudiante?",
+    confirmReactivateLogin:
+      "¿Reactivar a {name}? Su acceso también se restaurará.",
     reactivate: "Reactivar",
     allStudents: "Todos los estudiantes",
     unassigned: "Sin sección asignada",
@@ -236,5 +244,16 @@ export default {
     deactivatedDemo: "Acceso desactivado (demo — sin cambios reales).",
     activated: "Acceso restaurado.",
     activatedDemo: "Acceso restaurado (demo — sin cambios reales).",
+    loginDisabledWithStatus: "Guardado. Su acceso también quedó desactivado.",
+    loginDisabledWithStatusDemo:
+      "Guardado. Su acceso también se desactivaría (demo — sin cambios reales).",
+    loginRestoredWithStatus: "Guardado. Su acceso también quedó restaurado.",
+    loginRestoredWithStatusDemo:
+      "Guardado. Su acceso también se restauraría (demo — sin cambios reales).",
+    loginSyncFailed:
+      "El registro se guardó, pero no se pudo cambiar su acceso. Cámbielo desde Cuentas de acceso.",
+    loginNoticeTitle: "Acceso sin cambios",
+    adminLoginKept:
+      "Guardado. Este acceso pertenece a la administración, así que no se desactivó. Cámbielo desde Cuentas de acceso si hace falta.",
   },
 };

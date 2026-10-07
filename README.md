@@ -1,7 +1,7 @@
 <div align="center">
   <img width="715" height="206" alt="Simple Manage Pro logo" src="https://github.com/user-attachments/assets/f16f1a37-397e-4341-ae79-e2bc69ba6c7a" />
   <h1>Simple Manage Pro</h1>
-  <p><strong>A full-featured school management dashboard for Costa Rican schools —<br/>built on a 27-table PostgreSQL schema with real-time data via Supabase.</strong></p>
+  <p><strong>A full-featured school management dashboard for Costa Rican schools —<br/>built on a 27-table PostgreSQL schema on Supabase.</strong></p>
 
   <br/>
 
@@ -33,7 +33,7 @@
 
 Simple Manage Pro (SMP) is a web-based school management platform designed around the operational structure of Costa Rican secondary schools (colegios). It gives administrators and staff a centralized view of everything happening across an institution. From class schedules and teacher assignments to student grades, attendance records, and upcoming events.
 
-The project targets real data complexity: the underlying PostgreSQL schema spans **27 tables** to model grading periods, course sections and enrollment. All served in real time through Supabase.
+The project targets real data complexity: the underlying PostgreSQL schema spans **27 tables** to model grading periods, course sections and enrollment, served through Supabase.
 
 ---
 
@@ -63,7 +63,7 @@ The project targets real data complexity: the underlying PostgreSQL schema spans
 | **Frontend**       | ![JS](https://img.shields.io/badge/JavaScript-f7df1e?style=flat-square&logo=javascript&logoColor=black) ![HTML](https://img.shields.io/badge/HTML5-e34f26?style=flat-square&logo=html5&logoColor=white) ![CSS](https://img.shields.io/badge/CSS3-1572b6?style=flat-square&logo=css3&logoColor=white) |
 | **Build Tool**     | ![Vite](https://img.shields.io/badge/Vite-646cff?style=flat-square&logo=vite&logoColor=white)                                                                                                                                                                                                        |
 | **Database**       | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white) hosted on Supabase                                                                                                                                                                   |
-| **Backend / Auth** | ![Supabase](https://img.shields.io/badge/Supabase-3ecf8e?style=flat-square&logo=supabase&logoColor=white) RLS · Auth · Realtime                                                                                                                                                                      |
+| **Backend / Auth** | ![Supabase](https://img.shields.io/badge/Supabase-3ecf8e?style=flat-square&logo=supabase&logoColor=white) RLS · Auth · Edge Functions                                                                                                                                                                |
 | **Deployment**     | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)                                                                                                                                                                                                  |
 
 ---

@@ -99,6 +99,8 @@ export default {
     title: "Students",
     add: "Add student",
     import: "Import CSV",
+    export: "Export",
+    exportFile: "students",
     addTitle: "Add student",
     editTitle: "Edit student",
     name: "Name",
@@ -198,6 +200,19 @@ export default {
     description: "Description",
     empty: "No events yet. Add one to show it in the student portal.",
     confirmDelete: 'Delete the event "{name}"?',
+  },
+  export: {
+    title: "Export",
+    format: "Format",
+    formats: {
+      xlsx: "Excel workbook (.xlsx)",
+      csv: "CSV file (.csv), for other systems",
+    },
+    rowsHelp:
+      "Rows to export: {count}, as filtered on screen. To open the file in Excel, choose Excel workbook.",
+    privacyHelp:
+      "The file holds personal data: keep it safe and share it only with whoever needs it.",
+    download: "Download",
   },
   accounts: {
     create: "Create login",

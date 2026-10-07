@@ -21,6 +21,7 @@ let currentSubmitHandler = null;
 // Has the open form been touched? Drives the discard confirmation, so a stray
 // click or a mistaken Cancel can never silently throw away typed work.
 let modalDirty = false;
+let tracksEdits = true;
 
 /**
  * Show a validation message under its field, and — the part that makes it
@@ -133,6 +134,8 @@ function renderErrors(errors) {
  *  • `validate(values)` stays available for whole-form rules that don't
  *    belong to one field (a year's grading weights summing past 100%).
  * Both produce a { fieldName: message } map rendered inline under the field.
+ * `confirmDiscard: false` closes without the unsaved-changes warning, for a
+ * dialog whose fields are only choices about the action.
  */
 export function openModal({
   title,
@@ -140,11 +143,13 @@ export function openModal({
   onSubmit,
   validate,
   submitLabel = t("common.save"),
+  confirmDiscard = true,
 }) {
   modalTitle.textContent = title;
   document.getElementById("modal-submit").textContent = submitLabel;
   modalForm.innerHTML = "";
   modalDirty = false;
+  tracksEdits = confirmDiscard;
   // We own validation now: suppress the browser's own popups entirely.
   modalForm.noValidate = true;
 
@@ -217,7 +222,7 @@ export function requestCloseModal() {
 // retires that field's error so a correction clears the message immediately.
 ["input", "change"].forEach((evt) =>
   modalForm.addEventListener(evt, (e) => {
-    modalDirty = true;
+    if (tracksEdits) modalDirty = true;
     const name = /** @type {any} */ (e.target)?.name;
     if (name) clearFieldError(name);
   }),

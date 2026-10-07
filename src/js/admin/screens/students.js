@@ -21,6 +21,7 @@ import {
 import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
+import { EXPORT_FORMATS, dateCell, exportTable } from "../../tableExport.js";
 import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";
 
 export async function loadStudents() {
@@ -88,11 +89,15 @@ function filteredStudents() {
   );
 }
 
-/** The student's section, named the way the rest of the console names it. */
-function studentSectionName(student) {
-  if (!student.class_id) return "—";
+/**
+ * The student's section, named the way the rest of the console names it.
+ * @param {any} student
+ * @param {string | null} [missing] shown when there is no section to name
+ */
+function studentSectionName(student, missing = "—") {
+  if (!student.class_id) return missing;
   const sec = state.sections.find((x) => x.id === student.class_id);
-  return sec ? sectionName(sec) : "—";
+  return sec ? sectionName(sec) : missing;
 }
 
 function statusToggleBtn(student) {
@@ -323,6 +328,66 @@ function generateEnrollment(student) {
   return candidate;
 }
 
+/** Save the students the table is showing, under its current filter. */
+function openStudentExport() {
+  const list = filteredStudents();
+  openModal({
+    title: t("console.export.title"),
+    submitLabel: t("console.export.download"),
+    confirmDiscard: false,
+    fields: [
+      {
+        name: "format",
+        type: "select",
+        label: t("console.export.format"),
+        value: "xlsx",
+        required: true,
+        help: `${t("console.export.rowsHelp", { count: list.length })} ${t("console.export.privacyHelp")}`,
+        options: EXPORT_FORMATS.map((format) => ({
+          value: format,
+          label: t(`console.export.formats.${format}`),
+        })),
+      },
+    ],
+    onSubmit: (values) => {
+      const rows = [
+        [
+          t("console.students.enrollmentNumber"),
+          t("console.students.lastName"),
+          t("console.students.firstName"),
+          idLabel("students"),
+          t("console.students.dateOfBirth"),
+          t("console.students.gender"),
+          t("console.students.section"),
+          t("console.students.status"),
+          t("console.students.email"),
+          t("console.students.phone"),
+        ],
+        ...list.map((s) => [
+          s.enrollment_number,
+          s.last_name,
+          s.first_name,
+          s.national_id,
+          dateCell(s.date_of_birth),
+          s.gender ? genderLabel(s.gender) : null,
+          studentSectionName(s, null),
+          t(`enums.studentStatus.${s.status ?? "active"}`),
+          s.email,
+          s.phone,
+        ]),
+      ];
+      exportTable(rows, {
+        filename: `${t("console.students.exportFile")}-${todayIso()}`,
+        sheetName: t("console.students.title"),
+        format: values.format,
+      });
+    },
+  });
+}
+
+document
+  .getElementById("btn-export-students")
+  .addEventListener("click", openStudentExport);
 document
   .getElementById("btn-add-student")
   .addEventListener("click", () => openStudentForm());

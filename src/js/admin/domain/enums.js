@@ -20,6 +20,15 @@ export const ROOM_TYPES = [
 
 export const TEACHER_STATUSES = ["active", "inactive", "on_leave"];
 
+export const EVENT_TYPES = [
+  "general",
+  "activity",
+  "exam_period",
+  "holiday",
+  "parent_meeting",
+  "suspension",
+];
+
 export const STUDENT_STATUSES = [
   "active",
   "inactive",
@@ -27,6 +36,17 @@ export const STUDENT_STATUSES = [
   "transferred",
   "withdrawn",
 ];
+
+/**
+ * Whether a record with this status keeps a working sign-in. A student
+ * signs in only while active; a teacher keeps signing in on leave.
+ * @param {"teacher" | "student"} kind
+ * @param {string | null | undefined} status
+ */
+export function statusAllowsSignIn(kind, status) {
+  const s = status ?? "active";
+  return kind === "student" ? s === "active" : s !== "inactive";
+}
 
 export function genderLabel(g) {
   return g ? t(`enums.gender.${g}`) : "—";

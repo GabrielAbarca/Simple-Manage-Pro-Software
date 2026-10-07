@@ -89,6 +89,7 @@ export default {
     reason: "Reason",
     severity: "Severity",
     severityHelp: "For the register only — it does not affect the grade.",
+    descriptionHelp: "The student can read this in their portal.",
     description: "Description",
     conductPoints: "Conducta points off",
     conductPointsHelp: "Points deducted from this period's conducta.",

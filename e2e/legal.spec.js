@@ -72,8 +72,30 @@ for (const page_ of PAGES) {
         /child|student/i,
       );
     });
+
+    test("ships no unfilled placeholders in either language", async ({
+      page,
+    }) => {
+      await page.goto(page_.path);
+      for (const lang of ["es", "en"]) {
+        await expect(
+          page.locator(`section[data-legal-lang="${lang}"]`),
+        ).not.toContainText(/\[(PLACEHOLDER|MARCADOR)/);
+      }
+    });
   });
 }
+
+test("the privacy policy names Ley 8968 and PRODHAB in both languages", async ({
+  page,
+}) => {
+  await page.goto("/privacy.html");
+  for (const lang of ["es", "en"]) {
+    const section = page.locator(`section[data-legal-lang="${lang}"]`);
+    await expect(section).toContainText("Ley 8968");
+    await expect(section).toContainText("PRODHAB");
+  }
+});
 
 test("the two pages link to each other and back to sign-in", async ({
   page,

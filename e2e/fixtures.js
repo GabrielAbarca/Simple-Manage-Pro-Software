@@ -14,6 +14,14 @@ export const UID = "00000000-0000-4000-8000-000000000001";
 // midnight and the seeded register lands on a day the tab never shows.
 export const TODAY = new Date().toISOString().split("T")[0];
 
+/** A local-time `YYYY-MM-DD`, `offset` days from today. */
+export function inDays(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 const cls = {
   id: 21,
   section: "A",
@@ -198,8 +206,8 @@ export const studentFix = {
       title: "Final Exams",
       type: "exam_period",
       description: "Week of finals",
-      start_date: "2026-07-20",
-      end_date: "2026-07-24",
+      start_date: inDays(20),
+      end_date: inDays(24),
     },
   ],
 };

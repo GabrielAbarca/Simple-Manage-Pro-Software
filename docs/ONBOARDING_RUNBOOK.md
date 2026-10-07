@@ -240,11 +240,11 @@ Then point the project back at the app — Dashboard → Authentication → **UR
 Configuration**. Supabase defaults Site URL to `http://localhost:3000`, and
 that default is where every password-recovery email lands until it's changed:
 
-| Field         | Value                                                                |
-| ------------- | -------------------------------------------------------------------- |
-| Site URL      | the school's deployed origin, e.g. `https://smp-web-page.vercel.app` |
-| Redirect URLs | `<deployed origin>/**`                                               |
-| Redirect URLs | `http://localhost:3000/**` (dev — Vite's port, see `vite.config.js`) |
+| Field         | Value                                                                  |
+| ------------- | ---------------------------------------------------------------------- |
+| Site URL      | the school's deployed origin, e.g. `https://pilot.simplemanagepro.com` |
+| Redirect URLs | `<deployed origin>/**`                                                 |
+| Redirect URLs | `http://localhost:3000/**` (dev — Vite's port, see `vite.config.js`)   |
 
 Only allow-listed URLs are honoured as redirect targets, and that allow-list is
 the boundary that keeps the `redirectTo` the console sends from being an open

@@ -1,6 +1,7 @@
 // Shared Settings renderer (student + teacher).
 export default {
   rail: {
+    label: "Settings sections",
     account: "Account & Profile",
     preferences: "Preferences",
     help: "Help",

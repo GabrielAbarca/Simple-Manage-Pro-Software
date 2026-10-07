@@ -34,6 +34,13 @@ function bannerText() {
     : "Something went wrong. Please refresh the page.";
 }
 
+function dismissLabel() {
+  const es = (document.documentElement.lang || "")
+    .toLowerCase()
+    .startsWith("es");
+  return es ? "Cerrar" : "Dismiss";
+}
+
 function showErrorBanner() {
   if (bannerShown) return; // one at a time — don't let a loop spam banners
   bannerShown = true;
@@ -59,7 +66,7 @@ function showErrorBanner() {
 
   const dismiss = document.createElement("button");
   dismiss.type = "button";
-  dismiss.setAttribute("aria-label", "Dismiss");
+  dismiss.setAttribute("aria-label", dismissLabel());
   dismiss.textContent = "✕";
   Object.assign(dismiss.style, {
     background: "transparent",
@@ -125,7 +132,7 @@ function showOfflineBanner() {
 
   const dismiss = document.createElement("button");
   dismiss.type = "button";
-  dismiss.setAttribute("aria-label", "Dismiss");
+  dismiss.setAttribute("aria-label", dismissLabel());
   dismiss.textContent = "✕";
   Object.assign(dismiss.style, {
     background: "transparent",

@@ -31,6 +31,7 @@ export default {
   createSubtitle: "Únase a SMP y acceda a su portal estudiantil",
   fullName: "Nombre completo",
   fullNamePlaceholder: "María Rojas Vargas",
+  emailPlaceholder: "nombre@colegio.cr",
   emailAddress: "Correo electrónico",
   password: "Contraseña",
   confirmPassword: "Confirmar contraseña",

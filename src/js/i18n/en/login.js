@@ -31,6 +31,7 @@ export default {
   createSubtitle: "Join SMP and access your student portal",
   fullName: "Full Name",
   fullNamePlaceholder: "María Rojas Vargas",
+  emailPlaceholder: "you@example.com",
   emailAddress: "Email Address",
   password: "Password",
   confirmPassword: "Confirm Password",

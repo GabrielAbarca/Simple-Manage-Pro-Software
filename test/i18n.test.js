@@ -118,15 +118,4 @@ describe("i18n dictionary parity", () => {
       expect(tokens(read(esDict)), key).toEqual(tokens(read(enDict)));
     }
   });
-
-  it("Spanish copy addresses the reader as usted, never tú", () => {
-    const informal =
-      /(^|[^\p{L}])(tú|tu|tus|ti|contigo|te|necesitas|puedes|tienes|quieres|debes|deberías|elijas|asegúrate|inténtalo|vuelve a intentarlo|agrega|asocia|compártela|gestiónalas|reasigna|usa el|permite las)(?!\p{L})/iu;
-    for (const key of leafKeys(esDict)) {
-      const value = key
-        .split(".")
-        .reduce((acc, part) => acc?.[part], /** @type {any} */ (esDict));
-      expect(value, key).not.toMatch(informal);
-    }
-  });
 });

@@ -122,6 +122,30 @@ Rejected alternative: deny always and never ask. Simpler, but a `Supabase: yes` 
 | G1  | guard | green (13)                               | ✅          |
 | G2  | guard | green (6)                                | ✅          |
 
+### Review (round 1)
+
+**Verdict:** clean (code-reviewer: 0 Critical/High/Medium, 3 Low) · **Acceptance:** PASS
+
+| AC  | Kind  | Exists | Faithful                       | Passes   | Coupled                     | Frozen    | Probe | Verdict |
+| --- | ----- | ------ | ------------------------------ | -------- | --------------------------- | --------- | ----- | ------- |
+| AC1 | unit  | ✅     | ✅                             | ✅ 18/18 | ✅ 18/18 fail at RED        | unchanged | ✅    | PASS    |
+| AC2 | unit  | ✅     | ✅ (probe also checks "stop")  | ✅       | ✅ fails at RED             | unchanged | ✅    | PASS    |
+| G1  | guard | ✅     | ✅                             | ✅ 13/13 | n/a (green at RED and HEAD) | unchanged | ✅    | PASS    |
+| G2  | guard | ✅     | ✅ (probe also covers Default) | ✅ 6/6   | n/a (green at RED and HEAD) | unchanged | ✅    | PASS    |
+
+Independent probe: 831 checks, 0 failures (inputs written from the AC text only).
+
+Findings (all low):
+
+- L1 `.claude/references/conventions.md:127`: the loop halt list doesn't name the guard's new refusal path.
+- L2 `docs/DEVELOPMENT_PROCESS.md:81-83`: the quickstart for `Supabase: yes` tickets doesn't say "Default-mode session".
+- L3 `conventions.md:147`, `piv-implement*/SKILL.md`: uneven prose wrapping (cosmetic).
+
+Outcome:
+
+- Fixed: L1, L2. Both complete this ticket's docs task (task 2) → covered by `test/claudeSkills.test.js` staying green.
+- Not in this change: L3. Cosmetic wrapping; Prettier owns formatting and `format:check` passes.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

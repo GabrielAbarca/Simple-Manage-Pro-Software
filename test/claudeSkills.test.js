@@ -96,6 +96,19 @@ describe("AI layer: frontmatter is valid", () => {
     }
   });
 
+  it("no unquoted frontmatter value contains ' #', which YAML would cut off as a comment", () => {
+    const bad = [];
+    for (const file of [...skillFiles(), ...agentFiles()]) {
+      const block = read(file).match(/^---\n([\s\S]*?)\n---\n/)?.[1] ?? "";
+      for (const line of block.split("\n")) {
+        const kv = line.match(/^([A-Za-z][\w-]*):\s+(.*)$/);
+        if (kv && !/^["']/.test(kv[2]) && kv[2].includes(" #"))
+          bad.push(`${file} → ${kv[1]}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
   it("every agent names itself after its file and has a description", () => {
     for (const file of agentFiles()) {
       const fm = frontmatter(read(file));

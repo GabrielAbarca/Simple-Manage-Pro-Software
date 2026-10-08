@@ -1,8 +1,8 @@
 # Plan — Prove the schema baseline and the access audit in CI
 
 **Implements:** #87 · **Epic:** #86 · **Branch:** feat/ci-schema-harness
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-08
+**Red commit:** 6ca0b41
 **Confidence:** 8/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -368,10 +368,12 @@ Each has a default the loop uses if the reviewer approves without overriding it.
    run 17 only, which is the CLI's default and what a new school project gets.
    Both 15 and 17 pass today. If either project is on 15, a follow-up adds a
    second workdir with `major_version = 15` as a job matrix.
+   Resolved: default stands (17 only), approved 2026-10-08.
 2. **Add `@types/node` as a devDependency?** `tsc` needs it to type
    `node:child_process` in the new modules. The ticket allows "Node types if
    `tsc` needs them". It's dev-only and ships nothing. — **Default:** yes,
    `@types/node@^24`.
+   Resolved: default stands (add `@types/node@^24`), approved 2026-10-08.
 3. **Test isolation uses the CLI's local superuser** (`supabase_admin`, same
    local password) once per run. It ends the pg_net and pg_cron worker sessions
    on `postgres` so the pristine database can be copied as a template. This
@@ -380,6 +382,7 @@ Each has a default the loop uses if the reviewer approves without overriding it.
    accept. The alternative, resetting `public` in place between tests, would
    drop the default privileges Supabase sets on that schema. It could also
    wipe a developer's local database if the URL pointed at one.
+   Resolved: default stands (template clones), approved 2026-10-08.
 
 ## Notes
 

@@ -130,6 +130,52 @@ describe("guard hook: Supabase changes are refused when no prompt can be shown",
   );
 });
 
+describe("guard hook: the deliver command needs the owner's approval", () => {
+  const deliverCommands = [
+    "npm run deliver -- pilot",
+    "npm ci && npm run deliver -- demo --probe",
+    "node scripts/delivery/deliver.mjs demo",
+  ];
+  const reasonIn = (extra) =>
+    call("Bash", { command: "npx supabase db push" }, extra)?.reason;
+
+  it.each(deliverCommands)(
+    "asks before the deliver command in Default mode: %s",
+    (command) => {
+      const result = call("Bash", { command }, inDefault);
+      expect(result?.decision).toBe("ask");
+      expect(result?.reason).toBe(reasonIn(inDefault));
+    },
+  );
+
+  const promptlessModes = ["acceptEdits", "bypassPermissions", "plan"];
+  it.each(
+    promptlessModes.flatMap((mode) =>
+      deliverCommands.map((command) => [mode, command]),
+    ),
+  )(
+    "refuses the deliver command when no prompt can be shown (%s): %s",
+    (mode, command) => {
+      const extra = { permission_mode: mode };
+      const result = call("Bash", { command }, extra);
+      expect(result?.decision).toBe("deny");
+      expect(result?.reason).toBe(reasonIn(extra));
+    },
+  );
+
+  it.each([
+    "npx vitest run test/deliver.test.js",
+    "cat scripts/delivery/deliver.mjs",
+    "grep -rn deliver scripts/delivery",
+    "node scripts/delivery/gate.mjs --status",
+  ])("lets tests, reads and the read-only gate through: %s", (command) => {
+    expect(call("Bash", { command }, inDefault)).toBeNull();
+    expect(
+      call("Bash", { command }, { permission_mode: "bypassPermissions" }),
+    ).toBeNull();
+  });
+});
+
 describe("guard hook: secrets stay unread", () => {
   it.each([
     ["Read", { file_path: join(ROOT, ".env") }],

@@ -193,3 +193,34 @@ Findings: 3 Low.
 - Fixed: nothing. No code changed in this round, so validation stands as recorded above and there's no round 2.
 
 ## Execution report
+
+**Files:** +1 ~3 −0 · **Lines:** +250 −2 (code and tests: +55 −2) · **Review rounds:** 1 · **Outcome:** draft (AC3 is FAIL under the validator's coupling rule; owner decision needed)
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (514; 1 known Node-22 ICU failure in `test/i18n.test.js`, unrelated) · build ✅ · e2e ✅ (116 on the local browser config; 3 `classExports` download-filename failures reproduce without this branch) · acceptance validator: AC1 PASS · AC2 PASS · AC3 FAIL (coupling rule)
+
+### What went well
+
+- Mirroring the Postgres-CLI rule and reusing `supabaseDecision` made the implementation one constant plus one condition. AC1 and AC2 went green on the first run.
+- Comparing reasons with the guard's own `npx supabase db push` answer made the tests independent of the reason wording.
+
+### Divergences from the plan
+
+- None. No AMENDMENTS.
+
+### Challenges
+
+- **The guard refused two shell heredocs that wrote this plan.** The text quoted the Postgres-CLI regex, and one of its alternation branches matched as a database command. Both were written with the Write and Edit tools instead. Any Bash command that quotes guard patterns in text can trip it.
+- **The ladder's local environment has two failures unrelated to this branch:** the Node-22 ICU i18n case, and the Chromium 1194 download filename in `e2e/classExports.spec.js` (`"download"` instead of the suggested name). Proving they came from the environment cost a re-run on main's code.
+- **The `/piv-validate` entry-point check misfires.** It uses `head -20`, and `src/js/admin.js` has a 21-line header comment, so it reported "errorHandler not first" for a file that is correct (line 22).
+
+### Skipped
+
+- L1 hardening (env-var prefixes, leading whitespace, absolute paths): Low per the unattended policy, and it shares an anchor with rules the ticket keeps out of scope.
+
+### Recommendations
+
+- **Plan skill / validation ladder:** a negative AC ("X stays allowed") can never be red at RED. Give the ladder a `guard`-style kind for such checks (green from the start, proven by a mutation probe), so the slicer writes them as guards and the validator doesn't FAIL them and force a draft PR.
+- **piv-validate:** find the first `^import` anywhere in the file (`grep -m1 -E '^import '`) instead of within `head -20`.
+- **Ticket slicing:** the ticket was the right size. AC3 should have been a guard line (see above). A follow-up ticket should widen the shared command anchor (whitespace, `VAR=value` prefixes) for the Supabase, Postgres and deliver rules together.

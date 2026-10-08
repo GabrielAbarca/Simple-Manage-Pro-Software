@@ -31,7 +31,12 @@ export default [
 
   // Node-side config + tooling files (incl. build scripts).
   {
-    files: ["*.config.js", "vite.config.js", "scripts/**/*.{js,mjs}"],
+    files: [
+      "*.config.js",
+      "vite.config.js",
+      "scripts/**/*.{js,mjs}",
+      ".claude/hooks/**/*.mjs",
+    ],
     languageOptions: {
       sourceType: "module",
       globals: { ...globals.node },

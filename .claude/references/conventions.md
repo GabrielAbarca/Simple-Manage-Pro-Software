@@ -136,7 +136,8 @@ and `/piv-fix-review-findings`:
 
 - Hard rule 5: never touch Supabase RLS, Auth, migrations, or the database
   without asking the owner first. The PreToolUse guard (`.claude/hooks/guard.mjs`)
-  covers any edit under `supabase/`, any database-changing CLI command, and any
+  covers any edit under `supabase/`, any database-changing CLI command
+  (including the deliver command, `npm run deliver`), and any
   Supabase MCP write tool. In a **Default** permission-mode session it asks the
   owner. In every other mode (auto-accept, bypass, plan, …) no prompt can be
   relied on, so it denies. A denied or unanswered prompt is a stop, not something

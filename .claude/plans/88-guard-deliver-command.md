@@ -153,4 +153,22 @@ Append-only.
 
 ## Validation
 
+| Check                 | Result                                                                                                                                                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check          | ✅                                                                                                                                                                                                                                             |
+| lint                  | ✅                                                                                                                                                                                                                                             |
+| typecheck             | ✅                                                                                                                                                                                                                                             |
+| unit                  | ✅ 514 passed. 1 failure is the known Node-22 ICU case in `test/i18n.test.js` (es-CR 12h time), untouched by this branch; it passes in CI (Node 24)                                                                                            |
+| build                 | ✅                                                                                                                                                                                                                                             |
+| e2e                   | ✅ 116 passed (local browser fallback config). 3 `e2e/classExports.spec.js` cases fail on the download filename (`"download"`) with the container's Chromium 1194, identically without this branch's changes; no `src/` or `e2e/` file changed |
+| skip/only scan        | ✅ clean                                                                                                                                                                                                                                       |
+| entry-point order     | ✅ (`src/js/admin.js:22` imports `errorHandler.js` first; the `head -20` probe misses it behind the header comment)                                                                                                                            |
+| `supabase/` untouched | ✅                                                                                                                                                                                                                                             |
+
+| AC  | Kind | Red before (Phase R)                           | Green after |
+| --- | ---- | ---------------------------------------------- | ----------- |
+| AC1 | unit | `expected undefined to be 'ask'` (3 cases)     | ✅ 3 passed |
+| AC2 | unit | `expected undefined to be 'deny'` (9 cases)    | ✅ 9 passed |
+| AC3 | unit | green from the start (negative check, by plan) | ✅ 4 passed |
+
 ## Execution report

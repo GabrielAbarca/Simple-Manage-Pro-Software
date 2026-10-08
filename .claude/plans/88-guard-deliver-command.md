@@ -171,4 +171,20 @@ Append-only.
 | AC2 | unit | `expected undefined to be 'deny'` (9 cases)    | ✅ 9 passed |
 | AC3 | unit | green from the start (negative check, by plan) | ✅ 4 passed |
 
+### Review (round 1)
+
+**Verdict:** fix before PR (Low only) · **Acceptance:** AC1 PASS · AC2 PASS · AC3 FAIL by the coupling rule only (negative check, accepted at the gate as Open question 1; the validator's mutation probe with a too-broad matcher turns it red on all 4 cases)
+
+| AC  | Kind | Exists | Faithful | Passes    | Coupled            | Frozen    | Probe      | Verdict              |
+| --- | ---- | ------ | -------- | --------- | ------------------ | --------- | ---------- | -------------------- |
+| AC1 | unit | yes    | yes      | yes (3/3) | yes (fails at RED) | unchanged | n/a (unit) | PASS                 |
+| AC2 | unit | yes    | yes      | yes (9/9) | yes (fails at RED) | unchanged | n/a (unit) | PASS                 |
+| AC3 | unit | yes    | yes      | yes (4/4) | no (passes at RED) | unchanged | n/a (unit) | FAIL (coupling rule) |
+
+Findings: 3 Low.
+
+- L1 `.claude/hooks/guard.mjs:10-11`: env-var prefixes (`FOO=1 npm run deliver`), leading whitespace and absolute paths to `deliver.mjs` get through.
+- L2 `.claude/hooks/guard.mjs:10-11`: the command doesn't exist yet (#94), so its real invocation is unchecked.
+- L3 `test/claudeHooks.test.js:171`: AC3 can't be red at RED (accepted at the gate).
+
 ## Execution report

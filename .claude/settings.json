@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run format:check)",
+      "Bash(npm run typecheck)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run build)",
+      "Bash(npm run test:e2e)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier --check:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rev-parse:*)",
+      "mcp__github__issue_read",
+      "mcp__github__list_issues",
+      "mcp__github__search_issues",
+      "mcp__github__pull_request_read",
+      "mcp__github__get_file_contents",
+      "Bash(npm ci:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git worktree:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git grep:*)",
+      "Bash(git cat-file:*)",
+      "Bash(git config user.name:*)",
+      "Bash(git config user.email:*)",
+      "Bash(git push -u origin:*)",
+      "Bash(mktemp:*)",
+      "Bash(ln -s:*)",
+      "mcp__github__list_pull_requests",
+      "mcp__github__issue_write",
+      "mcp__github__create_pull_request",
+      "mcp__github__update_pull_request",
+      "mcp__claude-code-remote__subscribe_pr_activity"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Read(./.env.development)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.mjs\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|MultiEdit|Write|NotebookEdit|Bash|Grep|Glob|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

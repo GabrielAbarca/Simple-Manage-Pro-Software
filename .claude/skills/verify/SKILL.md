@@ -66,6 +66,19 @@ Existing specs show the pattern for each portal: `smoke.spec.js` (login and
 all three portals), `mobile.spec.js` (Pixel 7 viewport), `errors.spec.js`
 (failed reads, retry and the offline notice).
 
+## Acceptance evidence (PIV loop)
+
+When a ticket's acceptance check has kind `verify`, the scenario (portal,
+role, language, viewport, steps, what must be seen) is the text on that AC's
+line in the ticket (the plan copies it under the same id). Run it as written, take screenshots at the
+stated viewport, and report what they show. Anything that can be asserted
+belongs in a committed `e2e/*.spec.js`, not a scratch spec. The scratch route
+is for evidence only.
+
+The untracked override config has a fixed name, `playwright.local.config.js`
+(gitignored), so the PIV skills and the acceptance validator can rely on it. See
+`.claude/references/validation-ladder.md`.
+
 ## Gotchas
 
 - The teacher roster's column-header row shares `.roster-row-cells` with the

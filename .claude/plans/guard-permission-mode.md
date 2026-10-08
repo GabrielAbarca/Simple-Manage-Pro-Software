@@ -1,8 +1,8 @@
 # Plan — Deny Supabase changes when the session cannot show an approval prompt
 
 **Implements:** free-form (pilot finding 1) · **Epic:** none · **Branch:** fix/guard-permission-mode
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-08
+**Red commit:** 995a910
 **Confidence:** 9/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -87,8 +87,8 @@ E2E is untouched (no app code), so `npm run test:e2e` runs once at the end as a 
 
 ## Open questions / assumptions
 
-1. Which modes keep `ask`? **Default:** only `default`. `plan` also denies: nothing should touch the database while planning.
-2. A payload without `permission_mode`? **Default:** deny, which fails safe.
+1. Which modes keep `ask`? **Default:** only `default`. `plan` also denies: nothing should touch the database while planning. Resolved: default accepted at the gate.
+2. A payload without `permission_mode`? **Default:** deny, which fails safe. Resolved: default accepted at the gate.
 
 ## Notes
 

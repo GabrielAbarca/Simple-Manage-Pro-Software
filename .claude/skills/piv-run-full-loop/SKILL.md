@@ -64,7 +64,8 @@ Say which state you found and why, in one line, then continue.
   - Already has an open PR (`mcp__github__list_pull_requests`,
     `head: "GabrielAbarca:<Branch>"`) → state Shipped or Halted.
   - `**Supabase:** yes` → warn: this run will hit the owner-approval prompts
-    and must be attended.
+    and must be attended, in a Default-mode session (other modes refuse
+    Supabase changes).
 - Add the `in-progress` label (`mcp__github__issue_write`, method `update`,
   keeping the existing labels) if `/piv-run-epic` hasn't already.
 

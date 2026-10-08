@@ -104,7 +104,23 @@ Rejected alternative: deny always and never ask. Simpler, but a `Supabase: yes` 
 
 ## Validation
 
-Filled by `/piv-implement` and `/piv-validate`.
+| Check                 | Result                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check          | ✅                                                                                                                                        |
+| lint                  | ✅                                                                                                                                        |
+| typecheck             | ✅                                                                                                                                        |
+| unit                  | ✅ 498 passed. 1 failure is the known Node-22 ICU case in `test/i18n.test.js`, which also fails on `main` here and passes in CI (Node 24) |
+| build                 | ✅                                                                                                                                        |
+| e2e                   | ✅ 119 passed (local browser fallback config)                                                                                             |
+| skip/only scan        | ✅ clean                                                                                                                                  |
+| `supabase/` untouched | ✅                                                                                                                                        |
+
+| AC  | Kind  | Red before (Phase R)                     | Green after |
+| --- | ----- | ---------------------------------------- | ----------- |
+| AC1 | unit  | `expected 'ask' to be 'deny'` (18 cases) | ✅          |
+| AC2 | unit  | reason didn't match /Default/            | ✅          |
+| G1  | guard | green (13)                               | ✅          |
+| G2  | guard | green (6)                                | ✅          |
 
 ## Execution report
 

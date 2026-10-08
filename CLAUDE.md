@@ -164,6 +164,14 @@ These are non-negotiable. They override default agent behavior.
 
 For user-facing changes, verify in a real browser (dev server + Playwright, with the Supabase backend mocked) — the `verify` skill documents the exact recipe. For logic changes, a Vitest unit test is preferred over a manual check.
 
+## Development process
+
+Feature work runs through the PIV skills — see `docs/DEVELOPMENT_PROCESS.md`. Epics: `/plan-create-prd` → `/plan-architecture` → `/piv-slice-epic` → `/piv-run-epic #E`. One ticket or bug: `/piv-run-full-loop #N` (stops once for plan approval, ends at an open PR).
+
+- `.claude/references/conventions.md` turns the hard rules into exact branch, commit, PR, GitHub and Supabase steps; `.claude/references/validation-ladder.md` defines how work is proved.
+- Validation-first: each acceptance criterion's test is committed failing (`Add failing checks for …`) before any `src/` change, and is frozen from then on — changing it needs an AMENDMENTS entry in the plan.
+- Ticket plans and their execution reports are committed with the PR at `.claude/plans/<issue>-<slug>.md`.
+
 ## Environment
 
 Requires a `.env` with:

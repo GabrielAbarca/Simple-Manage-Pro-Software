@@ -187,4 +187,9 @@ Findings: 3 Low.
 - L2 `.claude/hooks/guard.mjs:10-11`: the command doesn't exist yet (#94), so its real invocation is unchecked.
 - L3 `test/claudeHooks.test.js:171`: AC3 can't be red at RED (accepted at the gate).
 
+- Not in this change: L1 prefixed forms (`FOO=1 npm run deliver`, leading whitespace, an absolute path to `deliver.mjs`) get through. The Supabase and Postgres CLI rules share the same command-position anchor and the same gap (`FOO=1 supabase db push` returns null), and the ticket keeps how those are matched out of scope. Recommended follow-up: widen the shared anchor to allow leading whitespace and `VAR=value` prefixes for all three rules, with tests.
+- Not in this change: L2, the real deliver invocation is unchecked until #94 lands; re-check it against `DELIVER_CLI` there.
+- Needs your decision: AC3 is FAIL under the validator's coupling rule because it passes at RED. It's a negative check (what must stay allowed), accepted at the gate as Open question 1, and the validator's mutation probe shows it goes red on an over-broad matcher. **Recommendation:** accept it as a non-regression check and mark the PR ready.
+- Fixed: nothing. No code changed in this round, so validation stands as recorded above and there's no round 2.
+
 ## Execution report

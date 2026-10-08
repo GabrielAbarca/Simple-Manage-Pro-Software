@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{js,css}\" \"*.{js,json}\" \"test/**/*.js\" \"e2e/**/*.js\"",
     "format:check": "prettier --check \"src/**/*.{js,css}\" \"*.{js,json}\"",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.scripts.json",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "prepare": "husky"

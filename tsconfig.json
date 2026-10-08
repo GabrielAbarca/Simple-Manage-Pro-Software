@@ -7,7 +7,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "types": ["vite/client"],
 
     "allowJs": true,
     "checkJs": true,
@@ -22,7 +22,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/js/**/*.js", "scripts/delivery/**/*.mjs"],
+  "include": ["src/js/**/*.js"],
   // The large view-controllers are DOM-glue and typed incrementally in a
   // later pass; the reusable logic layer (queries, demo DB, i18n, …) is checked.
   // src/js/main.js is now a thin orchestrator (session bootstrap + wiring),

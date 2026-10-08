@@ -427,6 +427,14 @@ red commit goes here: date — what changed — why.
   the executor's verbose-stderr parsing and password-free `connectionEnv` work.
   These cover behaviour the db-only ACs don't, and they run in the `quality`
   job. Not a frozen test.
+- 2026-10-08 — Task 1 changed after review round 1. The root `tsconfig.json`
+  is back to `main` (`types: ["vite/client"]`, `src/js` only). A new
+  `tsconfig.scripts.json` extends it with `types: ["node"]` and
+  `lib: ["ES2022"]` and includes `scripts/delivery/**/*.mjs`. `npm run
+typecheck` runs both. Reason: `"node"` in the root `types` let `src/js`
+  type-check `process` and `Buffer`, which don't exist in the browser. The
+  delivery scripts are still type-checked, which is the ticket's intent. No
+  acceptance test changed.
 
 ## Manual Supabase steps
 
@@ -488,6 +496,33 @@ Findings: 1 High, 1 Medium, 2 Low.
 - Low: `scripts/delivery/executors/psql.mjs:39-40,101`. Inherited `PG*`
   variables apply, and unknown URL parameters are dropped silently.
 - Low: `CLAUDE.md:70`. The CI summary doesn't name the `schema` job.
+
+Outcomes (unattended policy):
+
+- Fixed: Node globals visible to `src/js` (`tsconfig.json:10`) →
+  `test/typecheckConfig.test.js` › "type-checks Node code only in the delivery
+  scripts". It was red with
+  `expected [ 'vite/client', 'node' ] to not include 'node'`. Now
+  `tsconfig.scripts.json` checks the three delivery modules, and a
+  `process`/`Buffer` probe in `src/js` fails `npm run typecheck` again
+  (TS2591).
+- Not in this change: `psql.mjs` merges `connectionEnv` over inherited `PG*`
+  variables and drops URL parameters other than `sslmode` (Low). It's harmless
+  for the CI harness, which builds its own URL. It matters when the deliver
+  command reuses the executor with a project URL, so that ticket should strip
+  inherited `PG*` keys and reject unknown parameters.
+- Not in this change: `CLAUDE.md:70` doesn't name the `schema` job (Low). One
+  clause, for the owner to fold into the next `CLAUDE.md` edit or the epic's
+  process-docs ticket.
+- Needs your decision: AC1–AC3 are UNPROVEN by the independent validator
+  (High, evidence missing). This session isn't in Default permission mode, so
+  the guard refuses `npx supabase db start` and `psql`, and the validator
+  could reach no database. The author's evidence: red at `6ca0b41` (Phase R
+  table) and green at HEAD against the CLI's 17.6.1.132 database. The PR's
+  `schema` job will also show them passing. **Recommendation:** once CI is
+  green, re-run the validator in a Default-mode session, or run the two-step
+  recipe in `test/schemaHarness.db.test.js` at HEAD and at `6ca0b41`. Then
+  mark the PR ready.
 
 ## Execution report
 

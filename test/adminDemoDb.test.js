@@ -266,6 +266,22 @@ describe("adminData — createAdminData over a gateway", () => {
     ]);
   });
 
+  it("sets a new primary guardian before clearing the old one", async () => {
+    const calls = [];
+    /** @type {any} */
+    const gateway = {
+      select: async () => [],
+      insert: async () => ({}),
+      update: async (table, id, patch) => calls.push([table, id, patch]),
+      remove: async () => {},
+    };
+    await createAdminData(gateway).setPrimaryGuardian(7, [3, 7]);
+    expect(calls).toEqual([
+      ["student_guardians", 7, { is_primary: true }],
+      ["student_guardians", 3, { is_primary: false }],
+    ]);
+  });
+
   it("keeps an assignment reassignment inside the demo overlay", async () => {
     const real = fakeRealGateway({
       class_subject_teachers: [

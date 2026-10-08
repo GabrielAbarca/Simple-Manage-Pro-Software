@@ -208,6 +208,43 @@ export default {
   export: {
     rowsHelp: "Filas por exportar: {count}, según el filtro en pantalla.",
   },
+  guardians: {
+    action: "Encargados",
+    title: "Encargados — {name}",
+    empty: "Este estudiante aún no tiene encargados registrados.",
+    name: "Nombre",
+    relationship: "Parentesco",
+    relationshipPlaceholder: "p. ej. Madre",
+    phone: "Teléfono",
+    altPhone: "Otro teléfono",
+    email: "Correo",
+    firstName: "Nombre",
+    lastName: "Apellidos",
+    nationalId: "Identificación",
+    occupation: "Ocupación",
+    address: "Dirección",
+    primary: "Principal",
+    makePrimary: "Marcar como contacto principal",
+    add: "Agregar encargado",
+    addTitle: "Agregar encargado",
+    editTitle: "Editar encargado",
+    sharedHelp:
+      "Los cambios aplican a todos los estudiantes vinculados a este encargado.",
+    link: "Vincular existente",
+    linkTitle: "Vincular un encargado existente",
+    pick: "Encargado",
+    noOthers: "No hay otros encargados registrados. Agregue uno nuevo.",
+    unlink: "Quitar de este estudiante",
+    unlinkTitle: "¿Quitar encargado?",
+    confirmUnlink:
+      "¿Quitar a {guardian} como encargado de {student}? Su registro se conserva.",
+    confirmUnlinkLast:
+      "¿Quitar a {guardian} de {student}? No tiene otros estudiantes registrados, así que su registro se elimina.",
+    unlinkDelete: "Quitar y eliminar",
+    idInUse:
+      "Esta identificación ya está registrada a nombre de {name}. Use Vincular existente.",
+    saveFailed: "No se pudo guardar el cambio.",
+  },
   accounts: {
     create: "Crear acceso",
     reset: "Restablecer contraseña",

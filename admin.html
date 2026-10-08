@@ -901,6 +901,53 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════
+         GUARDIANS OVERLAY — a student's encargados
+    ═══════════════════════════════════════════════════════════════ -->
+    <!-- Before the shared form and confirm dialogs on purpose: overlays
+         share one z-index, so those, opened from here, must come later. -->
+    <div class="modal-overlay" id="guardians-overlay">
+      <div
+        class="modal modal-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guardians-title"
+      >
+        <div class="modal-header">
+          <h2 id="guardians-title">Guardians</h2>
+          <button
+            class="modal-close"
+            id="guardians-close"
+            aria-label="Close"
+            data-i18n-aria-label="common.close"
+          >
+            <span class="material-symbols-outlined"
+              ><svg aria-hidden="true"><use href="#icon-close"></use></svg
+            ></span>
+          </button>
+        </div>
+        <div class="modal-body" id="guardians-body"></div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            id="guardians-link"
+            data-i18n="console.guardians.link"
+          >
+            Link existing
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="guardians-add"
+            data-i18n="console.guardians.add"
+          >
+            Add guardian
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
          GENERIC MODAL — add/edit forms
     ═══════════════════════════════════════════════════════════════ -->
     <div class="modal-overlay" id="modal-overlay">

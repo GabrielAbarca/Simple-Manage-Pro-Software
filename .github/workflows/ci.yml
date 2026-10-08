@@ -47,3 +47,18 @@ jobs:
           path: playwright-report/
           retention-days: 7
           if-no-files-found: ignore
+
+  schema:
+    name: schema · baseline and access audit
+    runs-on: ubuntu-latest
+    env:
+      SMP_SCHEMA_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx supabase db start --workdir scripts/delivery/harness
+      - run: npx vitest run test/schemaHarness.db.test.js

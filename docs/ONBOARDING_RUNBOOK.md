@@ -175,6 +175,10 @@ restore drill (see [BACKUP_RESTORE.md](BACKUP_RESTORE.md)). Success ends with
 `RLS AUDIT: ALL CHECKS PASSED`; no summary line means it did not finish, which
 is a failure.
 
+CI's `schema` job also runs it on every pull request, in both shapes, against
+a throwaway database built from `school_schema.sql`. That proves the committed
+files, not a project, so still run it on each project after a change.
+
 ## 3. Deploy the account Edge Function
 
 Deploy [`supabase/functions/admin-users`](../supabase/functions/admin-users/index.ts)

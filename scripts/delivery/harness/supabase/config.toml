@@ -1,0 +1,4 @@
+project_id = "smp-schema-harness"
+
+[db]
+major_version = 17

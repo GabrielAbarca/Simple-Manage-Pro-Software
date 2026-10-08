@@ -413,7 +413,20 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-08 — Task 6's Validate ran as a byte-for-byte `diff` of the
+  committed `scripts/delivery/harness/supabase/config.toml` against the config
+  the local server was started from (identical), instead of a restart from the
+  committed path. Mid-implementation, the PreToolUse guard began refusing
+  `psql …` and `npx supabase db …` command lines (this session isn't in
+  Default mode). It refuses them even against the local throwaway container.
+  CI's first run is the restart from the committed path. No acceptance test or
+  AC changed.
+- 2026-10-08 — Added `test/deliveryProofs.test.js` (7 tests, no database
+  needed): the audit proof fails a run with no summary line, the FAIL label is
+  read, both lock directions are checked, a failed or empty count fails, and
+  the executor's verbose-stderr parsing and password-free `connectionEnv` work.
+  These cover behaviour the db-only ACs don't, and they run in the `quality`
+  job. Not a frozen test.
 
 ## Manual Supabase steps
 
@@ -421,7 +434,35 @@ red commit goes here: date — what changed — why.
 
 ## Validation
 
-Filled by `/piv-implement` and `/piv-validate`.
+Branch `feat/ci-schema-harness`, run 2026-10-08 in the cloud container (Node
+22.22). AC1–AC3 ran against `npx supabase db start` (CLI 2.104.0,
+`postgres:17.6.1.132`).
+
+| Check               | Result                    | Notes                                                                                                                                                                                                                                                          |
+| ------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check        | ✅                        |                                                                                                                                                                                                                                                                |
+| lint                | ✅                        |                                                                                                                                                                                                                                                                |
+| typecheck           | ✅                        | now includes `scripts/delivery/**/*.mjs` with Node types                                                                                                                                                                                                       |
+| unit                | ✅ 506 passed, 19 skipped | 1 failure not this branch's: `test/i18n.test.js` › "formats 24h time strings to the locale's 12h form" fails identically on an `origin/main` worktree in this container (Node 22 / ICU 77 prints U+202F). CI runs Node 24.                                     |
+| build               | ✅                        |                                                                                                                                                                                                                                                                |
+| e2e                 | ✅ 119                    | `playwright.local.config.js` (bundled Chromium 1228 missing; used `/opt/pw-browsers/chromium-1194`). Two full runs each hit 1–2 `page.goto` 30 s timeouts on different specs; those specs pass when re-run (16/16). No `src/` or `e2e/` change on this branch. |
+| AC1 (unit)          | ✅                        |                                                                                                                                                                                                                                                                |
+| AC2 (unit)          | ✅                        |                                                                                                                                                                                                                                                                |
+| AC3 (unit)          | ✅                        |                                                                                                                                                                                                                                                                |
+| AC4 (unit)          | ✅                        |                                                                                                                                                                                                                                                                |
+| skip/only           | ✅ clean                  |                                                                                                                                                                                                                                                                |
+| entry-point order   | ✅                        | the check printed "errorHandler not first in src/js/admin.js": its `head -20` window ends before line 22, where `import "./errorHandler.js"` is the first import. A false positive in the check.                                                               |
+| supabase/ untouched | ✅                        |                                                                                                                                                                                                                                                                |
+
+**Overall: PASS**, with the two environment exceptions above shown to be
+unrelated to this branch.
+
+| AC  | Kind | Red before (Phase R)                                                                              | Green after |
+| --- | ---- | ------------------------------------------------------------------------------------------------- | ----------- |
+| AC1 | unit | `expected { ok: false, check: null, …(2) } to match object { ok: true }`                          | ✅ 1386 ms  |
+| AC2 | unit | `expected { ok: false, check: null, …(2) } to match object { ok: false, …(1) }`                   | ✅ 1113 ms  |
+| AC3 | unit | `expected { ok: false, counts: {}, …(2) } to match object { ok: false, tables: [ 'guardians' ] }` | ✅ 1180 ms  |
+| AC4 | unit | `expected 0 to be greater than 0`                                                                 | ✅          |
 
 ## Execution report
 

@@ -367,6 +367,17 @@ Each spike is timeboxed so the epic finishes before mid-November 2026.
   in the timebox, run the audit only against live projects through deliver,
   and CI keeps the idempotency and "upgrade ≡ fresh" checks on plain Postgres
   with a stubbed `auth` schema.
+  Result (2026-10-08, #87): **`supabase db start`**. On the bare
+  `supabase/postgres:17.11.0.004` image the baseline applies, but the audit
+  fails at its first student check: the image's `auth.uid()` and
+  `auth.role()` read only the legacy `request.jwt.claim.*` settings, and
+  GoTrue's migrations are what replace them. `npx supabase db start` (CLI
+  2.104.0, which pulled `postgres:17.6.1.132` and `gotrue:v2.189.0`) runs those
+  migrations, and both shapes pass: 30 tables, 90 demo locks.
+  `major_version = 15` (`postgres:15.8.1.085`) passes too. The CI `schema`
+  job starts it from `scripts/delivery/harness/supabase/config.toml`, outside
+  `supabase/`. Each test copies a pristine template of the `postgres`
+  database, so no run touches another's state.
 - **S2 · Management API as the executor.**
   Question: does `POST /v1/projects/{ref}/database/query` run `rls_audit.sql`
   end to end (multi-statement, `begin`/`rollback`, `set local role`, the

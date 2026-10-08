@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { spawnSync, execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -107,11 +114,33 @@ describe("guard hook: the acceptance validator never sees the plan", () => {
     expect(call(tool, input, asValidator)?.decision).toBe("deny");
   });
 
-  it("lets the validator read source and tests", () => {
-    expect(
-      call("Read", { file_path: join(ROOT, "src/js/csv.js") }, asValidator),
-    ).toBeNull();
-  });
+  it.each([
+    ["Grep", { pattern: "AC1" }],
+    ["Grep", { pattern: "AC1", path: ROOT }],
+    ["Glob", { pattern: "**/*.md" }],
+    ["Bash", { command: "git show HEAD~2" }],
+    ["Bash", { command: "git log -p origin/main..HEAD" }],
+    ["Bash", { command: "git diff origin/main...HEAD" }],
+  ])(
+    "denies the validator %s routes that would surface the plan",
+    (tool, input) => {
+      expect(call(tool, input, asValidator)?.decision).toBe("deny");
+    },
+  );
+
+  it.each([
+    ["Read", { file_path: join(ROOT, "src/js/csv.js") }],
+    ["Grep", { pattern: "exportRows", path: join(ROOT, "src/js") }],
+    ["Glob", { pattern: "*.spec.js", path: "e2e" }],
+    ["Bash", { command: "git diff origin/main...HEAD -- test e2e" }],
+    ["Bash", { command: "git log --format='%h %s' origin/main..HEAD" }],
+    ["Bash", { command: 'npx vitest run test/csv.test.js -t "parses quotes"' }],
+  ])(
+    "lets the validator use %s on source, tests and history",
+    (tool, input) => {
+      expect(call(tool, input, asValidator)).toBeNull();
+    },
+  );
 
   it("lets every other agent read plans", () => {
     const input = {
@@ -203,6 +232,29 @@ describe("session-start hook", () => {
     expect(out.hookEventName).toBe("SessionStart");
     expect(out.additionalContext).toContain("claude/some-task-a1b2c3");
     expect(out.additionalContext).toMatch(/rule 1/i);
+  });
+
+  it("accepts real words as a valid branch and points only to that branch's own plan", () => {
+    git("checkout", "-q", "-b", "feat/html5-facade-export");
+    mkdirSync(join(repo, ".claude/plans"), { recursive: true });
+    writeFileSync(
+      join(repo, ".claude/plans/7-longer.md"),
+      "**Implements:** #7 · **Branch:** feat/html5-facade-export-v2\n**Status:** Approved 2026-01-01\n",
+    );
+    writeFileSync(
+      join(repo, ".claude/plans/9-exact.md"),
+      "**Implements:** #9 · **Branch:** feat/html5-facade-export\n**Status:** Draft\n",
+    );
+    const res = spawnSync(process.execPath, [SESSION_START], {
+      cwd: repo,
+      input: "{}",
+      encoding: "utf8",
+      env: { ...process.env, CLAUDE_PROJECT_DIR: repo },
+    });
+    const ctx = JSON.parse(res.stdout).hookSpecificOutput.additionalContext;
+    expect(ctx).not.toMatch(/rule 1/i);
+    expect(ctx).toContain(".claude/plans/9-exact.md (Status: Draft)");
+    expect(ctx).not.toContain("7-longer.md");
   });
 });
 

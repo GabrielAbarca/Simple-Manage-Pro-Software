@@ -9,6 +9,8 @@ export default [
       "coverage/**",
       ".vercel/**",
       "src/icons/**",
+      ".claude/scratch/**",
+      "playwright.local.config.js",
     ],
   },
   js.configs.recommended,

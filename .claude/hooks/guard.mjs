@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const FILE_EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
@@ -23,6 +23,25 @@ const SECRETS =
   "Env files hold real credentials and are never read. Use .env.example for the variable names.";
 const HOLDOUT =
   "The acceptance validator judges the change from the ticket and the code only. Plans and review notes are off limits to it.";
+
+const SCOPE_SEARCH =
+  "Scope searches to a directory such as src/, test/, e2e/ or public/, not the whole repository.";
+const SCOPE_HISTORY =
+  "Limit history to paths: git diff/log -p/show need a '-- <paths>' pathspec or a <rev>:<path> argument.";
+
+function revealsHistory(command) {
+  const hasPathspec = /\s--\s+\S/.test(command);
+  const git = String.raw`\bgit\b(?:\s+-C\s+\S+)?\s+`;
+  if (new RegExp(`${git}diff\\b`).test(command) && !hasPathspec) return true;
+  if (
+    new RegExp(`${git}log\\b[^|;&]*\\s(?:-p|--patch|-u)\\b`).test(command) &&
+    !hasPathspec
+  )
+    return true;
+  const show = new RegExp(`${git}show\\b([^|;&]*)`).exec(command);
+  if (show && !hasPathspec && !/\s\S+:\S+/.test(show[1])) return true;
+  return false;
+}
 
 const isEnvFile = (name) =>
   /^\.env(\.[\w.-]+)?$/.test(name) && name !== ".env.example";
@@ -83,6 +102,13 @@ export function decide(payload, options = {}) {
       .map((v) => v.replace(/\\/g, "/"));
     if (targets.some((t) => PLAN_PATHS.test(t)))
       return { decision: "deny", reason: HOLDOUT };
+    if (tool === "Grep" || tool === "Glob") {
+      const scope = input.path ? resolve(cwd, input.path) : null;
+      if (!scope || existsSync(join(scope, ".git")))
+        return { decision: "deny", reason: `${HOLDOUT} ${SCOPE_SEARCH}` };
+    }
+    if (tool === "Bash" && revealsHistory(command))
+      return { decision: "deny", reason: `${HOLDOUT} ${SCOPE_HISTORY}` };
   }
 
   if (tool === "Read" && isEnvFile(baseName(input.file_path)))

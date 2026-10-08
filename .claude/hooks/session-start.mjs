@@ -7,7 +7,7 @@ const OWNER_EMAIL = "gzelaya0404@gmail.com";
 const BRANCH_RULE =
   /^(feat|fix|docs|chore|refactor|test)\/[a-z0-9]+(-[a-z0-9]+){1,2}$/;
 const HASH_LIKE =
-  /^(?=[a-z0-9]*\d)(?=[a-z0-9]*[a-z])[a-z0-9]{5,}$|^[0-9a-f]{6,}$/;
+  /^(?=(?:[a-z]*\d){2})(?=[a-z0-9]*[a-z])[a-z0-9]{5,}$|^\d{6,}$/;
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const remote = process.env.CLAUDE_CODE_REMOTE === "true";
@@ -70,7 +70,9 @@ function planForBranch(branch) {
   if (!branch || !existsSync(dir)) return "";
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".md"))) {
     const text = readFileSync(join(dir, file), "utf8");
-    if (!text.includes(`**Branch:** ${branch}`)) continue;
+    const escaped = branch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (!new RegExp(`\\*\\*Branch:\\*\\* ${escaped}(?=\\s|$)`, "m").test(text))
+      continue;
     const status =
       text.match(/\*\*Status:\*\*\s*([^\n]+)/)?.[1]?.trim() ?? "unknown";
     return `Plan for this branch: .claude/plans/${file} (Status: ${status}). Resume with /piv-run-full-loop.`;

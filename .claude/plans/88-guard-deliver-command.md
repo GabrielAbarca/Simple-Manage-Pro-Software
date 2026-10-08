@@ -189,12 +189,12 @@ Findings: 3 Low.
 
 - Not in this change: L1 prefixed forms (`FOO=1 npm run deliver`, leading whitespace, an absolute path to `deliver.mjs`) get through. The Supabase and Postgres CLI rules share the same command-position anchor and the same gap (`FOO=1 supabase db push` returns null), and the ticket keeps how those are matched out of scope. Recommended follow-up: widen the shared anchor to allow leading whitespace and `VAR=value` prefixes for all three rules, with tests.
 - Not in this change: L2, the real deliver invocation is unchecked until #94 lands; re-check it against `DELIVER_CLI` there.
-- Needs your decision: AC3 is FAIL under the validator's coupling rule because it passes at RED. It's a negative check (what must stay allowed), accepted at the gate as Open question 1, and the validator's mutation probe shows it goes red on an over-broad matcher. **Recommendation:** accept it as a non-regression check and mark the PR ready.
+- Needs your decision: AC3 is FAIL under the validator's coupling rule because it passes at RED. It's a negative check (what must stay allowed), accepted at the gate as Open question 1, and the validator's mutation probe shows it goes red on an over-broad matcher. **Recommendation:** accept it as a non-regression check and mark the PR ready. Resolved 2026-10-08: the owner accepted AC3 as a non-regression check and asked for the PR to be marked ready.
 - Fixed: nothing. No code changed in this round, so validation stands as recorded above and there's no round 2.
 
 ## Execution report
 
-**Files:** +1 ~3 −0 · **Lines:** +250 −2 (code and tests: +55 −2) · **Review rounds:** 1 · **Outcome:** draft (AC3 is FAIL under the validator's coupling rule; owner decision needed)
+**Files:** +1 ~3 −0 · **Lines:** +250 −2 (code and tests: +55 −2) · **Review rounds:** 1 · **Outcome:** opened as a draft (AC3 coupling), marked ready once the owner accepted AC3 as a non-regression check
 
 ### Validation summary
 

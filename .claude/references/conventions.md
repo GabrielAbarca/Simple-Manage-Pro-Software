@@ -124,7 +124,8 @@ and `/piv-fix-review-findings`:
   - validation can't reach PASS;
   - a fix needs a change to a frozen acceptance test, a product decision, or
     breaking an epic decision;
-  - the Supabase guard asked and the owner declined or didn't answer;
+  - the Supabase guard refused the change (the session isn't in Default
+    permission mode), or asked and the owner declined or didn't answer;
   - a pushed commit turns out to have the wrong author or a trailer. Rewriting
     it needs a force-push, which needs the owner's OK, and it changes the
     red-commit sha.
@@ -135,14 +136,16 @@ and `/piv-fix-review-findings`:
 
 - Hard rule 5: never touch Supabase RLS, Auth, migrations, or the database
   without asking the owner first. The PreToolUse guard (`.claude/hooks/guard.mjs`)
-  asks before any edit under `supabase/`, any database-changing CLI command, and
-  any Supabase MCP write tool. A denied or unanswered prompt is a stop, not
-  something to route around.
+  covers any edit under `supabase/`, any database-changing CLI command, and any
+  Supabase MCP write tool. In a **Default** permission-mode session it asks the
+  owner. In every other mode (auto-accept, bypass, plan, …) no prompt can be
+  relied on, so it denies. A denied or unanswered prompt is a stop, not something
+  to route around.
 - Schema changes are `supabase/schema/incremental_*.sql` snippets applied by hand
   (see `supabase/CLAUDE.md` and `docs/ONBOARDING_RUNBOOK.md`). There is
   deliberately no `supabase/migrations/` directory.
-- A ticket with `**Supabase:** yes` runs attended, never dispatched unattended by
-  `/piv-run-epic`. Its PR lists the SQL to apply under "Manual Supabase steps".
+- A ticket with `**Supabase:** yes` runs attended, in a Default-mode session,
+  never dispatched unattended by `/piv-run-epic`. Its PR lists the SQL to apply under "Manual Supabase steps".
 - Demo mode is the default and a demo-mode write must never reach Supabase.
   Every data-flow change preserves the `demoDb.js` delta overlay.
 

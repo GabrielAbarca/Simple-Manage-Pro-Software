@@ -17,7 +17,8 @@ argument-hint: "[#ticket]"
    read or write path must go through these.
 2. **Hard rule 5:** never change Supabase RLS, Auth, schema or data without the
    owner's approval. Everything under `supabase/` is **read-only** while
-   priming. The guard hook asks before any edit there.
+   priming. The guard hook asks before any edit there in a Default-mode
+   session, and refuses it in every other mode.
 
 ## 0. The ticket
 

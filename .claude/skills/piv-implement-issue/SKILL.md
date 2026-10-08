@@ -36,8 +36,9 @@ a stale diagnosis.
   no unrelated refactors (hard rule 8).
 - The same pattern elsewhere (siblings the RCA found): fix them only if the
   plan lists them. Otherwise note them for the PR's "Not in this change".
-- Anything under `supabase/` is an owner-approval item. The guard hook will ask;
-  if the owner declines, stop. Once it's approved, list the SQL file and what it
+- Anything under `supabase/` is an owner-approval item. The guard hook asks in a
+  Default-mode session and refuses in every other mode; if it refuses or the owner
+  declines, stop. Once it's approved, list the SQL file and what it
   does under the plan's `## Manual Supabase steps`.
 - A deviation from the strategy gets an AMENDMENTS entry (date, what, why).
 

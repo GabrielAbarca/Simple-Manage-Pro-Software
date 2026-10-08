@@ -19,6 +19,7 @@ const PLAN_PATHS = /\.claude\/(?:plans|code-reviews)(?:\/|\b)/;
 
 const RULE_5 =
   "Hard rule 5: Supabase schema, RLS, Auth, Edge Functions and database changes need the owner's explicit approval first (.claude/references/conventions.md, section supabase).";
+const RULE_5_NO_PROMPT = `${RULE_5} This session's permission mode cannot show the owner an approval prompt, so the change is refused. Stop and tell the owner: they can switch the session to Default permission mode and retry, or apply the change by hand.`;
 const SECRETS =
   "Env files hold real credentials and are never read. Use .env.example for the variable names.";
 const HOLDOUT =
@@ -28,6 +29,17 @@ const SCOPE_SEARCH =
   "Scope searches to a directory such as src/, test/, e2e/ or public/, not the whole repository.";
 const SCOPE_HISTORY =
   "Limit history to paths: git diff/log -p/show need a '-- <paths>' pathspec or a <rev>:<path> argument.";
+
+/**
+ * Rule-5 decision: ask only where the owner actually sees a prompt.
+ * @param {{permission_mode?: string}} payload
+ * @returns {{decision: "ask" | "deny", reason: string}}
+ */
+function supabaseDecision(payload) {
+  return payload.permission_mode === "default"
+    ? { decision: "ask", reason: RULE_5 }
+    : { decision: "deny", reason: RULE_5_NO_PROMPT };
+}
 
 function revealsHistory(command) {
   const hasPathspec = /\s--\s+\S/.test(command);
@@ -71,7 +83,7 @@ function baseName(p) {
 
 /**
  * Decide whether a tool call must be confirmed by the owner, refused, or let through.
- * @param {{tool_name?: string, tool_input?: Record<string, any>, cwd?: string, agent_type?: string}} payload
+ * @param {{tool_name?: string, tool_input?: Record<string, any>, cwd?: string, agent_type?: string, permission_mode?: string}} payload
  * @param {{projectDir?: string}} [options]
  * @returns {{decision: "ask" | "deny", reason: string} | null}
  */
@@ -127,18 +139,17 @@ export function decide(payload, options = {}) {
       cwd,
       projectDir,
     );
-    if (rel && rel.startsWith("supabase/"))
-      return { decision: "ask", reason: RULE_5 };
+    if (rel && rel.startsWith("supabase/")) return supabaseDecision(payload);
   }
 
   if (tool === "Bash" && command) {
     if (SUPABASE_CLI.test(command) || POSTGRES_CLI.test(command))
-      return { decision: "ask", reason: RULE_5 };
+      return supabaseDecision(payload);
     if (SUPABASE_PATH_IN_COMMAND.test(command) && WRITE_VERB.test(command))
-      return { decision: "ask", reason: RULE_5 };
+      return supabaseDecision(payload);
   }
 
-  if (SUPABASE_MCP_WRITE.test(tool)) return { decision: "ask", reason: RULE_5 };
+  if (SUPABASE_MCP_WRITE.test(tool)) return supabaseDecision(payload);
 
   return null;
 }

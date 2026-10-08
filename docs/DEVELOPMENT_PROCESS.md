@@ -79,8 +79,9 @@ exact edits to the skills and rules. You approve those, and they land in a
 - `/piv-run-epic #<epic>` starts one cloud session per ready ticket (up to 3 at
   a time). Each one stops at its plan gate. Open it in the Claude app and approve.
 - Tickets marked `**Supabase:** yes` aren't dispatched automatically. Run
-  them yourself with `/piv-run-full-loop #N`, so you're there for the database
-  approval prompts.
+  them yourself with `/piv-run-full-loop #N` in a **Default**-mode session, so
+  you're there for the database approval prompts (other modes refuse Supabase
+  changes).
 - After merging PRs, run `/piv-run-epic #<epic>` again for the next wave.
 
 **Run one ticket or bug**
@@ -130,12 +131,12 @@ criteria.
 These live in `.claude/settings.json` and `.claude/hooks/`, and are tested by
 `test/claudeHooks.test.js`.
 
-| Guardrail                           | What it guarantees                                                                                                                                                                                                                                                                      |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session start (`session-start.mjs`) | Every cloud session commits as Gabriel Zelaya, has dependencies installed, and opens knowing its branch, its uncommitted work and any plan in progress. It warns when the branch name breaks hard rule 1.                                                                               |
-| Supabase guard (`guard.mjs`)        | Editing anything under `supabase/`, running database-changing commands, or calling Supabase MCP write tools asks you first (hard rule 5). Env files are never read. The acceptance validator can't read plans or reviews, or search the whole repository or its history without a path. |
-| Attribution settings                | Claude Code adds no co-author trailer, session link or attribution line to commits and PRs (hard rule 3). The pre-commit hook still blocks a Claude git identity.                                                                                                                       |
-| `test/claudeSkills.test.js`         | Every skill and agent is well-formed, every `/skill` and file path they reference exists, and no generic or rule-breaking instruction slips back in.                                                                                                                                    |
+| Guardrail                           | What it guarantees                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session start (`session-start.mjs`) | Every cloud session commits as Gabriel Zelaya, has dependencies installed, and opens knowing its branch, its uncommitted work and any plan in progress. It warns when the branch name breaks hard rule 1.                                                                                                                                             |
+| Supabase guard (`guard.mjs`)        | Editing anything under `supabase/`, running database-changing commands, or calling Supabase MCP write tools asks you first in a Default-mode session, and is refused in every other mode (hard rule 5). Env files are never read. The acceptance validator can't read plans or reviews, or search the whole repository or its history without a path. |
+| Attribution settings                | Claude Code adds no co-author trailer, session link or attribution line to commits and PRs (hard rule 3). The pre-commit hook still blocks a Claude git identity.                                                                                                                                                                                     |
+| `test/claudeSkills.test.js`         | Every skill and agent is well-formed, every `/skill` and file path they reference exists, and no generic or rule-breaking instruction slips back in.                                                                                                                                                                                                  |
 
 ## Where things live
 
@@ -168,5 +169,7 @@ These live in `.claude/settings.json` and `.claude/hooks/`, and are tested by
   this rare.
 - **Playwright can't find its browser in a cloud session.** Use the
   `playwright.local.config.js` fallback in `.claude/references/validation-ladder.md`.
-- **A Supabase prompt appeared.** That's hard rule 5 working. Approve only what
-  the epic's architecture lists as an owner-approval item.
+- **A Supabase prompt appeared, or a Supabase change was refused.** That's hard
+  rule 5 working. To approve a change, switch the session to Default permission
+  mode and approve only what the epic's architecture lists as an owner-approval
+  item, or apply it by hand from the PR's "Manual Supabase steps".

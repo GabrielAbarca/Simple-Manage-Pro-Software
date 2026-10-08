@@ -92,3 +92,9 @@ playwright-report/
 blob-report/
 playwright/.cache/
 .playwright/
+
+# Claude Code: personal settings, review scratch, local Playwright override
+.claude/settings.local.json
+.claude/code-reviews/
+.claude/scratch/
+playwright.local.config.js

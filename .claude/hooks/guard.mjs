@@ -1,3 +1,149 @@
-export function decide() {
+import { readFileSync } from "node:fs";
+import { isAbsolute, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const FILE_EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
+
+const SUPABASE_CLI =
+  /(?:^|[;&|(\n]\s*|\bnpx\s+(?:--yes\s+|-y\s+)?)supabase\s+(?:db|migration|functions|secrets|link|branches|projects)\b/;
+const POSTGRES_CLI = /(?:^|[;&|(\n]\s*)(?:\S*\/)?(?:psql|pg_dump|pg_restore)\b/;
+const SUPABASE_PATH_IN_COMMAND = /(?:^|[\s'"=])(?:\.\/)?supabase\//;
+const WRITE_VERB =
+  /\bsed\s+(?:-[a-zA-Z]*\s+)*-i|\bperl\s+-[a-zA-Z]*i|\btee\b|>{1,2}\s*["']?(?:\.\/)?supabase\/|\b(?:mv|cp|rm|truncate|patch)\b|\bgit\s+(?:checkout|restore|apply|rm|mv)\b/;
+const SUPABASE_MCP_WRITE =
+  /^mcp__.*supabase.*__(?:apply_migration|execute_sql|deploy_edge_function|create_branch|delete_branch|merge_branch|reset_branch|rebase_branch|create_project|pause_project|restore_project)$/i;
+
+const ENV_TOKEN =
+  /(?:^|[\s'"=:<>|;&(/])\.env((?:\.[\w-]+)*)(?=$|[\s'"|;&)<>])/g;
+const PLAN_PATHS = /\.claude\/(?:plans|code-reviews)(?:\/|\b)/;
+
+const RULE_5 =
+  "Hard rule 5: Supabase schema, RLS, Auth, Edge Functions and database changes need the owner's explicit approval first (.claude/references/conventions.md, section supabase).";
+const SECRETS =
+  "Env files hold real credentials and are never read. Use .env.example for the variable names.";
+const HOLDOUT =
+  "The acceptance validator judges the change from the ticket and the code only. Plans and review notes are off limits to it.";
+
+const isEnvFile = (name) =>
+  /^\.env(\.[\w.-]+)?$/.test(name) && name !== ".env.example";
+
+function mentionsEnvFile(text) {
+  for (const m of String(text).matchAll(ENV_TOKEN)) {
+    if (m[1] !== ".example") return true;
+  }
+  return false;
+}
+
+function relativeToProject(filePath, cwd, projectDir) {
+  if (!filePath) return null;
+  const abs = isAbsolute(filePath)
+    ? filePath
+    : resolve(cwd || projectDir, filePath);
+  const rel = relative(projectDir, abs);
+  if (rel.startsWith("..") || isAbsolute(rel)) return null;
+  return rel.split(sep).join("/");
+}
+
+function baseName(p) {
+  return String(p ?? "")
+    .split(/[\\/]/)
+    .pop();
+}
+
+/**
+ * Decide whether a tool call must be confirmed by the owner, refused, or let through.
+ * @param {{tool_name?: string, tool_input?: Record<string, any>, cwd?: string, agent_type?: string}} payload
+ * @param {{projectDir?: string}} [options]
+ * @returns {{decision: "ask" | "deny", reason: string} | null}
+ */
+export function decide(payload, options = {}) {
+  if (!payload || typeof payload !== "object") return null;
+  const tool = String(payload.tool_name ?? "");
+  const input =
+    payload.tool_input && typeof payload.tool_input === "object"
+      ? payload.tool_input
+      : {};
+  const projectDir =
+    options.projectDir ||
+    process.env.CLAUDE_PROJECT_DIR ||
+    payload.cwd ||
+    process.cwd();
+  const cwd = payload.cwd || projectDir;
+  const command = typeof input.command === "string" ? input.command : "";
+
+  if (payload.agent_type === "acceptance-validator") {
+    const targets = [
+      input.file_path,
+      input.path,
+      input.pattern,
+      input.glob,
+      command,
+    ]
+      .filter((v) => typeof v === "string")
+      .map((v) => v.replace(/\\/g, "/"));
+    if (targets.some((t) => PLAN_PATHS.test(t)))
+      return { decision: "deny", reason: HOLDOUT };
+  }
+
+  if (tool === "Read" && isEnvFile(baseName(input.file_path)))
+    return { decision: "deny", reason: SECRETS };
+  if (
+    tool === "Grep" &&
+    (isEnvFile(baseName(input.path)) || isEnvFile(baseName(input.glob)))
+  )
+    return { decision: "deny", reason: SECRETS };
+  if (tool === "Bash" && mentionsEnvFile(command))
+    return { decision: "deny", reason: SECRETS };
+
+  if (FILE_EDIT_TOOLS.has(tool)) {
+    const rel = relativeToProject(
+      input.file_path ?? input.notebook_path,
+      cwd,
+      projectDir,
+    );
+    if (rel && rel.startsWith("supabase/"))
+      return { decision: "ask", reason: RULE_5 };
+  }
+
+  if (tool === "Bash" && command) {
+    if (SUPABASE_CLI.test(command) || POSTGRES_CLI.test(command))
+      return { decision: "ask", reason: RULE_5 };
+    if (SUPABASE_PATH_IN_COMMAND.test(command) && WRITE_VERB.test(command))
+      return { decision: "ask", reason: RULE_5 };
+  }
+
+  if (SUPABASE_MCP_WRITE.test(tool)) return { decision: "ask", reason: RULE_5 };
+
   return null;
+}
+
+function main() {
+  let payload;
+  try {
+    payload = JSON.parse(readFileSync(0, "utf8"));
+  } catch {
+    return;
+  }
+  const result = decide(payload);
+  if (!result) return;
+  process.stdout.write(
+    JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: result.decision,
+        permissionDecisionReason: result.reason,
+      },
+    }),
+  );
+}
+
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1])
+) {
+  try {
+    main();
+  } catch {
+    process.exitCode = 0;
+  }
 }

@@ -79,8 +79,9 @@ exact edits to the skills and rules. You approve those, and they land in a
 - `/piv-run-epic #<epic>` starts one cloud session per ready ticket (up to 3 at
   a time). Each one stops at its plan gate. Open it in the Claude app and approve.
 - Tickets marked `**Supabase:** yes` aren't dispatched automatically. Run
-  them yourself with `/piv-run-full-loop #N`, so you're there for the database
-  approval prompts.
+  them yourself with `/piv-run-full-loop #N` in a **Default**-mode session, so
+  you're there for the database approval prompts (other modes refuse Supabase
+  changes).
 - After merging PRs, run `/piv-run-epic #<epic>` again for the next wave.
 
 **Run one ticket or bug**

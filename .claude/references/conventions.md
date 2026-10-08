@@ -124,7 +124,8 @@ and `/piv-fix-review-findings`:
   - validation can't reach PASS;
   - a fix needs a change to a frozen acceptance test, a product decision, or
     breaking an epic decision;
-  - the Supabase guard asked and the owner declined or didn't answer;
+  - the Supabase guard refused the change (the session isn't in Default
+    permission mode), or asked and the owner declined or didn't answer;
   - a pushed commit turns out to have the wrong author or a trailer. Rewriting
     it needs a force-push, which needs the owner's OK, and it changes the
     red-commit sha.

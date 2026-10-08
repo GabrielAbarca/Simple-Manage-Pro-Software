@@ -148,4 +148,36 @@ Outcome:
 
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +1 ~8 −0 · **Lines:** +254 −30 · **Review rounds:** 2 (round 2 docs-only) · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (498; 1 known Node-22 ICU failure, also red on `main`) · build ✅ · e2e ✅ (119) · acceptance validator: PASS (probe 831/0)
+
+### What went well
+
+- Phase R produced clean reds on the first run (assertion mismatches, no import errors). G1 and G2 were correctly modelled as guards, green from the start.
+- The validator's independent probe used none of the test's inputs (other CLI subcommands, other MCP prefixes, `null` and `""` modes) and still passed. Real evidence beyond the authored tests.
+- A single `supabaseDecision()` helper replaced four duplicated returns, so no Supabase surface can miss the mode check.
+
+### Divergences from the plan
+
+- **Review round 2 scope:** planned both agents (per conventions, section loop) · actual: code-reviewer only, on the docs-only fix commit · why: no code or test changed, so the acceptance verdict couldn't change · type: better approach found (process).
+
+### Challenges
+
+- **Pilot finding 1 (the reason for this ticket):** a hook `ask` doesn't prompt in permissive cloud permission modes. Found only by a live write.
+- **Pilot finding 2:** the validator's coupling recipe restores only `src`, `public` and `*.html`. A change in `.claude/` needed a manual hint in the dispatch prompt.
+- **Pilot finding 3:** the coupling recipe's `xargs rm -f "$W/{}"` was blocked by a sandbox safety check. Harmless here (no added files), but it would fail for tickets that add files.
+- The first command was typed in plan mode, so only the read-only state step ran.
+
+### Skipped
+
+- None.
+
+### Recommendations
+
+- **Acceptance validator / ladder:** restore _every_ implementation path changed since RED (`git diff --name-only RED HEAD` minus the acceptance test files), not a fixed `src public *.html` list. Remove added files with `git rm -q --cached` plus `git clean`, or `git checkout RED -- .`, instead of `xargs rm`.
+- **Conventions, section loop:** allow a fix round whose diff touches only docs or prose to be re-reviewed by the code-reviewer alone.
+- **piv-run-full-loop:** in step 0, check `permission_mode` and stop early with "turn off plan mode" if it's plan, instead of discovering it at the first write.
+- **Ticket slicing:** n/a (free-form). Size S was right.

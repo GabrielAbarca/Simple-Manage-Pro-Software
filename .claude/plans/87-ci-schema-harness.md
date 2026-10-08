@@ -464,6 +464,31 @@ unrelated to this branch.
 | AC3 | unit | `expected { ok: false, counts: {}, …(2) } to match object { ok: false, tables: [ 'guardians' ] }` | ✅ 1180 ms  |
 | AC4 | unit | `expected 0 to be greater than 0`                                                                 | ✅          |
 
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** UNPROVEN (AC1, AC2, AC3) · AC4 PASS
+
+| AC  | Kind | Exists | Faithful | Passes  | Coupled                                        | Frozen    | Probe | Verdict  |
+| --- | ---- | ------ | -------- | ------- | ---------------------------------------------- | --------- | ----- | -------- |
+| AC1 | unit | ✅     | ✅       | not run | not run (statically would fail at RED)         | unchanged | n/a   | UNPROVEN |
+| AC2 | unit | ✅     | ✅       | not run | not run (statically would fail at RED)         | unchanged | n/a   | UNPROVEN |
+| AC3 | unit | ✅     | ✅       | not run | not run (statically would fail at RED)         | unchanged | n/a   | UNPROVEN |
+| AC4 | unit | ✅     | ✅       | ✅      | ✅ fails at RED (`scripts`/`.github` reverted) | unchanged | n/a   | PASS     |
+
+The validator could not run AC1–AC3. The guard refused `npx supabase db start`
+and `psql` in this session's permission mode, so it reached no database to
+check "passes" at HEAD or "coupled" at RED.
+
+Findings: 1 High, 1 Medium, 2 Low.
+
+- High: `test/schemaHarness.db.test.js:105,144,158`. AC1–AC3 are UNPROVEN
+  because the evidence is missing (environment), not the behaviour.
+- Medium: `tsconfig.json:10`. `"node"` in the root `types` exposes Node
+  globals to `src/js` (confirmed with a `process`/`Buffer` probe).
+- Low: `scripts/delivery/executors/psql.mjs:39-40,101`. Inherited `PG*`
+  variables apply, and unknown URL parameters are dropped silently.
+- Low: `CLAUDE.md:70`. The CI summary doesn't name the `schema` job.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

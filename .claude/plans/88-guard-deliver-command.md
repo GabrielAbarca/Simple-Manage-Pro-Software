@@ -1,8 +1,8 @@
 # Plan — Ask the owner before the deliver command runs
 
 **Implements:** #88 · **Epic:** #86 · **Branch:** feat/guard-deliver-command
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-08
+**Red commit:** dd410b0
 **Confidence:** 9/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -121,12 +121,14 @@ regression check.
 
 1. AC3 can't be red before the change: it says what must _not_ be blocked, and
    nothing is blocked yet. **Default:** keep it as written, as a guard against
-   over-matching (it goes red if task 1's matcher is too broad).
+   over-matching (it goes red if task 1's matcher is too broad). Resolved: default
+   accepted at the gate.
 2. Also catch `npm run-script deliver`? **Default:** yes, it's the same command
-   and costs one optional group.
+   and costs one optional group. Resolved: default accepted at the gate.
 3. The ticket names auto-accept, bypass and plan for AC2. `auto`, `dontAsk` and
    a missing mode already fall to deny through `supabaseDecision`.
-   **Default:** test the three named modes only.
+   **Default:** test the three named modes only. Resolved: default
+   accepted at the gate.
 
 ## Notes
 

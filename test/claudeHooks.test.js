@@ -34,6 +34,8 @@ const call = (tool_name, tool_input, extra = {}) =>
     { projectDir: ROOT },
   );
 
+const inDefault = { permission_mode: "default" };
+
 describe("guard hook: Supabase changes need the owner's approval", () => {
   it.each([
     ["Edit", { file_path: join(ROOT, "supabase/schema/school_schema.sql") }],
@@ -43,7 +45,7 @@ describe("guard hook: Supabase changes need the owner's approval", () => {
       { file_path: join(ROOT, "supabase/functions/admin-users/index.ts") },
     ],
   ])("asks before %s under supabase/", (tool, input) => {
-    expect(call(tool, input)?.decision).toBe("ask");
+    expect(call(tool, input, inDefault)?.decision).toBe("ask");
   });
 
   it.each([
@@ -54,7 +56,7 @@ describe("guard hook: Supabase changes need the owner's approval", () => {
     "pg_dump -Fc mydb > backup.dump",
     "sed -i 's/a/b/' supabase/schema/school_schema.sql",
   ])("asks before the database-changing command: %s", (command) => {
-    expect(call("Bash", { command })?.decision).toBe("ask");
+    expect(call("Bash", { command }, inDefault)?.decision).toBe("ask");
   });
 
   it.each([
@@ -63,7 +65,7 @@ describe("guard hook: Supabase changes need the owner's approval", () => {
     "mcp__Supabase__deploy_edge_function",
     "mcp__plugin_db_supabase__merge_branch",
   ])("asks before the Supabase MCP write tool %s", (tool) => {
-    expect(call(tool, {})?.decision).toBe("ask");
+    expect(call(tool, {}, inDefault)?.decision).toBe("ask");
   });
 
   it.each([
@@ -77,6 +79,55 @@ describe("guard hook: Supabase changes need the owner's approval", () => {
   ])("allows %s that changes nothing in Supabase", (tool, input) => {
     expect(call(tool, input)).toBeNull();
   });
+});
+
+describe("guard hook: Supabase changes are refused when no prompt can be shown", () => {
+  const supabaseCalls = [
+    ["Edit", { file_path: join(ROOT, "supabase/schema/school_schema.sql") }],
+    ["Bash", { command: "npx supabase db push" }],
+    ["mcp__supabase__execute_sql", {}],
+  ];
+  const promptlessModes = [
+    "bypassPermissions",
+    "acceptEdits",
+    "auto",
+    "dontAsk",
+    "plan",
+    undefined,
+  ];
+  const cases = promptlessModes.flatMap((mode) =>
+    supabaseCalls.map(([tool, input]) => [String(mode), tool, input, mode]),
+  );
+
+  it.each(cases)(
+    "denies Supabase changes when the permission mode would skip the prompt (%s, %s)",
+    (_label, tool, input, mode) => {
+      const extra = mode === undefined ? {} : { permission_mode: mode };
+      expect(call(tool, input, extra)?.decision).toBe("deny");
+    },
+  );
+
+  it("explains how an approved Supabase change gets through", () => {
+    const result = call(
+      "Write",
+      { file_path: "supabase/schema/incremental_new.sql" },
+      { permission_mode: "bypassPermissions" },
+    );
+    expect(result?.reason).toMatch(/rule 5/i);
+    expect(result?.reason).toMatch(/Default/);
+    expect(result?.reason).toMatch(/by hand/i);
+  });
+
+  it.each(promptlessModes.map((mode) => [String(mode), mode]))(
+    "lets non-Supabase calls through in every permission mode (%s)",
+    (_label, mode) => {
+      const extra = mode === undefined ? {} : { permission_mode: mode };
+      expect(
+        call("Edit", { file_path: join(ROOT, "src/js/ui.js") }, extra),
+      ).toBeNull();
+      expect(call("mcp__supabase__list_tables", {}, extra)).toBeNull();
+    },
+  );
 });
 
 describe("guard hook: secrets stay unread", () => {
@@ -167,6 +218,7 @@ describe("guard hook: command-line contract", () => {
           file_path: join(ROOT, "supabase/schema/school_schema.sql"),
         },
         cwd: ROOT,
+        permission_mode: "default",
       }),
     );
     expect(res.status).toBe(0);

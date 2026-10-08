@@ -37,14 +37,15 @@ a stale diagnosis.
 - The same pattern elsewhere (siblings the RCA found): fix them only if the
   plan lists them. Otherwise note them for the PR's "Not in this change".
 - Anything under `supabase/` is an owner-approval item. The guard hook will ask;
-  if the owner declines, stop.
+  if the owner declines, stop. Once it's approved, list the SQL file and what it
+  does under the plan's `## Manual Supabase steps`.
 - A deviation from the strategy gets an AMENDMENTS entry (date, what, why).
 
 ## 4. Turn the regression test green
 
 Run every Phase R command. All must pass. The regression test is frozen like
-any acceptance test (`.claude/references/validation-ladder.md`): change it only
-through an AMENDMENTS entry.
+any acceptance test (`.claude/references/validation-ladder.md`): if it truly needs
+to change, stop and let the owner decide (a halt), never edit it to pass.
 
 Then run `/piv-validate <plan path>`. It must be PASS. Re-walk the issue's
 reported steps (the reproduction from the RCA) and confirm the symptom is gone.

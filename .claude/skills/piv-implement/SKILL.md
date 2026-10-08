@@ -1,6 +1,6 @@
 ---
 name: piv-implement
-description: Executes an approved Simple Manage Pro plan task by task, running each task's own validation before the next, until the acceptance checks committed red are green — without touching frozen tests except through a recorded amendment. Use after the plan is approved (Status Approved), on the ticket branch.
+description: Executes an approved Simple Manage Pro plan task by task, running each task's own validation before the next, until the acceptance checks committed red are green — never editing a frozen acceptance test (a needed change halts for the owner). Use after the plan is approved (Status Approved), on the ticket branch.
 argument-hint: "[path to .claude/plans/<N>-<slug>.md]"
 ---
 
@@ -39,6 +39,10 @@ For each task:
    the ticket (hard rule 8).
 3. Run the task's **Validate** command. The task isn't done until it passes.
    Fix it now rather than carrying a failure forward.
+4. For a task marked **owner approval** (a `**Supabase:** yes` ticket), the
+   guard hook asks the owner before the edit. Once it's approved and done, add the
+   SQL file and what it does, in apply order, to the plan's
+   `## Manual Supabase steps`. If the owner declines, stop (halt).
 
 When the plan is wrong (a file doesn't exist, a pattern differs, a step is
 impossible):
@@ -51,12 +55,15 @@ impossible):
 ## 3. Frozen tests
 
 The acceptance tests from the red commit are frozen (anti-gaming rules in
-`.claude/references/validation-ladder.md`). Don't edit them to make them pass.
-If one is genuinely wrong (it tests something the AC doesn't say), the fix is
-an AMENDMENTS entry that quotes the AC and explains the change, plus the minimal
-test edit. The acceptance validator will check every such change against the
-amendments. Non-acceptance tests you add for internal behaviour are fine to
-write freely.
+`.claude/references/validation-ladder.md`). They're the contract: make the code
+satisfy them, never the other way round. If one is genuinely wrong (it tests
+something the AC doesn't say, or it can't pass with any correct
+implementation), **don't edit it**. Stop with the evidence. That's a halt
+(`.claude/references/conventions.md`, section loop), and the owner decides. Once
+the owner agrees, the change is made with an AMENDMENTS entry that quotes the AC,
+and the ticket's AC line is updated (conventions, section github). Tests you
+add for internal behaviour, beyond the acceptance checks, are yours to write
+freely.
 
 ## 4. Turn Phase R green
 

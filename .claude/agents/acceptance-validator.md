@@ -45,31 +45,63 @@ no evidence the check was ever red.
    `npx playwright test e2e/<f>.spec.js -g "<name>"` (see the browser fallback in
    `.claude/references/validation-ladder.md`). Red means FAIL.
 4. **Coupled to the change.** Prove the test fails without the implementation,
-   in a throwaway worktree so the session's checkout is untouched:
+   in a throwaway worktree so the session's checkout is untouched. Restore the
+   app code (`src`, `public`, the HTML entry points) to RED, which keeps the
+   stubs, and delete anything added since:
    ```bash
    W=$(mktemp -d)/coupling && git worktree add --detach "$W" HEAD
    ln -s "$PWD/node_modules" "$W/node_modules"
-   git -C "$W" diff --name-only --diff-filter=A RED HEAD -- src | xargs -r -I{} rm -f "$W/{}"
-   git -C "$W" checkout RED -- src
+   git -C "$W" diff --name-only --diff-filter=A RED HEAD -- src public '*.html' | xargs -r -I{} rm -f "$W/{}"
+   git -C "$W" checkout RED -- src public '*.html'
    ```
-   Run the AC's check inside `$W`. For e2e, use a `playwright.local.config.js` in
-   `$W` on another port (for example 5299) so you don't reuse a server serving
-   other code. The check **must fail** with an assertion or locator failure. If
-   it still passes, the test doesn't depend on the change: FAIL. Clean up with
-   `git worktree remove --force "$W"`.
+   Run the AC's check inside `$W`: `cd "$W" && npx vitest run …`. For e2e, first
+   write a `playwright.local.config.js` in `$W` that spreads its
+   `playwright.config.js` with port 5299 (`use.baseURL`, `webServer.command`,
+   `webServer.url`, `reuseExistingServer: false`, plus the `executablePath`
+   fallback if needed), then `cd "$W" && npx playwright test -c playwright.local.config.js …`.
+   It must never reuse a server that serves other code. The check **must fail** with an assertion or locator
+   failure. If it still passes, the test doesn't depend on the change: FAIL.
+   Clean up with `git worktree remove --force "$W"`.
 5. **Frozen.** `git diff RED HEAD -- <the AC's test file>`. Report `unchanged`,
    or `changed` with a 3–5 line summary of what changed. Don't judge whether it
    was justified; the caller cross-checks amendments.
 6. **Independent probe** (every `e2e` and `verify` AC). Write your own minimal
    probe **from the AC text alone** to
-   `.claude/scratch/probe-<ticket>-<ac>.spec.js` (gitignored), built on
-   `e2e/fixtures.js` like the `/verify` recipe: sign in with `sessionSeed()`,
-   route Supabase with `routeSupabase`, drive the portal as the role named, and
-   assert the behaviour, plus `expect(writes).toEqual([])` and no `pageerror`.
-   Run it with a local config whose `testDir` is `.claude/scratch`. For
-   `verify` ACs also take screenshots at the stated viewport and language and
-   describe what they show. A probe that can't be built from the ticket text
-   alone means the AC is ambiguous: UNPROVEN, with what was missing.
+   `.claude/scratch/probe-<ticket>-<ac>.spec.js` (gitignored and ignored by
+   ESLint), built on `e2e/fixtures.js` (imported as `../../e2e/fixtures.js`) like
+   the `/verify` recipe: sign in with `sessionSeed()`, route Supabase with
+   `routeSupabase`, drive the portal as the role named, and assert the
+   behaviour, plus `expect(writes).toEqual([])` and no `pageerror`. A `verify`
+   AC's scenario is the text on its line in the ticket. For `verify` ACs, also
+   take screenshots at the stated viewport and language and describe what they
+   show. A probe that can't be built from the ticket text alone means the AC is
+   ambiguous: UNPROVEN, with what was missing.
+
+   Run probes with `.claude/scratch/playwright.probe.config.js`:
+
+   ```js
+   import base from "../../playwright.config.js";
+   const PORT = 5298;
+   export default {
+     ...base,
+     testDir: ".",
+     testMatch: /probe-.*\.spec\.js$/,
+     projects: [{ name: "probe", use: { ...base.projects[0].use } }],
+     use: { ...base.use, baseURL: `http://localhost:${PORT}` },
+     webServer: {
+       ...base.webServer,
+       cwd: "../..",
+       command: `npx vite --port ${PORT} --strictPort`,
+       url: `http://localhost:${PORT}`,
+       reuseExistingServer: false,
+     },
+   };
+   ```
+
+   Run it with `npx playwright test -c .claude/scratch/playwright.probe.config.js`.
+   If the bundled Chromium is missing, add
+   `launchOptions: { ...base.use.launchOptions, executablePath: <installed chromium> }`
+   to `use`, as `.claude/references/validation-ladder.md` describes.
 
 Also, once per run:
 
@@ -81,8 +113,14 @@ Any hit is a FAIL against the AC that file belongs to.
 
 ## Rules
 
-- Write files only under `.claude/scratch/` and the temporary worktree.
-  Never edit source, tests, or the ticket.
+- Write files only under `.claude/scratch/` and the temporary worktree. Never
+  edit source, tests, or the ticket. Delete your probe files and the probe config
+  when you're done.
+- Keep every search scoped. Grep and Glob need an explicit `path` such as
+  `src/js`, `test`, `e2e` or `public`, never the repository root. History
+  commands need a pathspec: `git diff <a> <b> -- <paths>`, `git log -p -- <paths>`,
+  `git show <rev>:<path>`. The guard hook enforces this, because unscoped
+  searches and history would surface the plan.
 - Never post to GitHub.
 - PASS needs every applicable step green. A step you couldn't run means
   UNPROVEN, never PASS.

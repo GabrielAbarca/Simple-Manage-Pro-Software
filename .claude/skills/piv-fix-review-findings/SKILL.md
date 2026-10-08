@@ -43,33 +43,35 @@ loosening anything. Frozen acceptance tests change only through an AMENDMENTS
 entry in the plan, and in `--unattended` mode that's a "Needs your decision"
 item, not a fix.
 
-## 3. Validate and commit
+## 3. Record what the PR must carry
 
-Run `/piv-validate <plan path>`. It must be PASS. Then `/piv-commit` with a
-subject that says what was fixed (for example
-`Escape imported names before rendering the preview`).
-
-## 4. Record what the PR must carry
-
-Append to the plan, under `## Validation`, a **Review** subsection:
+Add the outcome under the current round's `### Review (round n)` subsection in
+the plan's `## Validation` (written by `/piv-review-changes`):
 
 ```
-### Review (round <n>)
 - Fixed: <finding> → <test that proves it>
 - Not in this change: <finding> — <why it's out of scope>
 - Needs your decision: <finding> — <the decision needed, with a recommendation>
 - Won't fix: <finding> — <why>
 ```
 
-`/piv-create-pr` copies those into the PR body. Nothing is posted to GitHub and
-no issues are created. Follow-ups are for the human to file.
+`/piv-create-pr` copies these into the PR body. Nothing is posted to GitHub and
+no issues are created. Follow-ups are for the owner to file.
+
+## 4. Validate, then commit
+
+Run `/piv-validate <plan path>`. It must be PASS. Then `/piv-commit` with a
+subject that says what was fixed (for example
+`Escape imported names before rendering the preview`), including the plan
+update, so the tree is clean for the next review.
 
 ## 5. Rounds
 
-`--unattended`: after fixing, the caller re-runs `/piv-review-changes`. Stop after
-**two** rounds. If an acceptance FAIL/UNPROVEN or a Critical finding is still
-open, the loop halts: the PR opens as a draft with the blocker under "Needs your
-decision".
+`--unattended` follows the one definition in
+`.claude/references/conventions.md` (section loop): every round's fixes are
+re-reviewed, there are at most two fix rounds, and anything still open after
+the final review (an acceptance FAIL or UNPROVEN, a Critical or High finding, or
+a "Needs your decision" item) means the PR opens as a draft.
 
 ## Output
 

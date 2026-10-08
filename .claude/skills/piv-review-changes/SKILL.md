@@ -31,12 +31,16 @@ Send one message with two Agent calls:
 
 - **`code-reviewer`**, prompt: "Review `origin/main...HEAD` on branch
   `<branch>` for ticket #N. The plan is `<plan path>`; read only its
-  AMENDMENTS section. Return findings in the rubric format."
+  AMENDMENTS section. Return findings in the rubric format." For a
+  `**Supabase:** yes` ticket, add: "Supabase: yes. Owner-approved items:
+  <the plan's owner-approval tasks and its Manual Supabase steps>." Changes
+  under `supabase/` beyond those items are still Critical.
 - **`acceptance-validator`**, prompt: "Validate ticket #N against
   `origin/main...HEAD`." Nothing else: **don't** describe the plan, the
-  approach, the files touched, or what you expect. For a free-form task with
-  no ticket, pass the acceptance-check lines verbatim from the plan's Phase R
-  table, and only those.
+  approach, the files touched, or what you expect. If there's no ticket, or
+  the ticket has no `## Acceptance checks` lines, pass the plan's Phase R
+  lines verbatim instead, written in the ticket format
+  (`- ACn · behaviour · kind · where`), and only those.
 
 ## 3. Merge and verify
 
@@ -74,12 +78,29 @@ Save to `.claude/code-reviews/<N>-<slug>.md` (gitignored):
 - …
 ```
 
+## 5. Record the round in the plan
+
+The review file is gitignored and the container won't last, so the evidence
+goes into the committed plan. Append to the plan's `## Validation` section:
+
+```markdown
+### Review (round <n>)
+
+**Verdict:** … · **Acceptance:** …
+<the validator's table, verbatim>
+Findings: <count by severity, one line each with file:line>
+```
+
+Then `/piv-commit` (`Record review round <n> for <title>`). The tree is
+clean again for the next step.
+
 ## Output
 
 Print the verdict, the counts by severity, the acceptance line, and the file
 path. Next:
 
 - findings exist → `/piv-fix-review-findings .claude/code-reviews/<N>-<slug>.md`
-- clean → `/system-execution-report`, then `/piv-create-pr`.
+  (rounds and halts: `.claude/references/conventions.md`, section loop);
+- clean → `/system-execution-report`, `/piv-commit`, then `/piv-create-pr`.
 
 Nothing is posted to GitHub (`.claude/references/conventions.md`, section github).

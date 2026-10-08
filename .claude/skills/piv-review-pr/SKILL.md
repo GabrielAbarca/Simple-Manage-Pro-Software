@@ -16,7 +16,8 @@ section github). The human reads it, then reviews and merges on GitHub.
 ## 1. Fetch the PR
 
 Resolve the input to a PR number. For a branch, use
-`mcp__github__list_pull_requests` with head = branch. Then call
+`mcp__github__list_pull_requests` with `head: "GabrielAbarca:<branch>"` and
+check `head.ref`. Then call
 `mcp__github__pull_request_read` (owner `GabrielAbarca`, repo
 `Simple-Manage-Pro-Software`) for the details (title, body, state, base, head,
 changed files), the diff, and the check runs.

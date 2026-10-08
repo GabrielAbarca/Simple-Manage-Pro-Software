@@ -35,7 +35,8 @@ epic's docs PR first."
 ## 3. Decompose
 
 Size tickets for an agent loop, not a human backlog: a small-to-medium vertical
-slice, typically 300–1,500 lines including tests. Each ticket:
+slice sized S, M or L as the ticket template defines them (up to ~1,500 lines
+including tests). Each ticket:
 
 - is **one testable concern** a user can observe, provable with 2–5 acceptance
   checks;
@@ -48,7 +49,9 @@ slice, typically 300–1,500 lines including tests. Each ticket:
   the epic doc sections;
 - gets a **unique branch name** that follows `.claude/references/conventions.md`
   (section branch) and isn't already taken
-  (`git ls-remote --heads origin <branch>` prints nothing);
+  (`git ls-remote --heads origin <branch>` prints nothing, and no merged plan
+  used it: `git grep -lF "**Branch:** <branch>" origin/main -- .claude/plans`
+  prints nothing);
 - is marked `**Supabase:** yes` if it needs any owner-approval item from the
   architecture doc; those run attended.
 

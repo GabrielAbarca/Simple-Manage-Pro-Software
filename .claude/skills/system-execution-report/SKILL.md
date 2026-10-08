@@ -32,7 +32,7 @@ Fill the plan's `## Execution report` section:
 
 **Files:** +<added> ~<modified> −<deleted> · **Lines:** +<x> −<y> · **Review rounds:** <n> · **Outcome:** ready PR | draft (reason)
 
-### Validation
+### Validation summary
 
 format ✅ · lint ✅ · types ✅ · unit ✅ (<n>) · build ✅ · e2e ✅ (<n>) · acceptance validator: PASS | …
 

@@ -36,12 +36,12 @@ It is gitignored; never commit it. See `/verify` for the full recipe.
 Every acceptance criterion (AC) in a ticket names its check(s) with one of these
 kinds:
 
-| Kind     | Lives in                                       | Red before the change?        | Use for                                                                                              |
-| -------- | ---------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `unit`   | `test/<module>.test.js`, a named `it(...)`     | **Yes**                       | Rules, calculations, parsing, data shaping, gateway queries                                          |
-| `e2e`    | `e2e/<feature>.spec.js`, a named `test(...)`   | **Yes**                       | Anything a user does in a portal: clicks, forms, rendered rows, navigation, language                 |
-| `verify` | Scenario text kept in the plan under the AC id | Evidence only                 | Purely visual criteria that can't be asserted (spacing, visual hierarchy, how a mobile layout looks) |
-| `guard`  | An assertion inside an e2e spec                | **No** (green from the start) | Standing invariants: `expect(writes).toEqual([])`, no `pageerror`                                    |
+| Kind     | Lives in                                                          | Red before the change?        | Use for                                                                                              |
+| -------- | ----------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `unit`   | `test/<module>.test.js`, a named `it(...)`                        | **Yes**                       | Rules, calculations, parsing, data shaping, gateway queries                                          |
+| `e2e`    | `e2e/<feature>.spec.js`, a named `test(...)`                      | **Yes**                       | Anything a user does in a portal: clicks, forms, rendered rows, navigation, language                 |
+| `verify` | Scenario text on the AC line in the ticket (copied into the plan) | Evidence only                 | Purely visual criteria that can't be asserted (spacing, visual hierarchy, how a mobile layout looks) |
+| `guard`  | An assertion inside an e2e spec                                   | **No** (green from the start) | Standing invariants: `expect(writes).toEqual([])`, no `pageerror`                                    |
 
 Rules:
 
@@ -75,13 +75,14 @@ line), then commit the plan, the tests and any stubs together as
 
 ## Anti-gaming rules
 
-1. **Acceptance tests are frozen** after the red commit. Changing one requires an
-   `AMENDMENTS` entry in the plan (what changed, why, and the date). The
-   acceptance validator diffs the AC test files between the red commit and HEAD,
-   and any change without a matching amendment is a FAIL.
+1. **Acceptance tests are frozen** after the red commit. Changing one needs the
+   owner's agreement (at the plan gate, or after a halt), an `AMENDMENTS` entry in
+   the plan (what changed, why, and the date), and the ticket's AC line updated to
+   match. The acceptance validator diffs the AC test files between the red commit
+   and HEAD, and any change without a matching amendment is a FAIL.
 2. **No skipping or focusing.** No `.skip`, `.only`, `.todo`, `test.fixme`,
    `it.skip`, `describe.only`, `xit` or `xdescribe` in the diff
-   (`git diff origin/main...HEAD -- test e2e | grep -nE '\.(skip|only|todo|fixme)\b|\bx(it|describe)\b'`
+   (`git diff origin/main...HEAD -- test e2e | grep -nE '^\+.*(\.(skip|only|todo|fixme)\(|\bx(it|describe)\()'`
    must print nothing).
 3. **No loosened assertions.** Don't weaken `toEqual` into `toBeTruthy`, widen
    a regex, or catch and ignore an error to make a test pass.
@@ -92,8 +93,9 @@ line), then commit the plan, the tests and any stubs together as
    `e2e/fixtures.js` to weaken `routeSupabase`'s write refusal. Extending
    `rowMatches` for a new filter is fine.
 6. **Coupling.** An acceptance test must fail again when the implementation is
-   removed. The acceptance validator proves this by restoring `src/` from
-   `origin/main` and re-running the checks.
+   removed. The acceptance validator proves this in a throwaway worktree:
+   it restores `src/`, `public/` and the HTML entry points to the red commit
+   (keeping the stubs), deletes files added since, and re-runs the checks.
 
 ## Standing invariants (every ticket, no AC needed)
 

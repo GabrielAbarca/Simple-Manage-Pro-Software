@@ -130,12 +130,12 @@ criteria.
 These live in `.claude/settings.json` and `.claude/hooks/`, and are tested by
 `test/claudeHooks.test.js`.
 
-| Guardrail                           | What it guarantees                                                                                                                                                                                                        |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session start (`session-start.mjs`) | Every cloud session commits as Gabriel Zelaya, has dependencies installed, and opens knowing its branch, its uncommitted work and any plan in progress. It warns when the branch name breaks hard rule 1.                 |
-| Supabase guard (`guard.mjs`)        | Editing anything under `supabase/`, running database-changing commands, or calling Supabase MCP write tools asks you first (hard rule 5). Env files are never read. The acceptance validator can't read plans or reviews. |
-| Attribution settings                | Claude Code adds no co-author trailer, session link or attribution line to commits and PRs (hard rule 3). The pre-commit hook still blocks a Claude git identity.                                                         |
-| `test/claudeSkills.test.js`         | Every skill and agent is well-formed, every `/skill` and file path they reference exists, and no generic or rule-breaking instruction slips back in.                                                                      |
+| Guardrail                           | What it guarantees                                                                                                                                                                                                                                                                      |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session start (`session-start.mjs`) | Every cloud session commits as Gabriel Zelaya, has dependencies installed, and opens knowing its branch, its uncommitted work and any plan in progress. It warns when the branch name breaks hard rule 1.                                                                               |
+| Supabase guard (`guard.mjs`)        | Editing anything under `supabase/`, running database-changing commands, or calling Supabase MCP write tools asks you first (hard rule 5). Env files are never read. The acceptance validator can't read plans or reviews, or search the whole repository or its history without a path. |
+| Attribution settings                | Claude Code adds no co-author trailer, session link or attribution line to commits and PRs (hard rule 3). The pre-commit hook still blocks a Claude git identity.                                                                                                                       |
+| `test/claudeSkills.test.js`         | Every skill and agent is well-formed, every `/skill` and file path they reference exists, and no generic or rule-breaking instruction slips back in.                                                                                                                                    |
 
 ## Where things live
 

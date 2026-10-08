@@ -26,13 +26,13 @@ plan gate, for the owner. This skill only dispatches; it never implements.
 
 ## 2. Classify every ticket
 
-| Class         | Rule                                                                                            |
-| ------------- | ----------------------------------------------------------------------------------------------- |
-| **Done**      | Closed                                                                                          |
-| **In flight** | Open with the `in-progress` label, or with an open PR from its branch                           |
-| **Ready**     | Open, labelled `ticket`, not in flight, and every `**Depends on:**` issue closed by a merged PR |
-| **Attended**  | Ready and `**Supabase:** yes`. It isn't dispatched unattended                                   |
-| **Blocked**   | Anything else (name the open dependency)                                                        |
+| Class         | Rule                                                                                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Done**      | Closed                                                                                                                                                   |
+| **In flight** | Open with the `in-progress` label, or with an open PR from its branch (`head: "GabrielAbarca:<branch>"`)                                                 |
+| **Ready**     | Open, labelled `ticket`, not in flight, and every `**Depends on:**` issue counts as merged (rule in `.claude/references/conventions.md`, section github) |
+| **Attended**  | Ready and `**Supabase:** yes`. It isn't dispatched unattended                                                                                            |
+| **Blocked**   | Anything else (name the open dependency)                                                                                                                 |
 
 A dependency counts only once it's **merged**: tickets branch from `main`, so
 unmerged work isn't there to build on.

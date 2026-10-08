@@ -69,8 +69,8 @@ all three portals), `mobile.spec.js` (Pixel 7 viewport), `errors.spec.js`
 ## Acceptance evidence (PIV loop)
 
 When a ticket's acceptance check has kind `verify`, the scenario (portal,
-role, language, viewport, steps, what must be seen) is recorded in the ticket's
-plan under that criterion's id. Run it as written, take screenshots at the
+role, language, viewport, steps, what must be seen) is the text on that AC's
+line in the ticket (the plan copies it under the same id). Run it as written, take screenshots at the
 stated viewport, and report what they show. Anything that can be asserted
 belongs in a committed `e2e/*.spec.js`, not a scratch spec. The scratch route
 is for evidence only.

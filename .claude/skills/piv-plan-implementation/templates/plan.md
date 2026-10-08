@@ -2,7 +2,7 @@
 
 **Implements:** #<N> · **Epic:** #<E> · **Branch:** <type>/<two-or-three-words>
 **Status:** Draft
-**Red commit:** <sha, filled after Phase R>
+**Red commit:** <short sha of the newest `Add failing checks for` commit, filled at approval>
 **Confidence:** <n>/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -120,10 +120,21 @@ red commit goes here: date — what changed — why.
 
 - (none)
 
+## Manual Supabase steps
+
+The SQL the owner applies by hand for `owner approval` tasks
+(`supabase/schema/incremental_<name>.sql`, in order, with what each does).
+Filled by `/piv-implement`. Otherwise "None."
+
+- None.
+
 ## Validation
 
 Filled by `/piv-implement` and `/piv-validate`: the suite table and the per-AC
-table (red before · green after).
+table (red before · green after). `/piv-review-changes` appends one
+`### Review (round n)` subsection per round (verdict, the acceptance
+validator's table verbatim, findings), and `/piv-fix-review-findings` adds what
+was fixed, left out, or needs a decision under that same subsection.
 
 ## Execution report
 

@@ -28,7 +28,8 @@ This loop is a state machine, so it can be re-invoked after a gate, a restart
 or a context compaction. Determine the state before doing anything:
 
 1. Identify the ticket: from `$ARGUMENTS`; else from the plan whose
-   `**Branch:**` matches the current branch (`grep -l "**Branch:** $(git branch --show-current)" .claude/plans/*.md`);
+   `**Branch:**` matches the current branch
+   (`grep -lE "\*\*Branch:\*\* $(git branch --show-current)( |$)" .claude/plans/*.md`);
    else ask.
 2. Fetch the ticket's branch if it exists remotely
    (`git fetch origin <Branch>`) and check it out.
@@ -40,7 +41,8 @@ or a context compaction. Determine the state before doing anything:
 | Plan `Status: Draft`, red commit present                     | **At gate**  | A5                                                            |
 | Plan `Status: Approved`, no commit after the approval commit | **Approved** | B1                                                            |
 | Implementation commits after approval, no PR                 | **Built**    | B2 (re-validate, then continue)                               |
-| Open PR for the branch                                       | **Shipped**  | Report its URL; handle any CI or review event per the harness |
+| Draft PR for the branch (the loop halted)                    | **Halted**   | H (resume after the owner's decision)                         |
+| Ready PR for the branch                                      | **Shipped**  | Report its URL; handle any CI or review event per the harness |
 | Ticket closed                                                | **Done**     | Report and stop                                               |
 
 Say which state you found and why, in one line, then continue.
@@ -55,10 +57,12 @@ Say which state you found and why, in one line, then continue.
   (`.claude/references/ticket-template.md`).
   - Labelled `bug` → this is the **bug lane**: A4 uses
     `/piv-investigate-issue #N` instead of the plan skill.
-  - `**Depends on:**`: every listed issue must be closed by a merged PR (the
-    `get` result's `closed_by_pull_requests`). Otherwise **stop**: "#N waits
-    on #X". Branches are cut from `main`, so a dependency has to be merged first.
-  - Already has an open PR → state Shipped.
+  - `**Depends on:**`: every listed issue must count as merged (the rule is in
+    `.claude/references/conventions.md`, section github). Otherwise **stop**:
+    "#N waits on #X". Branches are cut from `main`, so a dependency has to be
+    merged first.
+  - Already has an open PR (`mcp__github__list_pull_requests`,
+    `head: "GabrielAbarca:<Branch>"`) → state Shipped or Halted.
   - `**Supabase:** yes` → warn: this run will hit the owner-approval prompts
     and must be attended.
 - Add the `in-progress` label (`mcp__github__issue_write`, method `update`,
@@ -71,9 +75,13 @@ yourself.
 ## A2. Branch
 
 Use the ticket's `**Branch:**` (it must pass the regex in conventions, section
-branch). If the session started on a different branch, including a
-pre-assigned `claude/…` or hash-suffixed one, create the correct branch anyway
-and never push the other:
+branch). A hand-filed issue may have none: derive `fix/<two-or-three-words>`
+for a bug or `feat/<two-or-three-words>` otherwise, check it isn't taken, and
+add the `**Branch:**` line to the top of the issue body
+(`mcp__github__issue_write`, method `update`, keeping the original text) so a
+resumed run finds the same branch. If the session started on a different branch,
+including a pre-assigned `claude/…` or hash-suffixed one, create the correct
+branch anyway and never push the other:
 
 ```bash
 git checkout <Branch> 2>/dev/null || git checkout -b <Branch> origin/main
@@ -82,7 +90,8 @@ git checkout <Branch> 2>/dev/null || git checkout -b <Branch> origin/main
 ## A3. Prime
 
 Run the prime named in `**Prime:**`: `/prime-frontend`, `/prime-backend`, or
-`/prime-codebase` for `both`. Pass `#N`.
+`/prime-codebase` for `both`. With no `**Prime:**` line (a hand-filed bug),
+use `/prime-codebase`. Pass `#N`.
 
 ## A4. Plan and prove red
 
@@ -116,9 +125,10 @@ On **Approve** or **Approve with overrides**:
 
 1. Record each override under Open questions as `Resolved: <answer>`.
 2. An override that changes an acceptance criterion means re-running Phase R for
-   that criterion before approving: update the test, prove it red, and commit
-   it again with the same subject `Add failing checks for <title>`. The newest
-   such commit is the freeze point.
+   that criterion before approving: update the test, prove it red, update the
+   ticket's AC line (conventions, section github), and commit it again with the
+   same subject `Add failing checks for <title>`. The newest such commit is the
+   freeze point.
 3. Set `**Status:** Approved <YYYY-MM-DD>` and fill `**Red commit:**` with
    the short sha of the newest `Add failing checks for` commit.
 4. `/piv-commit` with subject `Approve the plan for <title>`, then `git push`.
@@ -145,23 +155,32 @@ reach PASS, halt.
 acceptance-validator in parallel, in fresh contexts.
 
 **B4. Fix.** If there are findings,
-`/piv-fix-review-findings <review file> --unattended`, then B3 again. Two review
-rounds at most.
+`/piv-fix-review-findings <review file> --unattended`, then B3 again. Rounds
+follow `.claude/references/conventions.md` (section loop): every fix round is
+re-reviewed, with at most two fix rounds.
 
 **B5. Reflect.** `/system-execution-report <plan>`, then `/piv-commit`
 (`Record validation and execution notes for <title>`).
 
 **B6. Ship.** `/piv-create-pr #N`. It opens ready, or as a draft when halted.
 
-**B7. Halt rules.** Open the PR as a **draft** (or stop before the PR if
-nothing is worth showing) with the reason under "Needs your decision" when:
+**B7. Halt rules.** They're defined once, in `.claude/references/conventions.md`
+(section loop). On a halt, open the PR as a **draft** (or stop before the PR if
+nothing is worth showing) with the reason under "Needs your decision", and keep
+the `in-progress` label.
 
-- validation can't reach PASS;
-- after two review rounds an acceptance FAIL or UNPROVEN, or a Critical finding,
-  is still open;
-- the Supabase guard asked and the owner declined or didn't answer;
-- the fix needs a change to a frozen acceptance test, a product decision, or
-  breaking an epic decision.
+## H. Resume a halted run
+
+The owner has answered the "Needs your decision" items, in this session or on
+the draft PR.
+
+1. Read the answers and record them in the plan (AMENDMENTS for anything that
+   changes the plan or a frozen test, which also updates the ticket's AC line).
+2. Resume at the earliest step the answers affect: B1 for code still to write,
+   otherwise B2.
+3. Continue to B6. `/piv-create-pr` updates the existing PR body, and when no halt
+   remains it marks the PR ready (`mcp__github__update_pull_request`,
+   `draft: false`).
 
 ## Final report
 

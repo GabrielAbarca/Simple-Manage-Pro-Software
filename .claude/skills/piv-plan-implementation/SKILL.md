@@ -104,7 +104,12 @@ Follow "Phase R: proving red" in `.claude/references/validation-ladder.md`:
    already exists (tell the user; the ticket may be moot) or the test doesn't
    test it. Fix the test.
 5. Record the red evidence lines in the plan.
-6. Make sure existing tests still pass (`npm test`). The stubs must not break
+6. If any AC's file, test name, kind or wording now differs from the ticket
+   (or the ACs were written here for a hand-filed issue), update the ticket's
+   `## Acceptance checks` lines to match
+   (`.claude/references/conventions.md`, section github). The acceptance validator
+   reads only the ticket.
+7. Make sure existing tests still pass (`npm test`). The stubs must not break
    anything.
 
 ## 7. Commit and push

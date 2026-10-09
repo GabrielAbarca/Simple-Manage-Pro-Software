@@ -524,6 +524,43 @@ Outcomes (unattended policy):
   recipe in `test/schemaHarness.db.test.js` at HEAD and at `6ca0b41`. Then
   mark the PR ready.
 
+### Review (round 2, final)
+
+**Verdict:** clean code, with acceptance blocked by the environment ·
+**Acceptance:** UNPROVEN (AC1, AC2, AC3) · AC4 PASS. Reviewed at `27b10d0`.
+
+| AC  | Kind | Exists | Faithful | Passes  | Coupled           | Frozen    | Probe      | Verdict  |
+| --- | ---- | ------ | -------- | ------- | ----------------- | --------- | ---------- | -------- |
+| AC1 | unit | yes    | yes      | not run | not run           | unchanged | n/a (unit) | UNPROVEN |
+| AC2 | unit | yes    | yes      | not run | not run           | unchanged | n/a (unit) | UNPROVEN |
+| AC3 | unit | yes    | yes      | not run | not run           | unchanged | n/a (unit) | UNPROVEN |
+| AC4 | unit | yes    | yes      | yes     | yes, fails at RED | unchanged | n/a (unit) | PASS     |
+
+The cause is the same as round 1: the guard refused `npx supabase db start`.
+The validator restored `scripts` and `.github` to RED for AC4's coupling check.
+
+Findings: 0 Critical, 0 High (beyond the round-1 acceptance item, still
+open), 0 Medium, 3 Low.
+
+- Not in this change: `scripts/delivery/executors/psql.mjs:86-101` spawns
+  `psql` without `-w` and leaves stdin open as a pipe. With a URL that has no
+  password, `PGPASSWORD=""` also clears any inherited one, so a server that
+  asks for a password makes the run hang instead of failing. That can't
+  happen with the CI URL. Fold it into the deliver ticket that reuses the
+  executor, with the round-1 `PG*` item.
+- Not in this change: `psql.mjs:105-106` builds stdout and stderr with
+  `+= chunk`, so a UTF-8 character split across chunks turns into U+FFFD. It
+  doesn't happen at the audit's output size. Fix with `setEncoding("utf8")`
+  in the same follow-up.
+- Not in this change: `test/schemaHarness.db.test.js:53-54` passes the URL,
+  password included, as `-d url` to its own `psql` helper. It's harmless with
+  the CLI's fixed local password. The file is a frozen acceptance test, so
+  changing it would need an amendment. Fold it in if the test is ever amended
+  for another reason.
+- The reviewer confirmed the round-1 fix with throwaway configs. The scripts
+  config reports type errors in the `.mjs` modules (TS2322) and has no DOM
+  (TS2584). `src/js` still rejects `process` and `Buffer` (TS2591).
+
 ## Execution report
 
 Filled by `/system-execution-report`.

@@ -90,6 +90,32 @@ describe("delivery record file", () => {
     expect(JSON.stringify(stored)).not.toContain("Ana Mora");
   });
 
+  it("accepts only an identifier as an exception's object", () => {
+    const exception = (object) => ({
+      kind: "exception",
+      at: "2026-10-09T21:00:00Z",
+      approver: "Gabriel Zelaya <gzelaya0404@gmail.com>",
+      object,
+      reason: "Recorded on purpose",
+    });
+    for (const object of [
+      "Ana Mora cedula 1-2345-6789",
+      "index: public.students",
+      "public.students.cedula",
+      "index:Ana Mora",
+    ]) {
+      expect(() => validateEntry(demo, exception(object))).toThrow(RecordError);
+    }
+    for (const object of [
+      "index:public.students.cedula",
+      "policy:public.students.students_select_own",
+      "function:public.is_admin()",
+      "function:public.grade_of(uuid,text)",
+    ]) {
+      expect(validateEntry(demo, exception(object)).object).toBe(object);
+    }
+  });
+
   it("writes a record Prettier leaves unchanged", async () => {
     await appendEntry(dir, demo, delivery());
     await appendEntry(dir, demo, {

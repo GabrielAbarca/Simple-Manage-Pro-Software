@@ -123,8 +123,9 @@ Value rules (the "no free text" half of AC2):
 - `path`: `^supabase/[A-Za-z0-9_][A-Za-z0-9_./-]*$`, no `..`
 - `approver`: a git identity, `^[^<>\n]{1,100} <[^<>\s]+@[^<>\s]+>$`
 - `sqlstate`: `^[0-9A-Z]{5}$` or `null`
-- `object`: printable ASCII, 1–200 chars, no leading or trailing space,
-  stored as given (the compare in #93 owns its meaning)
+- `object`: an identifier `kind:name`, 3–200 chars, no spaces
+  (`^(?=.{3,200}$)[a-z][a-z_]*:[A-Za-z0-9_.,()]+$`), stored as given (the
+  compare in #93 owns its meaning; amended in review round 1)
 - `reason`: string, trimmed length 1–500, no control characters; only on
   bypass and exception
 - `ok`: boolean
@@ -276,6 +277,12 @@ red commit goes here: date — what changed — why.
   acceptance file stays byte-identical to the red commit, so the frozen-test
   diff is empty. No acceptance test changed. The Prettier check uses
   Prettier's API with the repo config rather than spawning `npx`.
+- 2026-10-09 — An exception's `object` narrowed from printable ASCII to an
+  identifier `kind:name` with no spaces — review round 1 (Medium) showed the
+  old rule let free text, and so row values, into the record. #93's keys must
+  fit this shape. No acceptance test changed; the proof is
+  `test/deliveryRecordFile.test.js` › "accepts only an identifier as an
+  exception's object".
 
 ## Manual Supabase steps
 
@@ -322,5 +329,16 @@ Findings: 0 Critical · 0 High · 1 Medium · 1 Low
 
 - Medium — `scripts/delivery/record.mjs:91`: an exception's `object` accepts spaces, so it can carry free text.
 - Low — `scripts/delivery/record.mjs:476-481`: a delivery with no `after` fingerprint counts as proved and closes open bypasses.
+
+Outcome:
+
+- Fixed: an exception's `object` could carry free text → narrowed to a
+  `kind:name` identifier; `test/deliveryRecordFile.test.js` › "accepts only an
+  identifier as an exception's object" (red before the fix: `expected function
+to throw an error, but it didn't`).
+- Not in this change: a delivery with no `after` fingerprint (or no units)
+  counts as proved and closes open bypasses — Low; what a proved delivery must
+  carry is decided by #94, which writes them. Suggested follow-up there:
+  `isProved` also requires `fingerprint.after`.
 
 ## Execution report

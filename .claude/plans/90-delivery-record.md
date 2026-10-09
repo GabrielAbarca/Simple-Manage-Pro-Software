@@ -271,12 +271,39 @@ Resolved 2026-10-09: approved at the gate with every default standing.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-09 — Task 3's tests live in `test/deliveryRecordFile.test.js`
+  instead of a new `describe` in `test/deliveryRecord.test.js` — the
+  acceptance file stays byte-identical to the red commit, so the frozen-test
+  diff is empty. No acceptance test changed. The Prettier check uses
+  Prettier's API with the repo config rather than spawning `npx`.
 
 ## Manual Supabase steps
 
 - None.
 
 ## Validation
+
+Run by `/piv-validate` on 2026-10-09, before review.
+
+| Check               | Result                     | Notes                                                                                                                                                  |
+| ------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| format:check        | ✅                         |                                                                                                                                                        |
+| lint                | ✅                         |                                                                                                                                                        |
+| typecheck           | ✅                         | needed `npm ci` first (stale `node_modules` lacked `@types/node`)                                                                                      |
+| unit                | ✅ 533 passed, 19 skipped  | under Node 24 (CI's). Node 22 in this container fails only `test/i18n.test.js` › "formats 24h time strings…", identically on `origin/main` (ICU space) |
+| build               | ✅                         |                                                                                                                                                        |
+| e2e                 | ✅ 119 passed              | local config: yes (`executablePath` → `/opt/pw-browsers/chromium-1194`), the default build isn't installed here                                        |
+| skip/only           | ✅ clean                   |                                                                                                                                                        |
+| entry-point order   | ✅                         | `admin.js`'s first import is `errorHandler.js` at line 22, past the quick check's 20-line window                                                       |
+| supabase/ untouched | ✅                         |                                                                                                                                                        |
+| frozen AC file      | ✅ unchanged since 78f6ad9 |                                                                                                                                                        |
+
+| AC  | Kind | Red before (Phase R)                                                 | Green after |
+| --- | ---- | -------------------------------------------------------------------- | ----------- |
+| AC1 | unit | `expected false to be true`                                          | ✅          |
+| AC2 | unit | `expected '' not to be ''`                                           | ✅          |
+| AC3 | unit | `expected undefined to deeply equal { unit: 'unit-1', sqlstate: … }` | ✅          |
+| AC4 | unit | `promise resolved "null" instead of rejecting`                       | ✅          |
+| AC5 | unit | `expected +0 to be 2`                                                | ✅          |
 
 ## Execution report

@@ -435,6 +435,12 @@ typecheck` runs both. Reason: `"node"` in the root `types` let `src/js`
   type-check `process` and `Buffer`, which don't exist in the browser. The
   delivery scripts are still type-checked, which is the ticket's intent. No
   acceptance test changed.
+- 2026-10-09 — The owner resolved the PR's two "Needs your decision" items.
+  (1) AC1–AC3 coupling: the owner accepted the author's red evidence at
+  `6ca0b41` (Phase R) together with CI's independent green run (`schema` job
+  on `89ff4da`, `Tests 3 passed (3)`), so the PR is marked ready. (2) Postgres
+  major: the projects' version is unknown, so the job stays on 17 only (the
+  plan's default). No plan task or acceptance test changed.
 
 ## Manual Supabase steps
 

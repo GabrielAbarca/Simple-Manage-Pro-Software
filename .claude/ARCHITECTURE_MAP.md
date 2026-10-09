@@ -271,3 +271,15 @@ Auth, migrations, or the database without asking first.
 
 Docs: `docs/ONBOARDING_RUNBOOK.md` (provisioning), `docs/BACKUP_RESTORE.md`
 (backups + restore drill), `docs/ACCOUNT_RECOVERY.md` (who resets a password).
+
+## Delivery
+
+How SQL changes are proved and delivered (`docs/epics/delivery-pipeline/`).
+Later tickets insert their rows in path order.
+
+| Path                                  | Responsibility                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/ci.yml` (`schema`) | On every PR, starts the CLI's Postgres from `scripts/delivery/harness/` (`supabase db start`, no secret) and runs `test/schemaHarness.db.test.js`: the baseline and the audit in both shapes.     |
+| `scripts/delivery/executors/psql.mjs` | The `psql` executor: runs a file or a statement with `ON_ERROR_STOP` and returns pass or fail, the SQLSTATE, notices and rows. The password goes through the environment, never the command line. |
+| `scripts/delivery/proofs.mjs`         | The audit proof (passes only on `rls_audit.sql`'s summary line, names the failed check) and the per-table demo-lock proof (0 on a school shape, 3 on the demo). Reused by later delivery code.    |
+| `scripts/delivery/schemaHarness.mjs`  | The two shapes: baseline → school proofs, then `demo_lockdown.sql` → demo proofs, with optional fixture files after each step.                                                                    |

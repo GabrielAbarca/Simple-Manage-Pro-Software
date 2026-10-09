@@ -563,4 +563,100 @@ open), 0 Medium, 3 Low.
 
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +13 ~6 −0 · **Lines:** +1357 −1 (the plan alone is about 560) ·
+**Review rounds:** 2 (one fix round) · **Outcome:** draft. AC1–AC3 are
+UNPROVEN by the independent validator because the guard refused database
+access in this session's permission mode.
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ (two configs) · unit ✅ (507; one pre-existing
+Node 22/ICU failure that also fails on `main` here) · build ✅ · e2e ✅ (119,
+local Chromium config) · acceptance validator: AC4 PASS, AC1–AC3 UNPROVEN
+(not run). The author ran AC1–AC3 red at `6ca0b41` and green at HEAD.
+
+### What went well
+
+- **Running the S1 spike before writing the plan.** The bare-image failure
+  (`auth.uid()` reads only `request.jwt.claim.sub`) showed up in minutes, and
+  the decision rule picked `supabase db start` without debate. Gate 1 had
+  evidence instead of a guess.
+- **Checking both fixtures by hand on a real clone before the red commit.** It
+  showed that unlocking `guardians` leaves the audit green. That is the case
+  only the per-table proof catches, and it is why the fixture avoids `rooms`
+  and `attendance`, which the audit uses to detect the lock.
+- **Cloning a template per test.** Isolation came for free, AC1–AC3 run in
+  about 1 s each, and the server's own `postgres` database is never touched.
+- **The fresh-context reviewer.** It caught the `types: ["node"]` leak that
+  the author's own probe had passed: the probe checked that `src/js` still
+  compiled, not that Node globals were still rejected.
+
+### Divergences from the plan
+
+- **Typecheck config.** Planned: add `scripts/delivery/**/*.mjs` and `"node"`
+  to the root `tsconfig.json`, as the ticket said. Actual: a separate
+  `tsconfig.scripts.json`, with `typecheck` running both. Why: the root change
+  let `src/js` type-check `process` and `Buffer`. Type: plan assumption wrong.
+  The ticket's wording ("add to tsconfig.json include, with Node types")
+  became a plan task with no check that browser code still rejects Node
+  globals.
+- **Task 6 validation.** Planned: restart the CLI database from the committed
+  workdir. Actual: a byte-for-byte diff against the config the running server
+  used. Why: partway through, the guard began refusing `psql` and
+  `supabase db` command lines in this permission mode. Type: missing context.
+- **An extra unit test file** (`test/deliveryProofs.test.js`, 7 tests). Not
+  planned. It covers the "no summary line means fail" rule and the stderr
+  parsing, which the db-only ACs don't. Type: better approach found.
+
+### Challenges
+
+- **The guard against a local container.** `.claude/hooks/guard.mjs` matches
+  `psql` and `supabase db` by command text. That also catches a filename
+  (`executors/psql.mjs` inside a `node -e` script) and a throwaway local
+  database the ticket itself prescribes. Early in the session the same
+  commands ran without a prompt; later, outside Default mode, they were
+  denied. The independent validator then couldn't run AC1–AC3 in either
+  round. That is what keeps this PR a draft.
+- **Container restarts.** Each worker restart stopped `dockerd`. The CLI
+  container has a restart policy, so restarting the daemon brought it back,
+  but every resume needed that step first.
+- **A template from `postgres`.** The pg_net and pg_cron workers stay
+  connected to `postgres`, so `create database … template postgres` fails
+  unless a superuser ends their sessions first. The test does that once, with
+  the CLI's local `supabase_admin`, and marks the copy `is_template`.
+- **Environment noise in the ladder.** One i18n case fails under Node 22 /
+  ICU 77 (CI runs Node 24). Playwright's bundled Chromium build was missing.
+  Full e2e runs hit random `page.goto` timeouts that pass on re-run. Each one
+  needed proving to be unrelated.
+
+### Skipped
+
+- Restarting the CLI database from the committed workdir (task 6). The guard
+  refused it; CI's `schema` job is the first run from that path.
+- Independent proof of AC1–AC3 (passes and coupled). Waiting on the owner.
+
+### Recommendations
+
+- **References (validation ladder, acceptance validator):** a ticket whose
+  checks need a local database (here `supabase db start`) can't be
+  independently validated outside Default mode. Either let the guard allow
+  `supabase db start` / `stop` and `psql` aimed at `127.0.0.1:54322`, or tell
+  the loop up front, at A1, that such a ticket must run in a Default-mode
+  session, the same warning `Supabase: yes` already gets. Today it fails late,
+  at B3.
+- **Validation ladder:** the coupling recipe restores only `src`, `public` and
+  the HTML entry points. Tooling tickets live in `scripts/` and `.github/`.
+  The validator worked that out each time, but the ladder should say "restore
+  every path the change touches" (or list `scripts/` and `.github/`).
+- **piv-validate:** the entry-point-order check uses `head -20`, and
+  `src/js/admin.js`'s header comment pushes `import "./errorHandler.js"` to
+  line 22, so it reports a false failure on every branch. Use the first
+  `^import ` line wherever it is, for example
+  `grep -m1 -E '^import ' "$f" | grep -q errorHandler`.
+- **Plan skill:** when a ticket says to widen `tsconfig` types or lib, add a
+  task check that the browser config still rejects what it should (a
+  `process` probe in `src/js`), not only that it still compiles.
+- **Ticket slicing:** size and checks were right for an M ticket. AC4 guards
+  the one silent failure, skipped db tests showing green. The Postgres major of
+  the projects is still unrecorded; the deliver or fingerprint tickets should
+  capture it.

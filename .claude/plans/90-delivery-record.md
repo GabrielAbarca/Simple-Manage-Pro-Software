@@ -306,4 +306,21 @@ Run by `/piv-validate` on 2026-10-09, before review.
 | AC4 | unit | `promise resolved "null" instead of rejecting`                       | ✅          |
 | AC5 | unit | `expected +0 to be 2`                                                | ✅          |
 
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 1 Low
+
+- Medium — `scripts/delivery/record.mjs:91`: an exception's `object` accepts spaces, so it can carry free text.
+- Low — `scripts/delivery/record.mjs:476-481`: a delivery with no `after` fingerprint counts as proved and closes open bypasses.
+
 ## Execution report

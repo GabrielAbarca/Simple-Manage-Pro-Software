@@ -1,8 +1,8 @@
 # Plan — Describe every project and delivery unit in a checked manifest
 
 **Implements:** #89 · **Epic:** #86 · **Branch:** feat/delivery-manifest
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-09
+**Red commit:** 50978b0
 **Confidence:** 8/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -233,19 +233,19 @@ No app code changes; e2e runs once at the end as a regression check.
 
 1. The pilot's origin: only `test/siteOrigin.test.js` names
    `pilot.simplemanagepro.com`. **Default:** `https://pilot.simplemanagepro.com`;
-   the owner corrects it at the gate if the pilot is served elsewhere.
+   the owner corrects it at the gate if the pilot is served elsewhere. Resolved: default accepted at the gate.
 2. The demo ref is taken from `.mcp.json` (the project linked to the GitHub
-   integration). **Default:** `jgszeiccaycnpzhuwclb`.
+   integration). **Default:** `jgszeiccaycnpzhuwclb`. Resolved: default accepted at the gate.
 3. Window format: per-slot `days` 1–7 (1 = Monday) with `HH:MM` `from`/`to`
    and one IANA timezone per project; no overnight slots (an evening window
-   past midnight is two slots). **Default:** as described.
+   past midnight is two slots). **Default:** as described. Resolved: default accepted at the gate.
 4. A check is "a single select" by shape only (one statement starting with
    `select`). It does not prove the statement is read-only (`select
 some_volatile_fn()` passes); the deliver command (#94) should run checks in a
    read-only transaction. **Default:** shape check here, read-only enforcement
-   noted for #94.
+   noted for #94. Resolved: default accepted at the gate.
 5. `functions` and `auth` are plain string lists for now; #101 gives them
-   meaning. **Default:** arrays of non-empty strings, empty for `conducta`.
+   meaning. **Default:** arrays of non-empty strings, empty for `conducta`. Resolved: default accepted at the gate.
 
 ## Notes
 

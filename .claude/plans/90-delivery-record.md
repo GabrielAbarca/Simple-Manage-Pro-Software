@@ -379,4 +379,100 @@ an error, but it didn't`).
   to — Low; the writer never creates one (the first append creates the file
   with its entry), and no record is committed until #102/#104.
 
+### Review (final)
+
+**Verdict:** clean (no Critical or High) · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 2 Low. Both fix rounds are spent,
+so all three are open and go to the PR:
+
+- Medium (open) — `scripts/delivery/record.mjs:89`: the approver's email half
+  (`<[^<>\s]+@[^<>\s]+>`) still accepts commas, colons and digits, so
+  `Gabriel Zelaya <Ana,Mora,cedula:1-2345-6789,7-B@x>` is stored. Suggested
+  fix: `<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}>` plus a rejected case
+  in `test/deliveryRecordFile.test.js`.
+- Low (open) — `scripts/delivery/record.mjs:279-286, 457`: `after: null` is
+  accepted without a `failure`, and `failure.unit` isn't checked against the
+  entry's units (same root as rounds 1–2's Low; for #94).
+- Low (open) — `scripts/delivery/record.mjs:428-439`: two concurrent appends
+  to one project share `<file>.tmp` and the last rename wins. Deliveries run
+  one at a time from the owner's terminal; an exclusive tmp create (`wx`)
+  would make a second writer fail instead.
+
 ## Execution report
+
+**Files:** +4 ~1 −0 · **Lines:** +1273 −6 · **Review rounds:** 2 fix rounds + final · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (535, under Node 24) · build ✅ · e2e ✅ (119, local Chromium config) · acceptance validator: PASS (all three rounds)
+
+### What went well
+
+- Building each stored entry key by key from an allow-list made AC2 and AC3
+  hold by construction; neither review found a stray-key path.
+- The canonical-text check in `load()` turned "unchanged byte for byte" into
+  a guarantee rather than a property of `JSON.stringify`, and caught hand
+  edits for free.
+- Every Phase R check was a valid assertion red on the first run, because the
+  tests probed file existence with `existsSync` instead of reading a missing
+  file.
+
+### Divergences from the plan
+
+- **Extra tests in a separate file** — planned: a new `describe` in
+  `test/deliveryRecord.test.js` · actual: `test/deliveryRecordFile.test.js` ·
+  why: keeps the frozen AC file byte-identical to the red commit · type: better
+  approach found
+- **Exception `object` narrowed** — planned: printable ASCII · actual:
+  `kind:name` identifier, no spaces · why: the planned rule was itself a
+  free-text field · type: security or performance
+- **Approver name narrowed** — planned: anything but `<>\n` · actual:
+  letters, marks, spaces, `.'-` · why: digits and commas let row values in ·
+  type: security or performance
+
+### Challenges
+
+- The plan's own value rules were the leak: two of three review rounds found
+  a schema field (object, approver) loose enough to carry a cédula. Each
+  narrowing exposed the next loose field (the approver's email half is still
+  open).
+- The container's `node_modules` predated `@types/node`, so typecheck failed
+  until `npm ci`; Node 22's ICU fails one i18n test that passes on Node 24
+  (CI's version); the default Playwright Chromium build is absent, so e2e ran
+  through `playwright.local.config.js`.
+- The acceptance validator's coupling recipe restores only `src`, `public` and
+  `*.html`; for a `scripts/` module it had to add `scripts` by hand to prove
+  anything.
+
+### Skipped
+
+- The final review's Medium (approver email half) and three Lows — the loop's
+  two fix rounds were spent; all are listed in the PR body.
+
+### Recommendations
+
+- **Plan skill:** for a "holds no row values" ticket, require every string
+  field in the planned schema to name its pattern and show one row-value
+  string it rejects; it would have caught `object` and `approver` (both
+  halves) at the gate instead of in three review rounds.
+- **Implement / validate / review skills:** the acceptance validator's
+  coupling step should restore every directory the diff touches outside
+  `test/` and `e2e/`, not a fixed `src public *.html` list; `/piv-validate`'s
+  entry-point check should grep the first `import` line rather than the first
+  20 lines (`admin.js` imports at line 22).
+- **References:** the validation ladder could note that unit tests must pass
+  under `engines.node` (24), and how to run them there (`npx node@24
+node_modules/vitest/vitest.mjs run`) when the container ships Node 22.
+- **CLAUDE.md / ARCHITECTURE_MAP:** None.
+- **Ticket slicing:** right size (M, ~500 lines of module). The ACs were
+  right; AC2's "free text anywhere but a reason" deserved a list of the fields
+  it covers.

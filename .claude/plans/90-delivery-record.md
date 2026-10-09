@@ -121,7 +121,9 @@ Value rules (the "no free text" half of AC2):
 - timestamp: `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$` and a real
   date; `startedAt <= endedAt`
 - `path`: `^supabase/[A-Za-z0-9_][A-Za-z0-9_./-]*$`, no `..`
-- `approver`: a git identity, `^[^<>\n]{1,100} <[^<>\s]+@[^<>\s]+>$`
+- `approver`: a git identity whose name is letters, spaces and `.'-` only,
+  `^[\p{L}\p{M}][\p{L}\p{M} .'-]{0,99} <[^<>\s]+@[^<>\s]+>$` (u flag;
+  amended in review round 2)
 - `sqlstate`: `^[0-9A-Z]{5}$` or `null`
 - `object`: an identifier `kind:name`, 3–200 chars, no spaces
   (`^(?=.{3,200}$)[a-z][a-z_]*:[A-Za-z0-9_.,()]+$`), stored as given (the
@@ -283,6 +285,11 @@ red commit goes here: date — what changed — why.
   fit this shape. No acceptance test changed; the proof is
   `test/deliveryRecordFile.test.js` › "accepts only an identifier as an
   exception's object".
+- 2026-10-09 — The approver's name narrowed from anything but `<>\n` to
+  letters, marks, spaces and `.'-` — review round 2 (Medium): digits, commas
+  and control characters let row values into every entry. No acceptance test
+  changed; the proof is `test/deliveryRecordFile.test.js` › "accepts only a
+  name and an email as the approver".
 
 ## Manual Supabase steps
 
@@ -340,5 +347,36 @@ to throw an error, but it didn't`).
   counts as proved and closes open bypasses — Low; what a proved delivery must
   carry is decided by #94, which writes them. Suggested follow-up there:
   `isProved` also requires `fingerprint.after`.
+
+### Review (round 2)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 2 Low
+
+- Medium — `scripts/delivery/record.mjs:89`: the approver's name part is free text (digits, commas, control characters).
+- Low — `scripts/delivery/record.mjs:273`: a delivery with no units still closes open bypasses (same root as round 1's Low).
+- Low — `scripts/delivery/record.mjs:93`: appending to a canonical record with zero entries throws "would not stay append-only".
+
+Outcome:
+
+- Fixed: the approver's name could carry free text → letters, marks, spaces
+  and `.'-` only; `test/deliveryRecordFile.test.js` › "accepts only a name and
+  an email as the approver" (red before the fix: `expected function to throw
+an error, but it didn't`).
+- Not in this change: an empty `units` list closing bypasses — Low; folded
+  into round 1's follow-up for #94 (a proved delivery needs units and an
+  `after` fingerprint).
+- Not in this change: a hand-made record with zero entries can't be appended
+  to — Low; the writer never creates one (the first append creates the file
+  with its entry), and no record is committed until #102/#104.
 
 ## Execution report

@@ -86,7 +86,7 @@ const ID = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const HASH = /^[0-9a-f]{64}$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 const PATH = /^supabase\/[A-Za-z0-9_][A-Za-z0-9_./-]*$/;
-const APPROVER = /^[^<>\n]{1,100} <[^<>\s]+@[^<>\s]+>$/;
+const APPROVER = /^[\p{L}\p{M}][\p{L}\p{M} .'-]{0,99} <[^<>\s]+@[^<>\s]+>$/u;
 const SQLSTATE = /^[0-9A-Z]{5}$/;
 const OBJECT = /^(?=.{3,200}$)[a-z][a-z_]*:[A-Za-z0-9_.,()]+$/;
 const PROJECT = /^[a-z0-9][a-z0-9-]{0,62}$/;

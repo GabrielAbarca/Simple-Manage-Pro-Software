@@ -116,6 +116,26 @@ describe("delivery record file", () => {
     }
   });
 
+  it("accepts only a name and an email as the approver", () => {
+    for (const approver of [
+      "Ana Mora 1-2345-6789 cedula, 7-B <a@b.c>",
+      "X\r\u0000\t <a@b.c>",
+      "Gabriel Zelaya",
+    ]) {
+      expect(() => validateEntry(demo, delivery({ approver }))).toThrow(
+        RecordError,
+      );
+    }
+    for (const approver of [
+      "Gabriel Zelaya <gzelaya0404@gmail.com>",
+      "María José O'Neill-Núñez <mj@escuela.cr>",
+    ]) {
+      expect(validateEntry(demo, delivery({ approver })).approver).toBe(
+        approver,
+      );
+    }
+  });
+
   it("writes a record Prettier leaves unchanged", async () => {
     await appendEntry(dir, demo, delivery());
     await appendEntry(dir, demo, {

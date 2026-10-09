@@ -267,4 +267,14 @@ Append-only.
 
 ## Validation
 
+### Halt (2026-10-09)
+
+Tasks 1, 2 and 4 are done: five of six tests in
+`test/deliveryManifest.test.js` pass, and lint and typecheck are clean. Task 3
+(the two JSON files under `supabase/delivery/`) was refused by the guard: the
+session's permission mode cannot show the owner an approval prompt. AC1 stays
+red until those files exist. Resume with `/piv-run-full-loop #89` in a
+Default-mode session (state Built → B2, creating the files with approval), or
+the owner creates them by hand exactly as in "Data shapes".
+
 ## Execution report

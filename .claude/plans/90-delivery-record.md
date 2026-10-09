@@ -1,8 +1,8 @@
 # Plan — Record each delivery in a fixed format that holds no row values
 
 **Implements:** #90 · **Epic:** #86 · **Branch:** feat/delivery-record
-**Status:** Draft
-**Red commit:** <short sha of the newest `Add failing checks for` commit, filled at approval>
+**Status:** Approved 2026-10-09
+**Red commit:** 78f6ad9
 **Confidence:** 9/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -254,6 +254,8 @@ Each has a default the loop uses if the reviewer approves without overriding it.
    earlier one's reason. Withdrawal can be a new kind when #93 needs it.
 4. Each unit's `sequence` is stored next to its `id`, so the reader can
    report the proved sequence without the manifest. — **Default:** yes.
+
+Resolved 2026-10-09: approved at the gate with every default standing.
 
 ## Notes
 

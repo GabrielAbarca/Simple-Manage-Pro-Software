@@ -7,6 +7,8 @@ const FILE_EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
 const SUPABASE_CLI =
   /(?:^|[;&|(\n]\s*|\bnpx\s+(?:--yes\s+|-y\s+)?)supabase\s+(?:db|migration|functions|secrets|link|branches|projects)\b/;
 const POSTGRES_CLI = /(?:^|[;&|(\n]\s*)(?:\S*\/)?(?:psql|pg_dump|pg_restore)\b/;
+const DELIVER_CLI =
+  /(?:^|[;&|(\n]\s*)(?:npm\s+run(?:-script)?\s+deliver\b|node\s+(?:\.\/)?scripts\/delivery\/deliver\.mjs\b)/;
 const SUPABASE_PATH_IN_COMMAND = /(?:^|[\s'"=])(?:\.\/)?supabase\//;
 const WRITE_VERB =
   /\bsed\s+(?:-[a-zA-Z]*\s+)*-i|\bperl\s+-[a-zA-Z]*i|\btee\b|>{1,2}\s*["']?(?:\.\/)?supabase\/|\b(?:mv|cp|rm|truncate|patch)\b|\bgit\s+(?:checkout|restore|apply|rm|mv)\b/;
@@ -143,7 +145,11 @@ export function decide(payload, options = {}) {
   }
 
   if (tool === "Bash" && command) {
-    if (SUPABASE_CLI.test(command) || POSTGRES_CLI.test(command))
+    if (
+      SUPABASE_CLI.test(command) ||
+      POSTGRES_CLI.test(command) ||
+      DELIVER_CLI.test(command)
+    )
       return supabaseDecision(payload);
     if (SUPABASE_PATH_IN_COMMAND.test(command) && WRITE_VERB.test(command))
       return supabaseDecision(payload);

@@ -121,6 +121,11 @@ describe("delivery record file", () => {
       "Ana Mora 1-2345-6789 cedula, 7-B <a@b.c>",
       "X\r\u0000\t <a@b.c>",
       "Gabriel Zelaya",
+      "Gabriel Zelaya <Ana,Mora,cedula:1-2345-6789,7-B@x>",
+      "Gabriel Zelaya <ana:mora@escuela.cr>",
+      "Gabriel Zelaya <ana,mora@escuela.cr>",
+      "Gabriel Zelaya <ana@1-2345-6789>",
+      "Gabriel Zelaya <ana@escuela.c0>",
     ]) {
       expect(() => validateEntry(demo, delivery({ approver }))).toThrow(
         RecordError,

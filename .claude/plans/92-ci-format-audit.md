@@ -388,6 +388,90 @@ Findings: 0 Critical · 0 High · 0 Medium · 3 Low.
 - Low · `package.json:12` — `format:check` globs narrower than `format`'s
   (pre-existing).
 
+Outcome (`/piv-fix-review-findings --unattended`, fixed policy: Low findings
+are listed, not fixed):
+
+- Not in this change: `@types/node` major bumps from Dependabot. The first
+  run will propose `@types/node` `^26` against `engines.node` 24.x; decline
+  that PR, or add
+  `ignore: [{ dependency-name: "@types/node", update-types: ["version-update:semver-major"] }]`
+  to the npm entry (AC3 still passes with it).
+- Not in this change: AC1 doesn't reject a job-level `continue-on-error:` on
+  `quality`. Tightening it changes a frozen acceptance test, which needs the
+  owner's agreement and an amendment.
+- Not in this change: `format:check` covers only `src/**/*.{js,css}` and root
+  `*.{js,json}` (pre-existing; `test/`, `e2e/` and `scripts/` are
+  Prettier-clean today, so widening it would cost nothing).
+- No code changed in this round, so round 1 is the final review: acceptance
+  PASS, no Critical or High finding open.
+
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +2 ~8 −0 · **Lines:** +527 −16 (config and tests: +122 −5) ·
+**Review rounds:** 1 · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (539 on Node 24.22.0; 538 plus the
+known ICU failure on the container's Node 22) · build ✅ · e2e ✅ (119, local
+Chromium config) · acceptance validator: PASS (AC1–AC4)
+
+### What went well
+
+- The ticket named the pattern (`test/securityHeaders.test.js`) and the seam
+  (#87's `block()` helper), so the four checks were a small extension of an
+  existing file: two helpers (`items`, `steps`) and no YAML dependency.
+- Dry-running the planned implementation in a throwaway worktree before the
+  red commit proved the frozen tests could go green with the intended change,
+  and the lockfile dry-run fixed the exact `git diff` count the task validates.
+- Writing the plan's Notes with the coupling paths (`.github`, `package.json`,
+  `package-lock.json`) let the validator prove coupling on the first pass
+  instead of reporting UNPROVEN.
+
+### Divergences from the plan
+
+- **ARCHITECTURE_MAP `ci.yml` row wording** — planned: the `schema` sentence
+  stays word for word · actual: it starts "`schema`, on every PR, starts…" ·
+  why: once the path lost its `(schema)` suffix the sentence no longer said
+  which job it describes · type: plan assumption wrong.
+- **Prettier re-aligned the whole Delivery table** — planned: two rows · actual:
+  every row of the table was rewritten, because the longer `ci.yml` row is
+  now the widest cell and the Responsibility column widened · why: Prettier
+  pads Markdown tables to the widest cell · type: missing context. `feat/delivery-manifest` also
+  edits this table, so whichever merges second re-runs Prettier on it.
+
+### Challenges
+
+- The worker restarted between implementation and commit. The working tree
+  survived, and the plan's task-by-task Validate lines made it clear where to
+  resume.
+- The container runs Node 22, so the unit rung shows the known ICU failure.
+  Downloading the Node 24 binary into the scratchpad and running Vitest under
+  it gave a clean 539/539 that matches CI.
+- The bundled Playwright headless shell (`chromium_headless_shell-1228`) is
+  missing; e2e ran through `playwright.local.config.js` pointed at
+  `/opt/pw-browsers/chromium-1194`.
+
+### Skipped
+
+- None. The three Low review findings are listed under Review (round 1) and in
+  the PR body.
+
+### Recommendations
+
+- **Plan skill:** when a ticket adds Dependabot (or any updater) next to a
+  version pin, have the plan check each pinned toolchain's type package
+  against the registry (`npm view @types/node version`) and decide the
+  major-update policy at the gate, not in review.
+- **References (validation ladder, acceptance validator):** this is the third
+  tooling ticket (#87, #90, #92) whose coupling proof needed paths outside
+  `src`, `public` and `*.html`. Make the recipe "restore every path the
+  branch's non-test diff touches" (`git diff --name-only RED HEAD -- . ':!test' ':!e2e' ':!.claude'`).
+- **piv-validate:** add "run the unit rung on CI's Node when the container's
+  differs" with the scratchpad-download recipe, so the ICU failure stops being
+  reported as a known exception on every ticket.
+- **CLAUDE.md / ARCHITECTURE_MAP:** none beyond this change's own edits.
+- **Ticket slicing:** size S was right (+122 −5 in config and tests). The seam
+  note "the `quality` job's steps only" conflicted with AC4's "CI's Node setup";
+  the gate resolved it, but the ticket could have said "every `setup-node`
+  step" up front.

@@ -1,8 +1,8 @@
 # Plan — Run delivery SQL on a real project through the Management API
 
 **Implements:** #91 · **Epic:** #86 · **Branch:** feat/management-api-executor
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-16
+**Red commit:** 37490bc
 **Confidence:** 8/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.

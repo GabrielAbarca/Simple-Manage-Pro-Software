@@ -67,7 +67,7 @@ npm test              # Vitest unit tests (test/)
 npm run test:e2e      # Playwright e2e (e2e/)
 ```
 
-CI (`.github/workflows/ci.yml`) mirrors `lint` → `typecheck` → `test` → `build` plus the Playwright e2e suite on every PR. A husky pre-commit hook runs lint-staged (ESLint + Prettier on staged files). **Run `lint`, `typecheck`, `test`, and `build` locally before considering work done** — don't rely on CI to catch what you can catch first.
+CI (`.github/workflows/ci.yml`) mirrors `format:check` → `lint` → `typecheck` → `test` → `build` plus the Playwright e2e suite on every PR. A husky pre-commit hook runs lint-staged (ESLint + Prettier on staged files). **Run `format:check`, `lint`, `typecheck`, `test`, and `build` locally before considering work done** — don't rely on CI to catch what you can catch first.
 
 ## Architecture
 

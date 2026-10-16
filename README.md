@@ -95,7 +95,7 @@ Core entities (partial):
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 24.x
 - A [Supabase](https://supabase.com) project with the schema applied
 
 ### Steps

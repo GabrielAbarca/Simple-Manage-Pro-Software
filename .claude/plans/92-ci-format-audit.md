@@ -317,7 +317,10 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-16 — Task 6: the `ci.yml` row's `schema` sentence now starts
+  "`schema`, on every PR, starts…" instead of staying word for word — once the
+  path lost its `(schema)` suffix, the sentence needed the job named to say
+  which job it describes. No test or AC affected.
 
 ## Manual Supabase steps
 
@@ -334,6 +337,29 @@ table (red before · green after). `/piv-review-changes` appends one
 `### Review (round n)` subsection per round (verdict, the acceptance
 validator's table verbatim, findings), and `/piv-fix-review-findings` adds what
 was fixed, left out, or needs a decision under that same subsection.
+
+Run on 2026-10-16, before the implementation commit.
+
+| Check             | Result                                                                                                                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check      | ✅                                                                                                                                                                                              |
+| lint              | ✅                                                                                                                                                                                              |
+| typecheck         | ✅                                                                                                                                                                                              |
+| unit              | ✅ 539 passed, 19 skipped on Node 24.22.0. On the container's Node 22.22.0: 538 passed, plus the known ICU failure in `test/i18n.test.js` › "formats 24h time strings to the locale's 12h form" |
+| build             | ✅                                                                                                                                                                                              |
+| e2e               | ✅ 119 passed (local config: `playwright.local.config.js` with `/opt/pw-browsers/chromium-1194`, because the bundled headless shell is missing)                                                 |
+| YAML parse        | ✅ `ci.yml` and `dependabot.yml` load with PyYAML; all three `setup-node` steps read `node-version-file: package.json`                                                                          |
+| skip/only         | ✅ clean                                                                                                                                                                                        |
+| entry order       | ✅                                                                                                                                                                                              |
+| i18n, `supabase/` | ✅ untouched                                                                                                                                                                                    |
+
+| AC  | Kind | Red before (from Phase R)           | Green after |
+| --- | ---- | ----------------------------------- | ----------- |
+| AC1 | unit | `expected -1 to be greater than -1` | ✅          |
+| AC2 | unit | `expected undefined to be defined`  | ✅          |
+| AC3 | unit | `expected false to be true`         | ✅          |
+| AC4 | unit | `expected undefined to be '24.x'`   | ✅          |
+| G0  | unit | green from the start                | ✅          |
 
 ## Execution report
 

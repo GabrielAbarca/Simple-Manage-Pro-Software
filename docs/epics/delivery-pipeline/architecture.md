@@ -388,6 +388,18 @@ Each spike is timeboxed so the epic finishes before mid-November 2026.
   `rls_audit.sql` ends in a result row. If not, real projects use the `psql`
   executor with each project's database URL (entered at the prompt), and the
   token is used only for functions and Auth.
+  Result (2026-10-16, #91): **yes**. On the pilot, restored from pause, the
+  endpoint ran the whole of `rls_audit.sql` as one request, as `postgres`:
+  `begin`, the `auth.users` insert, `set local role`, every check, then
+  `rollback`. It left 0 fixture rows. It returns no `NOTICE`s and only the
+  last statement's rows, so the file now ends with
+  `select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit;` after the rollback.
+  A failure comes back as `ERROR:  <SQLSTATE>: <message>`, and nothing after
+  it runs. The functions endpoint returns `verify_jwt`, the version and
+  `ezbr_sha256` for `admin-users`, which is enough for its metadata proof.
+  `config/auth` wasn't probed in the spike; #101 confirms it. The token is
+  read at a hidden prompt only (the owner's call), and real projects use
+  `scripts/delivery/executors/managementApi.mjs`.
 - **S3 · Drift on the two projects (known state).**
   Question: how far are the demo and the pilot from the expected
   fingerprints? · Spike: the owner runs the read-only probe on both (an

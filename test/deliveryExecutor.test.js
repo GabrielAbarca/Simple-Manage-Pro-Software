@@ -208,3 +208,133 @@ describe("Management API executor", () => {
     }
   });
 });
+
+describe("hidden prompt and executor edges", () => {
+  const terminal = () =>
+    Object.assign(new PassThrough(), { isTTY: true, setRawMode: vi.fn() });
+  const sink = () => {
+    const printed = [];
+    const output = new Writable({
+      write(chunk, _encoding, done) {
+        printed.push(String(chunk));
+        done();
+      },
+    });
+    return { output, printed };
+  };
+
+  it("refuses an input that isn't a terminal", async () => {
+    const input = new PassThrough();
+    await expect(
+      promptSecret("Token: ", { input, output: sink().output }),
+    ).rejects.toThrow("a hidden prompt needs a terminal");
+  });
+
+  it("applies Backspace, echoes nothing and restores the terminal", async () => {
+    const input = terminal();
+    const { output, printed } = sink();
+    const pending = promptSecret("Token: ", { input, output });
+    input.write("abcx\u007fd\r");
+    expect(await pending).toBe("abcd");
+    expect(printed.join("")).toBe("Token: \n");
+    expect(input.setRawMode.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it("rejects on Ctrl-C and on an empty answer", async () => {
+    const cancelled = terminal();
+    const pending = promptSecret("Token: ", {
+      input: cancelled,
+      output: sink().output,
+    });
+    cancelled.write("abc\u0003");
+    await expect(pending).rejects.toThrow("cancelled");
+
+    const empty = terminal();
+    const blank = promptSecret("Token: ", {
+      input: empty,
+      output: sink().output,
+    });
+    empty.write("   \r");
+    await expect(blank).rejects.toThrow("no token entered");
+  });
+
+  it("refuses a bad ref, an empty token or a missing holdsRealData", () => {
+    const fetch = vi.fn();
+    const make = (options) => () =>
+      createManagementApiExecutor({
+        projectRef: REF,
+        token: TOKEN,
+        holdsRealData: false,
+        fetch,
+        ...options,
+      });
+    expect(make({ projectRef: "../../v1/organizations" })).toThrow(TypeError);
+    expect(make({ token: "" })).toThrow(TypeError);
+    expect(make({ holdsRealData: undefined })).toThrow(TypeError);
+    for (const options of [{ projectRef: "bad" }, { holdsRealData: "no" }]) {
+      try {
+        make(options)();
+      } catch (error) {
+        expect(String(error)).not.toContain(TOKEN);
+      }
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("reports an HTTP failure without a SQLSTATE on a test project", async () => {
+    const result = await createManagementApiExecutor({
+      projectRef: REF,
+      token: TOKEN,
+      holdsRealData: false,
+      fetch: reply(401, { message: "Unauthorized" }),
+    }).runStatement("select 1");
+    expect(result).toEqual({
+      ok: false,
+      sqlstate: null,
+      error: "HTTP 401: Unauthorized",
+      notices: [],
+      rows: [],
+    });
+  });
+
+  it("keeps the failed audit check's label at the start of the error", async () => {
+    const result = await createManagementApiExecutor({
+      projectRef: REF,
+      token: TOKEN,
+      holdsRealData: false,
+      fetch: reply(400, {
+        message:
+          "Failed to run sql query: ERROR:  P0001: FAIL [teacher reads X]: expected 1 row(s), got 0\nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE\n",
+      }),
+    }).runStatement("select 1");
+    expect(result.sqlstate).toBe("P0001");
+    expect(result.error).toBe(
+      "FAIL [teacher reads X]: expected 1 row(s), got 0",
+    );
+  });
+
+  it("withholds a network error on a real-data project", async () => {
+    const result = await createManagementApiExecutor({
+      projectRef: REF,
+      token: TOKEN,
+      holdsRealData: true,
+      fetch: vi.fn(async () => {
+        throw new Error("getaddrinfo ENOTFOUND api.supabase.com");
+      }),
+    }).runStatement("select 1");
+    expect(result).toMatchObject({ ok: false, sqlstate: null });
+    expect(result.error).not.toContain("ENOTFOUND");
+  });
+
+  it("prints cells the way psql -A -t does", async () => {
+    const result = await createManagementApiExecutor({
+      projectRef: REF,
+      token: TOKEN,
+      holdsRealData: false,
+      fetch: reply(201, [
+        { a: true, b: false, c: null, d: 3, e: { k: 1 }, f: "x" },
+      ]),
+    }).runStatement("select 1");
+    expect(result.rows).toEqual([["t", "f", "", "3", '{"k":1}', "x"]]);
+  });
+});

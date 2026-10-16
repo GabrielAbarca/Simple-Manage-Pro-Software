@@ -436,7 +436,16 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-16 — Task 1 (`rls_audit.sql`) moved after tasks 2–8 — after a
+  worker restart the session came back in Accept Edits mode, and the guard
+  refuses `supabase/` edits outside Default mode. Tasks 2–8 don't depend on
+  it, because `proveAudit` accepts the notice and the row. The loop halts on
+  task 1 until the owner switches back to Default mode.
+- 2026-10-16 — `audit.mjs` prints a failure as
+  `RLS audit on <ref>: FAIL (SQLSTATE <s>): <error>` instead of
+  `FAIL [<check>] (SQLSTATE <s>) <error>` — on a test project the error
+  already starts with `FAIL [<check>]`, so the plan's format printed the label
+  twice. No acceptance check is affected.
 
 ## Manual Supabase steps
 

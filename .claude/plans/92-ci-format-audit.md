@@ -1,8 +1,8 @@
 # Plan — Check formatting and dependency health on every pull request
 
 **Implements:** #92 · **Epic:** #86 · **Branch:** chore/ci-format-audit
-**Status:** Draft
-**Red commit:** <short sha of the newest `Add failing checks for` commit, filled at approval>
+**Status:** Approved 2026-10-16
+**Red commit:** 574b2bf
 **Confidence:** 9/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -261,19 +261,20 @@ Each has a default the loop uses if the reviewer approves without overriding it.
    `node-version-file: package.json` (one line each in `e2e` and `schema`; no
    open branch edits them). AC4's test checks every `setup-node` step. The
    override "quality only" narrows the test to the `quality` job and re-runs
-   Phase R for AC4.
+   Phase R for AC4. Resolved: the default (approved 2026-10-16).
 2. **Group Dependabot updates?** — **Default:** no. Dependabot's defaults (one
    PR per dependency, at most 5 open per ecosystem) stand; grouping minor and
-   patch bumps can come later if the PR volume is a nuisance.
+   patch bumps can come later if the PR volume is a nuisance. Resolved: the
+   default (approved 2026-10-16).
 3. **Update the lines that go stale?** `CLAUDE.md:70` lists CI's steps without
    `format:check`, `validation-ladder.md:21` says CI runs rungs 2–6, and
    `README.md:98` says Node.js 22+. — **Default:** yes, the one-line edits in
-   task 5.
+   task 5. Resolved: the default (approved 2026-10-16).
 4. **Rename the `quality` job's display name** to
    `format · lint · typecheck · unit · build`? If `main`'s ruleset requires the
    check by its current name, the owner has to update the required check. —
    **Default:** yes, rename (the name lists what the job runs). Override: keep
-   the old name.
+   the old name. Resolved: the default (approved 2026-10-16).
 
 ## Notes
 

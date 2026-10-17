@@ -510,6 +510,34 @@ Findings: 2 High, 3 Low.
 - Low — `test/deliveryExecutor.test.js:198-201` (AC3, frozen): `"\n"`-joined
   output would miss a per-keystroke echo; the non-AC Backspace test catches it.
 
+Round 1 outcomes (`/piv-fix-review-findings --unattended`, 2026-10-17):
+
+- Needs your decision: the false pass under plain `psql -f` — the fix is in
+  `supabase/schema/rls_audit.sql`, and the session was back in Accept Edits
+  mode, so the guard refused it. **Recommended:** the summary `do` block also
+  runs `perform pg_advisory_lock(hashtextextended('rls_audit_summary', 0));`
+  (a session lock, so it survives the rollback), and the last statement
+  becomes
+  `select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit where pg_advisory_unlock(hashtextextended('rls_audit_summary', 0));`.
+  It returns the row only when the summary block ran, and it releases the
+  lock in the same statement, so no lock outlives the run on a pooled API
+  connection. On a failed plain-psql run it returns 0 rows with a `WARNING`.
+  Alternative: only add `-v ON_ERROR_STOP=1` to the two documented commands
+  (`rls_audit.sql:23`, `docs/BACKUP_RESTORE.md:144`). That leaves the trap for
+  anyone who runs it without the flag.
+- Needs your decision: AC4 — the owner runs
+  `node scripts/delivery/audit.mjs wklxkntdnzshyrijvnjj --test-data` on the
+  pilot (after the fix above), and the two output lines go into the PR.
+- Needs your decision: AC3's frozen test joins captured output with `"\n"`,
+  so a per-keystroke echo wouldn't show the token in one piece. The non-AC
+  test "applies Backspace, echoes nothing and restores the terminal" already
+  fails on any echo. **Recommended:** leave AC3 as committed; optionally join
+  with `""` under an AMENDMENTS entry.
+- Not in this change: `AUDIT_LEFTOVERS_SQL` has no drift test against
+  `rls_audit.sql`'s fixture literals (Low; all values match today).
+- Not in this change: `PROJECT_REF` is duplicated in `audit.mjs` and
+  `executors/managementApi.mjs` (Low).
+
 ## Execution report
 
 Filled by `/system-execution-report`.

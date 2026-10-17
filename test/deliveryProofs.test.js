@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  AUDIT_LEFTOVERS_SQL,
   AUDIT_SUMMARY,
   proveAudit,
   proveDemoLock,
+  proveNoAuditLeftovers,
 } from "../scripts/delivery/proofs.mjs";
 import {
   connectionEnv,
@@ -49,6 +51,67 @@ describe("proveAudit", () => {
       ok: false,
       check: "teacher reads X",
       sqlstate: "P0001",
+    });
+  });
+});
+
+describe("proveAudit through the Management API", () => {
+  it("passes when the summary arrives as the final result row", async () => {
+    expect(
+      await proveAudit(executor({ rows: [[AUDIT_SUMMARY]] }), "a.sql"),
+    ).toEqual({ ok: true, check: null, sqlstate: null, error: null });
+  });
+
+  it("fails on a result row that isn't the summary", async () => {
+    expect(
+      await proveAudit(executor({ rows: [["something else"]] }), "a.sql"),
+    ).toMatchObject({
+      ok: false,
+      error: "the audit ended without its summary line",
+    });
+  });
+});
+
+describe("proveNoAuditLeftovers", () => {
+  it("passes on zero fixture rows and fails on any", async () => {
+    let sent = null;
+    const counting = (count) => ({
+      runFile: async () => {
+        throw new Error("not a file");
+      },
+      runStatement: async (sql) => {
+        sent = sql;
+        return {
+          ok: true,
+          sqlstate: null,
+          error: null,
+          notices: [],
+          rows: [[count]],
+        };
+      },
+    });
+
+    expect(await proveNoAuditLeftovers(counting("0"))).toEqual({
+      ok: true,
+      count: 0,
+      error: null,
+    });
+    expect(sent).toBe(AUDIT_LEFTOVERS_SQL);
+    expect(await proveNoAuditLeftovers(counting("3"))).toEqual({
+      ok: false,
+      count: 3,
+      error: null,
+    });
+  });
+
+  it("fails when the count doesn't run or returns no number", async () => {
+    expect(
+      await proveNoAuditLeftovers(executor({ ok: false, error: "boom" })),
+    ).toEqual({ ok: false, count: null, error: "boom" });
+    expect(await proveNoAuditLeftovers(executor({ rows: [] }))).toEqual({
+      ok: false,
+      count: null,
+      error: "the count returned no number",
     });
   });
 });

@@ -479,12 +479,24 @@ Run 2026-10-17 at `ec912b7`:
 | `supabase/`       | ✅                      | only `supabase/schema/rls_audit.sql`, owner-approved at the guard prompt (2026-10-17)                                                                             |
 | frozen AC tests   | ✅                      | `git diff 37490bc HEAD -- test/deliveryExecutor.test.js` removes no line; the edge tests are appended                                                             |
 
-| AC  | Kind   | Red before (Phase R)                                       | Green after                   |
-| --- | ------ | ---------------------------------------------------------- | ----------------------------- |
-| AC1 | unit   | `expected "vi.fn()" to be called 1 times, but got 0 times` | ✅                            |
-| AC2 | unit   | `expected null to be '23505'`                              | ✅                            |
-| AC3 | unit   | `expected '' to be 'fake-access-token-for-unit-tests'`     | ✅                            |
-| AC4 | verify | n/a                                                        | pending the owner's pilot run |
+| AC  | Kind   | Red before (Phase R)                                       | Green after                  |
+| --- | ------ | ---------------------------------------------------------- | ---------------------------- |
+| AC1 | unit   | `expected "vi.fn()" to be called 1 times, but got 0 times` | ✅                           |
+| AC2 | unit   | `expected null to be '23505'`                              | ✅                           |
+| AC3 | unit   | `expected '' to be 'fake-access-token-for-unit-tests'`     | ✅                           |
+| AC4 | verify | n/a                                                        | ✅ owner's pilot run (below) |
+
+AC4 evidence (2026-10-17, the owner's terminal, pilot `wklxkntdnzshyrijvnjj`,
+the branch at `a3232b7` or later, so the advisory-lock final statement):
+
+```
+RLS audit on wklxkntdnzshyrijvnjj: PASS
+Audit fixture rows left behind: 0
+```
+
+Both lines passing means `runAudit` returned true, so the CLI exited 0. This
+is the first Management API run of the conditional final statement: the row
+came back and no fixture row was left.
 
 ### Review (round 1)
 
@@ -583,6 +595,8 @@ Round 2 outcomes (`--unattended`):
   later); AC3's frozen-test gaps (per-keystroke echo, an import-time
   `process.env` capture). Neither is a defect at HEAD. Recommended: leave
   AC3 as committed.
+- Resolved (owner, 2026-10-17): AC4 ran on the pilot and passed (evidence
+  above). AC3 stays as committed; its two gaps move to Not in this change.
 
 ## Execution report
 

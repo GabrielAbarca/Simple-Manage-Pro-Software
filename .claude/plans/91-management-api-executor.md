@@ -538,6 +538,52 @@ Round 1 outcomes (`/piv-fix-review-findings --unattended`, 2026-10-17):
 - Not in this change: `PROJECT_REF` is duplicated in `audit.mjs` and
   `executors/managementApi.mjs` (Low).
 
+### Review (round 2)
+
+Round 1's High was fixed by the owner in `a3232b7` (the summary block takes
+a session advisory lock; the final `select` returns its row only
+`where pg_advisory_unlock(...)`), applied by hand because the guard can't
+prompt in a cloud session. `819f829` updated the S2 note to match.
+
+**Verdict:** clean · **Acceptance:** UNPROVEN (AC4)
+
+| AC  | Kind   | Exists | Faithful         | Passes | Coupled         | Frozen                          | Probe                                               | Verdict  |
+| --- | ------ | ------ | ---------------- | ------ | --------------- | ------------------------------- | --------------------------------------------------- | -------- |
+| AC1 | unit   | ✅     | ✅               | ✅     | ✅ fails at RED | file changed, AC test unchanged | n/a                                                 | PASS     |
+| AC2 | unit   | ✅     | ✅               | ✅     | ✅ fails at RED | file changed, AC test unchanged | n/a                                                 | PASS     |
+| AC3 | unit   | ✅     | ✅ (with 2 gaps) | ✅     | ✅ fails at RED | file changed, AC test unchanged | n/a                                                 | PASS     |
+| AC4 | verify | n/a    | n/a              | n/a    | n/a             | n/a                             | could not run on the pilot; mocked-network probe ✅ | UNPROVEN |
+
+Findings: 0 Critical, 0 High, 1 Medium, 3 Low.
+
+- Medium — nothing proves the round-1 fix: CI only runs the audit with
+  `ON_ERROR_STOP`, so deleting the lock lines would stay green.
+- Low — `docs/epics/delivery-pipeline/architecture.md:395-396` quoted the
+  bare `select` (already fixed in `819f829`).
+- Low (pre-existing) — the documented `psql "$DB_URL" -f …` has no `-X`, so a
+  `~/.psqlrc` with `ON_ERROR_ROLLBACK on` would let a failed check reach the
+  summary (`rls_audit.sql:23`, `docs/BACKUP_RESTORE.md:144`).
+- Low (carried) — duplicated `PROJECT_REF`; no drift test for
+  `AUDIT_LEFTOVERS_SQL`.
+
+Round 2 outcomes (`--unattended`):
+
+- Fixed: the Medium → `test/schemaHarness.db.test.js` › "prints the summary
+  row only when a plain psql run of the audit passes" (CI `schema` job only:
+  a plain `psql -f` run, no `ON_ERROR_STOP`, prints the row on a clean
+  baseline and not after `drop_student_self_read.sql`). Red can't be shown
+  in this session (the guard refuses Postgres here). The round-1 reviewer
+  reproduced the pre-fix false pass on a throwaway Postgres (the row printed,
+  exit 0), which is the failure this test asserts against.
+- Fixed earlier: the stale S2 note (`819f829`).
+- Not in this change: `-X -v ON_ERROR_STOP=1` in the two documented commands
+  (pre-existing, and one is under `supabase/`).
+- Not in this change: the carried Lows from round 1.
+- Needs your decision: AC4 (the owner's pilot run, now at `a3232b7` or
+  later); AC3's frozen-test gaps (per-keystroke echo, an import-time
+  `process.env` capture). Neither is a defect at HEAD. Recommended: leave
+  AC3 as committed.
+
 ## Execution report
 
 **Files:** +6 ~5 −0 · **Lines:** +1391 −12 (plan included; code and tests

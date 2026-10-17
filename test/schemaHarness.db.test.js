@@ -1,8 +1,13 @@
 import { execFileSync } from "node:child_process";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createPsqlExecutor } from "../scripts/delivery/executors/psql.mjs";
-import { runSchemaHarness } from "../scripts/delivery/schemaHarness.mjs";
+import { AUDIT_SUMMARY } from "../scripts/delivery/proofs.mjs";
+import {
+  SCHEMA_DIR,
+  runSchemaHarness,
+} from "../scripts/delivery/schemaHarness.mjs";
 
 /**
  * Schema harness — opt-in, skipped unless SMP_SCHEMA_DB_URL is set.
@@ -168,5 +173,38 @@ describe.skipIf(!serverUrl)("schema harness", () => {
     expect(result.demo.ok).toBe(false);
     expect(result.school.ok).toBe(true);
     expect(result.ok).toBe(false);
+  }, 120_000);
+
+  it("prints the summary row only when a plain psql run of the audit passes", async () => {
+    const baseline = join(SCHEMA_DIR, "school_schema.sql");
+    const plainAudit = (url) =>
+      execFileSync(
+        "psql",
+        [
+          "-X",
+          "-q",
+          "-A",
+          "-t",
+          "-d",
+          url,
+          "-f",
+          join(SCHEMA_DIR, "rls_audit.sql"),
+        ],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+    const passing = freshDatabase();
+    const failing = freshDatabase();
+    for (const [url, files] of [
+      [passing, [baseline]],
+      [failing, [baseline, fixture("drop_student_self_read.sql")]],
+    ]) {
+      const executor = createPsqlExecutor({ databaseUrl: url });
+      for (const file of files) {
+        expect((await executor.runFile(file)).ok).toBe(true);
+      }
+    }
+
+    expect(lines(plainAudit(passing))).toContain(AUDIT_SUMMARY);
+    expect(plainAudit(failing)).not.toContain(AUDIT_SUMMARY);
   }, 120_000);
 });

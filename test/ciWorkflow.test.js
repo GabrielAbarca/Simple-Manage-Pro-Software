@@ -72,6 +72,17 @@ describe("CI workflow", () => {
     expect(text).not.toMatch(/secrets\./);
   });
 
+  it("pulls the schema job's images from a registry other than ECR Public", () => {
+    const schema = block(jobs, "schema", 2).join("\n");
+    const registry = schema.match(
+      /^\s+SUPABASE_INTERNAL_IMAGE_REGISTRY: "?([^"\s]+)"?$/m,
+    )?.[1];
+
+    expect(registry).toBeDefined();
+    expect(["ghcr.io", "docker.io"]).toContain(registry);
+    expect(schema).not.toMatch(/secrets\./);
+  });
+
   it("checks formatting in the quality job", () => {
     const quality = steps("quality");
     const commands = quality.map(command);

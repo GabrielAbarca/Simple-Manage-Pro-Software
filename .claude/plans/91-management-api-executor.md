@@ -540,4 +540,94 @@ Round 1 outcomes (`/piv-fix-review-findings --unattended`, 2026-10-17):
 
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +6 ~5 −0 · **Lines:** +1391 −12 (plan included; code and tests
+≈ +830) · **Review rounds:** 1 (halted before fixing) · **Outcome:** draft
+(the round-1 High needs a `supabase/` edit the session couldn't get approved;
+AC4 waits on the owner's pilot run)
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ⚠️ (554 passed; the one failure is the
+Node 22 i18n spacing test, identical on `main`) · build ✅ · e2e ✅ (119, local
+config) · acceptance validator: AC1–AC3 PASS, AC4 UNPROVEN
+
+### What went well
+
+- Running the spike through the connector's `execute_sql` was faithful
+  enough to decide S2 in minutes. It hits the same `database/query` endpoint,
+  and each call went through the guard's owner prompt. The 5-call sequence
+  (baseline count → audit unchanged → audit + row → count → a FAIL probe)
+  answered every question the plan needed: multi-statement, rollback, result
+  shape, error shape, leftovers.
+- Reusing `parseMessages` from `psql.mjs` made the API's error text match the
+  psql executor's exactly (`FAIL [label]` first, `DETAIL`/`CONTEXT` dropped),
+  so `proveAudit` needed only the result-row branch.
+- The AC3 test's `process.env` proxy plus output spies made "never reads the
+  environment" a real assertion. The validator's mutations (env read, token
+  logged, echo per chunk) were all caught.
+
+### Divergences from the plan
+
+- **Task order** — planned: task 1 (`rls_audit.sql`) first · actual: last,
+  after tasks 2–8 · why: after a worker restart the session came back in
+  Accept Edits mode, and the guard refused the edit; it went through once the
+  owner switched back to Default · type: other (environment).
+- **`audit.mjs` FAIL line** — planned: `FAIL [<check>] (SQLSTATE <s>) <error>`
+  · actual: `FAIL (SQLSTATE <s>): <error>` · why: the error already starts
+  with `FAIL [<check>]`, so the planned format printed it twice · type: plan
+  assumption wrong.
+- **Fake token in the tests** — planned: an `sbp_` + 40-hex test token ·
+  actual: `fake-access-token-for-unit-tests` · why: GitHub push protection
+  blocked the red commit as a "Supabase Personal Access Token". The commit
+  was unpushed, so it was amended before the first push · type: missing
+  context.
+- **The trailing result row** — planned: safe because "it runs only if every
+  statement before it did" · actual: true for both executors and the API, but
+  false for a plain psql run without `ON_ERROR_STOP`, which is how the file's
+  header and the restore drill say to run it · why: the plan reasoned only
+  about the executors' error handling · type: plan assumption wrong.
+
+### Challenges
+
+- The pilot was paused, and the restore made Postgres reachable before the
+  data was back: a probe at `COMING_UP` saw an empty `public` schema. Waiting
+  for `ACTIVE_HEALTHY` (about 5 minutes) mattered. Running the audit early
+  would have failed for the wrong reason.
+- The session's permission mode flipped from Default to Accept Edits after
+  worker restarts, twice. Each time it blocked `supabase/` work until the
+  owner switched back. The guard also matches `psql` and `supabase/` inside
+  any Bash command text, heredocs included, so even writing notes about them
+  through Bash was refused in that mode.
+- The pinned Playwright Chromium (`-1228`) wasn't in the container. e2e ran
+  through the ladder's `playwright.local.config.js` fallback with `-1194`.
+
+### Skipped
+
+- AC4 (the owner's pilot run through `audit.mjs`) — needs the owner and,
+  first, the round-1 fix.
+- The round-1 High fix and round 2 — waiting on the owner's approval of a
+  `supabase/` edit in a Default-mode session.
+- The `config/auth` probe (Open question 1) — no answer by approval, so S2
+  records "#101 confirms it", as defaulted.
+
+### Recommendations
+
+- **Plan skill:** when a ticket edits a SQL file people run by hand, list
+  every documented way to run it (header, runbook, restore drill) and reason
+  about each one, not only the executors. Here that would have caught the
+  plain-psql false pass at the gate.
+- **Plan skill / validation ladder:** never write a credential-shaped test
+  value (`sbp_` + 40 hex, `eyJ…` JWTs, `sk_…`). Secret scanning blocks the
+  push. A line in `.claude/references/validation-ladder.md` ("test secrets are
+  obviously fake strings") would prevent the amend-before-push.
+- **Run-full-loop / conventions (supabase):** re-check the permission mode
+  (`get_session`) before each `supabase/` step, and expect a worker restart to
+  reset it. Tell the owner up front, at A1, that Supabase-yes tickets need the
+  session's default mode set to Default, not just the current turn.
+- **CLAUDE.md / ARCHITECTURE_MAP:** the free-plan pilot pauses after 7 idle
+  days. Any ticket with a pilot `verify` AC should check `ACTIVE_HEALTHY` and
+  wait for the tables, not just for Postgres, before running.
+- **Ticket slicing:** right size. The spike-then-build shape worked because
+  the ACs were written executor-agnostic. AC4 depends on the owner, so it
+  needs a slot in the loop (after the PR opens, before ready) rather than
+  counting as UNPROVEN at review.

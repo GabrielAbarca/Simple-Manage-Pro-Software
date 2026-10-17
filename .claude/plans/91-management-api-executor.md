@@ -620,10 +620,13 @@ config) · acceptance validator: AC1–AC3 PASS, AC4 UNPROVEN
   value (`sbp_` + 40 hex, `eyJ…` JWTs, `sk_…`). Secret scanning blocks the
   push. A line in `.claude/references/validation-ladder.md` ("test secrets are
   obviously fake strings") would prevent the amend-before-push.
-- **Run-full-loop / conventions (supabase):** re-check the permission mode
-  (`get_session`) before each `supabase/` step, and expect a worker restart to
-  reset it. Tell the owner up front, at A1, that Supabase-yes tickets need the
-  session's default mode set to Default, not just the current turn.
+- **Run-full-loop / conventions (supabase):** cloud sessions offer only
+  Accept edits, Plan and Auto. The guard asks only in `default` mode, so in a
+  cloud session every guarded step is refused once the session leaves the mode
+  it started in (here, after a worker restart). Either Supabase-yes tickets
+  run in a local CLI session (where Default exists), or the loop plans
+  guarded edits as owner-applied patches from the start. A1 should say which,
+  instead of promising an approval prompt.
 - **CLAUDE.md / ARCHITECTURE_MAP:** the free-plan pilot pauses after 7 idle
   days. Any ticket with a pilot `verify` AC should check `ACTIVE_HEALTHY` and
   wait for the tables, not just for Postgres, before running.

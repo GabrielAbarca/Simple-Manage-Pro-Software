@@ -464,6 +464,28 @@ table (red before · green after). `/piv-review-changes` appends one
 validator's table verbatim, findings), and `/piv-fix-review-findings` adds what
 was fixed, left out, or needs a decision under that same subsection.
 
+Run 2026-10-17 at `ec912b7`:
+
+| Check             | Result                  | Notes                                                                                                                                                             |
+| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check      | ✅                      |                                                                                                                                                                   |
+| lint              | ✅                      |                                                                                                                                                                   |
+| typecheck         | ✅                      |                                                                                                                                                                   |
+| unit              | ⚠️ 554 passed, 1 failed | `test/i18n.test.js` › "formats 24h time strings to the locale's 12h form" fails identically on a clean `origin/main` worktree here (Node 22 ICU); CI runs Node 24 |
+| build             | ✅                      |                                                                                                                                                                   |
+| e2e               | ✅ 119 passed           | `playwright.local.config.js` (untracked): the pinned `chromium_headless_shell-1228` isn't in the container, so `-1194` is used                                    |
+| skip/only         | ✅ clean                |                                                                                                                                                                   |
+| entry-point order | ✅                      | the quick check flags `src/js/admin.js` only because its header comment is 21 lines; `errorHandler.js` is its first import (line 22). No `src/` change            |
+| `supabase/`       | ✅                      | only `supabase/schema/rls_audit.sql`, owner-approved at the guard prompt (2026-10-17)                                                                             |
+| frozen AC tests   | ✅                      | `git diff 37490bc HEAD -- test/deliveryExecutor.test.js` removes no line; the edge tests are appended                                                             |
+
+| AC  | Kind   | Red before (Phase R)                                       | Green after                   |
+| --- | ------ | ---------------------------------------------------------- | ----------------------------- |
+| AC1 | unit   | `expected "vi.fn()" to be called 1 times, but got 0 times` | ✅                            |
+| AC2 | unit   | `expected null to be '23505'`                              | ✅                            |
+| AC3 | unit   | `expected '' to be 'fake-access-token-for-unit-tests'`     | ✅                            |
+| AC4 | verify | n/a                                                        | pending the owner's pilot run |
+
 ## Execution report
 
 Filled by `/system-execution-report`.

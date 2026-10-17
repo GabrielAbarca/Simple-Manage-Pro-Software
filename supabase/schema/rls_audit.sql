@@ -31,8 +31,10 @@
 --  READING THE OUTPUT
 --    Every check prints `PASS [name]`. The first failure raises and
 --    aborts — that message names the check that broke. Success ends
---    with `RLS AUDIT: ALL CHECKS PASSED`. No summary line means it did
---    not finish, so treat a silent run as a failure.
+--    with `RLS AUDIT: ALL CHECKS PASSED`, as a notice and as the final
+--    result row (all the SQL Editor and the Management API show). No
+--    summary line means it did not finish, so treat a silent run as a
+--    failure.
 --
 --  IF auth.users IS NOT WRITABLE on your project, the fixture block will
 --  fail on the first insert. Fallback: create five users by hand in
@@ -647,3 +649,5 @@ begin
 end $$;
 
 rollback;
+
+select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit;

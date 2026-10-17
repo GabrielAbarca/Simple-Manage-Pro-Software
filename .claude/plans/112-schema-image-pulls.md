@@ -167,4 +167,46 @@ red commit goes here: date — what changed — why.
 
 ## Validation
 
+| Check        | Result                                                                                                                       |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| format:check | ✅                                                                                                                           |
+| lint         | ✅                                                                                                                           |
+| typecheck    | ✅                                                                                                                           |
+| unit         | ✅ 539 passed; 1 failure `test/i18n.test.js` (es-CR 12h time) also fails on unchanged `main` in this container (ICU spacing) |
+| build        | ✅                                                                                                                           |
+| e2e          | ✅ 116 passed; 3 `e2e/classExports.spec.js` failures also fail on unchanged `main` in this container                         |
+
+| AC  | Red before (6ab7cdb)                  | Green after (f892ec9)                           |
+| --- | ------------------------------------- | ----------------------------------------------- |
+| AC1 | `expected undefined to be defined` ✅ | `npx vitest run test/ciWorkflow.test.js` 6/6 ✅ |
+| AC2 | n/a (verify)                          | read from the PR's `schema` job                 |
+
+### Review (round 1)
+
+**Verdict:** clean · **Acceptance:** UNPROVEN (AC2)
+
+| AC  | Kind   | Exists | Faithful | Passes  | Coupled           | Frozen    | Probe                          | Verdict  |
+| --- | ------ | ------ | -------- | ------- | ----------------- | --------- | ------------------------------ | -------- |
+| AC1 | unit   | yes    | yes      | yes     | yes, fails at RED | unchanged | n/a (unit)                     | PASS     |
+| AC2 | verify | n/a    | n/a      | not run | n/a               | n/a       | not run (no CI run to observe) | UNPROVEN |
+
+Findings: none. AC2 is UNPROVEN by design: its evidence is the PR's own CI
+run, so the PR opens as a draft and is marked ready once the `schema` job is
+green.
+
 ## Execution report
+
+- **Built:** one job-level env line, `SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io`,
+  on the `schema` job, plus the regression check in `test/ciWorkflow.test.js`.
+  The plan's single task landed as written; no amendments.
+- **Divergence:** `/prime-backend` was skipped (CI-only change, no data seam).
+- **Hard part:** finding the override. `npx supabase` 2.104 is a Node shim
+  over a Bun-compiled CLI that hands legacy commands such as `db start` to a
+  bundled Go binary (`supabase-go`); the registry key lives only in that Go
+  binary, so it was confirmed with `strings`, not docs.
+- **Environment noise:** one unit test (`i18n` es-CR time) and three
+  `classExports` e2e tests fail in this container on unchanged `main` too.
+- **Lesson for the skills:** for a CI-only bug, the investigate lane's red
+  check is a workflow-shape assertion; the plan should say up front that the
+  verify AC is closed by the PR's own CI run, so the loop opens a draft and
+  flips it to ready on green instead of treating UNPROVEN as a halt.

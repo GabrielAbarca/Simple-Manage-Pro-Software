@@ -486,6 +486,30 @@ Run 2026-10-17 at `ec912b7`:
 | AC3 | unit   | `expected '' to be 'fake-access-token-for-unit-tests'`     | ✅                            |
 | AC4 | verify | n/a                                                        | pending the owner's pilot run |
 
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** UNPROVEN (AC4)
+
+| AC  | Kind   | Exists | Faithful                    | Passes | Coupled           | Frozen    | Probe                                                                       | Verdict  |
+| --- | ------ | ------ | --------------------------- | ------ | ----------------- | --------- | --------------------------------------------------------------------------- | -------- |
+| AC1 | unit   | yes    | yes                         | yes    | yes, fails at RED | unchanged | n/a                                                                         | PASS     |
+| AC2 | unit   | yes    | yes                         | yes    | yes, fails at RED | unchanged | n/a                                                                         | PASS     |
+| AC3 | unit   | yes    | yes, one gap (see evidence) | yes    | yes, fails at RED | unchanged | n/a                                                                         | PASS     |
+| AC4 | verify | n/a    | n/a                         | n/a    | n/a               | n/a       | partial: code path passes with a fake API; the pilot run was not reproduced | UNPROVEN |
+
+Findings: 2 High, 3 Low.
+
+- High — `supabase/schema/rls_audit.sql:653`: under plain `psql -f` (no
+  `ON_ERROR_STOP`, as the header and `docs/BACKUP_RESTORE.md:144` say to run
+  it) a failed audit still ends with the trailing summary row.
+- High — AC4 UNPROVEN: the owner's pilot run hasn't been captured.
+- Low — `scripts/delivery/proofs.mjs:30-48`: the leftover SQL copies the
+  audit's fixture literals with no drift test.
+- Low — `scripts/delivery/audit.mjs:8`: `PROJECT_REF` duplicates
+  `executors/managementApi.mjs:10`.
+- Low — `test/deliveryExecutor.test.js:198-201` (AC3, frozen): `"\n"`-joined
+  output would miss a per-keystroke echo; the non-AC Backspace test catches it.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

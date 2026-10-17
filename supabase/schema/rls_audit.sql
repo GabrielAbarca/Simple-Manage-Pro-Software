@@ -641,6 +641,7 @@ reset role;
 -- ═══════════════════════════════════════════════════════════════
 do $$
 begin
+  perform pg_advisory_lock(hashtextextended('rls_audit_summary', 0));
   raise notice ' ';
   raise notice '═══════════════════════════════════════════════';
   raise notice ' RLS AUDIT: ALL CHECKS PASSED';
@@ -650,4 +651,5 @@ end $$;
 
 rollback;
 
-select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit;
+select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit
+ where pg_advisory_unlock(hashtextextended('rls_audit_summary', 0));

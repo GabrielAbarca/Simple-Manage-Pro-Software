@@ -176,10 +176,10 @@ red commit goes here: date — what changed — why.
 | build        | ✅                                                                                                                           |
 | e2e          | ✅ 116 passed; 3 `e2e/classExports.spec.js` failures also fail on unchanged `main` in this container                         |
 
-| AC  | Red before (6ab7cdb)                  | Green after (f892ec9)                           |
-| --- | ------------------------------------- | ----------------------------------------------- |
-| AC1 | `expected undefined to be defined` ✅ | `npx vitest run test/ciWorkflow.test.js` 6/6 ✅ |
-| AC2 | n/a (verify)                          | read from the PR's `schema` job                 |
+| AC  | Red before (6ab7cdb)                  | Green after (f892ec9)                                 |
+| --- | ------------------------------------- | ----------------------------------------------------- |
+| AC1 | `expected undefined to be defined` ✅ | `npx vitest run test/ciWorkflow.test.js` 6/6 ✅       |
+| AC2 | n/a (verify)                          | PR #113 run 39015816597, `schema` job 117347585989 ✅ |
 
 ### Review (round 1)
 
@@ -193,6 +193,15 @@ red commit goes here: date — what changed — why.
 Findings: none. AC2 is UNPROVEN by design: its evidence is the PR's own CI
 run, so the PR opens as a draft and is marked ready once the `schema` job is
 green.
+
+### AC2 evidence (PR #113 CI)
+
+Run 39015816597 on 2c7b7a3, job `schema · baseline and access audit`
+(117347585989): success. `supabase db start` pulled
+`ghcr.io/supabase/postgres:17.6.1.132`, `ghcr.io/supabase/realtime:v2.102.1`,
+`ghcr.io/supabase/storage-api:v1.60.2` and `ghcr.io/supabase/gotrue:v2.189.0`,
+with no `public.ecr.aws` pull, and `test/schemaHarness.db.test.js` passed 3/3.
+`quality` and `playwright e2e` passed on the same run. **AC2: PASS.**
 
 ## Execution report
 

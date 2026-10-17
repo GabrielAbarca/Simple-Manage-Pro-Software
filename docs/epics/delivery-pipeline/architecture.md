@@ -392,8 +392,11 @@ Each spike is timeboxed so the epic finishes before mid-November 2026.
   endpoint ran the whole of `rls_audit.sql` as one request, as `postgres`:
   `begin`, the `auth.users` insert, `set local role`, every check, then
   `rollback`. It left 0 fixture rows. It returns no `NOTICE`s and only the
-  last statement's rows, so the file now ends with
-  `select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit;` after the rollback.
+  last statement's rows, so the file now ends in a result row after the
+  rollback: the summary block takes a session advisory lock, and the final
+  `select 'RLS AUDIT: ALL CHECKS PASSED' as rls_audit` returns its row only
+  `where pg_advisory_unlock(...)` succeeds, so a run that failed earlier,
+  including a plain `psql -f` run without `ON_ERROR_STOP`, prints no row.
   A failure comes back as `ERROR:  <SQLSTATE>: <message>`, and nothing after
   it runs. The functions endpoint returns `verify_jwt`, the version and
   `ezbr_sha256` for `admin-users`, which is enough for its metadata proof.

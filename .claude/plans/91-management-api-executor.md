@@ -598,6 +598,30 @@ Round 2 outcomes (`--unattended`):
 - Resolved (owner, 2026-10-17): AC4 ran on the pilot and passed (evidence
   above). AC3 stays as committed; its two gaps move to Not in this change.
 
+### Review (round 3, final)
+
+**Verdict:** clean · **Acceptance:** AC1–AC3 PASS; AC4 PASS on the owner's
+pilot run (the validator reads the ticket and code only, so it reported AC4
+UNPROVEN and asked for this evidence to be checked against the AC: the run
+above prints `PASS` and `0` left behind at `a3232b7` or later, which is
+AC4's scenario exactly).
+
+| AC  | Kind   | Exists                          | Faithful | Passes     | Coupled         | Frozen                          | Probe                     | Verdict                 |
+| --- | ------ | ------------------------------- | -------- | ---------- | --------------- | ------------------------------- | ------------------------- | ----------------------- |
+| AC1 | unit   | ✅                              | ✅       | ✅         | ✅ fails at RED | file changed, AC test unchanged | n/a                       | PASS                    |
+| AC2 | unit   | ✅                              | ✅       | ✅         | ✅ fails at RED | file changed, AC test unchanged | n/a                       | PASS                    |
+| AC3 | unit   | ✅                              | ✅       | ✅         | ✅ fails at RED | file changed, AC test unchanged | n/a                       | PASS                    |
+| AC4 | verify | n/a (scenario is in the ticket) | n/a      | ❌ not run | n/a             | n/a                             | partial (mocked API only) | UNPROVEN → PASS (owner) |
+
+Findings: 0 Critical, 0 High, 0 Medium, 3 Low (all carried: duplicated
+`PROJECT_REF`; no drift test for `AUDIT_LEFTOVERS_SQL`; the documented psql
+command lacks `-X -v ON_ERROR_STOP=1`). The reviewer confirmed the round-2
+test fails under every way of breaking the lock, and CI's `schema` job ran
+it green at `f4fe4e0` (4/4).
+
+Outcome: ready PR. Nothing Critical or High is open, every AC passes, and
+the owner resolved the last decisions (AC4 run; AC3 left as committed).
+
 ## Execution report
 
 **Files:** +6 ~5 −0 · **Lines:** +1391 −12 (plan included; code and tests

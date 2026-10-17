@@ -1,8 +1,8 @@
 # Plan — Pull the schema job's database images without hitting ECR Public's rate limit
 
 **Implements:** #112 · **Epic:** none (CI bug) · **Branch:** fix/schema-image-pulls
-**Status:** Draft
-**Red commit:** <short sha of the newest `Add failing checks for` commit, filled at approval>
+**Status:** Approved 2026-10-17
+**Red commit:** 6ab7cdb
 **Confidence:** 8/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.

@@ -379,21 +379,39 @@ red commit goes here: date — what changed — why.
 
 ## Validation
 
-**Halted at task 4 (2026-10-17).** The guard refused the write to
-`supabase/delivery/fingerprint.sql`: the session isn't in Default permission
-mode, so no approval prompt could be shown. Tasks 1, 2, 3 and 5 are done and
-committed; tasks 4, 6, 7 and 8 wait on the owner.
+The run halted once at task 4 (the guard refused `supabase/` writes outside
+Default mode) and resumed after the owner switched modes; see AMENDMENTS.
 
-| AC  | Red before (Phase R)                   | Now                                 |
-| --- | -------------------------------------- | ----------------------------------- |
-| AC1 | `equal: false` ≠ `equal: true`         | ✅ green                            |
-| AC2 | empty lists ≠ policy, column, function | ✅ green                            |
-| AC3 | `changed: []` ≠ the column             | ✅ green                            |
-| AC4 | probe file absent                      | ⏸ red until task 4 writes the probe |
-| AC5 | `expected 0 to be greater than 0`      | ⏸ needs tasks 4 and 6               |
+`/piv-validate` at `9dfb9b6`, run in an LF worktree of the commit (this
+checkout's `core.autocrlf=true` fails `format:check`, `ciWorkflow` and
+`claudeSkills` on `main` too), plus CI run 39090464362 on the same commit:
 
-The probe drafted for task 4 already passes AC4's read-only rule when checked
-outside `supabase/` (one statement, starts with `with`, no write keyword).
+| Check             | Result                                        |
+| ----------------- | --------------------------------------------- |
+| format:check      | ✅                                            |
+| lint              | ✅                                            |
+| typecheck         | ✅ (`tsconfig.json`, `tsconfig.scripts.json`) |
+| unit              | ✅ 570 passed, 21 skipped (opt-in DB/live)    |
+| build             | ✅                                            |
+| e2e               | ✅ 119 passed                                 |
+| CI `schema` job   | ✅ 5 passed, AC5 included                     |
+| skip/only         | ✅ clean                                      |
+| entry-point order | ✅                                            |
+| frozen tests      | ✅ byte-identical to `1406c95`                |
+
+| AC  | Kind | Red before (Phase R)                   | Green after          |
+| --- | ---- | -------------------------------------- | -------------------- |
+| AC1 | unit | `equal: false` ≠ `equal: true`         | ✅                   |
+| AC2 | unit | empty lists ≠ policy, column, function | ✅                   |
+| AC3 | unit | `changed: []` ≠ the column             | ✅                   |
+| AC4 | unit | probe file absent                      | ✅                   |
+| AC5 | unit | `expected 0 to be greater than 0`      | ✅ (CI `schema` job) |
+
+Expected fingerprints: `school.json` 509 objects (30 tables, 208 columns, 128
+constraints, 63 indexes, 68 policies, 3 views, 7 functions, 2 triggers; no
+`demo_deny_*`), `demo.json` 599 objects (the same 509 plus 90 `demo_deny_*`
+policies, three on each of the 30 tables, nothing else added, removed or
+changed).
 
 ## Execution report
 

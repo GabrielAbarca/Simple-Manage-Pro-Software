@@ -1,8 +1,15 @@
 import { execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createPsqlExecutor } from "../scripts/delivery/executors/psql.mjs";
+import {
+  compareFingerprints,
+  probeFingerprint,
+  readExpectedFingerprint,
+  serializeFingerprint,
+} from "../scripts/delivery/fingerprint.mjs";
 import { AUDIT_SUMMARY } from "../scripts/delivery/proofs.mjs";
 import {
   SCHEMA_DIR,
@@ -21,9 +28,13 @@ import {
  *
  * Each test gets its own database, cloned from a pristine copy of `postgres`
  * that the first run makes with the CLI's local `supabase_admin` login.
+ *
+ * With SMP_FINGERPRINT_OUT set, the fresh fingerprints are also written there
+ * as `school.json` and `demo.json`, ready to replace the committed ones.
  */
 
 const serverUrl = process.env.SMP_SCHEMA_DB_URL;
+const fingerprintOut = process.env.SMP_FINGERPRINT_OUT;
 const TEMPLATE = "smp_harness_template";
 
 /** @param {string} name */
@@ -206,5 +217,35 @@ describe.skipIf(!serverUrl)("schema harness", () => {
 
     expect(lines(plainAudit(passing))).toContain(AUDIT_SUMMARY);
     expect(plainAudit(failing)).not.toContain(AUDIT_SUMMARY);
+  }, 120_000);
+
+  it("the committed expected fingerprints match a fresh install in both shapes", async () => {
+    const executor = createPsqlExecutor({ databaseUrl: freshDatabase() });
+    const shapes = [
+      ["school", "school_schema.sql"],
+      ["demo", "demo_lockdown.sql"],
+    ];
+
+    for (const [shape, file] of shapes) {
+      expect((await executor.runFile(join(SCHEMA_DIR, file))).ok).toBe(true);
+      const fresh = await probeFingerprint(executor);
+      if (fingerprintOut) {
+        mkdirSync(fingerprintOut, { recursive: true });
+        writeFileSync(
+          join(fingerprintOut, `${shape}.json`),
+          serializeFingerprint(fresh),
+        );
+      }
+
+      expect(Object.keys(fresh.objects).length).toBeGreaterThan(0);
+      const committed = readExpectedFingerprint(shape);
+      expect(compareFingerprints(committed, fresh)).toEqual({
+        equal: true,
+        added: [],
+        removed: [],
+        changed: [],
+      });
+      expect(committed.digest).toBe(fresh.digest);
+    }
   }, 120_000);
 });

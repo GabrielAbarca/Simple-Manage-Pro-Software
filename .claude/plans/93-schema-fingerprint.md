@@ -353,7 +353,13 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-17 — Row parsing, normalisation and keys moved to
+  `scripts/delivery/fingerprintKeys.mjs` (96 lines); `fingerprint.mjs` keeps
+  the fingerprint, compare and file code (246 lines) and re-exports
+  `FingerprintError` — one file came to 331 lines, over the 300-line cap.
+- 2026-10-17 — Task 3's tests live in `test/deliveryFingerprintFiles.test.js`
+  instead of below the frozen tests — adding them to the same file meant
+  changing its imports, and the frozen file stays byte-identical to `1406c95`.
 
 ## Manual Supabase steps
 
@@ -362,7 +368,21 @@ red commit goes here: date — what changed — why.
 
 ## Validation
 
-Filled by `/piv-implement` and `/piv-validate`.
+**Halted at task 4 (2026-10-17).** The guard refused the write to
+`supabase/delivery/fingerprint.sql`: the session isn't in Default permission
+mode, so no approval prompt could be shown. Tasks 1, 2, 3 and 5 are done and
+committed; tasks 4, 6, 7 and 8 wait on the owner.
+
+| AC  | Red before (Phase R)                   | Now                                 |
+| --- | -------------------------------------- | ----------------------------------- |
+| AC1 | `equal: false` ≠ `equal: true`         | ✅ green                            |
+| AC2 | empty lists ≠ policy, column, function | ✅ green                            |
+| AC3 | `changed: []` ≠ the column             | ✅ green                            |
+| AC4 | probe file absent                      | ⏸ red until task 4 writes the probe |
+| AC5 | `expected 0 to be greater than 0`      | ⏸ needs tasks 4 and 6               |
+
+The probe drafted for task 4 already passes AC4's read-only rule when checked
+outside `supabase/` (one statement, starts with `with`, no write keyword).
 
 ## Execution report
 

@@ -83,6 +83,19 @@ describe("CI workflow", () => {
     expect(schema).not.toMatch(/secrets\./);
   });
 
+  it("uploads the schema job's fresh fingerprints as an artifact", () => {
+    const schema = block(jobs, "schema", 2).join("\n");
+    const upload = steps("schema").find((step) =>
+      step.includes("actions/upload-artifact@"),
+    );
+
+    expect(schema).toMatch(/^\s+SMP_FINGERPRINT_OUT: fingerprints$/m);
+    expect(upload).toBeDefined();
+    expect(upload).toContain("name: expected-fingerprints");
+    expect(upload).toContain("path: fingerprints/");
+    expect(upload).toContain("if: ${{ !cancelled() }}");
+  });
+
   it("checks formatting in the quality job", () => {
     const quality = steps("quality");
     const commands = quality.map(command);

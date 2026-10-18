@@ -1,8 +1,8 @@
 # Plan — Fingerprint a project's schema and compare it by definition
 
 **Implements:** #93 · **Epic:** #86 · **Branch:** feat/schema-fingerprint
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-17
+**Red commit:** 1406c95
 **Confidence:** 7/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -192,10 +192,10 @@ changed: [] }`, `serializeFingerprint()` returning `""`. No parameters,
 - AC2: `… -t "reports dropped, changed and added objects by kind and name"` → `AssertionError: expected { equal: false, added: [], …(2) } to match object { equal: false, …(3) }` ✅ valid red
 - AC3: `… -t "subtracts recorded exceptions before comparing"` → `AssertionError: expected { equal: false, added: [], …(2) } to match object { equal: false, removed: [], …(2) }` ✅ valid red
 - AC4: `… -t "the fingerprint probe only reads"` → `AssertionError: expected false to be true // Object.is equality` ✅ valid red
-- AC5: proved in CI's `schema` job on the draft PR (this machine has no
-  `psql` and no running Docker, and the guard refuses `supabase db start`
-  outside Default mode; the owner chose the draft-PR route at planning) → filled
-  in from the run.
+- AC5: CI `schema` job, run 39087235548 on `1406c95` (PR #114) → `AssertionError: expected 0 to be greater than 0`; the job's other four harness tests passed ✅ valid red. The `quality` job on the same run failed only on AC1–AC4's four tests; `ciWorkflow` and `claudeSkills` passed on CI's LF checkout.
+- Why AC5 is proved in CI: this machine has no `psql` and no running Docker,
+  and the guard refuses `supabase db start` outside Default mode, so the owner
+  chose the draft-PR route at planning.
 - `npm test` locally: the only other failures are `test/ciWorkflow.test.js`
   (6) and `test/claudeSkills.test.js` (2). They fail on `main` in this checkout
   too: `core.autocrlf=true` checks the YAML and Markdown out with CRLF, which
@@ -320,17 +320,17 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 1. Policy and function names carry spaces and other characters #90's exception
    `object` rejects. — **Default:** keys are slugged into #90's shape (see Key
    above); the human-readable `name` is kept beside each key. `record.mjs` is
-   not changed.
+   not changed. Resolved: default stands.
 2. Grants (`relacl` on tables and views, `proacl` on functions) decide who can
    reach what, but the ticket doesn't list them. — **Default:** left out here;
-   noted under "Not in this change" as a follow-up for the epic.
+   noted under "Not in this change" as a follow-up for the epic. Resolved: default stands.
 3. Indexes that back a primary-key or unique constraint appear twice (as the
    constraint and as its index). — **Default:** keep both. Both compare by
-   definition, so a rename stays invisible and nothing is double-hidden.
+   definition, so a rename stays invisible and nothing is double-hidden. Resolved: default stands.
 4. How the owner refreshes the committed files after a schema change. —
    **Default:** CI's `expected-fingerprints` artifact, copied into
    `supabase/delivery/expected/`; documented in the map row. A
-   `docs/DELIVERY.md` section is the epic's later doc ticket.
+   `docs/DELIVERY.md` section is the epic's later doc ticket. Resolved: default stands.
 
 ## Notes
 

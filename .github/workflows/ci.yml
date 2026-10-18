@@ -57,6 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SMP_SCHEMA_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

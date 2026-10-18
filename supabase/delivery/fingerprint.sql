@@ -34,8 +34,10 @@ objects as (
          concat_ws(' ', format_type(a.atttypid, a.atttypmod),
            case when a.attnotnull then 'not null' end,
            'default ' || pg_get_expr(ad.adbin, ad.adrelid),
-           case when a.attidentity <> '' then 'identity ' || a.attidentity end,
-           case when a.attgenerated <> '' then 'generated ' || a.attgenerated end,
+           case when a.attidentity <> ''
+                then 'identity ' || a.attidentity::text end,
+           case when a.attgenerated <> ''
+                then 'generated ' || a.attgenerated::text end,
            case when co.collname <> 'default' then 'collate ' || co.collname end)
     from tables t
     join pg_attribute a
@@ -47,7 +49,7 @@ objects as (
   select 'constraint',
          'public.' || t.relname,
          'public.' || t.relname || '.' || con.conname,
-         con.contype || ' ' || pg_get_constraintdef(con.oid)
+         con.contype::text || ' ' || pg_get_constraintdef(con.oid)
     from tables t
     join pg_constraint con on con.conrelid = t.oid
    where con.contype <> 'n'

@@ -360,6 +360,17 @@ red commit goes here: date — what changed — why.
 - 2026-10-17 — Task 3's tests live in `test/deliveryFingerprintFiles.test.js`
   instead of below the frozen tests — adding them to the same file meant
   changing its imports, and the frozen file stays byte-identical to `1406c95`.
+- 2026-10-17 — Resumed after the owner switched the session to Default mode
+  (the "Needs your decision" item on the draft PR).
+- 2026-10-17 — The probe casts `attidentity`, `attgenerated` and `contype` to
+  `::text` before concatenating (`f7f80b9`) — Postgres rejected
+  `'identity ' || attidentity` as `42725 operator is not unique: unknown ||
+"char"` on the first CI run.
+- 2026-10-17 — Task 6 took two CI round trips, `school.json` (`0572deb`) then
+  `demo.json` — AC5 writes and checks one shape at a time, so the first run
+  stopped at the missing `school.json` before probing the demo shape.
+- 2026-10-17 — Context reference corrected: the baseline defines 7 functions
+  in `public`, not 9 (the fresh fingerprint lists them).
 
 ## Manual Supabase steps
 

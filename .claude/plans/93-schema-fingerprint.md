@@ -413,6 +413,29 @@ constraints, 63 indexes, 68 policies, 3 views, 7 functions, 2 triggers; no
 policies, three on each of the 30 tables, nothing else added, removed or
 changed).
 
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** AC1–AC4 PASS, AC5 UNPROVEN
+locally (no Postgres in this checkout); proved in CI at red `1406c95`
+(run 39087235548, `expected 0 to be greater than 0`) and HEAD `ab88a16`
+(run 39092740822, 5 passed), the proof route the owner chose at planning.
+
+| AC  | Kind      | Exists | Faithful | Passes                   | Coupled                        | Frozen    | Probe      | Verdict  |
+| --- | --------- | ------ | -------- | ------------------------ | ------------------------------ | --------- | ---------- | -------- |
+| AC1 | unit      | yes    | yes      | yes (local)              | yes, fails at RED (local + CI) | unchanged | n/a (unit) | PASS     |
+| AC2 | unit      | yes    | yes      | yes (local)              | yes, fails at RED (local + CI) | unchanged | n/a (unit) | PASS     |
+| AC3 | unit      | yes    | yes      | yes (local)              | yes, fails at RED (local + CI) | unchanged | n/a (unit) | PASS     |
+| AC4 | unit      | yes    | yes      | yes (local)              | yes, fails at RED (local + CI) | unchanged | n/a (unit) | PASS     |
+| AC5 | unit (db) | yes    | yes      | CI only, at HEAD ab88a16 | CI only, fails at RED          | unchanged | n/a (unit) | UNPROVEN |
+
+Findings: 0 Critical, 0 High, 0 Medium, 2 Low.
+
+- Low — `scripts/delivery/fingerprint.mjs:79`: the digest covers key and hash
+  only, so a hand-edited `kind` or `name` in an expected file is accepted.
+  Fix in this change.
+- Low — `supabase/delivery/fingerprint.sql:21`: grants, enum values and
+  sequences aren't fingerprinted. Outside the ticket's kinds; follow-up.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

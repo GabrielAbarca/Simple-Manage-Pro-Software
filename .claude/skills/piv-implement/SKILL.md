@@ -39,9 +39,11 @@ For each task:
    the ticket (hard rule 8).
 3. Run the task's **Validate** command. The task isn't done until it passes.
    Fix it now rather than carrying a failure forward.
-4. For a task marked **owner approval** (a `**Supabase:** yes` ticket), the
-   guard hook asks the owner before the edit (only in a Default-mode session;
-   in other modes it refuses, which is a halt). Once it's approved and done, add the
+4. For a task marked **owner approval** (a `**Supabase:** yes` ticket), first
+   run the mode check in `.claude/references/conventions.md` (section
+   supabase). The guard hook asks the owner before the edit only in a
+   Manual-mode session (`default`); in other modes it refuses, which is a halt.
+   Once it's approved and done, add the
    SQL file and what it does, in apply order, to the plan's
    `## Manual Supabase steps`. If the owner declines, stop (halt).
 

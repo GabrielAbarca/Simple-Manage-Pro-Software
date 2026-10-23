@@ -455,6 +455,27 @@ error`). Both expected files carry the recomputed digest; their 509 and 599
 - AC5 UNPROVEN locally: no Postgres in this checkout. Its proof is CI's
   `schema` job at the exact commit, the route the owner chose at planning.
 
+### Review (round 2)
+
+**Verdict:** clean · **Acceptance:** PASS (AC5 on CI evidence pinned to HEAD
+`7ce8f61`, run 40013011705, and red `1406c95`, run 39087235548)
+
+| AC  | Kind      | Exists | Faithful | Passes             | Coupled                 | Frozen    | Probe      | Verdict            |
+| --- | --------- | ------ | -------- | ------------------ | ----------------------- | --------- | ---------- | ------------------ |
+| AC1 | unit      | yes    | yes      | yes                | yes, fails at RED       | unchanged | n/a (unit) | PASS               |
+| AC2 | unit      | yes    | yes      | yes                | yes, fails at RED       | unchanged | n/a (unit) | PASS               |
+| AC3 | unit      | yes    | yes      | yes                | yes, fails at RED       | unchanged | n/a (unit) | PASS               |
+| AC4 | unit      | yes    | yes      | yes                | yes, fails at RED       | unchanged | n/a (unit) | PASS               |
+| AC5 | unit (db) | yes    | yes      | yes, in CI at HEAD | yes, fails at RED in CI | unchanged | n/a (unit) | PASS (CI evidence) |
+
+Findings: 0 Critical, 0 High, 0 Medium, 1 Low.
+
+- Low — `scripts/delivery/fingerprint.mjs:66`: when two objects reduce to the
+  same key, the `.2` suffix follows probe row order, so dropping the first
+  would shift the second onto the bare key. Latent: neither expected file has
+  a suffixed key (0 of 509, 0 of 599). Not in this change; the follow-up is a
+  short hash of the raw name in the key.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

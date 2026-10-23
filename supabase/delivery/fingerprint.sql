@@ -4,7 +4,7 @@
 -- spans lines still arrives as a single cell.
 with relations as (
   select c.oid, c.relname, c.relkind, c.relrowsecurity, c.relforcerowsecurity,
-         c.reloptions
+         c.reloptions, c.relowner, c.relacl
     from pg_class c
     join pg_namespace n on n.oid = c.relnamespace
    where n.nspname = 'public'
@@ -17,6 +17,71 @@ with relations as (
 ),
 tables as (
   select * from relations where relkind in ('r', 'p')
+),
+functions as (
+  select p.oid, p.proname, p.proowner, p.proacl
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and p.prokind in ('f', 'p')
+     and not exists (
+       select 1 from pg_depend d
+        where d.classid = 'pg_proc'::regclass
+          and d.objid = p.oid
+          and d.deptype = 'e')
+),
+sequences as (
+  select c.relowner, c.relacl,
+         coalesce(owned.name, 'public.' || c.relname) as name,
+         concat_ws(' ', format_type(s.seqtypid, null),
+           'start ' || s.seqstart,
+           'increment ' || s.seqincrement,
+           'min ' || s.seqmin,
+           'max ' || s.seqmax,
+           case when s.seqcycle then 'cycle' end) as definition
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    join pg_sequence s on s.seqrelid = c.oid
+    left join lateral (
+      select tn.nspname || '.' || t.relname || '.' || a.attname as name
+        from pg_depend d
+        join pg_class t on t.oid = d.refobjid
+        join pg_namespace tn on tn.oid = t.relnamespace
+        join pg_attribute a
+          on a.attrelid = d.refobjid and a.attnum = d.refobjsubid
+       where d.classid = 'pg_class'::regclass
+         and d.objid = c.oid
+         and d.refclassid = 'pg_class'::regclass
+         and d.refobjsubid > 0
+         and d.deptype in ('a', 'i')
+       limit 1) owned on true
+   where n.nspname = 'public'
+     and c.relkind = 'S'
+     and not exists (
+       select 1 from pg_depend d
+        where d.classid = 'pg_class'::regclass
+          and d.objid = c.oid
+          and d.deptype = 'e')
+),
+privileged as (
+  select 'public.' || r.relname as object, r.relowner as owner,
+         coalesce(r.relacl, acldefault('r', r.relowner)) as acl
+    from relations r
+  union all
+  select s.name, s.relowner, coalesce(s.relacl, acldefault('s', s.relowner))
+    from sequences s
+  union all
+  select 'public.' || f.proname
+           || '(' || pg_get_function_identity_arguments(f.oid) || ')',
+         f.proowner,
+         coalesce(f.proacl, acldefault('f', f.proowner))
+    from functions f
+),
+acl_entries as (
+  select pr.object, x.grantee, x.privilege_type, x.is_grantable
+    from privileged pr
+   cross join lateral aclexplode(pr.acl) x
+   where x.grantee <> pr.owner
 ),
 objects as (
   select 'table' as kind,
@@ -91,18 +156,10 @@ objects as (
   union all
   select 'function',
          null,
-         'public.' || p.proname
-           || '(' || pg_get_function_identity_arguments(p.oid) || ')',
-         pg_get_functiondef(p.oid)
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'public'
-     and p.prokind in ('f', 'p')
-     and not exists (
-       select 1 from pg_depend d
-        where d.classid = 'pg_proc'::regclass
-          and d.objid = p.oid
-          and d.deptype = 'e')
+         'public.' || f.proname
+           || '(' || pg_get_function_identity_arguments(f.oid) || ')',
+         pg_get_functiondef(f.oid)
+    from functions f
 
   union all
   select 'trigger',
@@ -112,6 +169,40 @@ objects as (
     from tables t
     join pg_trigger tg on tg.tgrelid = t.oid
    where not tg.tgisinternal
+
+  union all
+  select 'grant',
+         null,
+         pv.object || '.'
+           || case when pv.grantee = 0 then 'public'
+                   else pg_get_userbyid(pv.grantee) end
+           || '.' || pv.privilege_type,
+         case when bool_or(pv.is_grantable) then 'grantable' else '' end
+    from acl_entries pv
+   group by pv.object, pv.grantee, pv.privilege_type
+
+  union all
+  select 'type',
+         null,
+         'public.' || ty.typname,
+         'enum (' || coalesce(
+           (select string_agg(quote_literal(e.enumlabel), ','
+                              order by e.enumsortorder)
+              from pg_enum e
+             where e.enumtypid = ty.oid), '') || ')'
+    from pg_type ty
+    join pg_namespace n on n.oid = ty.typnamespace
+   where n.nspname = 'public'
+     and ty.typtype = 'e'
+     and not exists (
+       select 1 from pg_depend d
+        where d.classid = 'pg_type'::regclass
+          and d.objid = ty.oid
+          and d.deptype = 'e')
+
+  union all
+  select 'sequence', null, s.name, s.definition
+    from sequences s
 )
 select json_build_object(
          'kind', kind,

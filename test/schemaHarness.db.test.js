@@ -248,4 +248,60 @@ describe.skipIf(!serverUrl)("schema harness", () => {
       expect(committed.digest).toBe(fresh.digest);
     }
   }, 120_000);
+
+  it("the probe reports a re-granted privilege, an extra enum label and a changed sequence", async () => {
+    const executor = createPsqlExecutor({ databaseUrl: freshDatabase() });
+    expect(
+      (await executor.runFile(join(SCHEMA_DIR, "school_schema.sql"))).ok,
+    ).toBe(true);
+    const fresh = await probeFingerprint(executor);
+    const freshKeys = Object.keys(fresh.objects);
+
+    expect(freshKeys).toContain("type:public.user_role_enum");
+    expect(freshKeys).toContain("sequence:public.students.id");
+    expect(freshKeys).toContain(
+      "grant:public.teacher_id().authenticated.EXECUTE",
+    );
+    expect(
+      freshKeys.filter((key) =>
+        /^grant:public\.(teacher_id\(\)\.(anon|public)\.|teachers_directory\.(anon|public)\.)/.test(
+          key,
+        ),
+      ),
+    ).toEqual([]);
+
+    for (const statement of [
+      "grant execute on function public.teacher_id() to anon",
+      "alter type public.user_role_enum add value 'guardian'",
+      "alter table public.students alter column id set increment by 10",
+    ]) {
+      expect((await executor.runStatement(statement)).ok).toBe(true);
+    }
+
+    expect(
+      compareFingerprints(fresh, await probeFingerprint(executor)),
+    ).toEqual({
+      equal: false,
+      added: [
+        {
+          key: "grant:public.teacher_id().anon.EXECUTE",
+          kind: "grant",
+          name: "public.teacher_id().anon.EXECUTE",
+        },
+      ],
+      removed: [],
+      changed: [
+        {
+          key: "sequence:public.students.id",
+          kind: "sequence",
+          name: "public.students.id",
+        },
+        {
+          key: "type:public.user_role_enum",
+          kind: "type",
+          name: "public.user_role_enum",
+        },
+      ],
+    });
+  }, 120_000);
 });

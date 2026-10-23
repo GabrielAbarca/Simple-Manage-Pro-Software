@@ -17,7 +17,14 @@ const KINDS_ON_A_TABLE = new Set([
   "policy",
   "trigger",
 ]);
-const KINDS_ON_THE_SCHEMA = new Set(["table", "view", "function"]);
+const KINDS_ON_THE_SCHEMA = new Set([
+  "table",
+  "view",
+  "function",
+  "grant",
+  "type",
+  "sequence",
+]);
 const KEYED_BY_DEFINITION = new Set(["constraint", "index"]);
 const MAX_KEY_LENGTH = 200;
 const INDEX_NAME = /^(CREATE (?:UNIQUE )?INDEX) (?:"(?:[^"]|"")+"|\S+) ON /;
@@ -41,12 +48,18 @@ export function normaliseDefinition(kind, definition) {
 }
 
 /** @param {string} identity */
-const keySafe = (identity) =>
-  identity.replaceAll(", ", ",").replace(/[^A-Za-z0-9_.,()]/g, "_");
+function keySafe(identity) {
+  const spaced = identity.replaceAll(", ", ",");
+  const safe = spaced.replace(/[^A-Za-z0-9_.,()]/g, "_");
+  if (safe === spaced) return safe;
+  return `${safe}.${sha256(identity).slice(0, 8)}`;
+}
 
 /**
  * Constraints and indexes are keyed by their definition, every other object
- * by its name, in the `kind:name` shape a recorded exception names.
+ * by its name, in the `kind:name` shape a recorded exception names. A name
+ * the shape can't hold as is carries a short hash of the raw name, so two
+ * names that slug alike keep distinct keys.
  * @param {ProbeRow} row
  * @param {string} hash
  * @returns {string}

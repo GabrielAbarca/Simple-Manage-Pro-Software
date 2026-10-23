@@ -81,9 +81,12 @@ describe("fingerprint keys and files", () => {
     const keys = Object.keys(fingerprint.objects);
     expect(keys).toHaveLength(baseline.length + 3);
     for (const key of keys) expect(key).toMatch(EXCEPTION_OBJECT);
-    expect(keys).toContain(
-      "function:public.grade_between(numeric,timestamp_with_time_zone)",
+    expect(keys).toContainEqual(
+      expect.stringMatching(
+        /^function:public\.grade_between\(numeric,timestamp_with_time_zone\)\.[0-9a-f]{8}$/,
+      ),
     );
+    expect(keys).toContain("function:public.teacher_id()");
   });
 
   it("treats columns whose defaults differ only by sequence name as equal", async () => {
@@ -180,5 +183,56 @@ describe("fingerprint keys and files", () => {
     expect(() => readExpectedFingerprint("demo", dir)).toThrow(
       "does not match its digest",
     );
+  });
+
+  it("keeps a function key free of a hash when only its argument spacing changes", async () => {
+    const fingerprint = await fingerprintOf([
+      {
+        kind: "function",
+        on: null,
+        name: "public.grade_of(integer, text)",
+        definition: "CREATE FUNCTION …",
+      },
+    ]);
+
+    expect(Object.keys(fingerprint.objects)).toEqual([
+      "function:public.grade_of(integer,text)",
+    ]);
+  });
+
+  it("keys identical constraints the same in either row order", async () => {
+    const duplicate = (/** @type {string} */ name) => ({
+      kind: "constraint",
+      on: STUDENTS,
+      name: `${STUDENTS}.${name}`,
+      definition: "UNIQUE (cedula)",
+    });
+    const rows = [duplicate("students_cedula_key"), duplicate("cedula_unique")];
+
+    const forward = await fingerprintOf(rows);
+    const backward = await fingerprintOf([...rows].reverse());
+
+    expect(Object.keys(forward.objects)).toHaveLength(2);
+    expect(backward).toEqual(forward);
+  });
+
+  it("leaves the probe's rows in the order they came", async () => {
+    const rows = [...baseline].reverse().map((row) => [JSON.stringify(row)]);
+    const before = structuredClone(rows);
+
+    await probeFingerprint({
+      runFile: async () => ({
+        ok: true,
+        sqlstate: null,
+        error: null,
+        notices: [],
+        rows,
+      }),
+      runStatement: async () => {
+        throw new Error("not used");
+      },
+    });
+
+    expect(rows).toEqual(before);
   });
 });

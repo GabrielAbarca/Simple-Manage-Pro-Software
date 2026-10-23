@@ -318,7 +318,24 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 Append-only. Every change to this plan or to a frozen acceptance test after the
 red commit goes here: date — what changed — why.
 
-- (none)
+- 2026-10-23 — A grant on a sequence names the sequence the same way its
+  `sequence` row does (the owning column when owned), not `public.<seq>` —
+  otherwise the generated sequence name Open question 1 hides would come back
+  in the grant keys.
+- 2026-10-23 — The probe's function filter moved into a shared `functions`
+  CTE, used by the `function` and `grant` branches; the `function` rows it
+  returns are unchanged. The `aclexplode` CTE is `acl_entries`, not
+  `privileges` (a Postgres keyword). The rename was made with `sed` after the
+  owner approved the edit, so the guard did not prompt for it.
+- 2026-10-23 — `test/deliveryFingerprintFiles.test.js` › "keys every object in
+  the shape a recorded exception names" (#93's non-AC test) now expects
+  `function:public.grade_between(numeric,timestamp_with_time_zone)` plus an
+  8-hex suffix — its argument types hold spaces, so the approved Open
+  question 5 gives it the hash; it also asserts `function:public.teacher_id()`
+  keeps a suffix-free key.
+- 2026-10-23 — Task 5's DB test changes the sequence with `alter table
+public.students alter column id set increment by 10`, which reaches the
+  identity sequence without naming it.
 
 ## Manual Supabase steps
 

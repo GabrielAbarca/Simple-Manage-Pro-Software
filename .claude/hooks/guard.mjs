@@ -21,7 +21,7 @@ const PLAN_PATHS = /\.claude\/(?:plans|code-reviews)(?:\/|\b)/;
 
 const RULE_5 =
   "Hard rule 5: Supabase schema, RLS, Auth, Edge Functions and database changes need the owner's explicit approval first (.claude/references/conventions.md, section supabase).";
-const RULE_5_NO_PROMPT = `${RULE_5} This session's permission mode cannot show the owner an approval prompt, so the change is refused. Stop and tell the owner: they can switch the session to Default permission mode and retry, or apply the change by hand.`;
+const RULE_5_NO_PROMPT = `${RULE_5} This session's permission mode cannot show the owner an approval prompt, so the change is refused. Only Manual mode (Claude Code's "default") can; Accept edits, Auto, Plan and Bypass permissions all refuse. Stop and tell the owner: they can switch the session to Manual and retry (a session can lower itself to it, see .claude/references/conventions.md, section supabase), or apply the change by hand.`;
 const SECRETS =
   "Env files hold real credentials and are never read. Use .env.example for the variable names.";
 const HOLDOUT =

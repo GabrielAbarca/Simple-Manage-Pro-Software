@@ -478,4 +478,75 @@ Findings: 0 Critical, 0 High, 0 Medium, 1 Low.
 
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +8 ~4 −0 · **Lines:** +6953 −12 (about 6,200 of them the two
+generated expected files) · **Review rounds:** 2 · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (570) · build ✅ · e2e ✅ (119) · CI
+`schema` ✅ (5, AC5 included) · acceptance validator: PASS (AC5 on CI evidence
+pinned to HEAD and red)
+
+### What went well
+
+- Putting normalisation and hashing in JS rather than SQL let AC1–AC3 run as
+  plain unit tests over fake executor rows; the catalog SQL stayed a dumb read.
+- The CI artifact route (the test writes fresh fingerprints before asserting,
+  the upload runs on `!cancelled()`) produced both expected files with no
+  local Postgres, exactly as the ticket intended for the owner's machine.
+- Pinning AC5's evidence to CI runs at the exact red and HEAD SHAs gave the
+  acceptance validator something it could check without a database.
+
+### Divergences from the plan
+
+- **Module split** — planned: one `fingerprint.mjs` (split "if it grows") ·
+  actual: `fingerprint.mjs` + `fingerprintKeys.mjs` · why: 331 lines, over the
+  300-line cap · type: better approach found
+- **Extra tests in their own file** — planned: appended below the frozen tests
+  · actual: `test/deliveryFingerprintFiles.test.js` · why: appending changed
+  the frozen file's imports · type: plan assumption wrong
+- **`::text` casts in the probe** — planned: none · actual: three casts · why:
+  `unknown || "char"` is ambiguous in Postgres (42725); nothing local could run
+  the SQL before CI · type: missing context
+- **Two CI round trips for task 6** — planned: one · actual: `school.json`,
+  then `demo.json` · why: the frozen AC5 test checks one shape at a time and
+  stops at the first missing file · type: plan assumption wrong
+- **Digest covers kind and name** — planned: key and hash · actual:
+  `[key, kind, name, hash]` · why: review round 1 showed a hand-edited name
+  passed the reader · type: security or performance
+- **Function count** — planned: 9 · actual: 7 · why: a grep counted lines, not
+  functions · type: plan assumption wrong
+
+### Challenges
+
+- The guard blocked `supabase/` writes three times because the session wasn't
+  reporting `permission_mode: "default"` (auto mode, accept-edits, then a mode
+  the owner called Manual). Each block was a halt, and the last copy had to be
+  done by the owner by hand.
+- No `psql` or running Docker on this machine, so the probe SQL was first
+  executed by CI; its one bug surfaced only there.
+- `core.autocrlf=true` makes `format:check`, `ciWorkflow` and `claudeSkills`
+  fail locally on `main` too. A clean ladder needed an LF worktree.
+- The first round-1 acceptance validator run was lost when the session ended
+  mid-call; it left a `coupling` worktree behind that had to be removed.
+
+### Skipped
+
+- None. Grants, enum values, sequences and the key-collision ordering are
+  out-of-scope follow-ups, not skipped plan items.
+
+### Recommendations
+
+- **Plan skill:** when a ticket is `Supabase: yes`, Phase R should check the
+  session's permission mode up front and say which tasks will hit the guard,
+  so the owner switches modes once instead of at each halt.
+- **Plan skill:** for a DB-backed AC that writes per-shape artifacts, plan the
+  generation to write every shape before asserting (or plan N round trips).
+  Here the frozen test's loop order cost an extra CI cycle.
+- **References (validation-ladder):** document the LF-worktree recipe for a
+  `core.autocrlf=true` checkout, or add `.gitattributes` with `eol=lf` so the
+  local ladder matches CI.
+- **CLAUDE.md / ARCHITECTURE_MAP:** the guard's mode check (`guard.mjs:41`)
+  only prompts on `"default"`; the docs should name which app mode that is.
+- **Ticket slicing:** right size. The ACs were sound; AC5's "both shapes"
+  wording is what fixed the round-trip count, which the slicer could note.

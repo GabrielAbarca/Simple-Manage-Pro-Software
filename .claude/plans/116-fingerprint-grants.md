@@ -1,8 +1,8 @@
 # Plan — Fingerprint grants, enum values and sequences in public
 
 **Implements:** #116 · **Epic:** #86 · **Branch:** feat/fingerprint-grants
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-23
+**Red commit:** 895db66
 **Confidence:** 7/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -282,20 +282,22 @@ Each has a default the loop uses if the reviewer approves without overriding it.
 1. An owned sequence's generated name (`students_id_seq`) differs by how the
    table was made. — **Default:** name it by its owning column
    (`sequence:public.students.id`); a free sequence keeps its own name.
+   Resolved: default stands.
 2. The object owner's privileges are implicit, and the owner role can differ
    between CI's install and a live project. — **Default:** grants to the
-   owner are left out.
+   owner are left out. Resolved: default stands.
 3. The same privilege can come from two grantors (`postgres` and
    `supabase_admin`). — **Default:** the grantor is dropped and duplicates
-   merge into one row, `grantable` if any grant was.
+   merge into one row, `grantable` if any grant was. Resolved: default stands.
 4. Two constraints or indexes with the same definition on one table still
    share a key. — **Default:** they keep `.2`, assigned over a sorted order
    instead of probe order; a name hash there would make a rename visible,
-   which #93 ruled out.
+   which #93 ruled out. Resolved: default stands.
 5. Which names get the hash suffix. — **Default:** only names the slug
    changes (8 hex); lossless names (tables, columns, functions) keep today's
    keys. Policies with spaces change keys; no record holds an exception yet
-   (`supabase/delivery/records/` is empty), so nothing breaks.
+   (`supabase/delivery/records/` is empty), so nothing breaks. Resolved:
+   default stands.
 
 ## Notes
 

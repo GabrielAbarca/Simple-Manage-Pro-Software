@@ -160,4 +160,25 @@ describe("fingerprint keys and files", () => {
       FingerprintError,
     );
   });
+
+  it("refuses a committed file whose object kind or name was edited", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "smp-fingerprint-"));
+    const committed = JSON.parse(
+      serializeFingerprint(await fingerprintOf(baseline)),
+    );
+    const [firstKey] = Object.keys(committed.objects);
+    const editedName = structuredClone(committed);
+    editedName.objects[firstKey].name = "public.students.hand_edited";
+    const editedKind = structuredClone(committed);
+    editedKind.objects[firstKey].kind = "view";
+    writeFileSync(join(dir, "school.json"), JSON.stringify(editedName));
+    writeFileSync(join(dir, "demo.json"), JSON.stringify(editedKind));
+
+    expect(() => readExpectedFingerprint("school", dir)).toThrow(
+      "does not match its digest",
+    );
+    expect(() => readExpectedFingerprint("demo", dir)).toThrow(
+      "does not match its digest",
+    );
+  });
 });

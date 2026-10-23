@@ -371,6 +371,10 @@ red commit goes here: date — what changed — why.
   stopped at the missing `school.json` before probing the demo shape.
 - 2026-10-17 — Context reference corrected: the baseline defines 7 functions
   in `public`, not 9 (the fresh fingerprint lists them).
+- 2026-10-23 — The digest covers each object's kind and name as well as its
+  key and hash (review round 1). The expected files' digests were recomputed
+  from their unchanged objects and copied in by the owner, because the guard
+  could not prompt in this session's mode.
 
 ## Manual Supabase steps
 
@@ -435,6 +439,21 @@ Findings: 0 Critical, 0 High, 0 Medium, 2 Low.
   Fix in this change.
 - Low — `supabase/delivery/fingerprint.sql:21`: grants, enum values and
   sequences aren't fingerprinted. Outside the ticket's kinds; follow-up.
+
+Outcome:
+
+- Fixed: the digest covered key and hash only → each digest line is now
+  `JSON.stringify([key, kind, name, hash])`;
+  `test/deliveryFingerprintFiles.test.js` › "refuses a committed file whose
+  object kind or name was edited" (red before: `expected [Function] to throw an
+error`). Both expected files carry the recomputed digest; their 509 and 599
+  objects are unchanged. Fixed in this change by the owner's call, although
+  the unattended policy would have parked a Low touching `supabase/`.
+- Not in this change: grants (`relacl`, `proacl`), enum values and sequences
+  in the fingerprint — outside the ticket's object kinds; a follow-up for the
+  epic.
+- AC5 UNPROVEN locally: no Postgres in this checkout. Its proof is CI's
+  `schema` job at the exact commit, the route the owner chose at planning.
 
 ## Execution report
 

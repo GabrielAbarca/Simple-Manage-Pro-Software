@@ -76,7 +76,10 @@ function unusedKey(objects, key) {
  */
 function fingerprintFrom(entries) {
   const sorted = [...entries].sort(([a], [b]) => (a < b ? -1 : 1));
-  const lines = sorted.map(([key, object]) => `${key}\t${object.hash}\n`);
+  const lines = sorted.map(
+    ([key, { kind, name, hash }]) =>
+      `${JSON.stringify([key, kind, name, hash])}\n`,
+  );
   return {
     digest: sha256(lines.join("")),
     objects: Object.fromEntries(

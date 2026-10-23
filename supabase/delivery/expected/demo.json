@@ -1,5 +1,5 @@
 {
-  "digest": "3ac532d33a2a0b2fed2d7f6ef93fc07b7bb3523b97f957bc162d874e9459e809",
+  "digest": "e90086c558495512cb1647039994689a69e526923fd26d10ded7f393ef8b44ab",
   "objects": {
     "column:public.app_config.key": {
       "kind": "column",

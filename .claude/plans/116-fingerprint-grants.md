@@ -431,4 +431,86 @@ select` at `:638` adds nothing; the new fingerprint shows 8 `authenticated`
 
 ## Execution report
 
-Filled by `/system-execution-report`.
+**Files:** +1 ~9 −0 · **Lines:** +11683 −165 (about 10,800 of them the two
+regenerated expected files) · **Review rounds:** 1 · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (579) · build ✅ · e2e ✅ (119) · CI
+`schema` ✅ (6, G2 and the probe DB test included) · acceptance validator:
+PASS for AC1–AC5 and G1, G2 on CI evidence pinned to HEAD
+
+### What went well
+
+- Planning a focused DB test (task 5) for the SQL paid off: CI's first run
+  proved the probe on a real Postgres (re-grant, `add value`, `set increment
+by`) before any expected file was touched, so G2's 1,000-line diff was known
+  to be the stale files, not a probe bug. #93 needed a second SQL pass; this
+  ticket's probe was right first time.
+- The `{ refused }` helper in the AC tests turned "the kind is rejected" into
+  an assertion mismatch, so all five ACs were valid reds without any stub.
+- Comparing the two artifacts in a script (school artifact byte-identical to
+  the committed file; demo = school + exactly 90 `demo_deny_*`) made each copy
+  under the guard a checked step rather than a trust exercise.
+- The new grants surfaced a real baseline gap the moment the file existed:
+  `authenticated` keeps `ALL` on `teachers_directory`.
+
+### Divergences from the plan
+
+- **Sequence grants named like their sequence row** — planned:
+  `public.<seq>` · actual: the owning column when owned · why: the generated
+  name Open question 1 hides would have reappeared in grant keys · type: plan
+  assumption wrong
+- **Shared `functions` CTE, `acl_entries` name** — planned: a new grant CTE
+  only · actual: the function filter shared by two branches; the CTE named
+  `acl_entries` because `privileges` is a Postgres keyword · type: better
+  approach found
+- **#93's non-AC key test changed** — planned: not mentioned · actual: the
+  `grade_between(numeric, timestamp with time zone)` key now carries the
+  hash · why: the approved Open question 5 applies to argument types with
+  spaces, which the plan didn't spot · type: missing context
+- **DB test changes the sequence through `alter table … set increment by`** —
+  planned: `alter sequence <name>` · why: reaches the identity sequence
+  without naming it · type: better approach found
+- **Draft PR opened mid-implementation** — planned: PR at B6 · actual: draft
+  PR 117 after task 5 · why: CI runs only on `pull_request`, and task 6 needs
+  its artifact; `/piv-create-pr` fills the body later · type: plan assumption
+  wrong (same as #93)
+
+### Challenges
+
+- The session's permission mode drifted to Accept edits twice (once between
+  turns, once on a CI-event turn), so every guarded step needed the mode check
+  and a switch back to Manual. The check caught both; without it the guard
+  would have refused and the run would have halted.
+- I first reported that a `sed -i` rename under `supabase/` bypassed the
+  guard. It hadn't: `WRITE_VERB` (`guard.mjs:13`) matches `sed -i`, so the
+  owner was prompted. Corrected by a later AMENDMENTS entry.
+- `core.autocrlf=true` again forced the ladder into an LF worktree with a
+  junctioned `node_modules`; Git Bash's `cmd //c mklink /J` failed on quoting,
+  and PowerShell's `New-Item -ItemType Junction` worked.
+- The guard refused one worktree command because it mentioned the env file
+  (copying it in); CI's dummy `VITE_SUPABASE_*` values were enough.
+
+### Skipped
+
+- None.
+
+### Recommendations
+
+- **Plan skill:** when a ticket changes how keys are derived, grep the
+  non-frozen tests for pinned keys (`toContain("kind:…")`) and list the ones
+  the change will move, so the update is a planned task, not an amendment.
+- **Plan skill / ticket template:** a ticket whose expected files come from a
+  CI artifact should plan the draft PR as task 0 of implementation (CI runs
+  on `pull_request` only). Two tickets in a row have diverged here.
+- **References (validation-ladder):** document the LF worktree recipe that
+  works on this machine (`git worktree add --detach`, `core.autocrlf false`,
+  PowerShell `New-Item -ItemType Junction` for `node_modules`, dummy
+  `VITE_SUPABASE_*`), or add `.gitattributes` with `eol=lf` so the local
+  ladder matches CI. Raised in #93 as well.
+- **piv-validate:** the entry-point check's `head -20` misses `admin.js`,
+  whose header comment runs 21 lines; grep for the first `^import` instead.
+- **Ticket slicing:** right size. The ACs were sound; AC1–AC3 as unit tests
+  needed the non-AC DB test to cover the SQL, which the slicer could make an
+  explicit check for probe tickets.

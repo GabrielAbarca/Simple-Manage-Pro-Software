@@ -336,6 +336,15 @@ red commit goes here: date — what changed — why.
 - 2026-10-23 — Task 5's DB test changes the sequence with `alter table
 public.students alter column id set increment by 10`, which reaches the
   identity sequence without naming it.
+- 2026-10-24 — Correction to the `acl_entries` entry: the guard does match
+  `sed -i` on a `supabase/` path (`WRITE_VERB`, `.claude/hooks/guard.mjs:13`),
+  so the rename went through the owner's prompt like the edit before it.
+- 2026-10-24 — Task 6, `school.json`: copied from the `expected-fingerprints`
+  artifact of CI run 40019525069 (head `3831831`, where G2 failed on the stale
+  files and task 5's DB test passed). 1,576 objects: the 509 kinds from #93
+  plus 1,039 grants, 27 sequences (every one named by its `….id` column) and
+  one type. No key outside `OBJECT`; no anon or `public` grant on any function
+  the baseline revokes them from, nor on `teachers_directory`.
 
 ## Manual Supabase steps
 

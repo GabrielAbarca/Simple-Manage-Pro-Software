@@ -464,16 +464,73 @@ select` at `:638` adds nothing; the new fingerprint shows 8 `authenticated`
 - No fixes, so no round 2: the round-1 review is the final review. The
   validation at `c146896` stands; this commit changes only the plan.
 
+### Re-validation after the AC1 amendment (`cb4b3a7`)
+
+The owner amended AC1 after round 1 (grants folded to one object per object
+and grantee; see AMENDMENTS), which supersedes the round-1 "frozen tests" row
+above: the AC1 test changed at `bd78e0c`, under that amendment. `/piv-validate`
+at `cb4b3a7` in an LF worktree, plus CI run 40065940102 on the same commit:
+
+| Check           | Result                                                                                                                      |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| format:check    | ✅                                                                                                                          |
+| lint            | ✅                                                                                                                          |
+| typecheck       | ✅                                                                                                                          |
+| unit            | ✅ 580 passed, 22 skipped (opt-in DB/live)                                                                                  |
+| build           | ✅                                                                                                                          |
+| e2e             | ✅ 119 passed                                                                                                               |
+| CI `schema` job | ✅ G2 and task 5's DB test pass with the folded keys                                                                        |
+| skip/only       | ✅ clean                                                                                                                    |
+| frozen tests    | ✅ `test/deliveryFingerprint.test.js` unchanged since `bd78e0c`; its one change since `895db66` is AC1, under the amendment |
+
+### Review (round 2)
+
+**Verdict:** clean · **Acceptance:** PASS (every AC; G2 in CI at `cb4b3a7`,
+run 40065940102)
+
+| AC  | Kind  | Exists | Faithful | Passes                | Coupled                         | Frozen                      | Probe | Verdict |
+| --- | ----- | ------ | -------- | --------------------- | ------------------------------- | --------------------------- | ----- | ------- |
+| AC1 | unit  | yes    | yes      | yes                   | fails at bd78e0c and at 895db66 | unchanged                   | n/a   | PASS    |
+| AC2 | unit  | yes    | yes      | yes                   | fails at 895db66                | unchanged                   | n/a   | PASS    |
+| AC3 | unit  | yes    | yes      | yes                   | fails at 895db66                | unchanged                   | n/a   | PASS    |
+| AC4 | unit  | yes    | yes      | yes                   | fails at 895db66                | unchanged                   | n/a   | PASS    |
+| AC5 | unit  | yes    | yes      | yes                   | fails at 895db66                | unchanged                   | n/a   | PASS    |
+| G1  | guard | yes    | yes      | yes                   | n/a (guard)                     | unchanged                   | n/a   | PASS    |
+| G2  | guard | yes    | yes      | yes, in CI at cb4b3a7 | n/a (guard)                     | changed (sibling test only) | n/a   | PASS    |
+
+Findings: 0 Critical, 0 High, 0 Medium, 3 Low.
+
+- Low — `supabase/delivery/fingerprint.sql:36`: the sequence definition
+  leaves out `pg_sequence.seqcache`, so a changed cache size compares equal.
+- Low — grant keys on an owned sequence (`grant:public.students.id.anon`) read
+  like column grants; only the map row explains it.
+- Low — this plan's Validation and Execution report predated `bd78e0c` and
+  `cb4b3a7` (stale "byte-identical to `895db66`" and line counts).
+
+Outcome:
+
+- Fixed: the stale plan sections → this re-validation block and the updated
+  Execution report.
+- Not in this change: `seqcache` in the sequence definition — the ticket
+  lists type, start, increment, min, max and cycle, and the fix is a probe
+  change under `supabase/` plus regenerated files; a follow-up.
+- Not in this change: a note for whoever documents recording exceptions
+  that an owned sequence's grants are keyed by its column.
+- Not in this change: with grants folded, a PG15 project would see about 120
+  table and view grants as changed (no `MAINTAIN`), not removed.
+- No code fixes, so round 2 is the final review.
+
 ## Execution report
 
-**Files:** +1 ~9 −0 · **Lines:** +11683 −165 (about 10,800 of them the two
-regenerated expected files) · **Review rounds:** 1 · **Outcome:** ready PR
+**Files:** +1 ~9 −0 · **Lines:** +3,408 −165 at `cb4b3a7` (about 2,190 of
+them the two expected files, now 3,645 and 4,095 lines; +11,683 before the
+owner had grants folded) · **Review rounds:** 2 · **Outcome:** ready PR
 
 ### Validation summary
 
-format ✅ · lint ✅ · types ✅ · unit ✅ (579) · build ✅ · e2e ✅ (119) · CI
-`schema` ✅ (6, G2 and the probe DB test included) · acceptance validator:
-PASS for AC1–AC5 and G1, G2 on CI evidence pinned to HEAD
+format ✅ · lint ✅ · types ✅ · unit ✅ (580) · build ✅ · e2e ✅ (119) · CI
+`schema` ✅ (G2 and the probe DB test included) · acceptance validator: PASS
+for every AC, G2 in CI at HEAD
 
 ### What went well
 
@@ -527,12 +584,33 @@ by`) before any expected file was touched, so G2's 1,000-line diff was known
 - The guard refused one worktree command because it mentioned the env file
   (copying it in); CI's dummy `VITE_SUPABASE_*` values were enough.
 
+- **AC1 amended after review** — planned: one grant object per privilege, as
+  the ticket's AC1 said · actual: one per object and grantee · why: 963 of
+  1,039 grant objects were Supabase's default `ALL` repeated per privilege,
+  about 10,800 generated lines nobody could review; the owner caught it after
+  the PR was marked ready · type: plan assumption wrong
+
+### Size check that was missing
+
+- I marked the PR ready at +11,683 lines without saying that ~93% of the new
+  objects were default-privilege boilerplate. The per-AC tests and CI were
+  green, which is why it slipped: nothing measured whether the generated
+  output was proportionate.
+
 ### Skipped
 
 - None.
 
 ### Recommendations
 
+- **Plan skill (generated artifacts):** when a ticket adds rows to a
+  committed generated file, estimate its growth in Phase R (objects × lines
+  per object × files) and flag it at the gate if it passes ~1,000 lines, with
+  the breakdown by source. Here that would have shown the per-privilege
+  explosion before any code.
+- **Ticket slicing:** an AC that fixes a key's grain ("keyed by object,
+  grantee and privilege") decides the size of every generated file; the
+  slicer should name the grain's expected object count alongside it.
 - **Plan skill:** when a ticket changes how keys are derived, grep the
   non-frozen tests for pinned keys (`toContain("kind:…")`) and list the ones
   the change will move, so the update is a planned task, not an amendment.

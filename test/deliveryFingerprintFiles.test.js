@@ -235,4 +235,40 @@ describe("fingerprint keys and files", () => {
 
     expect(rows).toEqual(before);
   });
+
+  it("folds a grantee's privileges into one grant in any order, marking grant options", async () => {
+    const privilege = (
+      /** @type {string} */ name,
+      /** @type {string} */ definition,
+    ) => ({
+      kind: "grant",
+      on: null,
+      name: `${STUDENTS}.authenticated.${name}`,
+      definition,
+    });
+    const plain = await fingerprintOf([
+      privilege("SELECT", ""),
+      privilege("INSERT", ""),
+    ]);
+    const reordered = await fingerprintOf([
+      privilege("INSERT", ""),
+      privilege("SELECT", ""),
+    ]);
+    const withGrantOption = await fingerprintOf([
+      privilege("SELECT", "grantable"),
+      privilege("INSERT", ""),
+    ]);
+
+    expect(Object.keys(plain.objects)).toEqual([
+      "grant:public.students.authenticated",
+    ]);
+    expect(reordered).toEqual(plain);
+    expect(compareFingerprints(plain, withGrantOption).changed).toEqual([
+      {
+        key: "grant:public.students.authenticated",
+        kind: "grant",
+        name: "public.students.authenticated",
+      },
+    ]);
+  });
 });

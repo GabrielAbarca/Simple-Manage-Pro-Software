@@ -2,7 +2,7 @@
 
 **Implements:** #116 · **Epic:** #86 · **Branch:** feat/fingerprint-grants
 **Status:** Approved 2026-10-23
-**Red commit:** 895db66
+**Red commit:** bd78e0c (AC1 amended 2026-10-24; first red `895db66`)
 **Confidence:** 7/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.
@@ -374,6 +374,16 @@ public.students alter column id set increment by 10`, which reaches the
   updated. The folding is in JS (`fingerprintKeys.mjs`), so it is
   unit-tested and the probe stays as approved. Task 5's DB test and both
   expected files follow the new keys.
+- 2026-10-24 — The folded expected files were rebuilt from the committed ones
+  instead of two more CI round trips: every per-privilege grant hash was
+  `sha256("")` or `sha256("grantable")` (the script refuses any other), so
+  the rows fold exactly through `foldGrants`, `objectKey` and
+  `serializeFingerprint`; non-grant objects are copied unchanged. CI's G2
+  (fresh install vs. committed file) is the check. Result: `school.json` 728
+  objects (1,039 grant objects → 191), 3,645 lines; `demo.json` 818 objects,
+  the school file plus the 90 `demo_deny_*` policies, 4,095 lines. A test in
+  `test/deliveryFingerprintFiles.test.js` covers privilege order and the `*`
+  grant-option marker.
 
 ## Manual Supabase steps
 

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FingerprintError,
+  foldGrants,
   normaliseDefinition,
   objectKey,
   parseRow,
@@ -107,7 +108,7 @@ const inProbeKeyOrder = (a, b) => {
  * @returns {Fingerprint}
  */
 export function buildFingerprint(rows) {
-  const probed = rows.map((row, index) => parseRow(row, index + 1));
+  const probed = foldGrants(rows.map((row, index) => parseRow(row, index + 1)));
   /** @type {Map<string, FingerprintObject>} */
   const objects = new Map();
   for (const row of probed.sort(inProbeKeyOrder)) {

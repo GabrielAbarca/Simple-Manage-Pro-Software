@@ -259,12 +259,10 @@ describe.skipIf(!serverUrl)("schema harness", () => {
 
     expect(freshKeys).toContain("type:public.user_role_enum");
     expect(freshKeys).toContain("sequence:public.students.id");
-    expect(freshKeys).toContain(
-      "grant:public.teacher_id().authenticated.EXECUTE",
-    );
+    expect(freshKeys).toContain("grant:public.teacher_id().authenticated");
     expect(
       freshKeys.filter((key) =>
-        /^grant:public\.(teacher_id\(\)\.(anon|public)\.|teachers_directory\.(anon|public)\.)/.test(
+        /^grant:public\.(teacher_id\(\)|teachers_directory)\.(anon|public)$/.test(
           key,
         ),
       ),
@@ -284,9 +282,9 @@ describe.skipIf(!serverUrl)("schema harness", () => {
       equal: false,
       added: [
         {
-          key: "grant:public.teacher_id().anon.EXECUTE",
+          key: "grant:public.teacher_id().anon",
           kind: "grant",
-          name: "public.teacher_id().anon.EXECUTE",
+          name: "public.teacher_id().anon",
         },
       ],
       removed: [],

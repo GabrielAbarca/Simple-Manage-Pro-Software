@@ -29,9 +29,51 @@ const KEYED_BY_DEFINITION = new Set(["constraint", "index"]);
 const MAX_KEY_LENGTH = 200;
 const INDEX_NAME = /^(CREATE (?:UNIQUE )?INDEX) (?:"(?:[^"]|"")+"|\S+) ON /;
 const SEQUENCE_DEFAULT = /nextval\('(?:[^']|'')*'::regclass\)/g;
+const GRANTED_PRIVILEGE = /^(.+)\.([A-Z]+)$/;
 
 /** @param {string} text */
 export const sha256 = (text) => createHash("sha256").update(text).digest("hex");
+
+/**
+ * @param {ProbeRow} row
+ * @returns {{ holder: string, privilege: string } | null}
+ */
+function grantedPrivilege(row) {
+  if (row.kind !== "grant") return null;
+  const granted = GRANTED_PRIVILEGE.exec(row.name);
+  if (!granted) return null;
+  const marker = row.definition === "grantable" ? "*" : "";
+  return { holder: granted[1], privilege: `${granted[2]}${marker}` };
+}
+
+/**
+ * Folds the probe's one row per privilege into one grant per object and
+ * grantee, so a role holding a table's default privileges is one object, not
+ * eight. A grantable privilege is marked `*`, as in an `aclitem`.
+ * @param {ProbeRow[]} rows
+ * @returns {ProbeRow[]}
+ */
+export function foldGrants(rows) {
+  /** @type {Map<string, string[]>} */
+  const privilegesByHolder = new Map();
+  const others = [];
+  for (const row of rows) {
+    const granted = grantedPrivilege(row);
+    if (!granted) {
+      others.push(row);
+      continue;
+    }
+    const held = privilegesByHolder.get(granted.holder) ?? [];
+    privilegesByHolder.set(granted.holder, held.concat(granted.privilege));
+  }
+  const folded = [...privilegesByHolder].map(([holder, privileges]) => ({
+    kind: "grant",
+    on: null,
+    name: holder,
+    definition: [...privileges].sort().join(","),
+  }));
+  return [...others, ...folded];
+}
 
 /**
  * Drops the names the database generates, so only the definition is hashed.

@@ -345,6 +345,10 @@ public.students alter column id set increment by 10`, which reaches the
   plus 1,039 grants, 27 sequences (every one named by its `….id` column) and
   one type. No key outside `OBJECT`; no anon or `public` grant on any function
   the baseline revokes them from, nor on `teachers_directory`.
+- 2026-10-24 — Task 6, `demo.json`: copied from CI run 40063940161 (head
+  `37171c2`, where the school shape passed and that run's `school.json` was
+  byte-identical to the committed one). 1,666 objects: the school file's
+  1,576, unchanged, plus the 90 `demo_deny_*` policies and nothing else.
 
 ## Manual Supabase steps
 

@@ -1,5 +1,5 @@
 {
-  "digest": "e90086c558495512cb1647039994689a69e526923fd26d10ded7f393ef8b44ab",
+  "digest": "004f9e0de9d5d7fa5cdd4b0fb14c06e5c974db20ca9670affcd1c2bcc1ed9ba2",
   "objects": {
     "column:public.app_config.key": {
       "kind": "column",
@@ -1716,6 +1716,961 @@
       "name": "public.teacher_id()",
       "hash": "29f495bb43a0f78753ebe310d8219efac63c1bd99733be07158c1e27328570fc"
     },
+    "grant:public.app_config.anon": {
+      "kind": "grant",
+      "name": "public.app_config.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.app_config.authenticated": {
+      "kind": "grant",
+      "name": "public.app_config.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.app_config.service_role": {
+      "kind": "grant",
+      "name": "public.app_config.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignment_grades.anon": {
+      "kind": "grant",
+      "name": "public.assignment_grades.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignment_grades.authenticated": {
+      "kind": "grant",
+      "name": "public.assignment_grades.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignment_grades.id.anon": {
+      "kind": "grant",
+      "name": "public.assignment_grades.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignment_grades.id.authenticated": {
+      "kind": "grant",
+      "name": "public.assignment_grades.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignment_grades.id.service_role": {
+      "kind": "grant",
+      "name": "public.assignment_grades.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignment_grades.service_role": {
+      "kind": "grant",
+      "name": "public.assignment_grades.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignments.anon": {
+      "kind": "grant",
+      "name": "public.assignments.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignments.authenticated": {
+      "kind": "grant",
+      "name": "public.assignments.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.assignments.id.anon": {
+      "kind": "grant",
+      "name": "public.assignments.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignments.id.authenticated": {
+      "kind": "grant",
+      "name": "public.assignments.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignments.id.service_role": {
+      "kind": "grant",
+      "name": "public.assignments.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.assignments.service_role": {
+      "kind": "grant",
+      "name": "public.assignments.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.attendance.anon": {
+      "kind": "grant",
+      "name": "public.attendance.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.attendance.authenticated": {
+      "kind": "grant",
+      "name": "public.attendance.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.attendance.id.anon": {
+      "kind": "grant",
+      "name": "public.attendance.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.attendance.id.authenticated": {
+      "kind": "grant",
+      "name": "public.attendance.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.attendance.id.service_role": {
+      "kind": "grant",
+      "name": "public.attendance.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.attendance.service_role": {
+      "kind": "grant",
+      "name": "public.attendance.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedule_blocks.anon": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedule_blocks.authenticated": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedule_blocks.id.anon": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedule_blocks.id.authenticated": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedule_blocks.id.service_role": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedule_blocks.service_role": {
+      "kind": "grant",
+      "name": "public.bell_schedule_blocks.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedules.anon": {
+      "kind": "grant",
+      "name": "public.bell_schedules.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedules.authenticated": {
+      "kind": "grant",
+      "name": "public.bell_schedules.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.bell_schedules.id.anon": {
+      "kind": "grant",
+      "name": "public.bell_schedules.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedules.id.authenticated": {
+      "kind": "grant",
+      "name": "public.bell_schedules.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedules.id.service_role": {
+      "kind": "grant",
+      "name": "public.bell_schedules.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.bell_schedules.service_role": {
+      "kind": "grant",
+      "name": "public.bell_schedules.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.class_subject_teachers.anon": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.class_subject_teachers.authenticated": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.class_subject_teachers.id.anon": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.class_subject_teachers.id.authenticated": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.class_subject_teachers.id.service_role": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.class_subject_teachers.service_role": {
+      "kind": "grant",
+      "name": "public.class_subject_teachers.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.classes.anon": {
+      "kind": "grant",
+      "name": "public.classes.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.classes.authenticated": {
+      "kind": "grant",
+      "name": "public.classes.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.classes.id.anon": {
+      "kind": "grant",
+      "name": "public.classes.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.classes.id.authenticated": {
+      "kind": "grant",
+      "name": "public.classes.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.classes.id.service_role": {
+      "kind": "grant",
+      "name": "public.classes.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.classes.service_role": {
+      "kind": "grant",
+      "name": "public.classes.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.discipline_records.anon": {
+      "kind": "grant",
+      "name": "public.discipline_records.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.discipline_records.authenticated": {
+      "kind": "grant",
+      "name": "public.discipline_records.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.discipline_records.id.anon": {
+      "kind": "grant",
+      "name": "public.discipline_records.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.discipline_records.id.authenticated": {
+      "kind": "grant",
+      "name": "public.discipline_records.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.discipline_records.id.service_role": {
+      "kind": "grant",
+      "name": "public.discipline_records.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.discipline_records.service_role": {
+      "kind": "grant",
+      "name": "public.discipline_records.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.events.anon": {
+      "kind": "grant",
+      "name": "public.events.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.events.authenticated": {
+      "kind": "grant",
+      "name": "public.events.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.events.id.anon": {
+      "kind": "grant",
+      "name": "public.events.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.events.id.authenticated": {
+      "kind": "grant",
+      "name": "public.events.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.events.id.service_role": {
+      "kind": "grant",
+      "name": "public.events.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.events.service_role": {
+      "kind": "grant",
+      "name": "public.events.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_categories.anon": {
+      "kind": "grant",
+      "name": "public.grade_categories.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_categories.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_categories.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_categories.id.anon": {
+      "kind": "grant",
+      "name": "public.grade_categories.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_categories.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_categories.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_categories.id.service_role": {
+      "kind": "grant",
+      "name": "public.grade_categories.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_categories.service_role": {
+      "kind": "grant",
+      "name": "public.grade_categories.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_template_items.anon": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_template_items.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_template_items.id.anon": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_template_items.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_template_items.id.service_role": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_template_items.service_role": {
+      "kind": "grant",
+      "name": "public.grade_component_template_items.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_templates.anon": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_templates.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_component_templates.id.anon": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_templates.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_templates.id.service_role": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_component_templates.service_role": {
+      "kind": "grant",
+      "name": "public.grade_component_templates.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_level_subjects.anon": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_level_subjects.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_level_subjects.id.anon": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_level_subjects.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_level_subjects.id.service_role": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_level_subjects.service_role": {
+      "kind": "grant",
+      "name": "public.grade_level_subjects.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_levels.anon": {
+      "kind": "grant",
+      "name": "public.grade_levels.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_levels.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_levels.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grade_levels.id.anon": {
+      "kind": "grant",
+      "name": "public.grade_levels.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_levels.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grade_levels.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_levels.id.service_role": {
+      "kind": "grant",
+      "name": "public.grade_levels.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grade_levels.service_role": {
+      "kind": "grant",
+      "name": "public.grade_levels.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grading_period_within_year().service_role": {
+      "kind": "grant",
+      "name": "public.grading_period_within_year().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.grading_periods.anon": {
+      "kind": "grant",
+      "name": "public.grading_periods.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grading_periods.authenticated": {
+      "kind": "grant",
+      "name": "public.grading_periods.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.grading_periods.id.anon": {
+      "kind": "grant",
+      "name": "public.grading_periods.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grading_periods.id.authenticated": {
+      "kind": "grant",
+      "name": "public.grading_periods.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grading_periods.id.service_role": {
+      "kind": "grant",
+      "name": "public.grading_periods.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.grading_periods.service_role": {
+      "kind": "grant",
+      "name": "public.grading_periods.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.guardians.anon": {
+      "kind": "grant",
+      "name": "public.guardians.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.guardians.authenticated": {
+      "kind": "grant",
+      "name": "public.guardians.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.guardians.id.anon": {
+      "kind": "grant",
+      "name": "public.guardians.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.guardians.id.authenticated": {
+      "kind": "grant",
+      "name": "public.guardians.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.guardians.id.service_role": {
+      "kind": "grant",
+      "name": "public.guardians.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.guardians.service_role": {
+      "kind": "grant",
+      "name": "public.guardians.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.handle_new_user().service_role": {
+      "kind": "grant",
+      "name": "public.handle_new_user().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.is_admin().authenticated": {
+      "kind": "grant",
+      "name": "public.is_admin().authenticated",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.is_admin().public": {
+      "kind": "grant",
+      "name": "public.is_admin().public",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.is_admin().service_role": {
+      "kind": "grant",
+      "name": "public.is_admin().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.profiles.anon": {
+      "kind": "grant",
+      "name": "public.profiles.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.profiles.authenticated": {
+      "kind": "grant",
+      "name": "public.profiles.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.profiles.service_role": {
+      "kind": "grant",
+      "name": "public.profiles.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.protect_profile_role().service_role": {
+      "kind": "grant",
+      "name": "public.protect_profile_role().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.rooms.anon": {
+      "kind": "grant",
+      "name": "public.rooms.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.rooms.authenticated": {
+      "kind": "grant",
+      "name": "public.rooms.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.rooms.id.anon": {
+      "kind": "grant",
+      "name": "public.rooms.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.rooms.id.authenticated": {
+      "kind": "grant",
+      "name": "public.rooms.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.rooms.id.service_role": {
+      "kind": "grant",
+      "name": "public.rooms.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.rooms.service_role": {
+      "kind": "grant",
+      "name": "public.rooms.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedule_configs.anon": {
+      "kind": "grant",
+      "name": "public.schedule_configs.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedule_configs.authenticated": {
+      "kind": "grant",
+      "name": "public.schedule_configs.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedule_configs.id.anon": {
+      "kind": "grant",
+      "name": "public.schedule_configs.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedule_configs.id.authenticated": {
+      "kind": "grant",
+      "name": "public.schedule_configs.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedule_configs.id.service_role": {
+      "kind": "grant",
+      "name": "public.schedule_configs.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedule_configs.service_role": {
+      "kind": "grant",
+      "name": "public.schedule_configs.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedules.anon": {
+      "kind": "grant",
+      "name": "public.schedules.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedules.authenticated": {
+      "kind": "grant",
+      "name": "public.schedules.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.schedules.id.anon": {
+      "kind": "grant",
+      "name": "public.schedules.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedules.id.authenticated": {
+      "kind": "grant",
+      "name": "public.schedules.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedules.id.service_role": {
+      "kind": "grant",
+      "name": "public.schedules.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.schedules.service_role": {
+      "kind": "grant",
+      "name": "public.schedules.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_settings.anon": {
+      "kind": "grant",
+      "name": "public.school_settings.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_settings.authenticated": {
+      "kind": "grant",
+      "name": "public.school_settings.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_settings.service_role": {
+      "kind": "grant",
+      "name": "public.school_settings.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_years.anon": {
+      "kind": "grant",
+      "name": "public.school_years.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_years.authenticated": {
+      "kind": "grant",
+      "name": "public.school_years.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.school_years.id.anon": {
+      "kind": "grant",
+      "name": "public.school_years.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.school_years.id.authenticated": {
+      "kind": "grant",
+      "name": "public.school_years.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.school_years.id.service_role": {
+      "kind": "grant",
+      "name": "public.school_years.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.school_years.service_role": {
+      "kind": "grant",
+      "name": "public.school_years.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.staff.anon": {
+      "kind": "grant",
+      "name": "public.staff.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.staff.authenticated": {
+      "kind": "grant",
+      "name": "public.staff.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.staff.id.anon": {
+      "kind": "grant",
+      "name": "public.staff.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.staff.id.authenticated": {
+      "kind": "grant",
+      "name": "public.staff.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.staff.id.service_role": {
+      "kind": "grant",
+      "name": "public.staff.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.staff.service_role": {
+      "kind": "grant",
+      "name": "public.staff.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_conduct_grades.anon": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_conduct_grades.authenticated": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_conduct_grades.id.anon": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_conduct_grades.id.authenticated": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_conduct_grades.id.service_role": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_conduct_grades.service_role": {
+      "kind": "grant",
+      "name": "public.student_conduct_grades.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_grades.anon": {
+      "kind": "grant",
+      "name": "public.student_grades.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_grades.authenticated": {
+      "kind": "grant",
+      "name": "public.student_grades.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_grades.id.anon": {
+      "kind": "grant",
+      "name": "public.student_grades.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_grades.id.authenticated": {
+      "kind": "grant",
+      "name": "public.student_grades.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_grades.id.service_role": {
+      "kind": "grant",
+      "name": "public.student_grades.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_grades.service_role": {
+      "kind": "grant",
+      "name": "public.student_grades.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_guardians.anon": {
+      "kind": "grant",
+      "name": "public.student_guardians.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_guardians.authenticated": {
+      "kind": "grant",
+      "name": "public.student_guardians.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_guardians.id.anon": {
+      "kind": "grant",
+      "name": "public.student_guardians.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_guardians.id.authenticated": {
+      "kind": "grant",
+      "name": "public.student_guardians.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_guardians.id.service_role": {
+      "kind": "grant",
+      "name": "public.student_guardians.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.student_guardians.service_role": {
+      "kind": "grant",
+      "name": "public.student_guardians.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_conduct.anon": {
+      "kind": "grant",
+      "name": "public.student_period_conduct.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_conduct.authenticated": {
+      "kind": "grant",
+      "name": "public.student_period_conduct.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_conduct.service_role": {
+      "kind": "grant",
+      "name": "public.student_period_conduct.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_grades.anon": {
+      "kind": "grant",
+      "name": "public.student_period_grades.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_grades.authenticated": {
+      "kind": "grant",
+      "name": "public.student_period_grades.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.student_period_grades.service_role": {
+      "kind": "grant",
+      "name": "public.student_period_grades.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.students.anon": {
+      "kind": "grant",
+      "name": "public.students.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.students.authenticated": {
+      "kind": "grant",
+      "name": "public.students.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.students.id.anon": {
+      "kind": "grant",
+      "name": "public.students.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.students.id.authenticated": {
+      "kind": "grant",
+      "name": "public.students.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.students.id.service_role": {
+      "kind": "grant",
+      "name": "public.students.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.students.service_role": {
+      "kind": "grant",
+      "name": "public.students.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.subjects.anon": {
+      "kind": "grant",
+      "name": "public.subjects.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.subjects.authenticated": {
+      "kind": "grant",
+      "name": "public.subjects.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.subjects.id.anon": {
+      "kind": "grant",
+      "name": "public.subjects.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.subjects.id.authenticated": {
+      "kind": "grant",
+      "name": "public.subjects.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.subjects.id.service_role": {
+      "kind": "grant",
+      "name": "public.subjects.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.subjects.service_role": {
+      "kind": "grant",
+      "name": "public.subjects.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.teacher_class_ids().authenticated": {
+      "kind": "grant",
+      "name": "public.teacher_class_ids().authenticated",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teacher_class_ids().service_role": {
+      "kind": "grant",
+      "name": "public.teacher_class_ids().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teacher_cst_ids().authenticated": {
+      "kind": "grant",
+      "name": "public.teacher_cst_ids().authenticated",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teacher_cst_ids().service_role": {
+      "kind": "grant",
+      "name": "public.teacher_cst_ids().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teacher_id().authenticated": {
+      "kind": "grant",
+      "name": "public.teacher_id().authenticated",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teacher_id().service_role": {
+      "kind": "grant",
+      "name": "public.teacher_id().service_role",
+      "hash": "daea414285e6618492463faf0758c867f67f270c5d8701fac0a68748cf8f9fff"
+    },
+    "grant:public.teachers.anon": {
+      "kind": "grant",
+      "name": "public.teachers.anon",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.teachers.authenticated": {
+      "kind": "grant",
+      "name": "public.teachers.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.teachers.id.anon": {
+      "kind": "grant",
+      "name": "public.teachers.id.anon",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.teachers.id.authenticated": {
+      "kind": "grant",
+      "name": "public.teachers.id.authenticated",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.teachers.id.service_role": {
+      "kind": "grant",
+      "name": "public.teachers.id.service_role",
+      "hash": "6373e5da093a1b6abe0872e3089df2d2983cf3d0a2712205f31cbab5b37bec9a"
+    },
+    "grant:public.teachers.service_role": {
+      "kind": "grant",
+      "name": "public.teachers.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.teachers_directory.authenticated": {
+      "kind": "grant",
+      "name": "public.teachers_directory.authenticated",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
+    "grant:public.teachers_directory.service_role": {
+      "kind": "grant",
+      "name": "public.teachers_directory.service_role",
+      "hash": "3bc0698b016d9814e413ac9e3d06cf24b7ccb527c90664fe45f53fad2b85032f"
+    },
     "index:public.app_config.fa536849353c242a": {
       "kind": "index",
       "name": "public.app_config.app_config_pkey",
@@ -2031,12 +2986,12 @@
       "name": "public.teachers.teachers_pkey",
       "hash": "a8f038a1dea96c91c7ca39c381f27a7a8d692fffe168d994e4baeaf8377242d6"
     },
-    "policy:public.app_config.Admins_have_full_access_to_app_config": {
+    "policy:public.app_config.Admins_have_full_access_to_app_config.ddbf0610": {
       "kind": "policy",
       "name": "public.app_config.Admins have full access to app_config",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.app_config.Authenticated_can_read_app_config": {
+    "policy:public.app_config.Authenticated_can_read_app_config.af23a0c6": {
       "kind": "policy",
       "name": "public.app_config.Authenticated can read app_config",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2056,12 +3011,12 @@
       "name": "public.app_config.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.assignment_grades.Admins_have_full_access_to_assignment_grades": {
+    "policy:public.assignment_grades.Admins_have_full_access_to_assignment_grades.7b1b325d": {
       "kind": "policy",
       "name": "public.assignment_grades.Admins have full access to assignment_grades",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.assignment_grades.Teachers_manage_grades_on_their_assignments": {
+    "policy:public.assignment_grades.Teachers_manage_grades_on_their_assignments.61fb61ac": {
       "kind": "policy",
       "name": "public.assignment_grades.Teachers manage grades on their assignments",
       "hash": "385c0681bdfd906accfce2bb2831ce2392c7cd865dad9106006a38aa3bcf8f1b"
@@ -2081,12 +3036,12 @@
       "name": "public.assignment_grades.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.assignments.Admins_have_full_access_to_assignments": {
+    "policy:public.assignments.Admins_have_full_access_to_assignments.a6519d11": {
       "kind": "policy",
       "name": "public.assignments.Admins have full access to assignments",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.assignments.Teachers_manage_their_assignments": {
+    "policy:public.assignments.Teachers_manage_their_assignments.d4721df4": {
       "kind": "policy",
       "name": "public.assignments.Teachers manage their assignments",
       "hash": "4d4f281ab73d850421239d189c2d5735c98b0b00586493a94f13862397966f36"
@@ -2106,17 +3061,17 @@
       "name": "public.assignments.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.attendance.Admins_have_full_access_to_attendance": {
+    "policy:public.attendance.Admins_have_full_access_to_attendance.a64c920a": {
       "kind": "policy",
       "name": "public.attendance.Admins have full access to attendance",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.attendance.Students_read_their_attendance": {
+    "policy:public.attendance.Students_read_their_attendance.f01698a7": {
       "kind": "policy",
       "name": "public.attendance.Students read their attendance",
       "hash": "6c0dce13724afd285514e5251ee36e3e6d350b7e62e65c032d83ab2ef02a5dc3"
     },
-    "policy:public.attendance.Teachers_manage_attendance_for_their_classes": {
+    "policy:public.attendance.Teachers_manage_attendance_for_their_classes.89d5dd90": {
       "kind": "policy",
       "name": "public.attendance.Teachers manage attendance for their classes",
       "hash": "3ca4cba92dfb3a70f282937f23d79455a37d1ade7a23201f87e249c777203ebe"
@@ -2136,12 +3091,12 @@
       "name": "public.attendance.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.bell_schedule_blocks.Admins_have_full_access_to_bell_schedule_blocks": {
+    "policy:public.bell_schedule_blocks.Admins_have_full_access_to_bell_schedule_blocks.85aa83fb": {
       "kind": "policy",
       "name": "public.bell_schedule_blocks.Admins have full access to bell_schedule_blocks",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.bell_schedule_blocks.Authenticated_can_read_bell_schedule_blocks": {
+    "policy:public.bell_schedule_blocks.Authenticated_can_read_bell_schedule_blocks.e0a492d7": {
       "kind": "policy",
       "name": "public.bell_schedule_blocks.Authenticated can read bell_schedule_blocks",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2161,12 +3116,12 @@
       "name": "public.bell_schedule_blocks.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.bell_schedules.Admins_have_full_access_to_bell_schedules": {
+    "policy:public.bell_schedules.Admins_have_full_access_to_bell_schedules.b74a27dc": {
       "kind": "policy",
       "name": "public.bell_schedules.Admins have full access to bell_schedules",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.bell_schedules.Authenticated_can_read_bell_schedules": {
+    "policy:public.bell_schedules.Authenticated_can_read_bell_schedules.1f656d24": {
       "kind": "policy",
       "name": "public.bell_schedules.Authenticated can read bell_schedules",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2186,12 +3141,12 @@
       "name": "public.bell_schedules.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.class_subject_teachers.Admins_have_full_access_to_class_subject_teachers": {
+    "policy:public.class_subject_teachers.Admins_have_full_access_to_class_subject_teachers.01ea6bf9": {
       "kind": "policy",
       "name": "public.class_subject_teachers.Admins have full access to class_subject_teachers",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.class_subject_teachers.Authenticated_can_read_class_subject_teachers": {
+    "policy:public.class_subject_teachers.Authenticated_can_read_class_subject_teachers.d44929c2": {
       "kind": "policy",
       "name": "public.class_subject_teachers.Authenticated can read class_subject_teachers",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2211,12 +3166,12 @@
       "name": "public.class_subject_teachers.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.classes.Admins_have_full_access_to_classes": {
+    "policy:public.classes.Admins_have_full_access_to_classes.a4368458": {
       "kind": "policy",
       "name": "public.classes.Admins have full access to classes",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.classes.Authenticated_can_read_classes": {
+    "policy:public.classes.Authenticated_can_read_classes.93d131aa": {
       "kind": "policy",
       "name": "public.classes.Authenticated can read classes",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2236,27 +3191,27 @@
       "name": "public.classes.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.discipline_records.Admins_have_full_access_to_discipline_records": {
+    "policy:public.discipline_records.Admins_have_full_access_to_discipline_records.4eedec3e": {
       "kind": "policy",
       "name": "public.discipline_records.Admins have full access to discipline_records",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.discipline_records.Students_read_their_discipline": {
+    "policy:public.discipline_records.Students_read_their_discipline.ed3c0611": {
       "kind": "policy",
       "name": "public.discipline_records.Students read their discipline",
       "hash": "6c0dce13724afd285514e5251ee36e3e6d350b7e62e65c032d83ab2ef02a5dc3"
     },
-    "policy:public.discipline_records.Teachers_file_their_own_discipline_reports": {
+    "policy:public.discipline_records.Teachers_file_their_own_discipline_reports.76be78c6": {
       "kind": "policy",
       "name": "public.discipline_records.Teachers file their own discipline reports",
       "hash": "c3dba68979f78366082d281c1a75e80fb8bd759f624af66d524c12c8dd5d7017"
     },
-    "policy:public.discipline_records.Teachers_read_discipline_for_their_students": {
+    "policy:public.discipline_records.Teachers_read_discipline_for_their_students.9bbff09a": {
       "kind": "policy",
       "name": "public.discipline_records.Teachers read discipline for their students",
       "hash": "138b79cabe97b2514d309c50805fc80188c7b90780663638c791a1d9d9579377"
     },
-    "policy:public.discipline_records.Teachers_update_their_own_discipline_reports": {
+    "policy:public.discipline_records.Teachers_update_their_own_discipline_reports.16e3d651": {
       "kind": "policy",
       "name": "public.discipline_records.Teachers update their own discipline reports",
       "hash": "66fcb906b31fdfd8ca6634e1002d4ecb4f627dee7f24e1b9b4c1409c88882685"
@@ -2276,12 +3231,12 @@
       "name": "public.discipline_records.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.events.Admins_have_full_access_to_events": {
+    "policy:public.events.Admins_have_full_access_to_events.69c54a07": {
       "kind": "policy",
       "name": "public.events.Admins have full access to events",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.events.Authenticated_can_read_events": {
+    "policy:public.events.Authenticated_can_read_events.7abd1ebd": {
       "kind": "policy",
       "name": "public.events.Authenticated can read events",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2301,12 +3256,12 @@
       "name": "public.events.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grade_categories.Admins_have_full_access_to_grade_categories": {
+    "policy:public.grade_categories.Admins_have_full_access_to_grade_categories.7aebb378": {
       "kind": "policy",
       "name": "public.grade_categories.Admins have full access to grade_categories",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grade_categories.Teachers_manage_their_grade_categories": {
+    "policy:public.grade_categories.Teachers_manage_their_grade_categories.4757d243": {
       "kind": "policy",
       "name": "public.grade_categories.Teachers manage their grade categories",
       "hash": "4d4f281ab73d850421239d189c2d5735c98b0b00586493a94f13862397966f36"
@@ -2326,12 +3281,12 @@
       "name": "public.grade_categories.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grade_component_template_items.Admins_have_full_access_to_grade_component_template_items": {
+    "policy:public.grade_component_template_items.Admins_have_full_access_to_grade_component_template_items.d56766cf": {
       "kind": "policy",
       "name": "public.grade_component_template_items.Admins have full access to grade_component_template_items",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grade_component_template_items.Authenticated_can_read_grade_component_template_items": {
+    "policy:public.grade_component_template_items.Authenticated_can_read_grade_component_template_items.1063c42f": {
       "kind": "policy",
       "name": "public.grade_component_template_items.Authenticated can read grade_component_template_items",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2351,12 +3306,12 @@
       "name": "public.grade_component_template_items.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grade_component_templates.Admins_have_full_access_to_grade_component_templates": {
+    "policy:public.grade_component_templates.Admins_have_full_access_to_grade_component_templates.2ce2c9b0": {
       "kind": "policy",
       "name": "public.grade_component_templates.Admins have full access to grade_component_templates",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grade_component_templates.Authenticated_can_read_grade_component_templates": {
+    "policy:public.grade_component_templates.Authenticated_can_read_grade_component_templates.5738d4b6": {
       "kind": "policy",
       "name": "public.grade_component_templates.Authenticated can read grade_component_templates",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2376,12 +3331,12 @@
       "name": "public.grade_component_templates.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grade_level_subjects.Admins_have_full_access_to_grade_level_subjects": {
+    "policy:public.grade_level_subjects.Admins_have_full_access_to_grade_level_subjects.9baa6ba0": {
       "kind": "policy",
       "name": "public.grade_level_subjects.Admins have full access to grade_level_subjects",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grade_level_subjects.Authenticated_can_read_grade_level_subjects": {
+    "policy:public.grade_level_subjects.Authenticated_can_read_grade_level_subjects.de39dc1a": {
       "kind": "policy",
       "name": "public.grade_level_subjects.Authenticated can read grade_level_subjects",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2401,12 +3356,12 @@
       "name": "public.grade_level_subjects.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grade_levels.Admins_have_full_access_to_grade_levels": {
+    "policy:public.grade_levels.Admins_have_full_access_to_grade_levels.17e408af": {
       "kind": "policy",
       "name": "public.grade_levels.Admins have full access to grade_levels",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grade_levels.Authenticated_can_read_grade_levels": {
+    "policy:public.grade_levels.Authenticated_can_read_grade_levels.dff63499": {
       "kind": "policy",
       "name": "public.grade_levels.Authenticated can read grade_levels",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2426,12 +3381,12 @@
       "name": "public.grade_levels.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.grading_periods.Admins_have_full_access_to_grading_periods": {
+    "policy:public.grading_periods.Admins_have_full_access_to_grading_periods.8d411c6f": {
       "kind": "policy",
       "name": "public.grading_periods.Admins have full access to grading_periods",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.grading_periods.Authenticated_can_read_grading_periods": {
+    "policy:public.grading_periods.Authenticated_can_read_grading_periods.6751b76d": {
       "kind": "policy",
       "name": "public.grading_periods.Authenticated can read grading_periods",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2451,12 +3406,12 @@
       "name": "public.grading_periods.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.guardians.Admins_have_full_access_to_guardians": {
+    "policy:public.guardians.Admins_have_full_access_to_guardians.62935a21": {
       "kind": "policy",
       "name": "public.guardians.Admins have full access to guardians",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.guardians.Students_read_their_guardians": {
+    "policy:public.guardians.Students_read_their_guardians.e7bb4670": {
       "kind": "policy",
       "name": "public.guardians.Students read their guardians",
       "hash": "299aa07047c374601a4882f43e89072a2b3d8ad0fc47f37f1ce5f14bcf6541e6"
@@ -2476,17 +3431,17 @@
       "name": "public.guardians.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.profiles.Admins_have_full_access_to_profiles": {
+    "policy:public.profiles.Admins_have_full_access_to_profiles.81308250": {
       "kind": "policy",
       "name": "public.profiles.Admins have full access to profiles",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.profiles.Users_can_read_their_own_profile": {
+    "policy:public.profiles.Users_can_read_their_own_profile.5af4e533": {
       "kind": "policy",
       "name": "public.profiles.Users can read their own profile",
       "hash": "7f0db4a95c2384ca827902e3eaa919fa3e5323af6fe57b2b690d8f7555563b2b"
     },
-    "policy:public.profiles.Users_can_update_their_own_profile": {
+    "policy:public.profiles.Users_can_update_their_own_profile.430dd2a9": {
       "kind": "policy",
       "name": "public.profiles.Users can update their own profile",
       "hash": "ef5813abf07ae790c06d567a3fc06fd3d2b8f70214bd8f3a9eb0168a1e56f910"
@@ -2506,12 +3461,12 @@
       "name": "public.profiles.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.rooms.Admins_have_full_access_to_rooms": {
+    "policy:public.rooms.Admins_have_full_access_to_rooms.be60d6e8": {
       "kind": "policy",
       "name": "public.rooms.Admins have full access to rooms",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.rooms.Authenticated_can_read_rooms": {
+    "policy:public.rooms.Authenticated_can_read_rooms.69562c70": {
       "kind": "policy",
       "name": "public.rooms.Authenticated can read rooms",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2531,12 +3486,12 @@
       "name": "public.rooms.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.schedule_configs.Admins_have_full_access_to_schedule_configs": {
+    "policy:public.schedule_configs.Admins_have_full_access_to_schedule_configs.0e6ed56b": {
       "kind": "policy",
       "name": "public.schedule_configs.Admins have full access to schedule_configs",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.schedule_configs.Authenticated_can_read_schedule_configs": {
+    "policy:public.schedule_configs.Authenticated_can_read_schedule_configs.bc6943a1": {
       "kind": "policy",
       "name": "public.schedule_configs.Authenticated can read schedule_configs",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2556,17 +3511,17 @@
       "name": "public.schedule_configs.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.schedules.Admins_have_full_access_to_schedules": {
+    "policy:public.schedules.Admins_have_full_access_to_schedules.699ce19f": {
       "kind": "policy",
       "name": "public.schedules.Admins have full access to schedules",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.schedules.Authenticated_can_read_schedules": {
+    "policy:public.schedules.Authenticated_can_read_schedules.f190db7e": {
       "kind": "policy",
       "name": "public.schedules.Authenticated can read schedules",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
     },
-    "policy:public.schedules.Students_read_their_class_schedule": {
+    "policy:public.schedules.Students_read_their_class_schedule.3be7e0f7": {
       "kind": "policy",
       "name": "public.schedules.Students read their class schedule",
       "hash": "385a3c6da7e831f1b566565fd8645a79b4aefe1897c8700ffee4a5f3c0917a4f"
@@ -2586,12 +3541,12 @@
       "name": "public.schedules.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.school_settings.Admins_have_full_access_to_school_settings": {
+    "policy:public.school_settings.Admins_have_full_access_to_school_settings.e6edbe05": {
       "kind": "policy",
       "name": "public.school_settings.Admins have full access to school_settings",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.school_settings.Authenticated_can_read_school_settings": {
+    "policy:public.school_settings.Authenticated_can_read_school_settings.e0a95a27": {
       "kind": "policy",
       "name": "public.school_settings.Authenticated can read school_settings",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2611,12 +3566,12 @@
       "name": "public.school_settings.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.school_years.Admins_have_full_access_to_school_years": {
+    "policy:public.school_years.Admins_have_full_access_to_school_years.bfafd400": {
       "kind": "policy",
       "name": "public.school_years.Admins have full access to school_years",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.school_years.Authenticated_can_read_school_years": {
+    "policy:public.school_years.Authenticated_can_read_school_years.3e429438": {
       "kind": "policy",
       "name": "public.school_years.Authenticated can read school_years",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2636,7 +3591,7 @@
       "name": "public.school_years.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.staff.Admins_have_full_access_to_staff": {
+    "policy:public.staff.Admins_have_full_access_to_staff.298dab4d": {
       "kind": "policy",
       "name": "public.staff.Admins have full access to staff",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
@@ -2656,17 +3611,17 @@
       "name": "public.staff.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.student_conduct_grades.Admins_have_full_access_to_student_conduct_grades": {
+    "policy:public.student_conduct_grades.Admins_have_full_access_to_student_conduct_grades.be49d725": {
       "kind": "policy",
       "name": "public.student_conduct_grades.Admins have full access to student_conduct_grades",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.student_conduct_grades.Students_read_their_conducta": {
+    "policy:public.student_conduct_grades.Students_read_their_conducta.73a82560": {
       "kind": "policy",
       "name": "public.student_conduct_grades.Students read their conducta",
       "hash": "6c0dce13724afd285514e5251ee36e3e6d350b7e62e65c032d83ab2ef02a5dc3"
     },
-    "policy:public.student_conduct_grades.Teachers_post_conducta_for_their_students": {
+    "policy:public.student_conduct_grades.Teachers_post_conducta_for_their_students.85fd3975": {
       "kind": "policy",
       "name": "public.student_conduct_grades.Teachers post conducta for their students",
       "hash": "c578bc51c5a3de250a28da11db67a86eebdeb3631592411c0f66fab8ad4d8c72"
@@ -2686,17 +3641,17 @@
       "name": "public.student_conduct_grades.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.student_grades.Admins_have_full_access_to_student_grades": {
+    "policy:public.student_grades.Admins_have_full_access_to_student_grades.424bfe1c": {
       "kind": "policy",
       "name": "public.student_grades.Admins have full access to student_grades",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.student_grades.Students_read_their_grades": {
+    "policy:public.student_grades.Students_read_their_grades.256ad14e": {
       "kind": "policy",
       "name": "public.student_grades.Students read their grades",
       "hash": "6c0dce13724afd285514e5251ee36e3e6d350b7e62e65c032d83ab2ef02a5dc3"
     },
-    "policy:public.student_grades.Teachers_manage_period_grades_for_their_subjects": {
+    "policy:public.student_grades.Teachers_manage_period_grades_for_their_subjects.dc986620": {
       "kind": "policy",
       "name": "public.student_grades.Teachers manage period grades for their subjects",
       "hash": "4d4f281ab73d850421239d189c2d5735c98b0b00586493a94f13862397966f36"
@@ -2716,12 +3671,12 @@
       "name": "public.student_grades.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.student_guardians.Admins_have_full_access_to_student_guardians": {
+    "policy:public.student_guardians.Admins_have_full_access_to_student_guardians.da02f5ee": {
       "kind": "policy",
       "name": "public.student_guardians.Admins have full access to student_guardians",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.student_guardians.Students_read_their_guardian_links": {
+    "policy:public.student_guardians.Students_read_their_guardian_links.94d2b253": {
       "kind": "policy",
       "name": "public.student_guardians.Students read their guardian links",
       "hash": "6c0dce13724afd285514e5251ee36e3e6d350b7e62e65c032d83ab2ef02a5dc3"
@@ -2741,17 +3696,17 @@
       "name": "public.student_guardians.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.students.Admins_have_full_access_to_students": {
+    "policy:public.students.Admins_have_full_access_to_students.b1bb68ba": {
       "kind": "policy",
       "name": "public.students.Admins have full access to students",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.students.Teachers_read_students_in_their_classes": {
+    "policy:public.students.Teachers_read_students_in_their_classes.5d5f339a": {
       "kind": "policy",
       "name": "public.students.Teachers read students in their classes",
       "hash": "caace94b733382e20ee556a41898da1a692b78a2946ada5fd068f5ccaa4d4633"
     },
-    "policy:public.students.Users_can_read_their_own_student_record": {
+    "policy:public.students.Users_can_read_their_own_student_record.260f1e34": {
       "kind": "policy",
       "name": "public.students.Users can read their own student record",
       "hash": "749bedc7dfb308d3bd80efbbf377e21fbb94d505e7bc95b8911ebdd94141a293"
@@ -2771,12 +3726,12 @@
       "name": "public.students.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.subjects.Admins_have_full_access_to_subjects": {
+    "policy:public.subjects.Admins_have_full_access_to_subjects.4ebf6f0b": {
       "kind": "policy",
       "name": "public.subjects.Admins have full access to subjects",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.subjects.Authenticated_can_read_subjects": {
+    "policy:public.subjects.Authenticated_can_read_subjects.aa4f63b2": {
       "kind": "policy",
       "name": "public.subjects.Authenticated can read subjects",
       "hash": "076e440e68be6b93cb717ab56c6c01b56226ab969352f64cb1bf9359ff0ae1c8"
@@ -2796,12 +3751,12 @@
       "name": "public.subjects.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
     },
-    "policy:public.teachers.Admins_have_full_access_to_teachers": {
+    "policy:public.teachers.Admins_have_full_access_to_teachers.ca3fe4f1": {
       "kind": "policy",
       "name": "public.teachers.Admins have full access to teachers",
       "hash": "acc0a1941028fc104628f005b7bdbd315f0e74de314383f838499c24e514f316"
     },
-    "policy:public.teachers.Teachers_can_read_their_own_full_record": {
+    "policy:public.teachers.Teachers_can_read_their_own_full_record.8513209d": {
       "kind": "policy",
       "name": "public.teachers.Teachers can read their own full record",
       "hash": "04c202c1d8df7514fa94c52c465b744838aaf27b9b228195e17db6f68d763c41"
@@ -2820,6 +3775,141 @@
       "kind": "policy",
       "name": "public.teachers.demo_deny_update",
       "hash": "4c74fc18f351b89f98a94715461d3066d1f33e49f292ab20dca229d3d1a57c64"
+    },
+    "sequence:public.assignment_grades.id": {
+      "kind": "sequence",
+      "name": "public.assignment_grades.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.assignments.id": {
+      "kind": "sequence",
+      "name": "public.assignments.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.attendance.id": {
+      "kind": "sequence",
+      "name": "public.attendance.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.bell_schedule_blocks.id": {
+      "kind": "sequence",
+      "name": "public.bell_schedule_blocks.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.bell_schedules.id": {
+      "kind": "sequence",
+      "name": "public.bell_schedules.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.class_subject_teachers.id": {
+      "kind": "sequence",
+      "name": "public.class_subject_teachers.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.classes.id": {
+      "kind": "sequence",
+      "name": "public.classes.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.discipline_records.id": {
+      "kind": "sequence",
+      "name": "public.discipline_records.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.events.id": {
+      "kind": "sequence",
+      "name": "public.events.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grade_categories.id": {
+      "kind": "sequence",
+      "name": "public.grade_categories.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grade_component_template_items.id": {
+      "kind": "sequence",
+      "name": "public.grade_component_template_items.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grade_component_templates.id": {
+      "kind": "sequence",
+      "name": "public.grade_component_templates.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grade_level_subjects.id": {
+      "kind": "sequence",
+      "name": "public.grade_level_subjects.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grade_levels.id": {
+      "kind": "sequence",
+      "name": "public.grade_levels.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.grading_periods.id": {
+      "kind": "sequence",
+      "name": "public.grading_periods.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.guardians.id": {
+      "kind": "sequence",
+      "name": "public.guardians.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.rooms.id": {
+      "kind": "sequence",
+      "name": "public.rooms.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.schedule_configs.id": {
+      "kind": "sequence",
+      "name": "public.schedule_configs.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.schedules.id": {
+      "kind": "sequence",
+      "name": "public.schedules.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.school_years.id": {
+      "kind": "sequence",
+      "name": "public.school_years.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.staff.id": {
+      "kind": "sequence",
+      "name": "public.staff.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.student_conduct_grades.id": {
+      "kind": "sequence",
+      "name": "public.student_conduct_grades.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.student_grades.id": {
+      "kind": "sequence",
+      "name": "public.student_grades.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.student_guardians.id": {
+      "kind": "sequence",
+      "name": "public.student_guardians.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.students.id": {
+      "kind": "sequence",
+      "name": "public.students.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.subjects.id": {
+      "kind": "sequence",
+      "name": "public.subjects.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
+    },
+    "sequence:public.teachers.id": {
+      "kind": "sequence",
+      "name": "public.teachers.id",
+      "hash": "a2f7e2389df999d98b5edf255e882b2899c6f28f9dbbb0459a5640e4f6301f3d"
     },
     "table:public.app_config": {
       "kind": "table",
@@ -2980,6 +4070,11 @@
       "kind": "trigger",
       "name": "public.profiles.profiles_protect_role",
       "hash": "0376ef0ce5d37b696842578a8ec0dfb73ea7d05edf0fc6b443bc8857db09fcd3"
+    },
+    "type:public.user_role_enum": {
+      "kind": "type",
+      "name": "public.user_role_enum",
+      "hash": "29618959601dad1d1eb99369fd47b7b43296f76be22b7e686390bf550d2763dd"
     },
     "view:public.student_period_conduct": {
       "kind": "view",

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FingerprintError,
+  foldGrants,
   normaliseDefinition,
   objectKey,
   parseRow,
@@ -89,18 +90,32 @@ function fingerprintFrom(entries) {
 }
 
 /**
+ * @param {import("./fingerprintKeys.mjs").ProbeRow} a
+ * @param {import("./fingerprintKeys.mjs").ProbeRow} b
+ */
+const inProbeKeyOrder = (a, b) => {
+  const left = [a.kind, a.name, a.definition];
+  const right = [b.kind, b.name, b.definition];
+  const differing = left.findIndex((value, at) => value !== right[at]);
+  if (differing < 0) return 0;
+  return left[differing] < right[differing] ? -1 : 1;
+};
+
+/**
+ * Keys rows in a fixed order, so a key never depends on the order the probe
+ * returned them in.
  * @param {string[][]} rows the probe's rows, one JSON object per row
  * @returns {Fingerprint}
  */
 export function buildFingerprint(rows) {
+  const probed = foldGrants(rows.map((row, index) => parseRow(row, index + 1)));
   /** @type {Map<string, FingerprintObject>} */
   const objects = new Map();
-  rows.forEach((row, index) => {
-    const probed = parseRow(row, index + 1);
-    const hash = sha256(normaliseDefinition(probed.kind, probed.definition));
-    const key = unusedKey(objects, objectKey(probed, hash));
-    objects.set(key, { kind: probed.kind, name: probed.name, hash });
-  });
+  for (const row of probed.sort(inProbeKeyOrder)) {
+    const hash = sha256(normaliseDefinition(row.kind, row.definition));
+    const key = unusedKey(objects, objectKey(row, hash));
+    objects.set(key, { kind: row.kind, name: row.name, hash });
+  }
   return fingerprintFrom(objects);
 }
 

@@ -111,6 +111,11 @@ case when u.r = 0 then 'public' else pg_get_userbyid(u.r) end
   (`public.teacher_id()`, `public.teachers_directory`); a sequence's is
   `public.<seq>`. Grantee `0` is `public`. The owner's own privileges and the
   grantor are left out (Open questions 2, 3).
+- **Grant folding (amended 2026-10-24):** `buildFingerprint` folds the
+  probe's per-privilege `grant` rows into one object per object and grantee,
+  named `<object>.<grantee>`, its definition the privileges sorted and
+  comma-joined, each grantable one marked `*` (the `aclitem` convention). The
+  probe is unchanged.
 - **Sequences:** an owned sequence (`pg_depend` `deptype` `a` or `i` on a
   column) is named by its owning column, so a generated sequence name never
   shows, as column defaults already hide it (Open question 1).
@@ -123,21 +128,23 @@ case when u.r = 0 then 'public' else pg_get_userbyid(u.r) end
 
 ## Phase R — acceptance checks, red before any implementation
 
-| AC  | Behaviour                                                                       | Kind  | Where (file › test name)                                                                                     | Command                                                                                                              | Expected red                                 |
-| --- | ------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| AC1 | A privilege the baseline revokes but a project still grants is an added `grant` | unit  | `test/deliveryFingerprint.test.js` › "reports a privilege the baseline revokes as an added grant"            | `npx vitest run test/deliveryFingerprint.test.js -t "reports a privilege the baseline revokes as an added grant"`    | `{ refused }` ≠ the two added grants         |
-| AC2 | An enum with an extra or reordered label is a changed `type`                    | unit  | `test/deliveryFingerprint.test.js` › "reports an enum with an extra or reordered label as changed"           | `npx vitest run test/deliveryFingerprint.test.js -t "reports an enum with an extra or reordered label as changed"`   | `{ refused }` ≠ one changed type             |
-| AC3 | An added and a changed sequence are reported by kind and name                   | unit  | `test/deliveryFingerprint.test.js` › "reports added and changed sequences by kind and name"                  | `npx vitest run test/deliveryFingerprint.test.js -t "reports added and changed sequences by kind and name"`          | `{ refused }` ≠ added + changed sequence     |
-| AC4 | Names that slug alike get distinct keys, the same in any row order              | unit  | `test/deliveryFingerprint.test.js` › "keys objects whose names slug alike the same in any row order"         | `npx vitest run test/deliveryFingerprint.test.js -t "keys objects whose names slug alike the same in any row order"` | keys by name differ between the two orders   |
-| AC5 | Every `grant`, `type` and `sequence` key fits the recorded `kind:name` shape    | unit  | `test/deliveryFingerprint.test.js` › "grant, type and sequence keys fit the recorded object shape"           | `npx vitest run test/deliveryFingerprint.test.js -t "grant, type and sequence keys fit the recorded object shape"`   | `expected [] to have a length of 6`          |
-| G1  | The probe stays a single read-only `with … select`                              | guard | `test/deliveryFingerprint.test.js` › "the fingerprint probe only reads"                                      | `npx vitest run test/deliveryFingerprint.test.js -t "the fingerprint probe only reads"`                              | green from the start                         |
-| G2  | The committed expected fingerprints equal a fresh install in each shape         | guard | `test/schemaHarness.db.test.js` › "the committed expected fingerprints match a fresh install in both shapes" | CI `schema` job                                                                                                      | green from the start (red between tasks 4–5) |
+| AC  | Behaviour                                                                                                              | Kind  | Where (file › test name)                                                                                     | Command                                                                                                                      | Expected red                                 |
+| --- | ---------------------------------------------------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| AC1 | A privilege the baseline revokes but a project still grants is an added or changed `grant`, one per object and grantee | unit  | `test/deliveryFingerprint.test.js` › "reports a privilege the baseline revokes as an added or changed grant" | `npx vitest run test/deliveryFingerprint.test.js -t "reports a privilege the baseline revokes as an added or changed grant"` | `expected [ …(4) ] to deeply equal [ …(3) ]` |
+| AC2 | An enum with an extra or reordered label is a changed `type`                                                           | unit  | `test/deliveryFingerprint.test.js` › "reports an enum with an extra or reordered label as changed"           | `npx vitest run test/deliveryFingerprint.test.js -t "reports an enum with an extra or reordered label as changed"`           | `{ refused }` ≠ one changed type             |
+| AC3 | An added and a changed sequence are reported by kind and name                                                          | unit  | `test/deliveryFingerprint.test.js` › "reports added and changed sequences by kind and name"                  | `npx vitest run test/deliveryFingerprint.test.js -t "reports added and changed sequences by kind and name"`                  | `{ refused }` ≠ added + changed sequence     |
+| AC4 | Names that slug alike get distinct keys, the same in any row order                                                     | unit  | `test/deliveryFingerprint.test.js` › "keys objects whose names slug alike the same in any row order"         | `npx vitest run test/deliveryFingerprint.test.js -t "keys objects whose names slug alike the same in any row order"`         | keys by name differ between the two orders   |
+| AC5 | Every `grant`, `type` and `sequence` key fits the recorded `kind:name` shape                                           | unit  | `test/deliveryFingerprint.test.js` › "grant, type and sequence keys fit the recorded object shape"           | `npx vitest run test/deliveryFingerprint.test.js -t "grant, type and sequence keys fit the recorded object shape"`           | `expected [] to have a length of 6`          |
+| G1  | The probe stays a single read-only `with … select`                                                                     | guard | `test/deliveryFingerprint.test.js` › "the fingerprint probe only reads"                                      | `npx vitest run test/deliveryFingerprint.test.js -t "the fingerprint probe only reads"`                                      | green from the start                         |
+| G2  | The committed expected fingerprints equal a fresh install in each shape                                                | guard | `test/schemaHarness.db.test.js` › "the committed expected fingerprints match a fresh install in both shapes" | CI `schema` job                                                                                                              | green from the start (red between tasks 4–5) |
 
 How each check holds up against a lazy implementation:
 
-- AC1 pins the exact keys (`grant:public.teacher_id().anon.EXECUTE`), so a
-  grant row keyed by anything but object, grantee and privilege fails; the
-  authenticated grants both sides share must not appear.
+- AC1 (amended 2026-10-24) pins the exact keys: three grant objects from five
+  per-privilege rows, so a key per privilege fails; `teacher_id()` to `anon`
+  (no baseline privilege) is added, an extra privilege for `authenticated` on
+  `teachers_directory` is changed, and `service_role`'s two unchanged
+  privileges must not appear.
 - AC2 asserts an extra label **and** a reorder are changes, and the same
   labels in the same order are not.
 - AC3 needs exactly one added and one changed, nothing removed.
@@ -155,6 +162,10 @@ How each check holds up against a lazy implementation:
 **Red evidence** (run 2026-10-23, Windows, Node 24):
 
 - AC1: `npx vitest run test/deliveryFingerprint.test.js -t "reports a privilege the baseline revokes as an added grant"` → `AssertionError: expected { Object (refused) } to deeply equal { equal: false, …(3) }` (`"refused": "probe row 2 has an unknown shape"`) ✅ valid red
+- AC1 as amended (run 2026-10-24 against `fd3a6ec`, which keys one grant per
+  privilege): `npx vitest run test/deliveryFingerprint.test.js -t "reports a privilege the baseline revokes as an added or changed grant"`
+  → `AssertionError: expected [ …(4) ] to deeply equal [ …(3) ]` ✅ valid red;
+  the other eight tests in the file pass
 - AC2: `… -t "reports an enum with an extra or reordered label as changed"` → `AssertionError: expected { Object (refused) } to match object { equal: false, added: [], …(2) }` ✅ valid red
 - AC3: `… -t "reports added and changed sequences by kind and name"` → `AssertionError: expected { Object (refused) } to match object { equal: false, …(3) }` ✅ valid red
 - AC4: `… -t "keys objects whose names slug alike the same in any row order"` → `AssertionError: expected { …(4) } to deeply equal { …(4) }` ✅ valid red
@@ -349,6 +360,20 @@ public.students alter column id set increment by 10`, which reaches the
   `37171c2`, where the school shape passed and that run's `school.json` was
   byte-identical to the committed one). 1,666 objects: the school file's
   1,576, unchanged, plus the 90 `demo_deny_*` policies and nothing else.
+- 2026-10-24 — **AC1 amended by the owner.** Was: "A privilege the baseline
+  revokes but a project still grants is reported as an added `grant` object
+  keyed by object, grantee and privilege". Now: "A privilege the baseline
+  revokes but a project still grants is reported as an added or changed
+  `grant` object, one per object and grantee". Why: 963 of the 1,039 grant
+  objects were Supabase's default `ALL` to `anon`, `authenticated` and
+  `service_role`, repeated per privilege, which put about 10,800 generated
+  lines in this PR. One object per object and grantee keeps every difference
+  (a re-granted privilege is a changed or added grant) at 191 objects. The
+  test is renamed to "reports a privilege the baseline revokes as an added or
+  changed grant", re-proved red against `fd3a6ec`, and the ticket's AC1 line
+  updated. The folding is in JS (`fingerprintKeys.mjs`), so it is
+  unit-tested and the probe stays as approved. Task 5's DB test and both
+  expected files follow the new keys.
 
 ## Manual Supabase steps
 

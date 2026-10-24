@@ -234,34 +234,45 @@ const policyNamed = (name, using) => ({
 });
 
 describe("fingerprinting grants, enum types and sequences", () => {
-  it("reports a privilege the baseline revokes as an added grant", async () => {
+  it("reports a privilege the baseline revokes as an added or changed grant", async () => {
     const revoked = [
       teacherIdFunction,
       grant(TEACHER_ID, "authenticated", "EXECUTE"),
       grant(DIRECTORY, "authenticated", "SELECT"),
+      grant(DIRECTORY, "service_role", "INSERT"),
+      grant(DIRECTORY, "service_role", "SELECT"),
     ];
     const stillGranted = [
       ...revoked,
       grant(TEACHER_ID, "anon", "EXECUTE"),
-      grant(DIRECTORY, "anon", "SELECT"),
+      grant(DIRECTORY, "authenticated", "INSERT"),
     ];
+    const grantKeys = Object.keys(
+      (await fingerprintOrRefusal(revoked)).objects,
+    ).filter((key) => key.startsWith("grant:"));
 
+    expect(grantKeys).toEqual([
+      "grant:public.teacher_id().authenticated",
+      "grant:public.teachers_directory.authenticated",
+      "grant:public.teachers_directory.service_role",
+    ]);
     expect(await compareOrRefusal(revoked, stillGranted)).toEqual({
       equal: false,
       added: [
         {
-          key: "grant:public.teacher_id().anon.EXECUTE",
+          key: "grant:public.teacher_id().anon",
           kind: "grant",
-          name: "public.teacher_id().anon.EXECUTE",
-        },
-        {
-          key: "grant:public.teachers_directory.anon.SELECT",
-          kind: "grant",
-          name: "public.teachers_directory.anon.SELECT",
+          name: "public.teacher_id().anon",
         },
       ],
       removed: [],
-      changed: [],
+      changed: [
+        {
+          key: "grant:public.teachers_directory.authenticated",
+          kind: "grant",
+          name: "public.teachers_directory.authenticated",
+        },
+      ],
     });
   });
 

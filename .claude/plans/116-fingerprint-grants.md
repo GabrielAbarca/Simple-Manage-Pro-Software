@@ -357,7 +357,56 @@ public.students alter column id set increment by 10`, which reaches the
 
 ## Validation
 
-Filled by `/piv-implement` and `/piv-validate`.
+`/piv-validate` at `c146896`, run in an LF worktree of the commit (this
+checkout's `core.autocrlf=true` fails `format:check`, `ciWorkflow` and
+`claudeSkills` on `main` too), plus CI run 40064377306 on the same commit:
+
+| Check             | Result                                                                          |
+| ----------------- | ------------------------------------------------------------------------------- |
+| format:check      | ✅                                                                              |
+| lint              | ✅                                                                              |
+| typecheck         | ✅ (`tsconfig.json`, `tsconfig.scripts.json`)                                   |
+| unit              | ✅ 579 passed, 22 skipped (opt-in DB/live)                                      |
+| build             | ✅                                                                              |
+| e2e               | ✅ 119 passed                                                                   |
+| CI `schema` job   | ✅ 6 passed, G2 and task 5's DB test included                                   |
+| skip/only         | ✅ clean                                                                        |
+| entry-point order | ✅ (`admin.js` flagged by `head -20`; its first import is `errorHandler`, l.22) |
+| frozen tests      | ✅ `test/deliveryFingerprint.test.js` byte-identical to `895db66`               |
+
+| AC  | Kind  | Red before (Phase R)                     | Green after          |
+| --- | ----- | ---------------------------------------- | -------------------- |
+| AC1 | unit  | `{ refused }` ≠ the two added grants     | ✅                   |
+| AC2 | unit  | `{ refused }` ≠ one changed type         | ✅                   |
+| AC3 | unit  | `{ refused }` ≠ added + changed sequence | ✅                   |
+| AC4 | unit  | keys by name differ between the orders   | ✅                   |
+| AC5 | unit  | `expected [] to have a length of 6`      | ✅                   |
+| G1  | guard | green from the start                     | ✅                   |
+| G2  | guard | green from the start                     | ✅ (CI `schema` job) |
+
+### Review (round 1)
+
+**Verdict:** clean · **Acceptance:** PASS (G2 on CI evidence pinned to HEAD
+`c146896`, run 40064377306; UNPROVEN locally only, no Postgres)
+
+| AC  | Kind  | Exists | Faithful | Passes                     | Coupled                        | Frozen                            | Probe | Verdict  |
+| --- | ----- | ------ | -------- | -------------------------- | ------------------------------ | --------------------------------- | ----- | -------- |
+| AC1 | unit  | yes    | yes      | yes                        | yes, fails at RED              | unchanged                         | n/a   | PASS     |
+| AC2 | unit  | yes    | yes      | yes                        | yes, fails at RED              | unchanged                         | n/a   | PASS     |
+| AC3 | unit  | yes    | yes      | yes                        | yes, fails at RED              | unchanged                         | n/a   | PASS     |
+| AC4 | unit  | yes    | yes      | yes                        | yes, fails at RED              | unchanged                         | n/a   | PASS     |
+| AC5 | unit  | yes    | yes      | yes                        | yes, fails at RED              | unchanged                         | n/a   | PASS     |
+| G1  | guard | yes    | yes      | yes                        | n/a (guard, passes at RED too) | unchanged                         | n/a   | PASS     |
+| G2  | guard | yes    | yes      | not run locally (CI green) | n/a (guard)                    | file changed, test body unchanged | n/a   | UNPROVEN |
+
+Findings: 0 Critical, 0 High, 0 Medium, 2 Low.
+
+- Low — `supabase/delivery/fingerprint.sql:80`: grant keys depend on the
+  Postgres major (`MAINTAIN` exists from 17; `school.json` holds 98 such
+  keys from the PG17 harness), so a PG15 project would show them as removed.
+- Low — `supabase/delivery/fingerprint.sql:66`: column-level grants
+  (`attacl`) and the `public` schema ACL (`nspacl`) aren't probed — out of
+  scope by this plan.
 
 ## Execution report
 

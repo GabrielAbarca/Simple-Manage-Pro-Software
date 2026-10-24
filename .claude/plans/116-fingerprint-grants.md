@@ -408,6 +408,27 @@ Findings: 0 Critical, 0 High, 0 Medium, 2 Low.
   (`attacl`) and the `public` schema ACL (`nspacl`) aren't probed — out of
   scope by this plan.
 
+Outcome (`/piv-fix-review-findings --unattended`):
+
+- Not in this change: grant keys tied to the Postgres major (`MAINTAIN`) —
+  latent while every project and the harness run 17; if a PG15 project
+  appears, filter `MAINTAIN` in `acl_entries` or record an exception. A
+  probe change sits under `supabase/`, which the unattended policy never
+  fixes on its own.
+- Not in this change: column-level grants (`attacl`) and the `public` schema
+  ACL (`nspacl`) — listed under this plan's Out of scope; a follow-up for the
+  epic.
+- Won't fix: G2 UNPROVEN — local only (no Postgres here). CI's `schema` job
+  passed it on HEAD `c146896` (run 40064377306), the proof route Phase R
+  names.
+- Also for the PR's "Not in this change": the baseline's `revoke all on
+public.teachers_directory from anon, public` (`school_schema.sql:637`)
+  leaves `authenticated` with the default `ALL` on the view, so `grant
+select` at `:638` adds nothing; the new fingerprint shows 8 `authenticated`
+  privileges there. A schema change, owner approval.
+- No fixes, so no round 2: the round-1 review is the final review. The
+  validation at `c146896` stands; this commit changes only the plan.
+
 ## Execution report
 
 Filled by `/system-execution-report`.

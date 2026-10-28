@@ -331,3 +331,39 @@ Findings: 0 Critical, 0 High, 0 Medium, 3 Low (two repeat round 1's follow-ups).
 - Not in this change: `scripts/delivery/manifest.mjs:89` the `\binto\b` test also refuses `into` inside a string literal (`where note = 'moved into 7A'`) — Low; it fails safe, nothing committed hits it, and the read-only transaction in #94 is the real guard.
 
 ## Execution report
+
+**Files:** +6 ~1 −0 · **Lines:** +1100 −6 · **Review rounds:** 2 · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (532) · build ✅ · e2e ✅ (119) · acceptance validator: PASS (AC1–AC5, both rounds)
+
+### What went well
+
+- `checkManifest` taking the schema file list as an argument kept AC2–AC5 on in-memory data, so the validator's coupling proof only had to reset `scripts/` and `supabase/` to RED.
+- The plan's Task 3 gotcha ("the guard asks for each file; a refusal halts the loop") made the first run's halt clean: tasks 1, 2 and 4 committed, the reason recorded, and the resume went straight to the two files.
+- The reviewer's `select … into` finding was real and cheap; a separate test file kept the frozen acceptance file untouched.
+
+### Divergences from the plan
+
+- **Task 3 landed in a second session** — planned: one unattended pass · actual: the first run halted at Task 3 because its permission mode couldn't show the guard prompt; resumed 2026-10-28 in Default mode, both files approved and committed as `bb801c6` · why: a `Supabase: yes` ticket needs an attended Default-mode session for every edit under `supabase/`, even pure repository data · type: missing context
+- **`isSingleSelect` refuses `into`** — planned: shape check only (`select`, no inner `;`) · actual: also rejects `\binto\b`, with JSDoc saying read-only enforcement belongs to the executor · why: review round 1 showed `select … into <table>` creates a table yet passed · type: security or performance
+- **Format and unit ran in a clean LF worktree** — planned: the ladder in the main checkout · actual: the Windows checkout holds CRLF endings on disk (`core.autocrlf=false`, files checked out earlier with CRLF), which trips Prettier across 89 files and `test/claudeSkills.test.js` frontmatter parsing; both are green in an LF worktree of the same commit · why: environment, not branch · type: other
+
+### Challenges
+
+- Telling environment noise from branch failures: 89 Prettier failures and 2 unit failures on a branch touching 6 files. Proving it took an LF worktree with a `node_modules` junction; the junction has to be removed with `rmdir` before `git worktree remove` so `node_modules` is never followed.
+- A bare `prettier --check .` is wider than `npm run format:check` (which covers only `src/**` and root `*.{js,json}`) and flags `public/site.webmanifest`, unformatted on `main` too. Easy to misread as a regression.
+- The entry-point-order check in `/piv-validate` uses `head -20`, but `src/js/admin.js` opens with a 21-line header, so it reports a false "errorHandler not first".
+
+### Skipped
+
+- Four Low review findings, routed to follow-ups: `typeof` guards before the regex checks (two units with `id: ["conducta"]` pass the repeat check), a refusal wrapper for a missing `supabase/schema/`, the temp fixture in the frozen test never being removed, and splitting `unitProblems` / `checkProjects`. Plus round 2's Low: `into` inside a string literal is refused.
+
+### Recommendations
+
+- **Plan skill:** for a `Supabase: yes` ticket whose only `supabase/` change is data files, say in the plan header that the run must start in Default mode, so it isn't dispatched or started in a mode that will halt at the guard.
+- **Implement / validate / review skills:** `/piv-validate`'s entry-point check should find the first `import` line anywhere in the file (`grep -m1 '^import '`), not within `head -20`. And step 0 should detect CRLF in the working copy (`git ls-files --eol | grep w/crlf`) and say so before the format and unit rungs, instead of letting them fail opaquely.
+- **References** (conventions, ladder, rubric, ticket template): the validation ladder should name `npm run format:check` as the only format command, since `prettier --check .` widens the scope; and the acceptance validator's coupling recipe should reset whatever paths the diff touches, not a fixed `src public *.html` (both validator runs had to widen it to `scripts` and `supabase`).
+- **CLAUDE.md / ARCHITECTURE_MAP:** `supabase/CLAUDE.md`'s Layout doesn't mention `delivery/` yet; that belongs to #105.
+- **Ticket slicing:** right size (M, ~1100 lines with tests and the plan). The checks were right; AC3's "a single select" wording invited the shape-only reading, so a future check ticket should say "read-only" explicitly if that's meant.

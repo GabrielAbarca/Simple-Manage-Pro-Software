@@ -433,4 +433,63 @@ Findings: 0 Critical · 0 High · 2 Medium · 4 Low
 - Not in this change: a failed lock-count or leftover query records `sqlstate: null` — `proofs.mjs` returns no SQLSTATE for those queries and the ticket composes it without editing it; a follow-up can add `sqlstate` to `LockProof` and `LeftoverProof`.
 - Won't fix: the early window check after the prompt — it refuses before the token prompt, which the per-unit check can't.
 
+### Review (final)
+
+**Verdict:** clean (no Critical or High) · **Acceptance:** PASS
+
+| AC  | Kind | Exists                                 | Faithful | Passes | Coupled           | Frozen    | Probe      | Verdict |
+| --- | ---- | -------------------------------------- | -------- | ------ | ----------------- | --------- | ---------- | ------- |
+| AC1 | unit | yes (`test/deliver.test.js:102`)       | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC2 | unit | yes (`test/deliver.test.js:140`)       | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC3 | unit | yes (`test/deliver.test.js:221`)       | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC4 | unit | yes (`test/deliver.test.js:251`)       | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC5 | unit | yes (`test/deliveryWindow.test.js:65`) | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+
+Findings: 0 Critical · 0 High · 2 Medium · 2 Low. Both fix rounds are spent
+(`.claude/references/conventions.md`, section loop), so none is fixed here.
+
+- Not in this change (Medium) · `scripts/delivery/deliver.mjs:268` — a failed `git fetch origin main` is tolerated, so a run against a stale `origin/main` passes the checkout check and can re-apply a unit another machine already recorded. Patch: refuse when the fetch fails (`if (!succeeds(run, "fetch", "origin", "main")) return "could not fetch origin/main; …"`) and add the case to the `checkoutProblem` test.
+- Not in this change (Medium) · `scripts/delivery/deliver.mjs:408` — a check returning NULL prints as `""`, and `Number("")` is 0, so a `max`/`sum` check with `expect: 0` would pass on no rows. Today's only check is a `count(*)`, which never returns NULL. Patch: fail when the cell is missing or blank before `Number(...)`.
+- Not in this change (Low) · `scripts/delivery/deliver.mjs:276` — "delete it or merge its PR first": merging doesn't delete the local branch; reword to "delete the local branch … after its PR is merged".
+- Not in this change (Low) · `scripts/delivery/deliver.mjs:282` — the clean-tree check covers `supabase/` only; add `scripts/delivery/`.
+
 ## Execution report
+
+**Files:** +7 ~2 −0 · **Lines:** +2161 −0 (plan included) · **Review rounds:** 3 (two fix rounds, then the final review) · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (604 passed; 1 Node-22 ICU failure in `test/i18n.test.js`, environmental, nothing under `src/` changed) · build ✅ · e2e ✅ (119, local browser config) · acceptance validator: PASS (all three rounds)
+
+### What went well
+
+- `scripts/delivery/audit.mjs` was the right pattern to name: injected boundaries in an options object, then a thin CLI. Every boundary of `deliver` (`connect`, `prepareCommit`, `input`, `now`, the sources) was injectable from the first commit, so the git and Management API paths never ran in a test.
+- Each AC test has a positive control: the same setup with the right ref, or inside the window, does connect and apply. With that, a refusal test can't pass by doing nothing, and the validator's coupling check failed every AC cleanly at the stubs.
+- Validating a dry-run entry with `validateEntry` (placeholder hashes) caught a bad approver or an over-long check id before anything was applied, without copying the record's regexes.
+
+### Divergences from the plan
+
+- **Extra exports and a non-AC test file** — planned: `deliver` and `main` only · actual: also `markerStatement`, `recordBranch`, `prepareRecordCommit`, `checkoutProblem` and `test/deliverRefusals.test.js` · why: the git step and the pre-connect checks needed unit tests the ACs don't reach · type: better approach found.
+- **Record branch cut from `origin/main`, and a checkout check** — planned: `git switch -c chore/record-<project>` from HEAD, no checkout check · actual: fetch, branch from `origin/main`, and refuse before the prompt unless HEAD equals `origin/main` and `supabase/` is clean (skipped when a caller passes all four sources) · why: review rounds 1 and 2. A run from a feature branch would carry unmerged commits into the record PR, or record a sequence `main` doesn't have · type: plan assumption wrong.
+- **Window re-checked before each unit** — planned: before the plan and after the prompt · actual: also before every unit · why: review round 1. A multi-unit run could cross the window's end · type: plan assumption wrong.
+- **Thrown steps recorded** — planned: a thrown error stops the run · actual: a step that throws becomes a failed proof and is recorded · why: review round 2. `managementApi.mjs:115` can throw after `apply` has changed the database · type: missing context.
+- **Own line reader instead of `readline/promises`** — changed in Phase R, before the red commit · why: `question` can stay pending when the input ends without a line · type: better approach found.
+
+### Challenges
+
+- The PreToolUse guard refused a git smoke test in the scratchpad because its path contained `supabase/`. Rerunning it under a neutral path proved the same git behaviour.
+- Each review round found a new class of failure at the boundary between the local checkout and the live project (stale branch, stale fetch, thrown I/O). The ACs cover the delivery flow, but none of them covers repository state.
+- No Node 24 and no default Playwright browser in the container. E2E needed `playwright.local.config.js`, and one i18n case fails on Node 22.
+
+### Skipped
+
+- Read-only checks (Open question 4's approved default). The Management API returns only the last statement's rows. Follow-up: a `runReadOnly` executor method, which would also make `manifest.mjs:80-81` true.
+- Final-review findings, because both fix rounds were spent: refuse when `git fetch` fails (Medium), treat a NULL/blank check cell as a failure (Medium), reword the existing-branch message (Low), and include `scripts/delivery/` in the clean-tree check (Low). Patches are in "Review (final)".
+- A SQLSTATE for a failed lock or leftover query needs `proofs.mjs`, which the ticket says not to edit.
+
+### Recommendations
+
+- **Plan skill:** for a command that writes to a live system from the owner's checkout, require a "repository preconditions" item in the plan (which branch, clean paths, fetch freshness, what happens when the fetch fails). Three of the six Medium findings were about this.
+- **Ticket slicing:** #94's ACs left out checkout state and partial-failure recording. The epic's drift ticket (#98) should own "the checkout equals `origin/main` and the fetch succeeded" as an AC, and #94's checks should have had one AC for "a step that fails after `apply` is still recorded".
+- **References (validation ladder):** the coupling recipe restores only `src`, `public` and `*.html`. Every delivery-tooling ticket lives in `scripts/`, and the validator had to widen the recipe in all three rounds. Add `scripts/` (and `package.json`) to the restored paths.
+- **CLAUDE.md / ARCHITECTURE_MAP:** none.

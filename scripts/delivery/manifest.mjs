@@ -75,15 +75,19 @@ const isText = (value) => typeof value === "string" && value.trim() !== "";
 const isTextList = (value) => Array.isArray(value) && value.every(isText);
 
 /**
- * True for one statement that starts with `select`. One trailing `;` is
- * allowed; any other `;` means more than one statement.
+ * True for one statement that starts with `select` and has no `into`. One
+ * trailing `;` is allowed; any other `;` means more than one statement.
+ * This is a shape check, not a read-only guarantee: the executor runs checks
+ * in a read-only transaction.
  * @param {unknown} sql
  * @returns {boolean}
  */
 export function isSingleSelect(sql) {
   if (typeof sql !== "string") return false;
   const body = sql.trim().replace(/;\s*$/, "");
-  return /^select\b/i.test(body) && !body.includes(";");
+  return (
+    /^select\b/i.test(body) && !body.includes(";") && !/\binto\b/i.test(body)
+  );
 }
 
 /**

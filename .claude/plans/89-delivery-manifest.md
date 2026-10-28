@@ -306,4 +306,10 @@ Findings: 0 Critical, 0 High, 1 Medium, 4 Low.
 - Low: `test/deliveryManifest.test.js:90` the temp fixture directory is never removed.
 - Low: `scripts/delivery/manifest.mjs:94` `unitProblems` and `checkProjects` are long.
 
+- Fixed: `isSingleSelect` accepted `select … into <table>` → `test/deliveryManifestSelect.test.js` › "rejects a select that writes its rows into a table" (red, then green); JSDoc now says it is a shape check and read-only enforcement belongs to the executor (#94).
+- Not in this change: regex checks coerce non-string ids, names and times, so `id: 7` passes and two `id: ["conducta"]` units slip past the repeat check — Low; worth a `typeof` guard in a follow-up.
+- Not in this change: a missing `supabase/schema/` throws raw ENOENT instead of a refusal — Low; the directory always exists in the repository.
+- Not in this change: the temp fixture in `test/deliveryManifest.test.js:90` is never removed — Low, and the file is a frozen acceptance test.
+- Not in this change: `unitProblems` and `checkProjects` are long and the module is 416 lines — Low; extracting `fileProblems` and `checkProblems` is a refactor.
+
 ## Execution report

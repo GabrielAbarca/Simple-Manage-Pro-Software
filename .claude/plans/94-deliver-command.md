@@ -340,12 +340,44 @@ session (the guard asks for it, and it would reach a live project).
 
 ## AMENDMENTS
 
-- (none)
+- 2026-10-28 — `deliver.mjs` also exports `markerStatement(seq)` and `recordBranch(name)`, and a new non-acceptance test file `test/deliverRefusals.test.js` covers them plus the unknown-project, bad-approver and nothing-pending refusals — so the paths the acceptance tests don't reach have a test; no frozen test changed.
 
 ## Manual Supabase steps
 
 - None.
 
 ## Validation
+
+Implementation commit on `feat/deliver-command`, Node 22.22 container
+(`engines.node` is 24.x; no Node 24 is installed here).
+
+| Check        | Result                       | Notes                                                                                                                                                                                                     |
+| ------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format:check | ✅                           |                                                                                                                                                                                                           |
+| lint         | ✅                           |                                                                                                                                                                                                           |
+| typecheck    | ✅                           | both configs, `scripts/delivery/**` included                                                                                                                                                              |
+| unit         | ✅ 597 passed, 1 env failure | `test/i18n.test.js` › "formats 24h time strings to the locale's 12h form" fails on Node 22's ICU, as recorded in #88's plan; this branch changes nothing under `src/`                                     |
+| build        | ✅                           |                                                                                                                                                                                                           |
+| e2e          | ✅ 119 passed                | local config: yes (`executablePath` → `/opt/pw-browsers/chromium-1243`); the default `chromium_headless_shell-1228` isn't installed, so the default run failed at browser launch before any test body ran |
+| AC1–AC5      | ✅                           | each command run on its own; `-t` matched exactly one test each                                                                                                                                           |
+| skip/only    | ✅ clean                     |                                                                                                                                                                                                           |
+| entry order  | ✅                           | the 20-line check flags `src/js/admin.js`, whose header comment runs past line 20; its first import is `./errorHandler.js` (line 22), unchanged from `main`                                               |
+| supabase/    | ✅ untouched                 |                                                                                                                                                                                                           |
+| frozen tests | ✅ unchanged since `2b1924e` | `git diff 2b1924e -- test/deliver.test.js test/deliveryWindow.test.js test/fixtures/delivery/fakes.js` is empty                                                                                           |
+
+| AC  | Kind | Red before (Phase R)                                                         | Green after |
+| --- | ---- | ---------------------------------------------------------------------------- | ----------- |
+| AC1 | unit | `expected '' to match /terminal/` (`test/deliver.test.js:109`)               | ✅          |
+| AC2 | unit | `expected false to be true` (`result.ok`, `test/deliver.test.js:166`)        | ✅          |
+| AC3 | unit | `expected false to be true` (`result.ok`, `test/deliver.test.js:223`)        | ✅          |
+| AC4 | unit | `expected false to be true` (`result.ok`, `test/deliver.test.js:255`)        | ✅          |
+| AC5 | unit | `expected false to be true` (`windowOpen`, `test/deliveryWindow.test.js:67`) | ✅          |
+
+Beyond the acceptance checks, `test/deliverRefusals.test.js` covers an
+unknown project, an approver the record would refuse (both refused before
+connecting), a re-run with nothing pending (no connection), the record
+branch name and the marker statement. The default git step was smoke-tested
+in a scratch repository: the commit holds only the record file, and a file
+already staged elsewhere stays out of it.
 
 ## Execution report

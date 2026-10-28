@@ -13,6 +13,7 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.scripts.json",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "deliver": "node scripts/delivery/deliver.mjs",
     "prepare": "husky"
   },
   "keywords": [],

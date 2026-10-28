@@ -404,4 +404,25 @@ Findings: 0 Critical · 0 High · 2 Medium · 2 Low
 - Fixed: the stopped message claims no marker when the marker ran → `deliverUnit` reports whether the marker step passed and a refused record entry, and the message says so · `test/deliverRefusals.test.js` › "says the marker was written when the record entry then fails". A Low, fixed because it is a wrong output in this change's own code.
 - Not in this change: checks aren't run read-only. The approved default (Open question 4): the Management API returns only the last statement's rows, so a `begin read only … rollback` wrapper hides the check's row. A read-only path belongs in the executors (a `runReadOnly` method), with `manifest.mjs:80-81`'s comment made true there.
 
+### Review (round 2)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe      | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ---------- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a (unit) | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a (unit) | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a (unit) | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a (unit) | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a (unit) | PASS    |
+
+Findings: 0 Critical · 0 High · 2 Medium · 4 Low
+
+- Medium · `scripts/delivery/deliver.mjs:399` — a step that throws after `apply` leaves the unit applied with no record entry.
+- Medium · `scripts/delivery/deliver.mjs:484` — the working tree's manifest, schema and record aren't checked against `origin/main`, where the record commit is cut.
+- Low · `scripts/delivery/deliver.mjs:265` — record-branch problems surface only after the database changed.
+- Low · `scripts/delivery/deliver.mjs:578` — the success line doesn't say the checkout moved.
+- Low · `scripts/delivery/deliver.mjs:343` — a failed lock or leftover query records no SQLSTATE.
+- Low · `scripts/delivery/deliver.mjs:517` — a repeated window check.
+
 ## Execution report

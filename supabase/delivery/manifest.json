@@ -1,0 +1,19 @@
+{
+  "units": [
+    {
+      "seq": 1,
+      "id": "conducta",
+      "files": ["incremental_conducta.sql"],
+      "appliesTo": ["demo", "school"],
+      "functions": [],
+      "auth": [],
+      "checks": [
+        {
+          "id": "conducta-unchanged",
+          "sql": "select count(*) from public.student_period_conduct where conduct_score <> 100",
+          "expect": 0
+        }
+      ]
+    }
+  ]
+}

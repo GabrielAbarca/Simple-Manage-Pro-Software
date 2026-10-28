@@ -277,4 +277,33 @@ red until those files exist. Resume with `/piv-run-full-loop #89` in a
 Default-mode session (state Built → B2, creating the files with approval), or
 the owner creates them by hand exactly as in "Data shapes".
 
+### Resume (2026-10-28)
+
+Resumed in a Default-mode session. The owner approved both guard prompts and
+Task 3 landed as `bb801c6`. `/piv-validate`: PASS (format, lint, typecheck,
+530 unit, build, 119 e2e, AC1–AC5 and the loader refusal each 1 passed).
+Format and unit ran in a clean LF worktree because this Windows checkout holds
+CRLF endings on disk, which trips Prettier and `test/claudeSkills.test.js`
+there; the branch's own files are clean either way.
+
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled           | Frozen    | Probe      | Verdict |
+| --- | ---- | ------ | -------- | ------ | ----------------- | --------- | ---------- | ------- |
+| AC1 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC2 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC3 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC4 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+| AC5 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a (unit) | PASS    |
+
+Findings: 0 Critical, 0 High, 1 Medium, 4 Low.
+
+- Medium: `scripts/delivery/manifest.mjs:83` `isSingleSelect` accepts `select … into <table>`.
+- Low: `scripts/delivery/manifest.mjs:144` regex checks coerce non-string ids, names and times.
+- Low: `scripts/delivery/manifest.mjs:368` a missing `supabase/schema/` throws raw ENOENT.
+- Low: `test/deliveryManifest.test.js:90` the temp fixture directory is never removed.
+- Low: `scripts/delivery/manifest.mjs:94` `unitProblems` and `checkProjects` are long.
+
 ## Execution report

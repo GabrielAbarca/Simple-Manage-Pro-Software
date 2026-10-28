@@ -16,9 +16,36 @@
  * @property {string | null} error
  */
 
+/**
+ * @typedef {object} LeftoverProof
+ * @property {boolean} ok
+ * @property {number | null} count
+ * @property {string | null} error
+ */
+
 /** @typedef {"school" | "demo"} Shape */
 
 export const AUDIT_SUMMARY = "RLS AUDIT: ALL CHECKS PASSED";
+
+const AUDIT_PERSONAS = `('00000000-0000-4000-a000-00000000ad11',
+     '00000000-0000-4000-a000-000000007ea1',
+     '00000000-0000-4000-a000-000000007ea2',
+     '00000000-0000-4000-a000-00000000c0a1',
+     '00000000-0000-4000-a000-00000000c0b2')`;
+
+export const AUDIT_LEFTOVERS_SQL = `select
+  (select count(*) from auth.users
+    where email like '%@rls-audit.invalid' or id in ${AUDIT_PERSONAS})
+  + (select count(*) from public.profiles where id in ${AUDIT_PERSONAS})
+  + (select count(*) from public.school_years where name = 'RLS Audit Year')
+  + (select count(*) from public.grade_levels where name = 'RLS Audit Grade')
+  + (select count(*) from public.subjects where code in ('RLSA', 'RLSA2'))
+  + (select count(*) from public.teachers where email like '%@rls-audit.invalid')
+  + (select count(*) from public.students where enrollment_number like 'RLS-%')
+  + (select count(*) from public.rooms where name like 'RLS Audit Room%')
+  + (select count(*) from public.grade_component_templates
+      where name in ('RLS Audit Scheme', 'Audit Scheme 2'))
+  as leftovers`;
 
 const FAIL_LABEL = /^FAIL \[(.+?)\]/;
 
@@ -36,14 +63,17 @@ const LOCK_COUNTS_SQL = `select t.tablename, count(p.policyname)
  order by t.tablename`;
 
 /**
- * Passes only when `rls_audit.sql` ran to its summary line.
+ * Passes only when `rls_audit.sql` ran to its summary line, read from the
+ * notices (psql) or from the final result row (the Management API).
  * @param {Executor} executor
  * @param {string} auditFile
  * @returns {Promise<AuditProof>}
  */
 export async function proveAudit(executor, auditFile) {
   const run = await executor.runFile(auditFile);
-  const finished = run.notices.some((notice) => notice.includes(AUDIT_SUMMARY));
+  const finished =
+    run.notices.some((notice) => notice.includes(AUDIT_SUMMARY)) ||
+    run.rows.some((row) => row[0] === AUDIT_SUMMARY);
   if (run.ok && finished) {
     return { ok: true, check: null, sqlstate: null, error: null };
   }
@@ -53,6 +83,23 @@ export async function proveAudit(executor, auditFile) {
     sqlstate: run.sqlstate,
     error: run.error ?? "the audit ended without its summary line",
   };
+}
+
+/**
+ * Passes only when none of the audit's fixture rows is left on the project.
+ * @param {Executor} executor
+ * @returns {Promise<LeftoverProof>}
+ */
+export async function proveNoAuditLeftovers(executor) {
+  const run = await executor.runStatement(AUDIT_LEFTOVERS_SQL);
+  if (!run.ok) {
+    return { ok: false, count: null, error: run.error ?? "the count failed" };
+  }
+  const count = Number(run.rows[0]?.[0]);
+  if (!Number.isInteger(count)) {
+    return { ok: false, count: null, error: "the count returned no number" };
+  }
+  return { ok: count === 0, count, error: null };
 }
 
 /**

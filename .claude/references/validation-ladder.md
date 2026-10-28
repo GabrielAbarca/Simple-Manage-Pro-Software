@@ -18,7 +18,7 @@ for its commands, check kinds and anti-gaming rules.
 | —   | **Independence line** |                                                                                                         | Everything below is visible to the author; everything above it is not                      |
 | 8   | Acceptance validator  | `.claude/agents/acceptance-validator.md`                                                                | Each acceptance criterion holds, checked by an agent that never saw the plan               |
 
-CI runs rungs 2–6 on every PR (`.github/workflows/ci.yml`). Locally, run all of
+CI runs rungs 1–6 on every PR (`.github/workflows/ci.yml`). Locally, run all of
 them before a PR.
 
 ### When the bundled browser is missing

@@ -124,8 +124,9 @@ and `/piv-fix-review-findings`:
   - validation can't reach PASS;
   - a fix needs a change to a frozen acceptance test, a product decision, or
     breaking an epic decision;
-  - the Supabase guard refused the change (the session isn't in Default
-    permission mode), or asked and the owner declined or didn't answer;
+  - the Supabase guard refused the change (the session isn't in Manual mode
+    and the mode check below couldn't put it there), or asked and the owner
+    declined or didn't answer;
   - a pushed commit turns out to have the wrong author or a trailer. Rewriting
     it needs a force-push, which needs the owner's OK, and it changes the
     red-commit sha.
@@ -138,14 +139,29 @@ and `/piv-fix-review-findings`:
   without asking the owner first. The PreToolUse guard (`.claude/hooks/guard.mjs`)
   covers any edit under `supabase/`, any database-changing CLI command
   (including the deliver command, `npm run deliver`), and any
-  Supabase MCP write tool. In a **Default** permission-mode session it asks the
-  owner. In every other mode (auto-accept, bypass, plan, …) no prompt can be
-  relied on, so it denies. A denied or unanswered prompt is a stop, not something
-  to route around.
+  Supabase MCP write tool. In a **Manual** session (the desktop app's name for
+  Claude Code's `default` permission mode, the value the hook checks) it asks
+  the owner. In every other mode (Accept edits, Auto, Plan, Bypass
+  permissions) no prompt can be relied on, so it denies. A denied or
+  unanswered prompt is a stop, not something to route around.
+- **Mode check, right before every step that hits the guard** (an owner-approval
+  task, copying files into `supabase/`, a database-changing command). The mode
+  can change between turns, and a turn started by an event (an Auto-fix CI
+  event, a background agent finishing) has run in another mode, so check each
+  time, not once per session:
+  1. Read the mode: `mcp__ccd_session_mgmt__get_session` with `"self"`, field
+     `permissionMode`.
+  2. If it isn't `default`, switch: `mcp__ccd_session_mgmt__set_session_permission_mode`
+     with `"self"` and `"default"`, then read it again. Lowering from Accept
+     edits, Auto or Bypass permissions needs no approval card. Raising from Plan
+     shows the owner a card, and the step waits for it.
+  3. If those tools aren't available (a plain CLI session) or the mode still
+     isn't `default`, stop and ask the owner to switch the session to Manual
+     (`default`). Don't attempt the step to find out.
 - Schema changes are `supabase/schema/incremental_*.sql` snippets applied by hand
   (see `supabase/CLAUDE.md` and `docs/ONBOARDING_RUNBOOK.md`). There is
   deliberately no `supabase/migrations/` directory.
-- A ticket with `**Supabase:** yes` runs attended, in a Default-mode session,
+- A ticket with `**Supabase:** yes` runs attended, in a Manual-mode session,
   never dispatched unattended by `/piv-run-epic`. Its PR lists the SQL to apply under "Manual Supabase steps".
 - Demo mode is the default and a demo-mode write must never reach Supabase.
   Every data-flow change preserves the `demoDb.js` delta overlay.

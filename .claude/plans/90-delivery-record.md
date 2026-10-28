@@ -1,0 +1,478 @@
+# Plan — Record each delivery in a fixed format that holds no row values
+
+**Implements:** #90 · **Epic:** #86 · **Branch:** feat/delivery-record
+**Status:** Approved 2026-10-09
+**Red commit:** 78f6ad9
+**Confidence:** 9/10 that one unattended pass reaches a green PR
+
+> Validate every pattern and path below against the code before acting on it.
+> Import from the files named here; don't recreate helpers that already exist.
+
+## Ticket
+
+**Concern:** Every delivery, bypass and exception is appended to its project's
+record, `supabase/delivery/records/<project>.json`, in a fixed schema: unit ids
+with each file's SHA-256; start and end times and the approver; the fingerprint
+hash before and after; pass or fail for each proof. Bypass and exception
+entries also carry the owner's reason. The writer refuses anything else, so no
+value read from a row can reach the public repo. A reader returns each
+project's proved sequence, latest proofs, open bypasses and exceptions.
+
+**User story:** As the owner, I want every delivery written to a record whose
+schema can't carry a row value, so that I can publish what each project is
+running without leaking minors' data.
+
+**Type:** New capability · **Complexity:** Medium
+**Portals:** none (delivery tooling) · **Supabase:** no (the module only
+defines where records live; tests write to a temp dir; nothing under
+`supabase/` is created or edited)
+
+## Inherited decisions
+
+- Records are append-only, one file per project, under `supabase/delivery/`
+  (guarded). Delivery entries carry unit ids with SHA-256 per file, start and
+  end times, the approver, the fingerprint before and after, pass or fail per
+  proof; bypass and exception entries carry a reason. Ids, hashes, booleans,
+  timestamps and owner-written reasons only. `architecture.md#data-shape-model-level`
+- A Postgres error on a `holdsRealData` project is stored as its SQLSTATE,
+  never its message. `architecture.md#security-and-privacy`
+- A bypass is a write made outside deliver, recorded with a reason by
+  `deliver --record-bypass` (#98). `architecture.md#portals-and-roles`
+- Exceptions are named, with a reason; the fingerprint compare subtracts them.
+  `architecture.md#data-shape-model-level`
+- No new npm dependency; `scripts/delivery/**/*.mjs` are JSDoc-typed and
+  checked by `tsconfig.scripts.json`. `architecture.md#other-build-vs-buy`
+
+## Out of scope
+
+- Writing records from a delivery (#94), the `--record-bypass` flag (#98),
+  printing state (#96), the fingerprint compare and its key format (#93).
+- Committing any record. The first ones come from #102 and #104.
+- Not changing: `scripts/delivery/{proofs,schemaHarness}.mjs`,
+  `scripts/delivery/executors/psql.mjs`, anything under `supabase/`.
+
+## Context references — read before implementing
+
+- `scripts/delivery/proofs.mjs` (lines 1–30) — JSDoc typedef style for this
+  directory (`@typedef {object}` + `@property`), named exports, no default.
+- `scripts/delivery/executors/psql.mjs` (lines 3–10) — `ExecResult` carries
+  `sqlstate` and `error`; #94 will map a failed unit's result into the
+  delivery's `failure` input (`{ unit, sqlstate, message: error }`).
+- `src/js/dbErrors.js` (lines 37–46) + `test/dbErrors.test.js` (lines 30–37) —
+  the pattern the ticket names: key off the SQLSTATE and prove the raw
+  message never survives (`JSON.stringify(mapped)` doesn't contain it).
+- `tsconfig.scripts.json` — already includes `scripts/delivery/**/*.mjs`
+  with Node types; nothing to add.
+- `eslint.config.js` (lines 34–44) — `scripts/**/*.{js,mjs}` already get Node
+  globals.
+- `.claude/ARCHITECTURE_MAP.md` (lines 275–285) — the `## Delivery` table,
+  sorted by path.
+
+### Patterns to follow
+
+```js
+// scripts/delivery/proofs.mjs:3-9 — typedefs at the top
+/**
+ * @typedef {object} AuditProof
+ * @property {boolean} ok
+ * @property {string | null} check
+ ...
+ */
+```
+
+```js
+// test/dbErrors.test.js:30-36 — prove the message is gone, not just the key present
+const mapped = mapDbError(pgError("23503", raw));
+expect(JSON.stringify(mapped)).not.toContain("fkey");
+```
+
+## Design
+
+### File
+
+`<dir>/<project>.json`, written as
+`JSON.stringify({ project, entries }, null, 2) + "\n"`.
+
+**Append-only by construction.** `appendEntry` reads the existing file,
+requires its text to equal the canonical serialisation of what it parses to
+(an edited file is refused, not normalised), builds the new canonical text,
+and refuses unless the new text starts with the old text minus its closing
+`\n  ]\n}\n` (so every earlier byte is kept). It writes to `<file>.tmp` and
+renames, so a crash never leaves half a record. A missing file starts a new
+record; `dir` is created if needed.
+
+### Entry schema (exact keys; any other key at any level → `RecordError`)
+
+| Kind        | Keys                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `delivery`  | `kind`, `units`, `startedAt`, `endedAt`, `approver`, `fingerprint`, `proofs`, optional `failure`               |
+| `bypass`    | `kind`, `at`, `approver`, `fingerprint`, `reason`                                                              |
+| `exception` | `kind`, `at`, `approver`, `object`, `reason`                                                                   |
+| unit        | `id`, `sequence`, `files` (array of `{ path, sha256 }`, may be empty for a function or Auth unit)              |
+| fingerprint | delivery: `{ before, after }` (`after` may be `null` when a unit failed); bypass: one hash (the live one seen) |
+| proof       | `{ name, ok }`, non-empty array                                                                                |
+| failure     | stored `{ unit, sqlstate }`; input may also carry `message`, which is always dropped                           |
+
+Value rules (the "no free text" half of AC2):
+
+- id (`unit.id`, `proof.name`, `failure.unit`): `^[a-z0-9][a-z0-9._-]{0,63}$`
+- `sequence`: positive integer
+- hash: `^[0-9a-f]{64}$`
+- timestamp: `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$` and a real
+  date; `startedAt <= endedAt`
+- `path`: `^supabase/[A-Za-z0-9_][A-Za-z0-9_./-]*$`, no `..`
+- `approver`: a git identity whose name is letters, spaces and `.'-` only,
+  `^[\p{L}\p{M}][\p{L}\p{M} .'-]{0,99} <[^<>\s]+@[^<>\s]+>$` (u flag;
+  amended in review round 2)
+- `sqlstate`: `^[0-9A-Z]{5}$` or `null`
+- `object`: an identifier `kind:name`, 3–200 chars, no spaces
+  (`^(?=.{3,200}$)[a-z][a-z_]*:[A-Za-z0-9_.,()]+$`), stored as given (the
+  compare in #93 owns its meaning; amended in review round 1)
+- `reason`: string, trimmed length 1–500, no control characters; only on
+  bypass and exception
+- `ok`: boolean
+- project name: `^[a-z0-9][a-z0-9-]{0,62}$` (also the file name)
+
+### Reader
+
+- `readRecord(dir, name)` → `{ project, entries }`; missing file →
+  `{ project: name, entries: [] }`. Every entry is re-validated, so a
+  hand-edited record that carries a stray field fails loudly.
+- `readProjectState(dir, name)` →
+  - `provedSequence`: the highest unit `sequence` across **proved** deliveries
+    (every proof `ok` and no `failure`), else `0`;
+  - `latestProofs`: `{ at: endedAt, proofs }` of the last delivery entry
+    (proved or not), else `null`;
+  - `openBypasses`: bypass entries after the last proved delivery (a
+    reconcile ships as a delivery of reconcile units, so it closes them too);
+  - `exceptions`: the latest exception entry per `object`, in record order.
+
+### API (`scripts/delivery/record.mjs`)
+
+`RECORDS_DIR`, `RecordError`, `validateEntry(project, entry)` (returns the
+stored form or throws), `appendEntry(dir, project, entry)` (returns the stored
+entry), `readRecord(dir, name)`, `projectState(entries)`,
+`readProjectState(dir, name)`. `project` is `{ name, holdsRealData }`.
+
+## Phase R — acceptance checks, red before any `src/` change
+
+| AC  | Behaviour                                                                                       | Kind | Where (file › test name)                                                                                    | Command                                                                       | Expected red                       |
+| --- | ----------------------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------- |
+| AC1 | Second append keeps the first entry byte for byte                                               | unit | `test/deliveryRecord.test.js` › "appends a delivery entry and never rewrites earlier ones"                  | `npx vitest run test/deliveryRecord.test.js -t "never rewrites earlier ones"` | file not written                   |
+| AC2 | Any field outside the schema, or free text outside a reason, is rejected and nothing is written | unit | `test/deliveryRecord.test.js` › "rejects an entry carrying any field outside the fixed schema"              | `npx vitest run test/deliveryRecord.test.js -t "outside the fixed schema"`    | valid entry not written / no throw |
+| AC3 | A failure on a `holdsRealData` project is stored as its SQLSTATE only                           | unit | `test/deliveryRecord.test.js` › "stores a failure on a real-data project as its SQLSTATE only"              | `npx vitest run test/deliveryRecord.test.js -t "SQLSTATE only"`               | `failure` undefined                |
+| AC4 | Bypass and exception need a reason; an exception names its object                               | unit | `test/deliveryRecord.test.js` › "requires a reason on bypass and exception entries"                         | `npx vitest run test/deliveryRecord.test.js -t "requires a reason"`           | promise resolved                   |
+| AC5 | Reader returns proved sequence, latest proofs, open bypasses, exceptions                        | unit | `test/deliveryRecord.test.js` › "reads a project's proved sequence, latest proofs, bypasses and exceptions" | `npx vitest run test/deliveryRecord.test.js -t "proved sequence"`             | `0` instead of `2`                 |
+
+**STUB tasks:**
+
+- STUB `scripts/delivery/record.mjs`: exports `RECORDS_DIR`, `RecordError`,
+  `appendEntry` (resolves `null`, writes nothing), `readRecord` (no entries),
+  `readProjectState` (the empty state), so every AC fails on its assertion.
+
+**Red evidence** (2026-10-09, `npx vitest run test/deliveryRecord.test.js`):
+
+- AC1: → `AssertionError: expected false to be true` (the record file exists) ✅ valid red
+- AC2: → `AssertionError: expected '' not to be ''` (the valid first entry wasn't written, and no bad entry is rejected) ✅ valid red
+- AC3: → `AssertionError: expected undefined to deeply equal { unit: 'unit-1', sqlstate: '23505' }` ✅ valid red
+- AC4: → `AssertionError: promise resolved "null" instead of rejecting` ✅ valid red
+- AC5: → `AssertionError: expected +0 to be 2` ✅ valid red
+
+Existing suite with the stub: all green except
+`test/i18n.test.js` › "formats 24h time strings to the locale's 12h form",
+which fails identically on a clean `origin/main` in this container (Node 22's
+ICU vs CI's Node 24; `'2:30 p. m.'` differs only in the space character).
+Not this ticket's.
+
+## Implementation tasks
+
+### 1. UPDATE `scripts/delivery/record.mjs` — schema and validator
+
+- **Implement:** typedefs (`Project`, `UnitEntry`, `ProofEntry`,
+  `DeliveryEntry`, `BypassEntry`, `ExceptionEntry`, `Entry`, `ProjectState`);
+  pattern constants; an `exactKeys(obj, required, optional, where)` helper that
+  throws `RecordError` naming the stray or missing key; `validateEntry(project,
+entry)` returning a new stored object built from the allowed keys only
+  (`failure` → `{ unit, sqlstate }`, `message` dropped on every project).
+- **Pattern:** `scripts/delivery/proofs.mjs:1-30`
+- **Gotcha:** build the stored object key by key; never spread the input, or a
+  stray key can slip through. `reason` is accepted only on bypass/exception.
+- **Validate:** `npx vitest run test/deliveryRecord.test.js -t "outside the fixed schema|requires a reason|SQLSTATE only"` (the parts not needing the writer will still fail until task 2)
+- **Satisfies:** AC2, AC3, AC4
+
+### 2. UPDATE `scripts/delivery/record.mjs` — writer and reader
+
+- **Implement:** `readRecord`, `appendEntry` (canonical check, prefix check,
+  tmp + rename, `mkdir -p`), `projectState`, `readProjectState`, per Design.
+  Use `node:fs/promises` and `node:path` only.
+- **Gotcha:** validate before touching the disk, so a rejected entry never
+  creates the file or the directory's `.tmp`.
+- **Validate:** `npx vitest run test/deliveryRecord.test.js`
+- **Satisfies:** AC1, AC2, AC3, AC4, AC5
+
+### 3. ADD non-AC unit tests to `test/deliveryRecord.test.js` (new `describe`, below the frozen ones)
+
+- **Implement:** a hand-edited record (reformatted, or with a stray field) is
+  refused on append and on read; `startedAt` after `endedAt` is rejected; a
+  generated record passes `npx prettier --check` unchanged (so the records
+  later committed by #102/#104 survive `format:check` from #92).
+- **Validate:** `npx vitest run test/deliveryRecord.test.js`
+- **Satisfies:** robustness (no AC)
+
+### 4. UPDATE `.claude/ARCHITECTURE_MAP.md`
+
+- **Implement:** in the `## Delivery` table, insert in path order a row for
+  `scripts/delivery/record.mjs` (after `proofs.mjs`, before
+  `schemaHarness.mjs`) and a row for `supabase/delivery/records/` (after
+  `scripts/…`) describing the append-only per-project record and that it is
+  guarded.
+- **Validate:** `npx prettier --check .claude/ARCHITECTURE_MAP.md`
+
+### 5. Turn Phase R green
+
+- **Validate:** every Phase R command passes; `npm run lint && npm run typecheck`
+
+## Validation commands
+
+```bash
+npm run format:check && npm run lint && npm run typecheck
+npm test
+npm run build
+npm run test:e2e
+```
+
+## Open questions / assumptions
+
+Each has a default the loop uses if the reviewer approves without overriding it.
+
+1. Does a project without `holdsRealData` (the demo) keep the Postgres message
+   of a failure? — **Default:** no. Every project stores the SQLSTATE only;
+   the message stays on the owner's terminal. It keeps AC2's "no free text
+   outside a reason" absolute, and the demo's messages can echo row values too.
+2. What closes a bypass? — **Default:** the next **proved** delivery (every
+   proof passes, no failure). A reconcile is a delivery of reconcile units, so
+   it closes bypasses the same way; there is no separate `reconcile` kind.
+3. Can an exception be withdrawn? — **Default:** not in this ticket.
+   Exceptions stay open; a later exception for the same object replaces the
+   earlier one's reason. Withdrawal can be a new kind when #93 needs it.
+4. Each unit's `sequence` is stored next to its `id`, so the reader can
+   report the proved sequence without the manifest. — **Default:** yes.
+
+Resolved 2026-10-09: approved at the gate with every default standing.
+
+## Notes
+
+- Rejected: JSON Lines (the ticket fixes the `.json` name and the PR diff of
+  a pretty JSON file reads better); rewriting the whole file from parsed data
+  (it would silently normalise a hand edit, so "unchanged byte for byte"
+  would be a property of the serialiser, not a guarantee).
+- `npm ci` was needed in this container: `node_modules` predated
+  `@types/node`, so `tsc -p tsconfig.scripts.json` failed before it.
+
+## AMENDMENTS
+
+Append-only. Every change to this plan or to a frozen acceptance test after the
+red commit goes here: date — what changed — why.
+
+- 2026-10-09 — Task 3's tests live in `test/deliveryRecordFile.test.js`
+  instead of a new `describe` in `test/deliveryRecord.test.js` — the
+  acceptance file stays byte-identical to the red commit, so the frozen-test
+  diff is empty. No acceptance test changed. The Prettier check uses
+  Prettier's API with the repo config rather than spawning `npx`.
+- 2026-10-09 — An exception's `object` narrowed from printable ASCII to an
+  identifier `kind:name` with no spaces — review round 1 (Medium) showed the
+  old rule let free text, and so row values, into the record. #93's keys must
+  fit this shape. No acceptance test changed; the proof is
+  `test/deliveryRecordFile.test.js` › "accepts only an identifier as an
+  exception's object".
+- 2026-10-09 — The approver's name narrowed from anything but `<>\n` to
+  letters, marks, spaces and `.'-` — review round 2 (Medium): digits, commas
+  and control characters let row values into every entry. No acceptance test
+  changed; the proof is `test/deliveryRecordFile.test.js` › "accepts only a
+  name and an email as the approver".
+
+## Manual Supabase steps
+
+- None.
+
+## Validation
+
+Run by `/piv-validate` on 2026-10-09, before review.
+
+| Check               | Result                     | Notes                                                                                                                                                  |
+| ------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| format:check        | ✅                         |                                                                                                                                                        |
+| lint                | ✅                         |                                                                                                                                                        |
+| typecheck           | ✅                         | needed `npm ci` first (stale `node_modules` lacked `@types/node`)                                                                                      |
+| unit                | ✅ 533 passed, 19 skipped  | under Node 24 (CI's). Node 22 in this container fails only `test/i18n.test.js` › "formats 24h time strings…", identically on `origin/main` (ICU space) |
+| build               | ✅                         |                                                                                                                                                        |
+| e2e                 | ✅ 119 passed              | local config: yes (`executablePath` → `/opt/pw-browsers/chromium-1194`), the default build isn't installed here                                        |
+| skip/only           | ✅ clean                   |                                                                                                                                                        |
+| entry-point order   | ✅                         | `admin.js`'s first import is `errorHandler.js` at line 22, past the quick check's 20-line window                                                       |
+| supabase/ untouched | ✅                         |                                                                                                                                                        |
+| frozen AC file      | ✅ unchanged since 78f6ad9 |                                                                                                                                                        |
+
+| AC  | Kind | Red before (Phase R)                                                 | Green after |
+| --- | ---- | -------------------------------------------------------------------- | ----------- |
+| AC1 | unit | `expected false to be true`                                          | ✅          |
+| AC2 | unit | `expected '' not to be ''`                                           | ✅          |
+| AC3 | unit | `expected undefined to deeply equal { unit: 'unit-1', sqlstate: … }` | ✅          |
+| AC4 | unit | `promise resolved "null" instead of rejecting`                       | ✅          |
+| AC5 | unit | `expected +0 to be 2`                                                | ✅          |
+
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 1 Low
+
+- Medium — `scripts/delivery/record.mjs:91`: an exception's `object` accepts spaces, so it can carry free text.
+- Low — `scripts/delivery/record.mjs:476-481`: a delivery with no `after` fingerprint counts as proved and closes open bypasses.
+
+Outcome:
+
+- Fixed: an exception's `object` could carry free text → narrowed to a
+  `kind:name` identifier; `test/deliveryRecordFile.test.js` › "accepts only an
+  identifier as an exception's object" (red before the fix: `expected function
+to throw an error, but it didn't`).
+- Not in this change: a delivery with no `after` fingerprint (or no units)
+  counts as proved and closes open bypasses — Low; what a proved delivery must
+  carry is decided by #94, which writes them. Suggested follow-up there:
+  `isProved` also requires `fingerprint.after`.
+
+### Review (round 2)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 2 Low
+
+- Medium — `scripts/delivery/record.mjs:89`: the approver's name part is free text (digits, commas, control characters).
+- Low — `scripts/delivery/record.mjs:273`: a delivery with no units still closes open bypasses (same root as round 1's Low).
+- Low — `scripts/delivery/record.mjs:93`: appending to a canonical record with zero entries throws "would not stay append-only".
+
+Outcome:
+
+- Fixed: the approver's name could carry free text → letters, marks, spaces
+  and `.'-` only; `test/deliveryRecordFile.test.js` › "accepts only a name and
+  an email as the approver" (red before the fix: `expected function to throw
+an error, but it didn't`).
+- Not in this change: an empty `units` list closing bypasses — Low; folded
+  into round 1's follow-up for #94 (a proved delivery needs units and an
+  `after` fingerprint).
+- Not in this change: a hand-made record with zero entries can't be appended
+  to — Low; the writer never creates one (the first append creates the file
+  with its entry), and no record is committed until #102/#104.
+
+### Review (final)
+
+**Verdict:** clean (no Critical or High) · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled         | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | --------------- | --------- | ----- | ------- |
+| AC1 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | ✅     | ✅       | ✅     | ✅ fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical · 0 High · 1 Medium · 2 Low. Both fix rounds are spent,
+so all three are open and go to the PR:
+
+- Medium (open) — `scripts/delivery/record.mjs:89`: the approver's email half
+  (`<[^<>\s]+@[^<>\s]+>`) still accepts commas, colons and digits, so
+  `Gabriel Zelaya <Ana,Mora,cedula:1-2345-6789,7-B@x>` is stored. Suggested
+  fix: `<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}>` plus a rejected case
+  in `test/deliveryRecordFile.test.js`.
+- Low (open) — `scripts/delivery/record.mjs:279-286, 457`: `after: null` is
+  accepted without a `failure`, and `failure.unit` isn't checked against the
+  entry's units (same root as rounds 1–2's Low; for #94).
+- Low (open) — `scripts/delivery/record.mjs:428-439`: two concurrent appends
+  to one project share `<file>.tmp` and the last rename wins. Deliveries run
+  one at a time from the owner's terminal; an exclusive tmp create (`wx`)
+  would make a second writer fail instead.
+
+## Execution report
+
+**Files:** +4 ~1 −0 · **Lines:** +1273 −6 · **Review rounds:** 2 fix rounds + final · **Outcome:** ready PR
+
+### Validation summary
+
+format ✅ · lint ✅ · types ✅ · unit ✅ (535, under Node 24) · build ✅ · e2e ✅ (119, local Chromium config) · acceptance validator: PASS (all three rounds)
+
+### What went well
+
+- Building each stored entry key by key from an allow-list made AC2 and AC3
+  hold by construction; neither review found a stray-key path.
+- The canonical-text check in `load()` turned "unchanged byte for byte" into
+  a guarantee rather than a property of `JSON.stringify`, and caught hand
+  edits for free.
+- Every Phase R check was a valid assertion red on the first run, because the
+  tests probed file existence with `existsSync` instead of reading a missing
+  file.
+
+### Divergences from the plan
+
+- **Extra tests in a separate file** — planned: a new `describe` in
+  `test/deliveryRecord.test.js` · actual: `test/deliveryRecordFile.test.js` ·
+  why: keeps the frozen AC file byte-identical to the red commit · type: better
+  approach found
+- **Exception `object` narrowed** — planned: printable ASCII · actual:
+  `kind:name` identifier, no spaces · why: the planned rule was itself a
+  free-text field · type: security or performance
+- **Approver name narrowed** — planned: anything but `<>\n` · actual:
+  letters, marks, spaces, `.'-` · why: digits and commas let row values in ·
+  type: security or performance
+
+### Challenges
+
+- The plan's own value rules were the leak: two of three review rounds found
+  a schema field (object, approver) loose enough to carry a cédula. Each
+  narrowing exposed the next loose field (the approver's email half is still
+  open).
+- The container's `node_modules` predated `@types/node`, so typecheck failed
+  until `npm ci`; Node 22's ICU fails one i18n test that passes on Node 24
+  (CI's version); the default Playwright Chromium build is absent, so e2e ran
+  through `playwright.local.config.js`.
+- The acceptance validator's coupling recipe restores only `src`, `public` and
+  `*.html`; for a `scripts/` module it had to add `scripts` by hand to prove
+  anything.
+
+### Skipped
+
+- The final review's Medium (approver email half) and three Lows — the loop's
+  two fix rounds were spent; all are listed in the PR body.
+
+### Recommendations
+
+- **Plan skill:** for a "holds no row values" ticket, require every string
+  field in the planned schema to name its pattern and show one row-value
+  string it rejects; it would have caught `object` and `approver` (both
+  halves) at the gate instead of in three review rounds.
+- **Implement / validate / review skills:** the acceptance validator's
+  coupling step should restore every directory the diff touches outside
+  `test/` and `e2e/`, not a fixed `src public *.html` list; `/piv-validate`'s
+  entry-point check should grep the first `import` line rather than the first
+  20 lines (`admin.js` imports at line 22).
+- **References:** the validation ladder could note that unit tests must pass
+  under `engines.node` (24), and how to run them there (`npx node@24
+node_modules/vitest/vitest.mjs run`) when the container ships Node 22.
+- **CLAUDE.md / ARCHITECTURE_MAP:** None.
+- **Ticket slicing:** right size (M, ~500 lines of module). The ACs were
+  right; AC2's "free text anywhere but a reason" deserved a list of the fields
+  it covers.

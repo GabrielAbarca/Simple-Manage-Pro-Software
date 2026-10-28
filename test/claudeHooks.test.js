@@ -114,7 +114,9 @@ describe("guard hook: Supabase changes are refused when no prompt can be shown",
       { permission_mode: "bypassPermissions" },
     );
     expect(result?.reason).toMatch(/rule 5/i);
-    expect(result?.reason).toMatch(/Default/);
+    expect(result?.reason).toMatch(/\bManual\b/);
+    expect(result?.reason).toContain('"default"');
+    expect(result?.reason).toMatch(/Accept edits/);
     expect(result?.reason).toMatch(/by hand/i);
   });
 

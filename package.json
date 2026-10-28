@@ -18,6 +18,9 @@
   "keywords": [],
   "author": "Gabriel Abarca",
   "license": "ISC",
+  "engines": {
+    "node": "24.x"
+  },
   "lint-staged": {
     "*.{js,mjs}": [
       "eslint --fix",

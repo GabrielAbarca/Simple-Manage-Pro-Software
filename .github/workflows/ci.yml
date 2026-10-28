@@ -14,15 +14,19 @@ env:
 
 jobs:
   quality:
-    name: lint · typecheck · unit · build
+    name: format · lint · typecheck · unit · build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: package.json
           cache: npm
       - run: npm ci
+      - name: Report dependency advisories
+        continue-on-error: true
+        run: npm audit
+      - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -35,7 +39,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: package.json
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -53,12 +57,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SMP_SCHEMA_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io
+      SMP_FINGERPRINT_OUT: fingerprints
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: package.json
           cache: npm
       - run: npm ci
       - run: npx supabase db start --workdir scripts/delivery/harness
       - run: npx vitest run test/schemaHarness.db.test.js
+      - uses: actions/upload-artifact@v6
+        if: ${{ !cancelled() }}
+        with:
+          name: expected-fingerprints
+          path: fingerprints/
+          retention-days: 7
+          if-no-files-found: ignore

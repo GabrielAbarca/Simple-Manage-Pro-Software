@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "name": "demo",
+      "ref": "jgszeiccaycnpzhuwclb",
+      "type": "demo",
+      "site": "demo-smp-web-page",
+      "origin": "https://demo.simplemanagepro.com",
+      "holdsRealData": false,
+      "window": null
+    },
+    {
+      "name": "pilot",
+      "ref": "wklxkntdnzshyrijvnjj",
+      "type": "school",
+      "site": "smp-pilot",
+      "origin": "https://pilot.simplemanagepro.com",
+      "holdsRealData": false,
+      "window": null
+    }
+  ]
+}

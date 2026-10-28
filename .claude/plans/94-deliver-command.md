@@ -380,4 +380,23 @@ branch name and the marker statement. The default git step was smoke-tested
 in a scratch repository: the commit holds only the record file, and a file
 already staged elsewhere stays out of it.
 
+### Review (round 1)
+
+**Verdict:** fix before PR · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled            | Frozen    | Probe      | Verdict |
+| --- | ---- | ------ | -------- | ------ | ------------------ | --------- | ---------- | ------- |
+| AC1 | unit | yes    | yes      | yes    | yes — fails at RED | unchanged | n/a (unit) | PASS    |
+| AC2 | unit | yes    | yes      | yes    | yes — fails at RED | unchanged | n/a (unit) | PASS    |
+| AC3 | unit | yes    | yes      | yes    | yes — fails at RED | unchanged | n/a (unit) | PASS    |
+| AC4 | unit | yes    | yes      | yes    | yes — fails at RED | unchanged | n/a (unit) | PASS    |
+| AC5 | unit | yes    | yes      | yes    | yes — fails at RED | unchanged | n/a (unit) | PASS    |
+
+Findings: 0 Critical · 0 High · 2 Medium · 2 Low
+
+- Medium · `scripts/delivery/deliver.mjs:512` — the window isn't re-checked between units.
+- Medium · `scripts/delivery/deliver.mjs:262` — the record branch is cut from HEAD, not `origin/main`.
+- Low · `scripts/delivery/deliver.mjs:555` — the stopped message claims no marker even when the marker ran.
+- Low · `scripts/delivery/deliver.mjs:357` — checks aren't run read-only (Open question 4's approved default; follow-up).
+
 ## Execution report

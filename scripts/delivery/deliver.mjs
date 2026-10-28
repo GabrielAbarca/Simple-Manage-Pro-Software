@@ -66,6 +66,7 @@ import { windowRefusal } from "./window.mjs";
  * @property {string} [recordsDir]
  * @property {string} [schemaDir]
  * @property {(change: RecordChange) => Promise<PreparedCommit>} [prepareCommit]
+ * @property {(project: Project) => string | null} [verifyCheckout]
  * @property {(line: string) => void} [out]
  */
 
@@ -255,6 +256,39 @@ function succeeds(run, ...args) {
 }
 
 /**
+ * Why this checkout can't back a delivery, or null. The manifest, schema
+ * files and records are read from the working tree while the record commit is
+ * cut from `origin/main`, so the two have to be the same; the record branch
+ * must also be free before the database is touched.
+ * @param {Project} project
+ * @param {(...args: string[]) => string} [run]
+ * @returns {string | null}
+ */
+export function checkoutProblem(project, run = git) {
+  succeeds(run, "fetch", "origin", "main");
+  const branch = recordBranch(project.name);
+  if (!branch) {
+    return `chore/record-${project.name} does not fit the branch rule, so the record could not be committed`;
+  }
+  if (
+    succeeds(run, "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`)
+  ) {
+    return `branch ${branch} already exists; delete it or merge its PR first`;
+  }
+  try {
+    if (run("rev-parse", "HEAD") !== run("rev-parse", "origin/main")) {
+      return "HEAD is not origin/main; deliver from an up-to-date main checkout";
+    }
+    if (run("status", "--porcelain", "--", "supabase/") !== "") {
+      return "supabase/ has uncommitted changes; commit or discard them first";
+    }
+  } catch (error) {
+    return `the checkout could not be checked: ${error.message}`;
+  }
+  return null;
+}
+
+/**
  * Commits only the record file on a new branch cut from `origin/main`, for
  * the owner's PR. It never pushes.
  * @param {RecordChange} change
@@ -396,7 +430,13 @@ async function deliverUnit({
   /** @type {Failure | null} */
   let failure = null;
   for (const [name, prove] of steps) {
-    const step = await prove();
+    /** @type {ProofStep} */
+    let step;
+    try {
+      step = await prove();
+    } catch (error) {
+      step = { ok: false, sqlstate: null, detail: error.message };
+    }
     proofs.push({ name, ok: step.ok });
     if (step.ok) {
       out(`  ${name}: pass`);
@@ -438,7 +478,19 @@ async function deliverUnit({
  * @param {DeliverOptions} options
  * @returns {Promise<DeliveryResult>}
  */
-export async function deliver({
+export async function deliver(options) {
+  const readsRepo = ["manifest", "projects", "recordsDir", "schemaDir"].some(
+    (key) => options[key] === undefined,
+  );
+  const { verifyCheckout = readsRepo ? checkoutProblem : () => null } = options;
+  return deliverFrom({ ...options, verifyCheckout });
+}
+
+/**
+ * @param {DeliverOptions} options
+ * @returns {Promise<DeliveryResult>}
+ */
+async function deliverFrom({
   project: name,
   input = process.stdin,
   output = process.stderr,
@@ -450,6 +502,7 @@ export async function deliver({
   recordsDir = join(REPO_ROOT, RECORDS_DIR),
   schemaDir = SCHEMA_DIR,
   prepareCommit = prepareRecordCommit,
+  verifyCheckout,
   out = (line) => process.stdout.write(`${line}\n`),
 }) {
   /** @type {string[]} */
@@ -480,6 +533,9 @@ export async function deliver({
 
   const closed = windowRefusal(project, now());
   if (closed) return refuse(closed);
+
+  const unsafe = verifyCheckout(project);
+  if (unsafe) return refuse(unsafe);
 
   const units = unitsFor(
     manifest ?? loadManifest(),
@@ -575,7 +631,7 @@ export async function deliver({
     branch = commit.branch;
     if (branch) {
       out(
-        `Record committed on ${branch}. Push it and open its PR: git push -u origin ${branch}`,
+        `Record committed on ${branch} (now checked out). Push it and open its PR: git push -u origin ${branch}`,
       );
     } else {
       out(

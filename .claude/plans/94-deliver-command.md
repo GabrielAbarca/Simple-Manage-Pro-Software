@@ -341,6 +341,7 @@ session (the guard asks for it, and it would reach a live project).
 ## AMENDMENTS
 
 - 2026-10-28 — `deliver.mjs` also exports `markerStatement(seq)` and `recordBranch(name)`, and a new non-acceptance test file `test/deliverRefusals.test.js` covers them plus the unknown-project, bad-approver and nothing-pending refusals — so the paths the acceptance tests don't reach have a test; no frozen test changed.
+- 2026-10-28 — review rounds 1–2: `deliver.mjs` also exports `prepareRecordCommit(change, run)` (the default `prepareCommit`, git runner injectable, branching from `origin/main`) and `checkoutProblem(project, run)`, and `deliver` takes `verifyCheckout(project)`. The checkout check runs by default whenever the manifest, project list, records or schema files come from the repository, and is skipped when a caller passes all four, as the frozen tests do — so a delivery never runs from a checkout that differs from the `origin/main` its record commit is cut from; no frozen test changed.
 
 ## Manual Supabase steps
 
@@ -424,5 +425,12 @@ Findings: 0 Critical · 0 High · 2 Medium · 4 Low
 - Low · `scripts/delivery/deliver.mjs:578` — the success line doesn't say the checkout moved.
 - Low · `scripts/delivery/deliver.mjs:343` — a failed lock or leftover query records no SQLSTATE.
 - Low · `scripts/delivery/deliver.mjs:517` — a repeated window check.
+
+- Fixed: a thrown step leaves no record → a step that throws becomes a failed proof with its message on the terminal and is recorded like any other failure · `test/deliverRefusals.test.js` › "records a step that throws as a failed proof".
+- Fixed: the checkout isn't checked against `origin/main` → `checkoutProblem` (fetch, then HEAD equals `origin/main` and `git status --porcelain -- supabase/` is empty) runs before the plan and the ref prompt · "refuses before the ref prompt when the checkout is not origin/main", "checks the checkout and the record branch before anything runs".
+- Fixed: record-branch problems surface after the database changed → the same pre-connect check refuses a name the branch rule rejects and an existing local branch · "checks the checkout and the record branch before anything runs".
+- Fixed: the success line says the checkout moved → "(now checked out)" · "tells the owner the checkout moved to the record branch".
+- Not in this change: a failed lock-count or leftover query records `sqlstate: null` — `proofs.mjs` returns no SQLSTATE for those queries and the ticket composes it without editing it; a follow-up can add `sqlstate` to `LockProof` and `LeftoverProof`.
+- Won't fix: the early window check after the prompt — it refuses before the token prompt, which the per-unit check can't.
 
 ## Execution report

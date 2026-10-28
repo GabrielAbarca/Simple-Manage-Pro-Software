@@ -1,8 +1,9 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  checkoutProblem,
   deliver,
   markerStatement,
   prepareRecordCommit,
@@ -184,5 +185,121 @@ describe("deliver refusals and helpers", () => {
       branch: null,
       reason: "branch chore/record-demo already exists",
     });
+  });
+
+  it("records a step that throws as a failed proof", async () => {
+    const base = fakeExecutor({ type: "demo" });
+    const executor = {
+      ...base,
+      runFile: async (path) => {
+        if (basename(path) === "rls_audit.sql") {
+          throw new Error("socket hang up");
+        }
+        return base.runFile(path);
+      },
+    };
+    const run = deliveryDeps({
+      recordsDir,
+      schemaDir,
+      executor,
+      input: ttyInput(`${DEMO_REF}\n`),
+    });
+    const result = await deliver({ ...run.deps, project: "demo" });
+
+    expect(result.ok).toBe(false);
+    expect(result.failure).toEqual({
+      unit: "conducta",
+      proof: "audit",
+      sqlstate: null,
+    });
+    expect(base.statementsRun().filter((sql) => MARKER.test(sql))).toEqual([]);
+    const { entries } = await readRecord(recordsDir, "demo");
+    expect(entries).toHaveLength(1);
+    expect(entries[0].proofs).toEqual([
+      { name: "apply", ok: true },
+      { name: "demo-lock", ok: true },
+      { name: "audit", ok: false },
+    ]);
+    expect(entries[0].failure).toEqual({ unit: "conducta", sqlstate: null });
+    expect(run.printed()).toMatch(/audit: FAIL: socket hang up/);
+  });
+
+  it("refuses before the ref prompt when the checkout is not origin/main", async () => {
+    const run = await attempt("demo", {
+      verifyCheckout: () => "HEAD is not origin/main",
+    });
+    expect(run.result.ok).toBe(false);
+    expect(run.result.reason).toBe("HEAD is not origin/main");
+    expect(run.connect).not.toHaveBeenCalled();
+    expect(run.printed()).not.toMatch(/Type demo's project ref/);
+    expect(existsSync(join(recordsDir, "demo.json"))).toBe(false);
+  });
+
+  it("checks the checkout and the record branch before anything runs", () => {
+    const gitWith = (answers) => {
+      const calls = [];
+      const git = (...args) => {
+        calls.push(args.join(" "));
+        const key = args.join(" ");
+        if (key in answers) {
+          if (answers[key] instanceof Error) throw answers[key];
+          return answers[key];
+        }
+        if (args[0] === "rev-parse" && args[1] === "--verify") {
+          throw new Error("absent");
+        }
+        return "";
+      };
+      return { git, calls };
+    };
+    const healthy = {
+      "rev-parse HEAD": "a1b2c3",
+      "rev-parse origin/main": "a1b2c3",
+      "status --porcelain -- supabase/": "",
+    };
+
+    const good = gitWith(healthy);
+    expect(checkoutProblem(demo, good.git)).toBeNull();
+    expect(good.calls[0]).toBe("fetch origin main");
+
+    expect(
+      checkoutProblem(
+        demo,
+        gitWith({ ...healthy, "rev-parse HEAD": "d4e5f6" }).git,
+      ),
+    ).toMatch(/HEAD is not origin\/main/);
+    expect(
+      checkoutProblem(
+        demo,
+        gitWith({
+          ...healthy,
+          "status --porcelain -- supabase/":
+            "?? supabase/delivery/records/demo.json",
+        }).git,
+      ),
+    ).toMatch(/supabase\/ has uncommitted changes/);
+    expect(
+      checkoutProblem(
+        demo,
+        gitWith({
+          ...healthy,
+          "rev-parse --verify --quiet refs/heads/chore/record-demo": "a1b2c3",
+        }).git,
+      ),
+    ).toMatch(/chore\/record-demo already exists/);
+    expect(
+      checkoutProblem(
+        { ...demo, name: "colegio-san-jose" },
+        gitWith(healthy).git,
+      ),
+    ).toMatch(/does not fit the branch rule/);
+  });
+
+  it("tells the owner the checkout moved to the record branch", async () => {
+    const run = await attempt("demo");
+    expect(run.result.ok).toBe(true);
+    expect(run.printed()).toMatch(
+      /Record committed on chore\/record-demo \(now checked out\)/,
+    );
   });
 });

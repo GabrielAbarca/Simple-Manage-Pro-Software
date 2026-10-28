@@ -1,8 +1,8 @@
 # Plan — Deliver pending units to a project only after the owner confirms it
 
 **Implements:** #94 · **Epic:** #86 · **Branch:** feat/deliver-command
-**Status:** Draft
-**Red commit:** <filled at approval>
+**Status:** Approved 2026-10-28
+**Red commit:** 2b1924e
 **Confidence:** 8/10 that one unattended pass reaches a green PR
 
 > Validate every pattern and path below against the code before acting on it.

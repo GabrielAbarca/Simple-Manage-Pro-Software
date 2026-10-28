@@ -312,4 +312,22 @@ Findings: 0 Critical, 0 High, 1 Medium, 4 Low.
 - Not in this change: the temp fixture in `test/deliveryManifest.test.js:90` is never removed — Low, and the file is a frozen acceptance test.
 - Not in this change: `unitProblems` and `checkProjects` are long and the module is 416 lines — Low; extracting `fileProblems` and `checkProblems` is a refactor.
 
+Fix round validated at `ece0d57`: PASS (format, lint, typecheck, 532 unit, build, 119 e2e).
+
+### Review (round 2)
+
+**Verdict:** clean · **Acceptance:** PASS
+
+| AC  | Kind | Exists | Faithful | Passes | Coupled           | Frozen    | Probe | Verdict |
+| --- | ---- | ------ | -------- | ------ | ----------------- | --------- | ----- | ------- |
+| AC1 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a   | PASS    |
+| AC2 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a   | PASS    |
+| AC3 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a   | PASS    |
+| AC4 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a   | PASS    |
+| AC5 | unit | yes    | yes      | yes    | yes, fails at RED | unchanged | n/a   | PASS    |
+
+Findings: 0 Critical, 0 High, 0 Medium, 3 Low (two repeat round 1's follow-ups).
+
+- Not in this change: `scripts/delivery/manifest.mjs:89` the `\binto\b` test also refuses `into` inside a string literal (`where note = 'moved into 7A'`) — Low; it fails safe, nothing committed hits it, and the read-only transaction in #94 is the real guard.
+
 ## Execution report

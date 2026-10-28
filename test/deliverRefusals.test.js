@@ -5,22 +5,42 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   deliver,
   markerStatement,
+  prepareRecordCommit,
   recordBranch,
 } from "../scripts/delivery/deliver.mjs";
+import { readRecord } from "../scripts/delivery/record.mjs";
 import {
   DEMO_REF,
+  LICEO_REF,
+  MARKER,
+  conducta,
   deliveryDeps,
+  demo,
   fakeExecutor,
+  pilot,
   schemaDirWith,
   ttyInput,
 } from "./fixtures/delivery/fakes.js";
+
+const liceo = {
+  name: "liceo-norte",
+  ref: LICEO_REF,
+  type: "school",
+  site: "liceo-norte",
+  origin: "https://liceo-norte.example.com",
+  holdsRealData: true,
+  window: {
+    timezone: "America/Costa_Rica",
+    slots: [{ days: [6], from: "08:00", to: "12:00" }],
+  },
+};
 
 describe("deliver refusals and helpers", () => {
   let recordsDir;
   let schemaDir;
   beforeEach(() => {
     recordsDir = mkdtempSync(join(tmpdir(), "smp-deliver-refusals-"));
-    schemaDir = schemaDirWith(["incremental_conducta.sql"]);
+    schemaDir = schemaDirWith(["incremental_conducta.sql", "later.sql"]);
   });
   afterEach(() => {
     rmSync(recordsDir, { recursive: true, force: true });
@@ -74,5 +94,95 @@ describe("deliver refusals and helpers", () => {
     expect(markerStatement(3)).toBe(
       "insert into public.app_config (key, value) values ('schema_version', '3') on conflict (key) do update set value = excluded.value;",
     );
+  });
+
+  it("stops before the next unit once the delivery window has closed", async () => {
+    let closed = false;
+    const executor = fakeExecutor({
+      type: "school",
+      statements: (sql) => {
+        if (MARKER.test(sql)) closed = true;
+        return null;
+      },
+    });
+    const run = deliveryDeps({
+      recordsDir,
+      schemaDir,
+      executor,
+      input: ttyInput(`${LICEO_REF}\n`),
+      projects: [pilot, liceo],
+      units: [
+        conducta,
+        { ...conducta, seq: 2, id: "later", files: ["later.sql"] },
+      ],
+    });
+    const result = await deliver({
+      ...run.deps,
+      project: "liceo-norte",
+      now: () =>
+        new Date(
+          closed ? "2026-10-31T19:00:00.000Z" : "2026-10-31T15:00:00.000Z",
+        ),
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toMatch(/outside its delivery window/);
+    expect(result.delivered).toEqual(["conducta"]);
+    expect(executor.applied()).toEqual(["incremental_conducta.sql"]);
+    const { entries } = await readRecord(recordsDir, "liceo-norte");
+    expect(entries.map((entry) => entry.units[0].id)).toEqual(["conducta"]);
+    expect(run.prepareCommit).toHaveBeenCalledTimes(1);
+    expect(run.prepareCommit.mock.calls[0][0].units).toEqual(["conducta"]);
+  });
+
+  it("says the marker was written when the record entry then fails", async () => {
+    let clock = Date.parse("2026-10-28T20:00:00.000Z");
+    const run = await attempt("demo", {
+      now: () => new Date((clock -= 60_000)),
+    });
+    expect(run.result.ok).toBe(false);
+    expect(
+      run.executor.statementsRun().filter((sql) => MARKER.test(sql)),
+    ).toHaveLength(1);
+    expect(run.printed()).toMatch(/marker for conducta was written/);
+    expect(run.printed()).not.toMatch(/No marker was written/);
+  });
+
+  it("cuts the record branch from origin/main and commits only the record", async () => {
+    const calls = [];
+    const git = (...args) => {
+      calls.push(args);
+      if (args[0] === "rev-parse") throw new Error("absent");
+      return "";
+    };
+    const file = join(recordsDir, "demo.json");
+    const commit = await prepareRecordCommit(
+      { project: demo, file, units: ["conducta"] },
+      git,
+    );
+    expect(commit).toEqual({ branch: "chore/record-demo", reason: null });
+    expect(calls).toEqual([
+      ["rev-parse", "--verify", "--quiet", "refs/heads/chore/record-demo"],
+      ["fetch", "origin", "main"],
+      ["switch", "-c", "chore/record-demo", "origin/main"],
+      ["add", "--", file],
+      [
+        "commit",
+        "-m",
+        "Record the delivery of conducta to demo",
+        "--only",
+        "--",
+        file,
+      ],
+    ]);
+
+    const taken = await prepareRecordCommit(
+      { project: demo, file, units: ["conducta"] },
+      () => "",
+    );
+    expect(taken).toEqual({
+      branch: null,
+      reason: "branch chore/record-demo already exists",
+    });
   });
 });

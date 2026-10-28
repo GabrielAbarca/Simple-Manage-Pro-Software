@@ -399,4 +399,9 @@ Findings: 0 Critical · 0 High · 2 Medium · 2 Low
 - Low · `scripts/delivery/deliver.mjs:555` — the stopped message claims no marker even when the marker ran.
 - Low · `scripts/delivery/deliver.mjs:357` — checks aren't run read-only (Open question 4's approved default; follow-up).
 
+- Fixed: the window isn't re-checked between units → `windowRefusal` runs before every unit; a closed window stops the run, keeping the earlier units' record and commit · `test/deliverRefusals.test.js` › "stops before the next unit once the delivery window has closed".
+- Fixed: the record branch is cut from HEAD → `prepareRecordCommit` (now exported, its git runner injectable) fetches `origin main` (a failed fetch is tolerated) and runs `git switch -c chore/record-<project> origin/main` · `test/deliverRefusals.test.js` › "cuts the record branch from origin/main and commits only the record".
+- Fixed: the stopped message claims no marker when the marker ran → `deliverUnit` reports whether the marker step passed and a refused record entry, and the message says so · `test/deliverRefusals.test.js` › "says the marker was written when the record entry then fails". A Low, fixed because it is a wrong output in this change's own code.
+- Not in this change: checks aren't run read-only. The approved default (Open question 4): the Management API returns only the last statement's rows, so a `begin read only … rollback` wrapper hides the check's row. A read-only path belongs in the executors (a `runReadOnly` method), with `manifest.mjs:80-81`'s comment made true there.
+
 ## Execution report

@@ -241,12 +241,27 @@ function gitApprover() {
 }
 
 /**
- * Commits only the record file on a new branch for the owner's PR. It never
- * pushes.
+ * @param {(...args: string[]) => string} run
+ * @param {string[]} args
+ * @returns {boolean}
+ */
+function succeeds(run, ...args) {
+  try {
+    run(...args);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Commits only the record file on a new branch cut from `origin/main`, for
+ * the owner's PR. It never pushes.
  * @param {RecordChange} change
+ * @param {(...args: string[]) => string} [run]
  * @returns {Promise<PreparedCommit>}
  */
-async function gitPrepareCommit({ project, file, units }) {
+export async function prepareRecordCommit({ project, file, units }, run = git) {
   const branch = recordBranch(project.name);
   if (!branch) {
     return {
@@ -255,13 +270,14 @@ async function gitPrepareCommit({ project, file, units }) {
     };
   }
   try {
-    git("rev-parse", "--verify", "--quiet", `refs/heads/${branch}`);
+    run("rev-parse", "--verify", "--quiet", `refs/heads/${branch}`);
     return { branch: null, reason: `branch ${branch} already exists` };
   } catch {
+    succeeds(run, "fetch", "origin", "main");
     try {
-      git("switch", "-c", branch);
-      git("add", "--", file);
-      git(
+      run("switch", "-c", branch, "origin/main");
+      run("add", "--", file);
+      run(
         "commit",
         "-m",
         `Record the delivery of ${units.join(", ")} to ${project.name}`,
@@ -280,7 +296,7 @@ async function gitPrepareCommit({ project, file, units }) {
  * Applies one unit, proves it, writes the marker, and appends its entry.
  * Stops at the first step that fails.
  * @param {{ executor: Executor, project: Project, unit: Unit, schemaDir: string, recordsDir: string, approver: string, now: () => Date, out: (line: string) => void }} context
- * @returns {Promise<Failure | null>}
+ * @returns {Promise<{ failure: Failure | null, marked: boolean, unrecorded: string | null }>}
  */
 async function deliverUnit({
   executor,
@@ -394,19 +410,24 @@ async function deliverUnit({
     break;
   }
 
-  await appendEntry(recordsDir, project, {
-    kind: "delivery",
-    units: [{ id: unit.id, sequence: unit.seq, files: hashed }],
-    startedAt,
-    endedAt: now().toISOString(),
-    approver,
-    fingerprint: { before, after: null },
-    proofs,
-    ...(failure
-      ? { failure: { unit: failure.unit, sqlstate: failure.sqlstate } }
-      : {}),
-  });
-  return failure;
+  const marked = proofs.some((proof) => proof.name === "marker" && proof.ok);
+  try {
+    await appendEntry(recordsDir, project, {
+      kind: "delivery",
+      units: [{ id: unit.id, sequence: unit.seq, files: hashed }],
+      startedAt,
+      endedAt: now().toISOString(),
+      approver,
+      fingerprint: { before, after: null },
+      proofs,
+      ...(failure
+        ? { failure: { unit: failure.unit, sqlstate: failure.sqlstate } }
+        : {}),
+    });
+  } catch (error) {
+    return { failure, marked, unrecorded: error.message };
+  }
+  return { failure, marked, unrecorded: null };
 }
 
 /**
@@ -428,7 +449,7 @@ export async function deliver({
   projects,
   recordsDir = join(REPO_ROOT, RECORDS_DIR),
   schemaDir = SCHEMA_DIR,
-  prepareCommit = gitPrepareCommit,
+  prepareCommit = prepareRecordCommit,
   out = (line) => process.stdout.write(`${line}\n`),
 }) {
   /** @type {string[]} */
@@ -510,9 +531,16 @@ export async function deliver({
   /** @type {string | null} */
   let stopped = null;
   for (const unit of units) {
+    const closedNow = windowRefusal(project, now());
+    if (closedNow) {
+      stopped = closedNow;
+      out(`Unit ${unit.seq} ${unit.id} not started: ${closedNow}`);
+      break;
+    }
     out(`Unit ${unit.seq} ${unit.id}:`);
+    let outcome;
     try {
-      failure = await deliverUnit({
+      outcome = await deliverUnit({
         executor,
         project,
         unit,
@@ -523,10 +551,18 @@ export async function deliver({
         out,
       });
     } catch (error) {
-      stopped = `unit ${unit.id} stopped before it was recorded: ${error.message}`;
+      stopped = `unit ${unit.id} stopped before any marker or record: ${error.message}`;
       out(`  ${stopped}`);
       break;
     }
+    if (outcome.unrecorded) {
+      stopped = outcome.marked
+        ? `the marker for ${unit.id} was written, but its record entry was refused: ${outcome.unrecorded}`
+        : `unit ${unit.id} was not recorded: ${outcome.unrecorded}`;
+      out(`  ${stopped}`);
+      break;
+    }
+    failure = outcome.failure;
     recorded.push(unit.id);
     if (failure) break;
     delivered.push(unit.id);
@@ -552,7 +588,9 @@ export async function deliver({
   out(
     ok
       ? `Delivered ${delivered.join(", ")} to ${project.name}.`
-      : `Stopped: ${failure ? `${failure.unit} failed ${failure.proof}` : stopped}. No marker was written for it.`,
+      : failure
+        ? `Stopped: ${failure.unit} failed ${failure.proof}. No marker was written for it.`
+        : `Stopped: ${stopped}.`,
   );
   return {
     ok,

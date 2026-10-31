@@ -1,0 +1,12 @@
+# Store and check out text as LF everywhere, whatever core.autocrlf says.
+* text=auto eol=lf
+
+# Binary assets: never touch.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary

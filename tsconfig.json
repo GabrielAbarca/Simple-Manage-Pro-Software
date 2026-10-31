@@ -73,7 +73,6 @@
     "src/js/views/teacherSettings.js",
     "node_modules",
     "dist",
-    "src/js/views/discipline.js",
     "src/js/views/conduct.js"
   ]
 }

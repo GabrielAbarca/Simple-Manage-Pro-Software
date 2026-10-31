@@ -23,7 +23,7 @@ export default [
     },
     rules: {
       "no-unused-vars": [
-        "warn",
+        "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
     },
@@ -31,7 +31,7 @@ export default [
 
   // Node-side config + tooling files (incl. build scripts).
   {
-    files: ["*.config.js", "vite.config.js", "scripts/**/*.{js,mjs}"],
+    files: ["*.config.js", "scripts/**/*.{js,mjs}"],
     languageOptions: {
       sourceType: "module",
       globals: { ...globals.node },
@@ -47,7 +47,7 @@ export default [
     },
     rules: {
       "no-unused-vars": [
-        "warn",
+        "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
     },

@@ -1,7 +1,8 @@
 {
   "name": "simple-manage-pro-software",
   "version": "1.0.0",
-  "description": "Simple Manage Pro dashboard site reorganized with Vite and Vercel Serverless API.",
+  "private": true,
+  "description": "School management web app for Costa Rican schools: student, teacher and admin portals on Supabase.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,7 +42,6 @@
     "prettier": "^3.9.5",
     "supabase": "^2.104.0",
     "typescript": "^7.0.2",
-    "vercel": "^54.12.2",
     "vite": "^5.2.11",
     "vitest": "^4.1.10"
   }

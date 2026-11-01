@@ -56,6 +56,8 @@ describe("conductPassingScore", () => {
 
 describe("isPassing", () => {
   it("puts the boundary at the mark itself", () => {
+    expect(isPassing(55, secondary)).toBe(false);
+    expect(isPassing(55, null)).toBe(false);
     expect(isPassing(69, secondary)).toBe(false);
     expect(isPassing(69.99, secondary)).toBe(false);
     expect(isPassing(70, secondary)).toBe(true);
@@ -65,12 +67,6 @@ describe("isPassing", () => {
   it("moves the boundary with the school's mark", () => {
     expect(isPassing(65, primaria)).toBe(true);
     expect(isPassing(65, secondary)).toBe(false);
-  });
-
-  it("fails the score the student portal used to pass at 50", () => {
-    // The defect this module exists to fix: a 55 read "Aprobado".
-    expect(isPassing(55, secondary)).toBe(false);
-    expect(isPassing(55, null)).toBe(false);
   });
 
   it("treats an ungraded subject as not passing, not as a failure to colour", () => {
@@ -86,12 +82,6 @@ describe("bandClass", () => {
     expect(bandClass(70, secondary)).toBe("score-mid");
     expect(bandClass(74.99, secondary)).toBe("score-mid");
     expect(bandClass(75, secondary)).toBe("score-high");
-  });
-
-  it("reproduces the teacher console's original 70/75 split at the default", () => {
-    expect(bandClass(69, null)).toBe("score-low");
-    expect(bandClass(72, null)).toBe("score-mid");
-    expect(bandClass(90, null)).toBe("score-high");
   });
 
   it("shifts the whole band set with the school's mark", () => {

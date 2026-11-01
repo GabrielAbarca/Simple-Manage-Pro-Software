@@ -48,20 +48,26 @@ describe("conductScore", () => {
   });
 
   describe("a record with no usable points costs nothing", () => {
-    it("ignores 0, null, undefined and a missing column", () => {
-      // Every row predating conduct_points carries the 0 default, and a
-      // record filed purely for the register is allowed to cost nothing.
-      expect(conductScore([rec(0), rec(null), rec(undefined), {}])).toBe(100);
+    // Every row predating conduct_points carries the 0 default, and a record
+    // filed purely for the register is allowed to cost nothing. Conducta
+    // counts down only, so a negative must not hand out a 105.
+    it.each([
+      ["0", rec(0)],
+      ["null", rec(null)],
+      ["undefined", rec(undefined)],
+      ["a missing column", {}],
+      ['"abc"', rec("abc")],
+      ["NaN", rec(NaN)],
+      ["Infinity", rec(Infinity)],
+      ["a negative", rec(-5)],
+    ])("ignores %s in conductScore and conductDeduction", (_label, record) => {
+      expect(conductScore([record])).toBe(100);
+      expect(conductDeduction([record])).toBe(0);
     });
 
-    it("ignores a value that is not a number", () => {
-      expect(conductScore([rec("abc"), rec(NaN), rec(Infinity)])).toBe(100);
-    });
-
-    it("ignores negative points rather than awarding them", () => {
-      // Conducta counts down only — a negative must not hand out a 105.
-      expect(conductScore([rec(-5)])).toBe(100);
+    it("still counts the usable record next to an unusable one", () => {
       expect(conductScore([rec(-5), rec(10)])).toBe(90);
+      expect(conductDeduction([rec(-5), rec(10)])).toBe(10);
     });
   });
 
@@ -128,10 +134,6 @@ describe("conductDeduction", () => {
     // record still shows 120 deducted.
     expect(conductDeduction([rec(60), rec(60)])).toBe(120);
     expect(conductScore([rec(60), rec(60)])).toBe(0);
-  });
-
-  it("ignores the same unusable values conductScore ignores", () => {
-    expect(conductDeduction([rec(null), rec("abc"), rec(-5), {}])).toBe(0);
   });
 });
 

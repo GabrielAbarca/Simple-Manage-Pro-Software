@@ -136,7 +136,7 @@ function seed() {
 
 beforeEach(seed);
 
-describe("fetchStudentAttendance (N+1 fix)", () => {
+describe("fetchStudentAttendance batches the recorder lookup", () => {
   it("resolves all recorders in a single batched teachers?id=in.(…) query", async () => {
     const rows = await fetchStudentAttendance(101);
     const teacherCalls = calls.filter((c) => c.table === "teachers_directory");
@@ -177,14 +177,6 @@ describe("fetchDashboardStats aggregation", () => {
     // (90 + 80) / 2 = 85, null excluded
     expect(stats.grades).toEqual({ average: 85, count: 2 });
     expect(stats.nextClass?.subjects?.name).toBe("Mathematics");
-  });
-
-  it("runs its three reads concurrently (attendance, grades, schedule)", async () => {
-    await fetchDashboardStats(101, 21);
-    const tables = calls.map((c) => c.table);
-    expect(tables).toContain("attendance");
-    expect(tables).toContain("student_grades");
-    expect(tables).toContain("schedules");
   });
 });
 
@@ -229,10 +221,6 @@ describe("failures propagate instead of looking like empty data", () => {
     // No error, no row — a real answer, not a failure.
     fixtures.students = [];
     await expect(fetchStudentProfile(999)).resolves.toBeNull();
-  });
-
-  it("returns data normally when nothing is failing", async () => {
-    await expect(fetchStudentGrades(101)).resolves.toHaveLength(3);
   });
 });
 

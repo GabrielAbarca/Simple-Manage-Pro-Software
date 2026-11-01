@@ -116,7 +116,7 @@ describe("parsing what a human typed", () => {
     expect(parseDisplay("09/01/2026", "en-US")).toBe("2026-09-01");
   });
 
-  it("accepts ISO whatever the locale — this is the path page.fill() takes", () => {
+  it("accepts a pasted ISO date in any locale", () => {
     expect(parseDisplay("2026-09-01", "es-CR")).toBe("2026-09-01");
     expect(parseDisplay("2026-09-01", "en-US")).toBe("2026-09-01");
   });

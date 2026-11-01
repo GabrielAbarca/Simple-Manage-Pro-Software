@@ -107,10 +107,6 @@ export default {
       '¿Eliminar la tarea "{name}"? También se eliminarán todas las notas de los estudiantes. Esto no se puede deshacer.',
     deleteCategory:
       '¿Eliminar la categoría "{name}"? Sus tareas se mantienen, pero quedan sin categoría (ponderación simple).',
-    discardTitle: "¿Descartar cambios?",
-    discardMessage: "Tiene cambios sin guardar. ¿Desea descartarlos?",
-    discard: "Descartar",
-    keepEditing: "Seguir editando",
   },
   modal: {
     addAssignment: "Agregar tarea",

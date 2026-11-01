@@ -1,7 +1,7 @@
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { openModal } from "../teacherModal.js";
+import { openModal } from "../modal.js";
 import { showToast, openConfirm } from "../feedback.js";
 import { className, genderOptions } from "../teacherFormat.js";
 import { loadRoster } from "./roster.js";
@@ -196,7 +196,7 @@ export function openEditStudent(student) {
       },
     ],
     onSubmit: async (formData) => {
-      // national_id is a disabled field — excluded from FormData, never updated.
+      // national_id is a disabled field: left out of the values, never updated.
       await db.updateStudent(student.id, {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),

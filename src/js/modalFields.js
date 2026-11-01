@@ -1,4 +1,4 @@
-import { t } from "../../i18n.js";
+import { t } from "./i18n.js";
 
 /**
  * A field spec rendered as a `.field-group`: heading, control, optional help.
@@ -9,14 +9,19 @@ export function buildFieldGroup(field) {
   group.className = "field-group";
   group.appendChild(buildHeading(field));
   const build = FIELD_BUILDERS[field.type] ?? buildTextInput;
-  group.appendChild(build(field));
+  const control = build(field);
+  // Read-only context such as national_id (registrar-owned): shown, but left
+  // out of the submitted values and the rules.
+  if (field.disabled) control.disabled = true;
+  group.appendChild(control);
   if (field.help) group.appendChild(buildHelp(field.help));
   return group;
 }
 
 /**
  * Read the open form back out as name → value. Checkbox groups yield arrays;
- * everything else yields the control's string value.
+ * everything else yields the control's string value. Disabled fields are left
+ * out, as in a native form submit.
  * @param {any[]} fields
  * @param {HTMLFormElement} form
  */
@@ -24,6 +29,7 @@ export function collectValues(fields, form) {
   /** @type {Record<string, any>} */
   const values = {};
   fields.forEach((field) => {
+    if (field.disabled) return;
     if (field.type === "checkboxes") {
       values[field.name] = [
         ...form.querySelectorAll(`input[name="${field.name}"]:checked`),

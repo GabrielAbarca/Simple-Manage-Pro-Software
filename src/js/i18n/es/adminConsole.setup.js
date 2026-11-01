@@ -143,10 +143,6 @@ export default {
   },
   confirm: {
     message: "Esta acción no se puede deshacer.",
-    discardTitle: "¿Descartar cambios?",
-    discardMessage: "Tiene cambios sin guardar. ¿Desea descartarlos?",
-    discard: "Descartar",
-    keepEditing: "Seguir editando",
   },
   years: {
     title: "Cursos lectivos",

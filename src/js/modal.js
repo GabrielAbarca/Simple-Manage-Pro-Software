@@ -1,7 +1,7 @@
-import { registerDialog } from "../../dialog.js";
-import { t } from "../../i18n.js";
-import * as v from "../../validate.js";
-import { showToast, errorText, openConfirm } from "../../feedback.js";
+import { registerDialog } from "./dialog.js";
+import { t } from "./i18n.js";
+import * as v from "./validate.js";
+import { showToast, errorText, openConfirm } from "./feedback.js";
 import { buildFieldGroup, collectValues } from "./modalFields.js";
 
 const modalOverlay = document.getElementById("modal-overlay");
@@ -9,12 +9,17 @@ const modalTitle = document.getElementById("modal-title");
 const modalForm = /** @type {HTMLFormElement} */ (
   document.getElementById("modal-form")
 );
+const modalSubmit = /** @type {HTMLButtonElement} */ (
+  document.getElementById("modal-submit")
+);
 
 let currentSubmitHandler = null;
 // Has the open form been touched? Drives the discard confirmation, so a stray
 // click or a mistaken Cancel can never silently throw away typed work.
 let modalDirty = false;
 let tracksEdits = true;
+// Bumped whenever a dialog opens or closes.
+let generation = 0;
 
 /**
  * Show a validation message under its field, and — the part that makes it
@@ -76,10 +81,10 @@ function clearFieldError(name) {
  * @param {any[]} fields
  */
 function collectRules(fields) {
-  /** @type {Record<string, import("../../validate.js").Rule[]>} */
+  /** @type {Record<string, import("./validate.js").Rule[]>} */
   const map = {};
   fields.forEach((field) => {
-    if (field.type === "checkboxes") return;
+    if (field.type === "checkboxes" || field.disabled) return;
     const rules = [...(field.rules ?? [])];
     if (field.required) rules.unshift(v.required());
     // One `maxLength` declaration yields both the browser's own cap and a rule,
@@ -93,7 +98,7 @@ function collectRules(fields) {
 /**
  * Turn validate.js message descriptors into display strings. Keeping the keys
  * un-translated until here is what lets the rules stay pure and testable.
- * @param {Record<string, import("../../validate.js").Message>} messages
+ * @param {Record<string, import("./validate.js").Message>} messages
  */
 function translateMessages(messages) {
   /** @type {Record<string, string>} */
@@ -120,6 +125,8 @@ function renderErrors(errors) {
 /**
  * Open the shared modal with a field spec. `onSubmit` receives an object of
  * name → value (checkbox groups yield arrays); returning resolves & closes.
+ * It is also handed an `isCurrent()` that turns false once this dialog is
+ * closed or replaced, so slow work can stop when the user has moved on.
  *
  * Validation runs before the write and never uses native browser popups:
  *  • each field spec may carry `rules: Rule[]` from validate.js — a field
@@ -129,6 +136,14 @@ function renderErrors(errors) {
  * Both produce a { fieldName: message } map rendered inline under the field.
  * `confirmDiscard: false` closes without the unsaved-changes warning, for a
  * dialog whose fields are only choices about the action.
+ * @param {{
+ *   title: string,
+ *   fields: any[],
+ *   onSubmit: (values: any, isCurrent: () => boolean) => any,
+ *   validate?: (values: any) => any,
+ *   submitLabel?: string,
+ *   confirmDiscard?: boolean,
+ * }} opts
  */
 export function openModal({
   title,
@@ -138,8 +153,10 @@ export function openModal({
   submitLabel = t("common.save"),
   confirmDiscard = true,
 }) {
+  generation++;
   modalTitle.textContent = title;
-  document.getElementById("modal-submit").textContent = submitLabel;
+  modalSubmit.textContent = submitLabel;
+  modalSubmit.disabled = false;
   modalForm.innerHTML = "";
   modalDirty = false;
   tracksEdits = confirmDiscard;
@@ -166,17 +183,17 @@ export function openModal({
     };
     if (renderErrors(errors)) return;
 
-    const submitBtn = /** @type {HTMLButtonElement} */ (
-      document.getElementById("modal-submit")
-    );
-    submitBtn.disabled = true;
+    modalSubmit.disabled = true;
+    const opened = generation;
+    const isCurrent = () => generation === opened;
     try {
-      await onSubmit(values);
-      closeModal();
+      await onSubmit(values, isCurrent);
+      // Closing a dialog the user has since replaced would close theirs.
+      if (isCurrent()) closeModal();
     } catch (err) {
       showToast(errorText(err), "error");
     } finally {
-      submitBtn.disabled = false;
+      if (isCurrent()) modalSubmit.disabled = false;
     }
   };
   modalForm.addEventListener("submit", currentSubmitHandler);
@@ -184,6 +201,7 @@ export function openModal({
 }
 
 export function closeModal() {
+  generation++;
   modalOverlay.classList.remove("active");
   modalForm.innerHTML = "";
   modalDirty = false;
@@ -203,10 +221,10 @@ export function requestCloseModal() {
     closeModal();
     return;
   }
-  openConfirm(t("console.confirm.discardMessage"), () => closeModal(), {
-    title: t("console.confirm.discardTitle"),
-    confirmLabel: t("console.confirm.discard"),
-    cancelLabel: t("console.confirm.keepEditing"),
+  openConfirm(t("common.discardMessage"), () => closeModal(), {
+    title: t("common.discardTitle"),
+    confirmLabel: t("common.discard"),
+    cancelLabel: t("common.keepEditing"),
   });
 }
 

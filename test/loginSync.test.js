@@ -24,7 +24,7 @@ vi.mock("../src/js/feedback.js", () => feedback);
 vi.mock("../src/js/admin/state.js", () => adminState);
 vi.mock("../src/js/admin/data.js", () => ({ data: {} }));
 vi.mock("../src/js/admin/ui/tables.js", () => ({ iconBtn: vi.fn() }));
-vi.mock("../src/js/admin/ui/modal.js", () => ({ openModal: vi.fn() }));
+vi.mock("../src/js/modal.js", () => ({ openModal: vi.fn() }));
 
 const { syncLoginWithStatus } =
   await import("../src/js/admin/domain/accountActions.js");

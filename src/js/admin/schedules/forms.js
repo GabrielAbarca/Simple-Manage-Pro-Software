@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  forms.js — the schedules tab's three dialogs: add/edit one class
-//  period, choose the school's teaching days, and copy another
-//  section's week. Split out of admin.js.
-//
-//  Conflicts come back typed: a `section` clash is rejected inline, a
-//  `teacher`/`room` clash is a warning the director can override —
-//  co-teaching and shared rooms are real.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import * as sched from "../../scheduleLogic.js";

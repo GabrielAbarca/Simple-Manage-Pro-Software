@@ -253,7 +253,7 @@ export default {
     confirmReset: "Send a password reset to {email}?",
     resetSent: "Password reset sent.",
     resetDemo: "Password reset (demo — no email sent).",
-    // ── Accounts screen ──
+    // Accounts screen
     title: "Login accounts",
     subtitle: "Who can sign in, and with what role.",
     hint: "Create logins for teachers and students from their own tables. Admin logins are created here.",

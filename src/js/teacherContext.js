@@ -1,15 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherContext.js — resolves the signed-in teacher's identity and
-//  academic context into the shared state, and reports whether that
-//  succeeded so the views can tell a failed lookup from an account that
-//  simply owns no teachers row.
-//
-//  Takes the data layer as an argument instead of importing it (same
-//  shape as createAdminData(gateway) in adminData.js): teacherData/index.js
-//  is excluded from typecheck, and importing it here would pull its whole
-//  graph into the checked set. It also keeps this module free of Supabase
-//  at unit-test time.
-// ─────────────────────────────────────────────────────────────────
 import { state } from "./teacherState.js";
 
 /**

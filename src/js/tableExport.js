@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  tableExport.js — save a table the console is showing as an Excel
-//  workbook or a CSV file, built in the browser.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "./i18n.js";
 import { toCsv } from "./csv.js";
 import { toXlsx } from "./xlsx.js";

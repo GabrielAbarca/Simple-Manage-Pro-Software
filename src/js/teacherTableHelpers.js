@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherTableHelpers.js — parameterized table/list rendering helpers
-//  (empty state, error state, row action buttons). Split
-//  out of teacher.js's UI-helpers section.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "./i18n.js";
 import { errorState, errorRow } from "./ui.js";
 import { IS_ADMIN, applyAdminLock } from "./teacherAuth.js";

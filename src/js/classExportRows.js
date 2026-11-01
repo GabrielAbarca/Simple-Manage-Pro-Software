@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  classExportRows.js — the rows behind the class workspace's exports:
-//  a period's gradebook and a subject's attendance. Pure, so the sheets
-//  can be checked without a browser.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "./i18n.js";
 import { dateCell } from "./tableExport.js";
 

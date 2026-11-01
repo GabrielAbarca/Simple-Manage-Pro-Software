@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  guardians.js — a student's guardians (encargados), opened from the
-//  students table. A guardian record can be linked to several students
-//  (siblings), so editing one changes it for all of them; removing a
-//  guardian from their last student deletes the record.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../../dialog.js";
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";

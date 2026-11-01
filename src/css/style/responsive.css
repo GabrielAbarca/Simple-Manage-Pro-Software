@@ -263,7 +263,7 @@
     background: var(--color-info-dark);
   }
 
-  /* ── Right-rail widgets scoped to the dashboard (A6) ───────────────
+  /* Right-rail widgets scoped to the dashboard
    `.right` holds the always-visible top bar (menu / theme / profile) AND the
    dashboard-only widgets. navigateTo() toggles .rail-widgets-hidden on `.right`
    for every non-dashboard view, so "Upcoming Events" and "Subject Performance"

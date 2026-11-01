@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  feedback.js — the admin console's non-form feedback surfaces: the
-//  toast strip, the database-error translator, and the confirm/notice
-//  dialog. Split out of admin.js's UI helpers.
-//
-//  Deliberately imports no data layer and no form modal, so both of
-//  those can depend on it without a cycle.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../../dialog.js";
 import { t } from "../../i18n.js";
 import { mapDbError } from "../../dbErrors.js";
@@ -35,7 +27,7 @@ export function errorText(err) {
   return t(mapDbError(err).key);
 }
 
-// ── Confirm modal ──────────────────────────────────────────────
+// Confirm modal
 const confirmOverlay = document.getElementById("confirm-overlay");
 const confirmTitle = document.getElementById("confirm-title");
 const confirmMessage = document.getElementById("confirm-message");

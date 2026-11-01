@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Absence summary (item 3) ─────────────────────────────────── */
+  /* Absence summary */
   .absence-summary {
     margin-bottom: 1.2rem;
     padding: 1rem 1.2rem;
@@ -57,7 +57,7 @@
     color: var(--color-dark-variant);
   }
 
-  /* ─── Today start page (item 7) ────────────────────────────────── */
+  /* Today start page */
   .today-list {
     display: flex;
     flex-direction: column;

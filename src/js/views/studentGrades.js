@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  studentGrades.js — per-student grade entry modal (detail view + grade
-//  entry), opened by clicking a row in the gradebook table.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";

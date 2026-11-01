@@ -1,18 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  controls/index.js — apply the custom controls, everywhere, forever.
-//
-//  The app builds form controls in a lot of places: openModal() in both
-//  consoles (27 selects, 13 date fields between them), labeledSelect()
-//  in the schedules toolbar, and several template-string rebuilds like
-//  #gradebook-period that replace their markup on every render.
-//
-//  Enhancing at each call site would mean touching all of them and
-//  would silently miss the next one somebody adds. Observing the
-//  document instead means every control — present, re-rendered or added
-//  later — is enhanced exactly once, and the call sites stay untouched.
-//  Same approach dialog.js already takes for overlays.
-// ─────────────────────────────────────────────────────────────────
-
 import { enhanceSelect } from "./select.js";
 import { enhanceDate } from "./datepicker.js";
 import { closeAllPopovers } from "./popover.js";

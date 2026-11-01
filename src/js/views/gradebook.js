@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  gradebook.js — the class workspace's Gradebook tab hub: renders the
-//  per-student grade table and owns `gradebookState` (single writer here).
-//  Sibling gradebook features (assignments, per-student grades, categories,
-//  post grades, column entry) read it via `getGradebookState()` and refresh
-//  it via `loadGradebook()` rather than each threading their own params —
-//  see the split-monolith plan for why this pair of modules is allowed to
-//  import each other (every cross-call happens inside an event handler,
-//  never at module top-level).
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";

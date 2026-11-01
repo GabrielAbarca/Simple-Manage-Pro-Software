@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherAuth.js — auth guard, teacher identity resolution, and the
-//  admin-restricted-control gate. Split out of teacher.js.
-// ─────────────────────────────────────────────────────────────────
 import { getSession } from "./auth.js";
 import { fetchRole, portalPath, haltForRedirect } from "./role.js";
 import { t } from "./i18n.js";
@@ -26,7 +22,7 @@ export async function resolveTeacherSession() {
   return { session, role };
 }
 
-// ── Role gating (visual/demo only) ──────────────────────────────
+// Role gating (visual/demo only)
 // There is no per-user auth yet — this console always runs as the demo teacher.
 // IS_ADMIN is the SINGLE flag every admin-restricted control routes through, and
 // the only line a future real auth check would replace. Do not hardcode the

@@ -1,8 +1,7 @@
 @layer page {
-  /* ═══════════════════════════════════════════════════════════════
-   GRADE ENTRY GRIDS — shared modal helpers, categories,
+  /* GRADE ENTRY GRIDS — shared modal helpers, categories,
    post grades, column entry
-═══════════════════════════════════════════════════════════════ */
+*/
 
   /* Modal field help text (e.g. read-only national_id) */
   .field-help {
@@ -32,7 +31,7 @@
     color: var(--color-dark-variant);
   }
 
-  /* ─── Post grades grid (item 1) ────────────────────────────────── */
+  /* Post grades grid */
   .pg-grid {
     min-width: 700px;
   }
@@ -94,7 +93,7 @@
     justify-content: flex-end;
   }
 
-  /* ─── Column grade entry grid (item 4) ─────────────────────────── */
+  /* Column grade entry grid */
   .cg-grid {
     min-width: 520px;
   }

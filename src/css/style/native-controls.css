@@ -1,5 +1,5 @@
 @layer controls {
-  /* ── Select: give back the affordance the reset removed ──────────
+  /* Select: give back the affordance the reset removed
    The global `* { appearance: none }` strips a <select> of its native
    dropdown arrow. Only two rules in the app ever restored it, so ~29
    selects rendered as plain rectangles — nothing said "this opens".
@@ -32,7 +32,7 @@
     color: var(--color-dark);
   }
 
-  /* ── Number: spin buttons ────────────────────────────────────────
+  /* Number: spin buttons
    Kept rather than hidden — score entry genuinely benefits from them,
    and removing a control users expect would trade one Jakob's Law
    problem for another. `color-scheme` themes them; this only stops them
@@ -41,7 +41,7 @@
     padding-right: 0.5rem;
   }
 
-  /* ── Date / time: the picker trigger ─────────────────────────────
+  /* Date / time: the picker trigger
    The indicator is a UA-drawn glyph. With `color-scheme` set it now
    follows the theme instead of staying black on a dark field. Sized and
    spaced here so it lines up with the select chevron beside it, and
@@ -55,9 +55,9 @@
     opacity: 0.75;
   }
 
-  /* The tint here used to be --color-light, which is rgba(0,0,0,0.4) in dark
-   mode — a near-black square painted behind an already-dark icon, so hovering
-   turned the whole indicator into one solid block. --surface-hover moves away
+  /* Not --color-light: that is rgba(0,0,0,0.4) in dark mode, a near-black
+   square behind an already-dark icon that turns the whole indicator into one
+   solid block on hover. --surface-hover moves away
    from the surface in both themes. */
   input[type="date"]::-webkit-calendar-picker-indicator:hover,
   input[type="time"]::-webkit-calendar-picker-indicator:hover {
@@ -65,12 +65,12 @@
     background: var(--surface-hover);
   }
 
-  /* ── Search: the clear affordance ───────────────────────────────── */
+  /* Search: the clear affordance */
   input[type="search"]::-webkit-search-cancel-button {
     cursor: pointer;
   }
 
-  /* ── Colour: the swatch ─────────────────────────────────────────
+  /* Colour: the swatch
    The UA wraps the colour in its own inset border with square corners,
    which reads as a broken input next to the app's rounded fields. */
   input[type="color"]::-webkit-color-swatch-wrapper {
@@ -87,7 +87,7 @@
     border-radius: var(--border-radius-1);
   }
 
-  /* ── File: the least-owned control in the app ───────────────────
+  /* File: the least-owned control in the app
    The CSV import's file input shipped as a bare OS button — different
    font, different metrics, no theme, on the screen a director uses to
    load their entire roster. Dressed as a ghost button so it belongs to

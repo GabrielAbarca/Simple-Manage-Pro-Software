@@ -85,7 +85,7 @@ function showErrorBanner() {
   (document.body ?? document.documentElement).appendChild(bar);
 }
 
-// ── Offline notice ─────────────────────────────────────────────
+// Offline notice
 // Losing the network makes every query fail at once, which without this reads
 // as the app breaking for no reason. Naming the cause turns a mystery into
 // something the user can fix. Amber rather than red: nothing is broken, and

@@ -1,11 +1,10 @@
 @layer page {
-  /* ═══════════════════════════════════════════════════════════════
-   FULL-WIDTH DATA TABLES (admin-only, desktop)
+  /* FULL-WIDTH DATA TABLES (admin-only, desktop)
    Drop the dedicated 23rem right column from the shared shell and pin
    the theme/profile/stats cluster as a compact block in the top-right,
    so Roster/Gradebook/Attendance/Schedule tables span the full width.
    Scoped to ≥769px so the existing mobile rules in style.css win below.
-═══════════════════════════════════════════════════════════════ */
+*/
   @media (min-width: 769px) {
     .container {
       grid-template-columns: 14rem minmax(0, 1fr);
@@ -77,7 +76,7 @@
     color: var(--color-primary-text);
   }
 
-  /* ─── Responsive fixes (admin-only) ───────────────────────────── */
+  /* Responsive fixes (admin-only) */
 
   /* style.css turns .recent-activity into an absolutely-positioned block
    at ≤1200px (a student-dashboard hack). On admin that breaks every

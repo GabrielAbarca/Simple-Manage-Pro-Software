@@ -1,26 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  datepicker.js — the app's own calendar, over <input type="date">.
-//
-//  Two separate problems with the native control.
-//
-//  1. Its calendar popup is drawn by the OS: unstyleable, off the type
-//     scale, and (before color-scheme) light in dark mode.
-//  2. Its TEXT follows the BROWSER's locale, not the app's. A director
-//     using the app in Spanish on an English-locale browser reads
-//     mm/dd/yyyy. The app's own language toggle has no say — which is
-//     the same defect as the rest of this pass, one layer down.
-//
-//  ENHANCE, NEVER REPLACE. The native input stays in the DOM, clipped,
-//  keeping its id and name, and remains the source of truth: it holds
-//  the ISO value that FormData submits, validate.js checks
-//  (dateWithin / endAfterStart / notFuture) and the e2e suite sets with
-//  page.fill(). A spike confirmed fill() still works on a clipped input.
-//  What the user sees and types into is a text field formatted in the
-//  APP's locale, which writes back to it.
-//
-//  Touch devices keep the OS picker.
-// ─────────────────────────────────────────────────────────────────
-
 import { showPopover } from "./popover.js";
 import { t, localeTag } from "../i18n.js";
 
@@ -41,7 +18,7 @@ import {
   withinRange,
 } from "./dateUtils.js";
 
-// ── Component ────────────────────────────────────────────────────
+// Component
 
 /**
  * Give one <input type="date"> the app's calendar. Idempotent.

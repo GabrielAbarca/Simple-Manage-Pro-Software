@@ -1,10 +1,9 @@
 @layer page {
-  /* ═══════════════════════════════════════════════════════════════
-   ROSTER — clickable grid list with a trailing action rail
+  /* ROSTER — clickable grid list with a trailing action rail
    The roster is a CSS-grid list (not a <table>) so the edit/delete
    rail can sit OUTSIDE the clickable cells. Whole .roster-row-cells
    block opens the student-360 drawer; the rail reveals on hover/focus.
-═══════════════════════════════════════════════════════════════════ */
+*/
   .roster-head {
     display: flex;
     padding-right: 84px; /* reserve the rail width so labels align with rows */
@@ -80,10 +79,8 @@
     }
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-   GRADEBOOK — clickable student rows
-═══════════════════════════════════════════════════════════════════ */
-  /* ── Row hover carries two different meanings; the paint must too ──
+  /* GRADEBOOK — clickable student rows */
+  /* Row hover carries two different meanings; the paint must too
    A plain tint on a table row is a SCANNING AID — it helps the eye hold
    its place across a wide row, and every table gets it. On the rows that
    actually open something (gradebook rows, roster rows) the same tint was

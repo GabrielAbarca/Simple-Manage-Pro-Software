@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  nav.js — sidebar section switching, logout, and the profile-photo
-//  shortcut for the admin console. Split out of admin.js.
-//
-//  Takes a `{page: loader}` map rather than importing the screen
-//  modules directly (same shape as teacherNav.js / studentNav.js), so
-//  this file never has to import the screens that in turn import
-//  `showSection` from here.
-// ─────────────────────────────────────────────────────────────────
 import { signOut } from "../auth.js";
 import { state } from "./state.js";
 

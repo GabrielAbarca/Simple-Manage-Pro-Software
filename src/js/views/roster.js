@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  roster.js — the class workspace's Roster tab: the student list (with
-//  per-period + Overall grade columns). Add/edit/delete forms live in
-//  studentForm.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";

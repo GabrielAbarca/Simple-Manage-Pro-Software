@@ -1,14 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  accounts.js — login management. Split out of admin.js.
-//
-//  The one place every login is visible, across all three roles.
-//  Teacher and student logins are still created from their own tables
-//  (accountBtn there); this screen enumerates existing accounts, adds
-//  admin logins (creatable nowhere else), and enables/disables sign-in.
-//  In demo mode listAccounts is a simulated fixture, so writes are
-//  reflected locally like every other demo change instead of
-//  re-fetched.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import {

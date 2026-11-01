@@ -1,7 +1,5 @@
 @layer page {
-  /* ─── Sidebar divider moved to style.css (shared by both surfaces) ─ */
-
-  /* ─── Stat cards (Overview) ───────────────────────────────────── */
+  /* Stat cards (Overview) */
   .admin-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));

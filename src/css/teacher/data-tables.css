@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Data tables ──────────────────────────────────────────────── */
+  /* Data tables */
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -47,7 +47,7 @@
     margin-left: var(--space-3);
   }
 
-  /* ─── Status badges (admin-specific states) ──────────────────── */
+  /* Status badges (admin-specific states) */
   /* .badge-primary / -success / -warning / -danger live in style.css.
    Only the neutral variant is admin-only. */
   .badge-neutral {
@@ -55,7 +55,7 @@
     color: var(--color-dark-variant);
   }
 
-  /* ─── Pagination ───────────────────────────────────────────────── */
+  /* Pagination */
   .table-pagination {
     display: flex;
     justify-content: flex-end;
@@ -86,7 +86,7 @@
     color: var(--color-white);
   }
 
-  /* ─── Grade matrix / inputs inside tables ─────────────────────── */
+  /* Grade matrix / inputs inside tables */
   .data-table input[type="text"],
   .data-table input[type="number"],
   .data-table select {

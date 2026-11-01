@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherNav.js — sidebar section switching, logout, and cross-portal
-//  links for the teacher console. Split out of teacher.js's navigation
-//  section.
-//
-//  Takes a `{page: loader}` map rather than importing view modules
-//  directly (same shape as studentNav.js's initNav), so this file never
-//  has to import the class-workspace/view modules that in turn import
-//  `showSection` from here.
-// ─────────────────────────────────────────────────────────────────
 import { getSession, signOut } from "./auth.js";
 import { fetchStudentId } from "./role.js";
 import { state } from "./teacherState.js";

@@ -1,22 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  popover.js — the anchored transient surface both custom controls
-//  hang off (the select's listbox, the date picker's calendar).
-//
-//  Two constraints shape this.
-//
-//  1. It cannot live next to its trigger. Both controls appear inside
-//     the shared modal, and `.modal` is `overflow-y: auto` — an
-//     absolutely positioned child gets clipped at the modal's edge, so
-//     a listbox on the last field of a form would be cut in half. The
-//     surface is therefore rendered into a body-level root and
-//     positioned with `position: fixed` from the trigger's rect.
-//
-//  2. It is NOT a dialog. It must not trap focus and must not make the
-//     page inert — a listbox is part of the form behind it, not a layer
-//     over it. What it does need is first refusal on Escape, which it
-//     gets by registering a guard with dialog.js.
-// ─────────────────────────────────────────────────────────────────
-
 import { registerEscapeGuard } from "../dialog.js";
 
 /** Gap between the trigger and the surface, and the margin kept off-screen. */

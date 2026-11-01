@@ -1,28 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════
-   STYLE.CSS — shared design system + student-portal styles
-   ───────────────────────────────────────────────────────────────
-   Loaded by EVERY page (index.html, admin.html, login.html), so it
-   holds the design tokens and shared chrome used across the app:
-     • CSS variables / theming        • base reset & typography
-     • app shell (container, aside, main, .right panel)
-     • shared chrome (.profile, .recent-updates, .subjects-analytics,
-       .theme-toggler, badges, base tables, .view-section)
-   Page-specific styles live in their own file and are layered on top:
-     • admin.html  → admin.css   • login.html → login.css
-   Sections below are tagged [SHARED] (used everywhere) or
-   [STUDENT] (only the student portal renders these views).
-
-   This file is a thin entry point — the rules live in ./style/*,
-   split by component domain (fonts, design tokens, reset, app shell,
-   student-portal views, settings, right panel, legal/404 pages,
-   responsive breakpoints, native/custom form controls). Vite resolves
-   the @import graph at build time, so the shipped CSS is unchanged.
-═══════════════════════════════════════════════════════════════ */
-
-/* ── Cascade layers ─────────────────────────────────────────────────
+/* Cascade layers
    The Vite build does NOT preserve the <link rel="stylesheet"> order
    authored in the HTML (production ships admin.css BEFORE style.css),
-   so page overrides at equal specificity used to lose in prod but win
+   so page overrides at equal specificity would lose in prod but win
    in dev. Layers make the cascade independent of load order.
 
    The order statement below is repeated verbatim in every stylesheet:
@@ -53,9 +32,7 @@
 @import "./style/responsive.css";
 @import "./style/notfound-and-motion.css";
 
-/* ═══════════════════════════════════════════════════════════════
-   CONTROLS LAYER — the app claims the controls the browser drew
-   ───────────────────────────────────────────────────────────────
+/* CONTROLS LAYER — the app claims the controls the browser drew
    These rules sit in a THIRD cascade layer, above `page`, and that
    placement is load-bearing rather than stylistic.
 

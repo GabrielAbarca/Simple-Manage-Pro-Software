@@ -1,24 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  dbErrors.js — turn a PostgREST/Postgres failure into something a
-//  school director can act on.
-//
-//  Writes that slip past client-side validation come back as PostgrestError
-//  objects whose `.message` is written for whoever wrote the schema, not for
-//  whoever runs the school:
-//
-//    update or delete on table "teachers" violates foreign key constraint
-//    "class_subject_teachers_teacher_id_fkey" on table "class_subject_teachers"
-//
-//  Callers map the error to a Message first and translate it, exactly like a
-//  validation rule — same descriptor shape as validate.js, so the existing
-//  t(key, vars) path is reused rather than duplicated.
-//
-//  This is the backstop, not the plan: the fix for most of these is a rule that
-//  catches the value before it ever leaves the browser (see validate.js's
-//  maxLen and unique). Demo mode never reaches Postgres at all, so anything
-//  relying on this module is invisible there.
-// ─────────────────────────────────────────────────────────────────
-
 /** @typedef {import("./validate.js").Message} Message */
 
 /**

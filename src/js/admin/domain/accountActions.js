@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  accountActions.js — the per-record login button shared by the
-//  teachers and students tables. Split out of admin.js.
-//
-//  Real mode goes through the admin-users Edge Function; demo mode
-//  simulates and never mints a user. A record with a linked auth user
-//  shows "reset password"; otherwise "create login". `reload`
-//  re-renders the owning screen afterward.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import {

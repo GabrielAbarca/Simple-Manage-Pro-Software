@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  settings.js — the Settings screen: the school profile card (the
-//  only admin-writable part) above the shared read-only renderer.
-//  Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { renderSettings } from "../../settings.js";
 import { state } from "../state.js";

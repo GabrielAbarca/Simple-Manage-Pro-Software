@@ -1,21 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  adminDemoDb.js — demo-mode write sandbox for the admin console.
-//
-//  Wraps a real Gateway (adminData.js) so every write lands in an
-//  in-memory, per-session delta store instead of Supabase, while reads
-//  keep hitting the real (read-only) backend and get the session's
-//  deltas overlaid on the way out. The console's write→re-fetch flows
-//  then render local changes as if they persisted; a refresh discards
-//  the deltas and restores pristine demo data.
-//
-//  This module NEVER writes to Supabase — it only records deltas. The
-//  server-side RLS lock remains the backstop for anyone bypassing the UI.
-//
-//  Because the admin data layer reads one flat table at a time, the
-//  overlay is fully generic: one delta store per table, no per-method
-//  bespoke logic (unlike the teacher console's demoDb.js).
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * @typedef {import("./adminData.js").Gateway} Gateway
  * @typedef {import("./adminData.js").SelectOpts} SelectOpts

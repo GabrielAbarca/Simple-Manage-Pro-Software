@@ -1,7 +1,7 @@
-// ── Roster / students, student 360, and discipline ──────────────
+// Roster / students, student 360, and discipline
 import { supabase } from "../supabaseClient.js";
 
-// ── Roster / students ───────────────────────────────────────
+// Roster / students
 export async function fetchRoster(classId) {
   const { data, error } = await supabase
     .from("students")
@@ -47,7 +47,7 @@ export async function deleteStudent(id) {
   if (error) throw error;
 }
 
-// ── Student 360 (read-only) ─────────────────────────────────
+// Student 360 (read-only)
 export async function fetchStudentAttendance(studentId) {
   const { data, error } = await supabase
     .from("attendance")
@@ -89,7 +89,7 @@ export async function fetchClassDiscipline(studentIds, period) {
   return data; // Array with selected columns' data.
 }
 
-// ── Discipline (write — item 2) ─────────────────────────────
+// Discipline (write)
 // Teacher-filed behavior records. reported_by_teacher stamps authorship;
 // reported_by_staff stays null (this console is teacher-scoped).
 export async function insertDiscipline(payload) {
@@ -105,7 +105,7 @@ export async function updateDiscipline(id, payload) {
   if (error) throw error;
 }
 
-// ── Conducta ────────────────────────────────────────────────
+// Conducta
 // The live mark, read from the view and never recomputed here — the same
 // contract fetchPeriodGrades has with student_period_grades.
 export async function fetchPeriodConduct(classId, periodId) {
@@ -179,7 +179,7 @@ export async function fetchStudentSubjectGrades(studentId, periodId) {
 }
 
 // Every posted subject grade for a student, all periods — powers the printable
-// progress report (item 6). Read-only, the full-school student_grades record.
+// progress report. Read-only, the full-school student_grades record.
 export async function fetchStudentAllSubjectGrades(studentId) {
   const { data, error } = await supabase
     .from("student_grades")

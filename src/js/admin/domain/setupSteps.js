@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  setupSteps.js — what the overview's setup checklist counts as done,
-//  in dependency order. Pure, so the rules are unit-tested.
-// ─────────────────────────────────────────────────────────────────
 import { totalWeight, weightStatus } from "../../gradingPeriods.js";
 
 /**

@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Gradebook scoresheet ─────────────────────────────────────── */
+  /* Gradebook scoresheet */
   .scoresheet-wrap {
     overflow-x: auto;
   }

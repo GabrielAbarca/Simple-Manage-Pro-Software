@@ -1,5 +1,5 @@
 @layer base {
-  /* ── 404 page (404.html) ──────────────────────────────────────────
+  /* 404 page (404.html)
    Standalone branded not-found page; self-contained so it renders without the
    app shell, themable through the shared design tokens. */
   .notfound-body {
@@ -49,7 +49,7 @@
     opacity: 0.9;
   }
 
-  /* ── Reduced motion (A3) ──────────────────────────────────────────
+  /* Reduced motion
    Respect the OS "reduce motion" preference. style.css loads on every page
    (index / admin / login / 404), so this one global damper neutralises the
    decorative + entrance animations and long transitions across the whole app.

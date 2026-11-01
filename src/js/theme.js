@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-//  Global theme (light/dark) — shared across every page.
-//  The choice is persisted to localStorage so it survives reloads
-//  and navigation between the student portal, admin dashboard and
-//  login. A tiny inline <head> script applies the class to <html>
-//  before first paint (no flash); this module keeps body + the
-//  toggler UI in sync and owns the toggle/persist logic.
-// ─────────────────────────────────────────────────────────────
-
 const STORAGE_KEY = "smp-theme";
 const DARK_CLASS = "dark-theme-variables";
 
@@ -33,8 +24,8 @@ export function isDarkMode() {
 /**
  * Reflect the current mode in any toggler present on the page.
  *
- * The togglers are <button aria-pressed> (they used to be plain <div>s, which
- * made theme switching mouse-only). `aria-pressed` is what tells a screen
+ * The togglers are <button aria-pressed> so theme switching works from the
+ * keyboard, not just the mouse. `aria-pressed` is what tells a screen
  * reader which way the switch currently sits — the .active class only moves
  * the highlight visually, so both have to be kept in step here.
  */

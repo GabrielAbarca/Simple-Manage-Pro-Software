@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  enums.js — the console's closed value sets and the coercions that
-//  map free-form input onto them. Split out of admin.js.
-//
-//  Shared deliberately: the add/edit forms build their <select> options
-//  from these lists, and the CSV import reads spreadsheet text through
-//  the same coercions, so a pasted "Masculino" and a picked "Male" land
-//  on the identical stored value.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 
 export const ROOM_TYPES = [

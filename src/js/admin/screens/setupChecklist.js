@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  setupChecklist.js — the overview's guided setup for a new school:
-//  the steps from an empty project to a running one, in dependency
-//  order, each linking to the screen that does it.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../../i18n.js";
 import { state } from "../state.js";
 import { showSection } from "../nav.js";

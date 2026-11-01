@@ -1,20 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  scheduleLogic.js — pure rules for weekly class schedules.
-//
-//  Everything the schedule builder needs that isn't DOM work: day
-//  bookkeeping, time arithmetic, conflict detection and the plan for
-//  copying one section's week onto another. The admin console (and the
-//  student dashboard's "next class") call in here; nothing in this file
-//  touches the DOM, Supabase or i18n — conflicts come back as typed
-//  records and the caller translates them.
-//
-//  Times arrive from Postgres as "HH:MM:SS" but from an <input type=
-//  "time"> as "HH:MM", so every comparison goes through normalizeTime.
-//
-//  Days are ISO-ish: 1 = Monday … 7 = Sunday. JavaScript's getDay() puts
-//  Sunday at 0, hence jsDayToDow.
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * The minimum an entry needs to be ordered or overlap-tested. The student
  * portal reads schedules with embedded joins and no foreign keys, so the

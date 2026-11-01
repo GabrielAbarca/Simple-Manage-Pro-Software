@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  structure.js — CSV import descriptors for the calendar and the
-//  sections hung off it. Split out of admin.js.
-//
-//  These three all bind to the active school year, and sections also
-//  resolve grade levels, teachers and rooms by name.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../../i18n.js";
 import { state } from "../../state.js";
 import { data } from "../../data.js";

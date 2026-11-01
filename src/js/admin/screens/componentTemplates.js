@@ -1,15 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  componentTemplates.js — MEP grade-component schemes (cotidiano,
-//  tareas, pruebas, …). Split out of admin.js.
-//
-//  Admin-owned evaluative-component schemes. A teacher applies one to
-//  a gradebook, copying its items into that gradebook's
-//  grade_categories. Weights are checked with the same helpers grading
-//  periods use. A scheme is built one component at a time, so it may sit
-//  under 100% while being edited, but a save may not push it over; it
-//  takes exactly 100% to become the default or to be applied, and editing
-//  the default off 100% warns that teachers cannot apply it.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { totalWeight, weightStatus } from "../../gradingPeriods.js";

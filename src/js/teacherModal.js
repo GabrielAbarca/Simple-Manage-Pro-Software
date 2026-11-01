@@ -1,13 +1,9 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherModal.js — the generic add/edit form modal shared by every
-//  create/edit flow in the teacher console. Split out of teacher.js.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "./dialog.js";
 import { t } from "./i18n.js";
 import * as v from "./validate.js";
 import { showToast, errorText, openConfirm } from "./teacherFeedback.js";
 
-// ── Generic Modal ──────────────────────────────────────────────
+// Generic Modal
 const modalOverlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalForm = /** @type {HTMLFormElement} */ (
@@ -251,8 +247,7 @@ export function closeModal() {
 
 /**
  * Close on explicit intent only, confirming first when the form carries
- * unsaved edits. The X and Cancel both used to discard a half-filled form
- * without a word — the admin console already warns, this matches it.
+ * unsaved edits, the same as the admin console.
  */
 export function requestCloseModal() {
   if (!modalDirty) {

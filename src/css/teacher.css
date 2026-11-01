@@ -1,32 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════
-   TEACHER.CSS — teacher-console-only components, layered on style.css
-   ───────────────────────────────────────────────────────────────
-   Loaded only by teacher.html. Its rules live in the `page` cascade
-   layer, so they beat style.css's `base` layer no matter which file
-   the browser loads first. Contains styles that
-   exist nowhere else in the app: stat cards, overview grid, data
-   tables, toolbars (search/filters), buttons, modals, toasts, status
-   toggles, pagination and admin-only badges.
-
-   Shared chrome is NOT redefined here — the app shell, right panel
-   (.profile, .recent-updates, .subjects-analytics, .theme-toggler),
-   base badges and the .view-toolbar container all live in style.css
-   so the student portal (which does not load this file) keeps them.
-   Uses the same CSS variables defined in style.css.
-
-   This file is a thin entry point — the rules live in ./teacher/*,
-   split by component domain (console chrome, the class-first
-   workspace, the gradebook, the roster, the student drawer, and the
-   grade-entry grids). Every partial wraps itself in `@layer page`,
-   the same way ./style/* wraps itself in `@layer base`. Vite
-   resolves the @import graph at build time, so the shipped CSS is
-   unchanged.
-═══════════════════════════════════════════════════════════════ */
-
-/* ── Cascade layers ─────────────────────────────────────────────────
+/* Cascade layers
    The Vite build does NOT preserve the <link rel="stylesheet"> order
    authored in the HTML (production ships admin.css BEFORE style.css),
-   so page overrides at equal specificity used to lose in prod but win
+   so page overrides at equal specificity would lose in prod but win
    in dev. Layers make the cascade independent of load order.
 
    The order statement below is repeated verbatim in every stylesheet:
@@ -38,7 +13,7 @@
    order, so cascade results (which rule wins at equal specificity)
    stay identical after the split. Do not reorder. */
 
-/* ── Console chrome — shared by every teacher view ───────────────── */
+/* Console chrome — shared by every teacher view */
 @import "./teacher/stat-cards.css";
 @import "./teacher/toolbar.css";
 @import "./teacher/attendance-buttons.css";
@@ -46,7 +21,7 @@
 @import "./teacher/modals.css";
 @import "./teacher/panel-empty-and-toasts.css";
 
-/* ── Class-first workspace ───────────────────────────────────────── */
+/* Class-first workspace */
 @import "./teacher/my-classes.css";
 @import "./teacher/class-workspace.css";
 @import "./teacher/gradebook-scoresheet.css";
@@ -54,11 +29,11 @@
 @import "./teacher/student-drawer.css";
 @import "./teacher/conduct.css";
 
-/* ── Desktop/responsive overrides + clickable row lists ──────────── */
+/* Desktop/responsive overrides + clickable row lists */
 @import "./teacher/desktop-tables.css";
 @import "./teacher/clickable-rows.css";
 
-/* ── Grade entry: wide modals and the entry grids ────────────────── */
+/* Grade entry: wide modals and the entry grids */
 @import "./teacher/wide-modal.css";
 @import "./teacher/grade-entry-grids.css";
 @import "./teacher/absence-and-today.css";

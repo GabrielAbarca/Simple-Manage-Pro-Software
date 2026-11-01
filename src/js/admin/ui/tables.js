@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  tables.js — table/list rendering helpers shared by every admin
-//  console screen: loading/empty/error rows, row action buttons, the
-//  "just saved" row flash, and select-option building. Split out of
-//  admin.js's UI helpers.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { errorState, errorRow } from "../../ui.js";
 import { escapeHtml } from "../../html.js";
@@ -25,8 +19,8 @@ export function renderEmptyRow(
 /**
  * A section that failed to load, with a way to try again.
  *
- * This used to route through renderMessageRow, which meant a failed fetch and
- * an empty table rendered as the SAME muted grey line. "No students yet" and
+ * Not routed through renderMessageRow: a failed fetch and an empty table
+ * would render as the SAME muted grey line. "No students yet" and
  * "we couldn't reach the server" mean opposite things to a director — one is
  * an invitation to add the first student, the other is a dropped connection —
  * and showing the first when the second happened is how an outage turns into
@@ -68,7 +62,7 @@ export function iconBtn(icon, label, onClick, danger = false) {
   return btn;
 }
 
-// ── "Just saved" row feedback ──────────────────────────────────
+// "Just saved" row feedback
 // A toast confirms that a write happened, but not *which* record it touched.
 // After a save the owning table re-renders, so the row is a fresh element:
 // remember the id, then outline it green once it comes back on screen. This

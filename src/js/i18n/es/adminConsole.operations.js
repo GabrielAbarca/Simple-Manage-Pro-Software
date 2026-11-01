@@ -258,7 +258,7 @@ export default {
     confirmReset: "¿Enviar un restablecimiento de contraseña a {email}?",
     resetSent: "Restablecimiento de contraseña enviado.",
     resetDemo: "Contraseña restablecida (demo — no se envió correo).",
-    // ── Pantalla de cuentas ──
+    // Pantalla de cuentas
     title: "Cuentas de acceso",
     subtitle: "Quién puede iniciar sesión y con qué rol.",
     hint: "Los accesos de docentes y estudiantes se crean desde sus propias tablas. Los accesos de administración se crean aquí.",

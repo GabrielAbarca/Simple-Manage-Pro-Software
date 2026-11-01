@@ -21,8 +21,8 @@
   }
 
   /* Dashboard summary cards that double as shortcuts to their full section.
-   This is now the ONLY card lift in the app: every other card that used to
-   rise on hover was not clickable and no longer moves. The distance comes
+   This is the ONLY card lift in the app: a card that is not clickable does
+   not rise on hover. The distance comes
    from --lift-hover so the three surfaces that do lift agree on how far. */
   .clickable-card {
     cursor: pointer;

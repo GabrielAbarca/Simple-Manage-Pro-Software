@@ -65,9 +65,7 @@
 
   <body>
     <div class="container">
-      <!-- ═══════════════════════════════════════════════════════
-             SIDEBAR
-        ═══════════════════════════════════════════════════════ -->
+      <!-- SIDEBAR -->
       <aside>
         <div class="top">
           <div class="logo">
@@ -144,11 +142,9 @@
         </div>
       </aside>
 
-      <!-- ═══════════════════════════════════════════════════════
-             MAIN
-        ═══════════════════════════════════════════════════════ -->
+      <!-- MAIN -->
       <main>
-        <!-- ─── TODAY (landing) ──────────────────────────────── -->
+        <!-- TODAY (landing) -->
         <section class="view-section active" id="view-today">
           <h1 data-i18n="admin.heading.today">Today</h1>
           <p
@@ -167,7 +163,7 @@
           </div>
         </section>
 
-        <!-- ─── MY CLASSES ───────────────────────────────────── -->
+        <!-- MY CLASSES -->
         <section class="view-section" id="view-myclasses">
           <h1 data-i18n="admin.heading.myclasses">My Classes</h1>
           <p
@@ -184,7 +180,7 @@
           </div>
         </section>
 
-        <!-- ─── CLASS WORKSPACE (entered from a card) ────────── -->
+        <!-- CLASS WORKSPACE (entered from a card) -->
         <section class="view-section" id="view-class">
           <button class="breadcrumb-back" id="class-back-btn" type="button">
             <span class="material-symbols-outlined"
@@ -245,7 +241,7 @@
           </div>
         </section>
 
-        <!-- ─── SUBJECTS (global catalog — retained) ─────────── -->
+        <!-- SUBJECTS (global catalog — retained) -->
         <section class="view-section" id="view-subjects">
           <h1 data-i18n="admin.heading.subjects">Subjects</h1>
 
@@ -309,16 +305,14 @@
           </div>
         </section>
 
-        <!-- ─── SETTINGS (read-only, demo) ───────────────────── -->
+        <!-- SETTINGS (read-only, demo) -->
         <section class="view-section" id="view-settings">
           <h1 data-i18n="admin.heading.settings">Settings</h1>
           <div id="settings-root"></div>
         </section>
       </main>
 
-      <!-- ═══════════════════════════════════════════════════════
-             RIGHT PANEL
-        ═══════════════════════════════════════════════════════ -->
+      <!-- RIGHT PANEL -->
       <div class="right">
         <div class="quickbar" id="quick-stats-list"></div>
         <div class="top">
@@ -368,9 +362,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         STUDENT DETAIL DRAWER — read-only contact + guardians
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- STUDENT DETAIL DRAWER — read-only contact + guardians -->
     <div class="drawer-overlay" id="drawer-overlay">
       <aside
         class="drawer"
@@ -413,9 +405,7 @@
       </aside>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         SHARED MODAL — repurposed by admin.js for all add/edit forms
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- SHARED MODAL — repurposed by admin.js for all add/edit forms -->
     <div class="modal-overlay" id="modal-overlay">
       <div
         class="modal"
@@ -461,9 +451,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         CONFIRM DELETE MODAL
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- CONFIRM DELETE MODAL -->
     <div class="modal-overlay" id="confirm-overlay">
       <div
         class="modal modal-sm"
@@ -502,9 +490,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         MANAGE ASSIGNMENTS MODAL — gradebook assignment add/edit/delete
-    ═══════════════════════════════════════════════════════════════════ -->
+    <!-- MANAGE ASSIGNMENTS MODAL — gradebook assignment add/edit/delete -->
     <div class="modal-overlay" id="assignments-overlay">
       <div
         class="modal"
@@ -545,9 +531,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         STUDENT GRADES MODAL — per-student detail + grade entry (wide)
-    ═══════════════════════════════════════════════════════════════════ -->
+    <!-- STUDENT GRADES MODAL — per-student detail + grade entry (wide) -->
     <div class="modal-overlay" id="student-grades-overlay">
       <div
         class="modal modal-lg"
@@ -590,9 +574,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         GRADE CATEGORIES MODAL — weighting buckets per class (item 8)
-    ═══════════════════════════════════════════════════════════════════ -->
+    <!-- GRADE CATEGORIES MODAL — weighting buckets per class -->
     <div class="modal-overlay" id="categories-overlay">
       <div
         class="modal"
@@ -646,9 +628,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         POST GRADES MODAL — finalize period averages to the report card (item 1)
-    ═══════════════════════════════════════════════════════════════════ -->
+    <!-- POST GRADES MODAL — finalize period averages to the report card -->
     <div class="modal-overlay" id="post-grades-overlay">
       <div
         class="modal modal-lg"
@@ -691,11 +671,10 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         POST CONDUCTA MODAL — freezes a period's conducta to the record
+    <!-- POST CONDUCTA MODAL — freezes a period's conducta to the record
          the report card reads. Class-scoped, not subject-scoped: conducta
          is one institutional mark per period.
-    ═══════════════════════════════════════════════════════════════════ -->
+    -->
     <div class="modal-overlay" id="post-conduct-overlay">
       <div
         class="modal modal-lg"
@@ -738,9 +717,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         COLUMN GRADE ENTRY MODAL — one assignment, every student (item 4)
-    ═══════════════════════════════════════════════════════════════════ -->
+    <!-- COLUMN GRADE ENTRY MODAL — one assignment, every student -->
     <div class="modal-overlay" id="column-grades-overlay">
       <div
         class="modal modal-lg"
@@ -783,9 +760,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         TOAST CONTAINER
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- TOAST CONTAINER -->
     <!-- Live region: toasts are how every save and every failure is
          reported, and without this they were announced to nobody. -->
     <div

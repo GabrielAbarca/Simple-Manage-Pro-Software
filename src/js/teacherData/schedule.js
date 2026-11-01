@@ -1,4 +1,4 @@
-// ── Schedule (by class, and today's — item 7) ────────────────────
+// Schedule (by class, and today's)
 import { supabase } from "../supabaseClient.js";
 
 export async function fetchScheduleByClass(classId) {
@@ -37,7 +37,7 @@ export async function fetchScheduleByClass(classId) {
   return data;
 }
 
-// ── Today (item 7) ──────────────────────────────────────────
+// Today
 export async function fetchScheduleToday(teacherId, dayOfWeek) {
   const { data, error } = await supabase
     .from("schedules")

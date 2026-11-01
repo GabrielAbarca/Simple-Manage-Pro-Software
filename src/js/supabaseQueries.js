@@ -1,9 +1,9 @@
 // Student portal data layer.
 //
 // Every fetcher here throws when the query fails, and returns empty only when
-// the query succeeded and there genuinely is nothing. These used to be the
-// same thing — a failure returned [] — which meant a dropped connection or an
-// RLS denial rendered as "No grades recorded yet". The caller (main.js) is the
+// the query succeeded and there genuinely is nothing. Returning [] on failure
+// would render a dropped connection or an RLS denial as "No grades recorded
+// yet". The caller (main.js) is the
 // only consumer, and it turns a throw into a visible error state with a retry.
 import { supabase } from "./supabaseClient.js";
 import { nextOccurrence } from "./scheduleLogic.js";
@@ -148,8 +148,8 @@ export async function fetchStudentAttendance(studentId) {
     throw error;
   }
 
-  // Resolve every recorder in ONE batched query instead of one lookup per row
-  // (this was an N+1: a serial round-trip for each attendance record).
+  // Resolve every recorder in ONE batched query instead of a serial
+  // round-trip for each attendance record.
   const recorderIds = [
     ...new Set(data.filter((r) => r.recorded_by).map((r) => r.recorded_by)),
   ];

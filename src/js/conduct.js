@@ -1,24 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  conduct.js — conducta as a grade, in one place.
-//
-//  REAC 2026 grades conducta as a mark in its own right, with the same
-//  70 floor as an academic subject in secondary. A student below it is
-//  aplazado por conducta.
-//
-//  Every student starts the period at 100 and a teacher deducts points
-//  on each discipline record, naming the reason. There is no severity
-//  scale and no school-wide weighting: the points a teacher enters ARE
-//  the deduction, so every point of a conducta grade traces back to one
-//  named, described record. `severity` is kept on the record for the
-//  register and deliberately has no effect here, as do `resolved` and
-//  `resolution`, which survive in the table but no longer surface.
-//
-//  Pure on purpose: the SQL view public.student_period_conduct computes
-//  the identical number server-side, and demoDb.js mirrors it through
-//  this module. Keep all three in step — a divergence here is a grade
-//  that changes depending on whether the demo overlay is in play.
-// ─────────────────────────────────────────────────────────────────
-
 /** A clean record. Conducta counts down from here, never up. */
 export const CONDUCT_MAX = 100;
 

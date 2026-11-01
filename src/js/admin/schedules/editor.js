@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  editor.js — the weekly editor sub-tab: one section's week as a
-//  grid, with a bell schedule optionally laying out the rows, plus the
-//  always-visible list of everything already clashing this year.
-//  Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as sched from "../../scheduleLogic.js";
 import { state } from "../state.js";

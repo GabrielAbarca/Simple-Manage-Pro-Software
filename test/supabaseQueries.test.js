@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 // Chainable Supabase mock: from(table).select().eq().in().order().{maybeSingle,
 // single} — all thenable — resolving fixture rows with eq/in filters applied.
 // `calls` records every resolved query so tests can assert query shape (e.g.
-// the N+1 fix issuing a single teachers?id=in.(…) batch).
+// the recorder lookup issuing a single teachers_directory?id=in.(…) batch).
 // `errors[table]` makes that table's next query fail, the way a dropped
 // connection or an RLS denial would.
 const { fixtures, calls, errors } = vi.hoisted(() => ({
@@ -180,8 +180,8 @@ describe("fetchDashboardStats aggregation", () => {
   });
 });
 
-// A failed query used to return [] — indistinguishable from "no grades yet",
-// so a network drop rendered as an empty state. These pin the distinction:
+// A failed query that returned [] would be indistinguishable from "no grades
+// yet", so a network drop would render as an empty state. These pin the distinction:
 // a failure propagates, and only a genuinely absent row returns empty.
 describe("failures propagate instead of looking like empty data", () => {
   it("fetchStudentGrades rejects when the query fails", async () => {

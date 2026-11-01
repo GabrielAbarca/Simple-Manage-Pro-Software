@@ -1,21 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  gradingPeriods.js — pure rules for a school year's grading periods.
-//
-//  A year's periods must carry weights that add up to 100% and must sit
-//  inside the parent year's date range. Both rules are enforced in the
-//  admin console (inline, before a write) and — for the dates — again by
-//  a database trigger (supabase/schema/incremental_grading_period_bounds.sql).
-//
-//  How many periods a year has is up to the school: Costa Rica's MEP
-//  calendar runs two periodos at 50/50, while a colegio on three
-//  trimestres splits 33.33 / 33.33 / 33.34. Nothing here assumes a count.
-//
-//  The three-period split is why rounding matters: weights are stored as
-//  numeric(5,2), and summing 33.33 / 33.33 / 33.34 as floats yields
-//  99.99999999…, so every total is rounded to two decimals before being
-//  compared to 100 — otherwise a correctly weighted year would be rejected.
-// ─────────────────────────────────────────────────────────────────
-
 /** Column precision of grading_periods.weight — numeric(5,2). */
 const WEIGHT_DECIMALS = 2;
 

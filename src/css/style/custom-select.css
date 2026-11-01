@@ -1,7 +1,5 @@
 @layer controls {
-  /* ═══════════════════════════════════════════════════════════════
-     CUSTOM SELECT + DATE PICKER
-     ───────────────────────────────────────────────────────────────
+  /* CUSTOM SELECT + DATE PICKER
      The native control is still in the DOM in both cases — it holds the
      value the form submits and the tests drive. It is CLIPPED, never
      `display: none`: hiding it outright would take it out of the layout
@@ -9,7 +7,7 @@
 
      On coarse pointers everything here reverses and the OS control comes
      back, because a wheel picker beats a custom list on a phone.
-  ═══════════════════════════════════════════════════════════════ */
+  */
   /* Six different surface rules style a <select> or a date input — modal,
      panel toolbar, view toolbar, schedule field, CSV mapping row, data-table
      cell — each with its own padding, border and background. Rather than
@@ -108,7 +106,7 @@
     outline: none;
   }
 
-  /* ── The surfaces ─────────────────────────────────────────────── */
+  /* The surfaces */
   .smp-popover-root {
     position: absolute;
     top: 0;

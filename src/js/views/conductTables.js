@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  views/conductTables.js — HTML builders for the Conduct tab. Pure:
-//  data in, markup out. No state, no queries, no listeners; clicks are
-//  handled by delegation in views/conduct.js through data-action.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { escapeHtml } from "../html.js";

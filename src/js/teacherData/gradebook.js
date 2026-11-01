@@ -1,7 +1,7 @@
-// ── Assignments, scores, posted grades, and column entry (gradebook) ──
+// Assignments, scores, posted grades, and column entry (gradebook)
 import { supabase } from "../supabaseClient.js";
 
-// ── Assignments (gradebook) ─────────────────────────────────
+// Assignments (gradebook)
 export async function fetchAssignments(cstId, periodId) {
   const { data, error } = await supabase
     .from("assignments")
@@ -79,7 +79,7 @@ export async function fetchAllPeriodGrades(cstId) {
   return data;
 }
 
-// ── Post grades (item 1) ────────────────────────────────────
+// Post grades
 // The grades already posted to the report card for this section + period, so
 // the posting panel can show what's live and pre-fill overrides/comments.
 export async function fetchPostedGrades(cstId, periodId) {
@@ -101,7 +101,7 @@ export async function upsertStudentGrades(rows) {
   if (error) throw error;
 }
 
-// ── Column grade entry (item 4) ─────────────────────────────
+// Column grade entry
 // Every student's score for ONE assignment, for the whole-class entry grid.
 export async function fetchAssignmentColumn(assignmentId) {
   const { data, error } = await supabase

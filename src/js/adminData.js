@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  adminData.js — data layer for the admin console.
-//
-//  Two pieces:
-//    • a generic table Gateway (select / insert / update / remove),
-//      with a Supabase-backed implementation; the demo overlay in
-//      adminDemoDb.js is an alternate Gateway.
-//    • createAdminData(gateway): declarative read/write methods for the
-//      academic-structure tables. Reads are FLAT (one table each) so the
-//      demo overlay stays a simple per-table delta store; the controller
-//      composes joins from the small reference lists it already holds.
-// ─────────────────────────────────────────────────────────────────
-
 import { supabase } from "./supabaseClient.js";
 import { MISSED_LESSON_STATUSES } from "./atRisk.js";
 
@@ -157,7 +144,7 @@ export const supabaseGateway = {
  */
 export function createAdminData(gateway) {
   return {
-    // ── School years ──────────────────────────────────────────
+    // School years
     listSchoolYears: () =>
       gateway.select("school_years", {
         order: { column: "start_date", ascending: false },
@@ -183,7 +170,7 @@ export function createAdminData(gateway) {
       await gateway.update("school_years", id, { is_active: true });
     },
 
-    // ── Grading periods ───────────────────────────────────────
+    // Grading periods
     listPeriods: (/** @type {number} */ yearId) =>
       gateway.select("grading_periods", {
         match: { school_year_id: yearId },
@@ -196,7 +183,7 @@ export function createAdminData(gateway) {
     deletePeriod: (/** @type {number} */ id) =>
       gateway.remove("grading_periods", id),
 
-    // ── Grade levels ──────────────────────────────────────────
+    // Grade levels
     listGradeLevels: () =>
       gateway.select("grade_levels", { order: { column: "numeric_level" } }),
     createGradeLevel: (/** @type {object} */ row) =>
@@ -206,14 +193,14 @@ export function createAdminData(gateway) {
     deleteGradeLevel: (/** @type {number} */ id) =>
       gateway.remove("grade_levels", id),
 
-    // ── Rooms ─────────────────────────────────────────────────
+    // Rooms
     listRooms: () => gateway.select("rooms", { order: { column: "name" } }),
     createRoom: (/** @type {object} */ row) => gateway.insert("rooms", row),
     updateRoom: (/** @type {number} */ id, /** @type {object} */ patch) =>
       gateway.update("rooms", id, patch),
     deleteRoom: (/** @type {number} */ id) => gateway.remove("rooms", id),
 
-    // ── Sections (classes) ────────────────────────────────────
+    // Sections (classes)
     listSections: (/** @type {number} */ yearId) =>
       gateway.select("classes", {
         match: { school_year_id: yearId },
@@ -225,7 +212,7 @@ export function createAdminData(gateway) {
       gateway.update("classes", id, patch),
     deleteSection: (/** @type {number} */ id) => gateway.remove("classes", id),
 
-    // ── Subjects ──────────────────────────────────────────────
+    // Subjects
     listSubjects: () =>
       gateway.select("subjects", { order: { column: "name" } }),
     createSubject: (/** @type {object} */ row) =>
@@ -234,14 +221,14 @@ export function createAdminData(gateway) {
       gateway.update("subjects", id, patch),
     deleteSubject: (/** @type {number} */ id) => gateway.remove("subjects", id),
 
-    // ── Grade-level ↔ subject mapping ─────────────────────────
+    // Grade-level ↔ subject mapping
     listGradeLevelSubjects: () => gateway.select("grade_level_subjects"),
     createGradeLevelSubject: (/** @type {object} */ row) =>
       gateway.insert("grade_level_subjects", row),
     deleteGradeLevelSubject: (/** @type {number} */ id) =>
       gateway.remove("grade_level_subjects", id),
 
-    // ── MEP grade-component templates ─────────────────────────
+    // MEP grade-component templates
     // Admin-owned schemes (cotidiano, tareas, pruebas, …) that teachers
     // instantiate into a gradebook's grade_categories.
     listComponentTemplates: () =>
@@ -289,7 +276,7 @@ export function createAdminData(gateway) {
     deleteTemplateItem: (/** @type {number} */ id) =>
       gateway.remove("grade_component_template_items", id),
 
-    // ── Teachers (records; auth accounts are Phase 3) ─────────
+    // Teachers (records; auth accounts are Phase 3)
     listTeachers: () =>
       gateway.select("teachers", { order: { column: "last_name" } }),
     createTeacher: (/** @type {object} */ row) =>
@@ -298,7 +285,7 @@ export function createAdminData(gateway) {
       gateway.update("teachers", id, patch),
     deleteTeacher: (/** @type {number} */ id) => gateway.remove("teachers", id),
 
-    // ── Class ↔ subject ↔ teacher assignments ─────────────────
+    // Class ↔ subject ↔ teacher assignments
     listAssignments: (/** @type {number} */ yearId) =>
       gateway.select("class_subject_teachers", {
         match: { school_year_id: yearId },
@@ -313,7 +300,7 @@ export function createAdminData(gateway) {
     deleteAssignment: (/** @type {number} */ id) =>
       gateway.remove("class_subject_teachers", id),
 
-    // ── Schedules ─────────────────────────────────────────────
+    // Schedules
     listSchedules: (/** @type {number} */ classId) =>
       gateway.select("schedules", {
         match: { class_id: classId },
@@ -339,7 +326,7 @@ export function createAdminData(gateway) {
     deleteSchedule: (/** @type {number} */ id) =>
       gateway.remove("schedules", id),
 
-    // ── Schedule configuration (one row per school year) ──────
+    // Schedule configuration (one row per school year)
     /** The year's config, or null before the school has set one. */
     async getScheduleConfig(/** @type {number} */ yearId) {
       const rows = await gateway.select("schedule_configs", {
@@ -354,7 +341,7 @@ export function createAdminData(gateway) {
       /** @type {object} */ patch,
     ) => gateway.update("schedule_configs", id, patch),
 
-    // ── Bell schedules (reusable time-block templates) ────────
+    // Bell schedules (reusable time-block templates)
     listBellSchedules: () =>
       gateway.select("bell_schedules", { order: { column: "name" } }),
     createBellSchedule: (/** @type {object} */ row) =>
@@ -384,7 +371,7 @@ export function createAdminData(gateway) {
     deleteBellBlock: (/** @type {number} */ id) =>
       gateway.remove("bell_schedule_blocks", id),
 
-    // ── Students & enrollment ─────────────────────────────────
+    // Students & enrollment
     listStudents: () =>
       gateway.select("students", { order: { column: "last_name" } }),
     createStudent: (/** @type {object} */ row) =>
@@ -402,7 +389,7 @@ export function createAdminData(gateway) {
      */
     bulkInsert: (table, rows) => gateway.insertMany(table, rows),
 
-    // ── Events (school calendar shown in the student portal) ──
+    // Events (school calendar shown in the student portal)
     listEvents: () =>
       gateway.select("events", {
         order: { column: "start_date", ascending: false },
@@ -412,7 +399,7 @@ export function createAdminData(gateway) {
       gateway.update("events", id, patch),
     deleteEvent: (/** @type {number} */ id) => gateway.remove("events", id),
 
-    // ── Guardians (encargados) and their links to students ────
+    // Guardians (encargados) and their links to students
     listGuardians: () =>
       gateway.select("guardians", { order: { column: "last_name" } }),
     /** @param {number[]} ids */
@@ -456,7 +443,7 @@ export function createAdminData(gateway) {
     unlinkGuardian: (/** @type {number} */ id) =>
       gateway.remove("student_guardians", id),
 
-    // ── School settings (single row: name, logo, ID label) ────
+    // School settings (single row: name, logo, ID label)
     /** The settings row, or null when the table is empty. */
     async getSchoolSettings() {
       const rows = await gateway.select("school_settings");
@@ -469,7 +456,7 @@ export function createAdminData(gateway) {
       /** @type {object} */ patch,
     ) => gateway.update("school_settings", id, patch),
 
-    // ── Overview (school-wide reads) ──────────────────────────
+    // Overview (school-wide reads)
     /** @param {string} [status] only students with this status */
     countStudents: (status) =>
       gateway.count("students", status ? { match: { status } } : {}),

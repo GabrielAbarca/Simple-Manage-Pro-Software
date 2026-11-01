@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  rows.js — turn the wizard's current mapping into normalized DB
-//  payloads plus a validation report. Split out of admin.js.
-//
-//  Nothing here touches the DOM or writes: it answers "what would be
-//  imported, and which lines would be skipped and why", which is
-//  exactly what the preview step shows before anything is committed.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 
 /**

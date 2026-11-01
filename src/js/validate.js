@@ -1,22 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  validate.js — declarative field validation for the admin console.
-//
-//  The create/edit forms used to lean on the browser's own validation,
-//  which surfaces errors as native popups (unstyled, untranslatable, one
-//  at a time) and lets anything it can't express through — a letter in a
-//  numeric field became NaN on its way to the database.
-//
-//  This module owns the rules. Each rule is a small function of
-//  (value, siblingValues) that returns either null or a MESSAGE
-//  DESCRIPTOR — an i18n key plus its interpolation vars, never a
-//  translated string. Keeping translation out means the rules stay pure
-//  and unit-testable, and the caller (admin.js) renders each message
-//  inline under its field via t().
-//
-//  Every rule tolerates a blank value except required(): "optional but
-//  well-formed if present" is the common case (national ID, phone).
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * An untranslated validation message: an i18n key plus its {token} vars.
  * @typedef {{ key: string, vars?: Record<string, string|number> }} Message
@@ -54,13 +35,13 @@ function isBlank(/** @type {any} */ value) {
 
 const normalize = (/** @type {any} */ v) => String(v ?? "").trim();
 
-// ── Presence ─────────────────────────────────────────────────────
+// Presence
 
 /** @returns {Rule} */
 export const required = () => (v) =>
   isBlank(v) ? msg("validation.required") : null;
 
-// ── Formats ──────────────────────────────────────────────────────
+// Formats
 
 /** @returns {Rule} */
 export const email = () => (v) =>
@@ -75,7 +56,7 @@ export const phone = () => (v) => {
   return PHONE_RE.test(s) && /\d/.test(s) ? null : msg("validation.phone");
 };
 
-// ── Numbers ──────────────────────────────────────────────────────
+// Numbers
 
 /** @returns {Rule} */
 export const integer = () => (v) => {
@@ -151,7 +132,7 @@ export const percent = () => (v) => {
   return n < 0 || n > 100 ? msg("validation.percent") : null;
 };
 
-// ── Dates (ISO yyyy-mm-dd strings compare correctly as strings) ───
+// Dates (ISO yyyy-mm-dd strings compare correctly as strings)
 
 /**
  * Date must fall inside a parent entity's range. `labels` carries the
@@ -210,7 +191,7 @@ export const notFuture = (todayIso) => (v) => {
   return normalize(v) > today ? msg("validation.futureDate") : null;
 };
 
-// ── Uniqueness ───────────────────────────────────────────────────
+// Uniqueness
 
 /**
  * Value must not collide with one already in use. Mirrors the database's
@@ -236,7 +217,7 @@ export const unique = (existing, opts = {}) => {
   };
 };
 
-// ── Passwords ────────────────────────────────────────────────────
+// Passwords
 
 /** @returns {Rule} */
 export const password = () => (v) => {
@@ -246,7 +227,7 @@ export const password = () => (v) => {
     : null;
 };
 
-// ── Runner ───────────────────────────────────────────────────────
+// Runner
 
 /**
  * Run a field → rules map over submitted values. Stops at the first failing

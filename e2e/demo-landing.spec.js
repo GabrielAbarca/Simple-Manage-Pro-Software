@@ -3,8 +3,6 @@ import { REF, routeSupabase, seedLang, sessionSeed, UID } from "./fixtures.js";
 
 // The demo is the product's shop window and a director is the buyer, so where
 // it lands and which language it opens in are the first two things it says.
-// Both used to say the wrong thing: the tour started on one student's
-// dashboard, in English.
 
 // The demo account is an admin that ALSO has a students row — that is what
 // lets one login tour all three portals. Both facts matter to these specs.

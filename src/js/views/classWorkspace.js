@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  classWorkspace.js — the class workspace shell: opens a class into its
-//  own view and dispatches its sub-tabs (roster/gradebook/attendance/
-//  schedule) to their respective renderers.
-// ─────────────────────────────────────────────────────────────────
 import { state } from "../teacherState.js";
 import { showSection } from "../teacherNav.js";
 import { className } from "../teacherFormat.js";
@@ -25,8 +20,8 @@ export function openClassWorkspace(cst, initialTab = "roster") {
 
   document.getElementById("class-ws-title").textContent =
     `${state.currentClass.subjectName} · ${state.currentClass.className}`;
-  // The title now spells the grade out ("10th Grade — Section A"), so the
-  // subtitle drops the grade it used to repeat and carries the year alone.
+  // The title spells the grade out ("10th Grade — Section A"), so the
+  // subtitle carries the year alone.
   document.getElementById("class-ws-subtitle").textContent =
     state.activeYear.name;
   document.getElementById("class-ws-dot").style.background =

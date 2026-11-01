@@ -1,6 +1,5 @@
 import "./errorHandler.js";
 
-// ─────────────────────────────────────────────────────────────
 //  Privacy / terms pages.
 //
 //  Both languages ship in the markup and this only decides which one is
@@ -11,7 +10,6 @@ import "./errorHandler.js";
 //  with JavaScript off sees Spanish rather than an empty page — the markup
 //  ships the `es` section visible and hides `en`, matching the app's default
 //  (src/js/i18n.js). Keep the two in step: if one flips, so does the other.
-// ─────────────────────────────────────────────────────────────
 
 const SUPPORTED = ["en", "es"];
 

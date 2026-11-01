@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  modalFields.js — field spec → DOM, for the admin console's generic
-//  form modal. Split out of admin.js's openModal so the dialog module
-//  is left with the parts that matter: validation, dirty tracking and
-//  the submit gate.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 
 /**

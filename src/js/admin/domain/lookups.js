@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  lookups.js — id → display name, resolved against the reference
-//  lists already in state. Split out of admin.js.
-//
-//  Every one of these is a read of state and nothing else, which is
-//  what lets the screens, the schedules grid and the CSV import
-//  preview all name the same record the same way.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { state } from "../state.js";
 

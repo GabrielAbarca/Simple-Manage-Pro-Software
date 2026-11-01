@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  modal.js — the generic add/edit form dialog every create/edit flow
-//  in the admin console opens. Split out of admin.js.
-//
-//  Owns validation, inline field errors, dirty tracking and the submit
-//  gate; the field-spec → DOM work lives in modalFields.js.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../../dialog.js";
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
@@ -202,8 +195,8 @@ export function closeModal() {
 
 /**
  * Close on explicit intent only (X / Cancel), confirming first when the form
- * carries unsaved edits. Clicking the backdrop deliberately does nothing —
- * it used to discard a half-filled form without warning.
+ * carries unsaved edits. Clicking the backdrop deliberately does nothing, so
+ * a stray click can't discard a half-filled form.
  */
 export function requestCloseModal() {
   if (!modalDirty) {

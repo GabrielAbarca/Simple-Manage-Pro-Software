@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  auth.js — auth guard, role gate and the signed-in admin's own
-//  profile row. Split out of admin.js. Mirrors teacherAuth.js.
-// ─────────────────────────────────────────────────────────────────
 import { supabase } from "../supabaseClient.js";
 import { getSession } from "../auth.js";
 import { fetchRole, portalPath, haltForRedirect } from "../role.js";

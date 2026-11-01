@@ -1,22 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════
-   ADMIN.CSS — admin-console-only components, layered on style.css
-   ───────────────────────────────────────────────────────────────
-   Loaded only by admin.html (the school director portal). Its rules
-   live in the `page` cascade layer, so they beat style.css's `base`
-   layer no matter which file the browser loads first. Contains only
-   what the console shell needs today — overview card + placeholder
-   panels; the data sections (structure, people, enrollment) bring
-   their own components when they land.
-
-   Shared chrome is NOT redefined here — the app shell, sidebar,
-   right panel, badges and .view-section all live in style.css.
-   Uses the same CSS variables defined in style.css.
-═══════════════════════════════════════════════════════════════ */
-
-/* ── Cascade layers ─────────────────────────────────────────────────
+/* Cascade layers
    The Vite build does NOT preserve the <link rel="stylesheet"> order
    authored in the HTML (production ships admin.css BEFORE style.css),
-   so page overrides at equal specificity used to lose in prod but win
+   so page overrides at equal specificity would lose in prod but win
    in dev. Layers make the cascade independent of load order.
 
    The order statement below is repeated verbatim in every stylesheet:
@@ -25,14 +10,14 @@
 @layer base, page, controls;
 
 @layer page {
-  /* ─── Section subtitle (same treatment as the teacher console) ── */
+  /* Section subtitle (same treatment as the teacher console) */
   .view-subtitle {
     color: var(--color-dark-variant);
     font-size: 0.88rem;
     margin: 0.2rem 0 1.4rem;
   }
 
-  /* ─── Overview card ────────────────────────────────────────────── */
+  /* Overview card */
   .console-card {
     background: var(--color-white);
     border-radius: var(--card-border-radius);
@@ -65,7 +50,7 @@
     display: inline-flex;
   }
 
-  /* ─── Overview stat cards ──────────────────────────────────────── */
+  /* Overview stat cards */
   .overview-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -130,7 +115,7 @@
     margin-top: 0.2rem;
   }
 
-  /* ─── "Coming soon" placeholder panels ─────────────────────────── */
+  /* "Coming soon" placeholder panels */
   .console-placeholder {
     background: var(--color-white);
     border-radius: var(--card-border-radius);
@@ -159,7 +144,7 @@
     max-width: 32rem;
   }
 
-  /* ─── Setup checklist (overview) ───────────────────────────────── */
+  /* Setup checklist (overview) */
   .setup-checklist {
     margin-top: var(--space-4);
   }
@@ -236,7 +221,7 @@
     }
   }
 
-  /* ─── Section panels (stacked cards holding a table) ───────────── */
+  /* Section panels (stacked cards holding a table) */
   .console-panel {
     background: var(--color-white);
     border-radius: var(--card-border-radius);
@@ -281,7 +266,7 @@
     overflow-x: auto;
   }
 
-  /* ─── Data tables ──────────────────────────────────────────────── */
+  /* Data tables */
   .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -303,7 +288,7 @@
     vertical-align: middle;
   }
 
-  /* ── "Just saved" confirmation ───────────────────────────────────
+  /* "Just saved" confirmation
      Outlines the row a save just wrote, then fades out. .data-table uses
      border-collapse, where box-shadow on a <tr> does not paint reliably —
      an outline does, and a faint tint on the cells carries the signal even
@@ -382,7 +367,7 @@
     color: var(--color-dark-variant);
   }
 
-  /* ─── Modals ───────────────────────────────────────────────────── */
+  /* Modals */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -585,13 +570,13 @@
     border-top: 1px solid var(--color-light);
   }
 
-  /* ─── School profile (Settings tab — the one writable card there) ── */
+  /* School profile (Settings tab — the one writable card there) */
   /* Reuses .modal-body/.field-group so its inputs match every other form. */
   .school-profile-form {
     max-width: 30rem;
   }
 
-  /* ─── Schedules tab ────────────────────────────────────────────── */
+  /* Schedules tab */
   /* Toolbar above the weekly grid: what to edit, then what to do. */
   .sched-toolbar {
     display: flex;
@@ -746,7 +731,7 @@
     font-size: 0.8rem;
   }
 
-  /* ─── Panel actions (toolbar buttons + filter in a panel head) ──── */
+  /* Panel actions (toolbar buttons + filter in a panel head) */
   .panel-actions {
     display: flex;
     align-items: center;
@@ -763,7 +748,7 @@
     color: var(--color-dark);
   }
 
-  /* ─── CSV import modal ─────────────────────────────────────────── */
+  /* CSV import modal */
   .import-help {
     font-size: 0.82rem;
     color: var(--color-dark-variant);
@@ -826,7 +811,7 @@
     gap: 0.2rem;
   }
 
-  /* ─── Toasts ───────────────────────────────────────────────────── */
+  /* Toasts */
   /* Top-center: status messages belong where the eye already is during form
      work, not tucked in a corner. Above the modal overlay's z-index, so a
      toast raised while a dialog is open is still seen. */

@@ -1,4 +1,4 @@
-// ── Grade categories (item 8) + MEP component templates ─────────
+// Grade categories + MEP component templates
 import { supabase } from "../supabaseClient.js";
 
 export async function fetchCategories(cstId) {
@@ -34,7 +34,7 @@ export async function deleteCategory(id) {
   if (error) throw error;
 }
 
-// ── MEP component templates (admin-owned; teacher instantiates) ──
+// MEP component templates (admin-owned; teacher instantiates)
 export async function fetchComponentTemplates() {
   const { data, error } = await supabase
     .from("grade_component_templates")

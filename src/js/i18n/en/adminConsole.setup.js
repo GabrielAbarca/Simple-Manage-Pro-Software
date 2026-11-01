@@ -142,10 +142,6 @@ export default {
   },
   confirm: {
     message: "This action cannot be undone.",
-    discardTitle: "Discard changes?",
-    discardMessage: "You have unsaved changes. Do you want to discard them?",
-    discard: "Discard",
-    keepEditing: "Keep editing",
   },
   years: {
     title: "School years",

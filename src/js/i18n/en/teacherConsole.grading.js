@@ -107,10 +107,6 @@ export default {
       'Delete assignment "{name}"? All student scores for it will also be removed. This cannot be undone.',
     deleteCategory:
       'Delete category "{name}"? Its assignments stay but become uncategorized (flat weighting).',
-    discardTitle: "Discard changes?",
-    discardMessage: "You have unsaved changes. Do you want to discard them?",
-    discard: "Discard",
-    keepEditing: "Keep editing",
   },
   modal: {
     addAssignment: "Add Assignment",

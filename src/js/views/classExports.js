@@ -1,7 +1,7 @@
 import { t, tn } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { openModal } from "../teacherModal.js";
+import { openModal } from "../modal.js";
 import { showToast } from "../feedback.js";
 import { exportTable, fileNamePart, formatField } from "../tableExport.js";
 import {

@@ -2,7 +2,7 @@ import { registerDialog } from "../dialog.js";
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { openModal } from "../teacherModal.js";
+import { openModal } from "../modal.js";
 import { showToast, openConfirm } from "../feedback.js";
 import { makeActionBtn } from "../teacherTableHelpers.js";
 import { escapeHtml } from "../html.js";

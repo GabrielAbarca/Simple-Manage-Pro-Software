@@ -5,7 +5,7 @@ import { data } from "../data.js";
 import { fmtDate, nullable } from "../ui/format.js";
 import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../../feedback.js";
-import { openModal } from "../ui/modal.js";
+import { openModal } from "../../modal.js";
 import {
   renderMessageRow,
   renderEmptyRow,

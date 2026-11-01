@@ -11,7 +11,7 @@ import { data } from "../data.js";
 import { showToast, openConfirm, openNotice } from "../../feedback.js";
 import { state } from "../state.js";
 import { iconBtn } from "../ui/tables.js";
-import { openModal } from "../ui/modal.js";
+import { openModal } from "../../modal.js";
 import { statusAllowsSignIn } from "./enums.js";
 
 /**

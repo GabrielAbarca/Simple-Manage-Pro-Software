@@ -4,7 +4,7 @@ import * as sched from "../../scheduleLogic.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
 import { showToast, openConfirm } from "../../feedback.js";
-import { openModal } from "../ui/modal.js";
+import { openModal } from "../../modal.js";
 import { optionsFrom } from "../ui/tables.js";
 import { sectionName } from "../domain/lookups.js";
 import { repaint } from "./tabState.js";

@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Toolbar ──────────────────────────────────────────────────── */
+  /* Toolbar */
   /* The .view-toolbar flex container is defined in style.css (shared).
    Below are the admin-only controls placed inside it. */
   .search-bar {
@@ -46,5 +46,5 @@
     color: var(--color-dark);
   }
 
-  /* ─── Buttons moved to style.css (shared button system) ────────── */
+  /* Buttons moved to style.css (shared button system) */
 }

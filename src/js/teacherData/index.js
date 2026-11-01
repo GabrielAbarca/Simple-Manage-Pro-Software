@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherData/index.js — composes the per-domain query modules into the
-//  same `db` shape teacher.js used to expose as an inline object, and
-//  applies the demo-mode overlay exactly as before.
-// ─────────────────────────────────────────────────────────────────
 import { DEMO_MODE } from "../demoMode.js";
 import { wrapDbForDemo } from "../demoDb.js";
 import { t } from "../i18n.js";

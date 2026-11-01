@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  columnGrades.js — column grade entry modal (item 4): one assignment,
-//  every student, opened from the Manage Assignments list.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";

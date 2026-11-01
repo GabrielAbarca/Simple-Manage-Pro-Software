@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Modals ───────────────────────────────────────────────────── */
+  /* Modals */
   .modal-overlay {
     position: fixed;
     inset: 0;

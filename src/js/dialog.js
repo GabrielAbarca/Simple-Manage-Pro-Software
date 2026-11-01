@@ -1,26 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  dialog.js — the keyboard contract every modal in the app owes.
-//
-//  The two consoles between them raise ten dialogs (add/edit form,
-//  confirm, CSV import, student drawer, manage assignments, per-student
-//  grades, categories, post grades, column entry). Each was opened by
-//  toggling a single `.active` class, which is enough to make a dialog
-//  APPEAR and nothing else: Tab walked straight out of it into the page
-//  behind, Escape did nothing, focus never entered on open and never
-//  came back to the trigger on close. A keyboard or screen-reader user
-//  had no way to tell a dialog had opened, and no way out of it.
-//
-//  Rather than patch ten call sites, this module watches the overlays.
-//  `register()` attaches a MutationObserver to the `class` attribute, so
-//  the existing `classList.add("active")` calls keep working untouched
-//  and simply gain the contract. That also means a dialog added later
-//  cannot forget to opt in — it only has to be registered.
-//
-//  Stack-based, because the consoles genuinely nest: the shared form and
-//  confirm dialogs open ON TOP of Manage Assignments. Only the topmost
-//  dialog traps focus and answers Escape.
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * Things a user can Tab to. `:not([disabled])` matters for the submit
  * button, which is disabled for the duration of an in-flight save.

@@ -1,4 +1,4 @@
-// ── Shared reference data (for forms) + subjects catalog ─────────
+// Shared reference data (for forms) + subjects catalog
 import { supabase } from "../supabaseClient.js";
 
 export async function fetchSubjects() {
@@ -47,7 +47,7 @@ export async function fetchRooms() {
   return data;
 }
 
-// ── Subjects catalog (global — retained) ────────────────────
+// Subjects catalog (global — retained)
 export async function fetchSubjectsDetailed() {
   const { data, error } = await supabase
     .from("subjects")

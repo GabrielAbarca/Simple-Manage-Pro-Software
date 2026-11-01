@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  classWorkspace.js — the class workspace shell: opens a class into its
-//  own view and dispatches its sub-tabs (roster/gradebook/attendance/
-//  schedule) to their respective renderers.
-// ─────────────────────────────────────────────────────────────────
 import { state } from "../teacherState.js";
 import { showSection } from "../teacherNav.js";
 import { className } from "../teacherFormat.js";

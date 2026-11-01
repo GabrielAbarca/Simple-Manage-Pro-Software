@@ -1,17 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  promotion.js — the MEP pass mark, in one place.
-//
-//  Costa Rica's REAC 2026 sets the promotion minimum at 70 for III ciclo
-//  and Educación Diversificada. The number is per-school rather than a
-//  constant because primaria runs at 65, so it lives in
-//  school_settings.passing_score and everything here resolves against
-//  that row.
-//
-//  Pure on purpose: every function takes the settings row explicitly so
-//  it is unit-testable without a portal, a DOM or a session. The portals
-//  hold the row in their own state module and pass it in.
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * Fallback when the settings row is unreadable or predates the column.
  * School schemas are applied by hand, so a project that has not run

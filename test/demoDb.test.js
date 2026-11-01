@@ -424,7 +424,7 @@ describe("demoDb attendance overlay — one register per subject", () => {
   });
 });
 
-// ── Conducta ────────────────────────────────────────────────────
+// Conducta
 describe("conducta", () => {
   // Parity against the real thing. These records and the number beside them
   // were read out of the demo project (student 4, grading period 2) from

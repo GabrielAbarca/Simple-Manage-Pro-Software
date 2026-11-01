@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  helpers.js — the schedules tab's shared vocabulary: how a day, a
-//  time slot and a conflict read, the small toolbar controls, and the
-//  re-read that follows a write. Split out of admin.js.
-//
-//  All the rules (overlaps, double-booked teachers and rooms, what a
-//  copy would do) live in scheduleLogic.js; this is DOM glue and
-//  translation.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as sched from "../../scheduleLogic.js";
 import { state } from "../state.js";

@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  accounts.js — login-account management for the admin console.
-//
-//  Real mode: calls the `admin-users` Edge Function (service role) to
-//  create login accounts, reset passwords and (de)activate them.
-//  Demo mode: never calls the function — it returns a simulated result
-//  so the public demo can show the flow without minting real users.
-// ─────────────────────────────────────────────────────────────────
-
 import { supabase } from "./supabaseClient.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { recoveryRedirectUrl } from "./recovery.js";

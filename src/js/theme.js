@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-//  Global theme (light/dark) — shared across every page.
-//  The choice is persisted to localStorage so it survives reloads
-//  and navigation between the student portal, admin dashboard and
-//  login. A tiny inline <head> script applies the class to <html>
-//  before first paint (no flash); this module keeps body + the
-//  toggler UI in sync and owns the toggle/persist logic.
-// ─────────────────────────────────────────────────────────────
-
 const STORAGE_KEY = "smp-theme";
 const DARK_CLASS = "dark-theme-variables";
 

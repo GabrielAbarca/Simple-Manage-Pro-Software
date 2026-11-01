@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  xlsx.js — a dependency-free writer for a one-sheet .xlsx workbook.
-//
-//  CSV leaves the delimiter and decimal separator to the reader's
-//  locale, and Excel set to Spanish (Costa Rica) splits on semicolons,
-//  so a comma-separated export opens as one column. A real workbook has
-//  no such ambiguity: numbers are stored as numbers and text as text.
-//
-//  The file is a minimal Office Open XML package, zipped without
-//  compression (the "stored" method), which needs nothing beyond a
-//  CRC-32.
-// ─────────────────────────────────────────────────────────────────
-
 const encoder = new TextEncoder();
 
 /** @type {Uint32Array | null} */

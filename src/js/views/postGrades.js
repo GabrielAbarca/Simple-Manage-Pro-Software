@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  postGrades.js — post grades modal (item 1): finalize a period's
-//  computed grade to the official report-card record.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
@@ -14,7 +10,7 @@ import { gradeCellHtml, gradeBandClass } from "../teacherFormat.js";
 import { getGradebookState } from "./gradebook.js";
 import { totalWeight, weightStatus } from "../gradingPeriods.js";
 
-// ── Post grades modal (item 1) ─────────────────────────────────
+// Post grades modal
 const pgOverlay = document.getElementById("post-grades-overlay");
 const pgTitle = document.getElementById("pg-title");
 const pgBody = document.getElementById("pg-body");

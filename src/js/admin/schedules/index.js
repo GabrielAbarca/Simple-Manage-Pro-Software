@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  index.js — the schedules tab: loads everything the two sub-tabs
-//  need, then renders the rail and whichever panel is showing.
-//  Split out of admin.js.
-//
-//  Two sub-tabs behind one nav entry:
-//    • the weekly editor — one section's week as a grid, with a bell
-//      schedule optionally laying out the rows;
-//    • bell schedules — the reusable time-block templates themselves.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { state } from "../state.js";
 import { data } from "../data.js";

@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  state.js — shared session + reference state for the admin console.
-//  A single mutable object every module imports and mutates in place,
-//  the same pattern as teacherState.js / studentState.js.
-// ─────────────────────────────────────────────────────────────────
-
 /** Reference lists reused across screens, refreshed by the loaders that own them. */
 export const state = {
   /** @type {any} */ session: null,
@@ -28,7 +22,7 @@ export const state = {
   /** @type {string} */ studentFilter: "all", // "all" | "unassigned" | section id
   /** @type {any[]} */ importPeriods: [], // active year's periods, for the import wizard
 
-  // ── Schedules tab ──
+  // Schedules tab
   /** @type {any} */ scheduleConfig: null, // active year's structure + school days
   /** @type {any[]} */ bellSchedules: [], // time-block templates
   /** @type {Record<number, any[]>} */ bellBlocks: {}, // template id → its blocks

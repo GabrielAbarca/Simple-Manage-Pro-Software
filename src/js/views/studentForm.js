@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  studentForm.js — the roster's add/edit/delete student forms, split out
-//  of roster.js to keep the table/list rendering and the CRUD forms each
-//  under a page's worth of code. Imports loadRoster back from roster.js to
-//  refresh after a save (safe: only called from inside a submit/confirm
-//  callback, never at module top level — see gradebook.js's header comment
-//  for why this shape of circular import is fine).
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";

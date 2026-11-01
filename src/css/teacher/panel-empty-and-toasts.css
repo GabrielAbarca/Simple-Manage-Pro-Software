@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Right-panel empty states (matched family with .empty-state) ── */
+  /* Right-panel empty states (matched family with .empty-state) */
   .panel-empty {
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@
     color: var(--color-info-dark);
   }
 
-  /* ─── Toasts ───────────────────────────────────────────────────── */
+  /* Toasts */
   /* Top-center: status messages belong where the eye already is during form
      work, not tucked in a corner. Above the modal overlay's z-index, so a
      toast raised while a dialog is open is still seen. */

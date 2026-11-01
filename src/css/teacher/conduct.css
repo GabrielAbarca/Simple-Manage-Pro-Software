@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Conduct tab: expandable student rows + record cards ──────── */
+  /* Conduct tab: expandable student rows + record cards */
   .conduct-toggle {
     display: inline-flex;
     align-items: center;

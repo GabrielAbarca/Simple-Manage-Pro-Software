@@ -10,7 +10,7 @@
     box-sizing: border-box;
   }
 
-  /* ── Focus visibility ──────────────────────────────────────────────
+  /* Focus visibility
    The reset above clears `outline` on every element, which removed the
    browser's own focus ring app-wide. Only a handful of components ever
    added a replacement, so most controls — every button, every icon
@@ -39,9 +39,7 @@
     outline-offset: -2px;
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-   FORM CONTROLS — the app's, not the browser's
-   ───────────────────────────────────────────────────────────────
+  /* FORM CONTROLS — the app's, not the browser's
    Form controls do NOT inherit font-family. That is a UA-stylesheet
    rule, not an oversight in this codebase, and it is why every modal
    input, every console select, every grade cell and every search box
@@ -50,7 +48,7 @@
 
    Declaring it once here fixes every control on every surface, and any
    control added later inherits the fix instead of having to remember.
-═══════════════════════════════════════════════════════════════ */
+*/
   input,
   select,
   textarea,
@@ -104,7 +102,7 @@
     caret-color: var(--color-primary-text);
   }
 
-  /* ── Firefox scrollbars ───────────────────────────────────────────
+  /* Firefox scrollbars
    The ::-webkit-scrollbar rules further down are Chrome/Safari only, so
    Firefox was still painting OS scrollbars.
 
@@ -139,7 +137,7 @@
     transition: background-color 100000s ease-in-out 0s;
   }
 
-  /* ── Inline SVG icons (replaces the Material Symbols icon font) ──────
+  /* Inline SVG icons (replaces the Material Symbols icon font)
    Each icon is now an inline sprite reference (<svg><use href="#icon-NAME">)
    nested inside the SAME `.material-symbols-outlined` span that previously held
    the font ligature. Keeping the span and its classes means every existing

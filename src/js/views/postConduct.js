@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  postConduct.js — post conducta modal: finalize a period's conducta to
-//  the official report-card record.
-//
-//  The twin of postGrades.js, and posting means the same thing here: the
-//  computed mark keeps moving as records are filed, the posted one does
-//  not. That is what stops a deduction filed in October from silently
-//  rewriting a conducta that went home on a report card in July.
-//
-//  Class-scoped rather than subject-scoped — conducta is one
-//  institutional mark per period, so it is launched from the roster and
-//  not from a gradebook.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";

@@ -1,24 +1,8 @@
-// ═══════════════════════════════════════════════════════════════
-//  demoDb.js — demo-mode write sandbox for the teacher console
-//
-//  Wraps the admin data layer (the `db` object in admin.js) so every
-//  write lands in an in-memory, per-session delta store instead of
-//  Supabase, while reads keep hitting the real (read-only) backend and
-//  get the session's deltas overlaid on the way out. The console's
-//  write→re-fetch flows then render local changes as if they persisted;
-//  a refresh discards the deltas and restores pristine demo data.
-//
-//  This module NEVER writes to Supabase — the few direct queries below
-//  are read-only SELECTs needed where the wrapped read method doesn't
-//  return enough columns to dedupe against local upserts. The server-side
-//  RLS read-only policy remains the backstop for anyone bypassing the UI.
-// ═══════════════════════════════════════════════════════════════
-
 import { supabase } from "./supabaseClient.js";
 import { attendanceRate } from "./attendanceScore.js";
 import { conductScore, conductDeduction } from "./conduct.js";
 
-// ── student_period_grades view emulation ────────────────────
+// student_period_grades view emulation
 // A port of the SQL view in supabase/schema/incremental_teacher_policies.sql,
 // which is itself the definition the demo project runs. Keep the two in step:
 // a student edited during a demo session is scored here, everyone else comes
@@ -112,7 +96,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
   let nextLocalId = -1;
   const newId = () => nextLocalId--;
 
-  // ── Delta stores ────────────────────────────────────────────
+  // Delta stores
   // Row tables: pristine server rows pass through with deletes dropped and
   // update patches merged; local inserts are appended by each read method.
   const makeDelta = () => ({
@@ -133,7 +117,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
   const postedDeltas = new Map(); //  "studentId|cstId|periodId"
   const conductDeltas = new Map(); //  "studentId|periodId"
 
-  // ── Context caches (filled as reads pass through) ───────────
+  // Context caches (filled as reads pass through)
   const assignmentIndex = new Map(); // assignment id → { cstId, periodId }
   const categoryIndex = new Map(); // category id → cstId
   const deletedCategoryIds = new Set(); // emulate assignments.category_id ON DELETE SET NULL
@@ -141,7 +125,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
   const seenDiscipline = new Map(); // discipline id → student id
   const cstSubjects = new Map(); // cst id → { name, color }
 
-  // ── Delta bookkeeping ───────────────────────────────────────
+  // Delta bookkeeping
   function recordInsert(delta, row) {
     delta.inserts.push(row);
     onWrite();
@@ -185,7 +169,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     return rows;
   }
 
-  // ── Sorters mirroring each read's .order() clauses ──────────
+  // Sorters mirroring each read's .order() clauses
   const byLastName = (a, b) =>
     (a.last_name ?? "").localeCompare(b.last_name ?? "");
   const byDueDate = (a, b) =>
@@ -357,7 +341,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     return [...out.values()];
   }
 
-  // ── Conducta recompute ──────────────────────────────────────
+  // Conducta recompute
   // The live conducta comes from public.student_period_conduct, so a local
   // discipline delta has to be re-scored here the way computePeriodScore
   // mirrors student_period_grades. Both go through conduct.js, which is the
@@ -410,7 +394,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
     });
   }
 
-  // ── The wrapped data layer ──────────────────────────────────
+  // The wrapped data layer
   const wrapped = {
     // Pure passthroughs — reference/read-only data no demo write can touch.
     getTeacherId: realDb.getTeacherId,
@@ -442,7 +426,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       return rows;
     },
 
-    // ── Students ────────────────────────────────────────────
+    // Students
     async fetchRoster(classId) {
       const server = await realDb.fetchRoster(classId);
       server.forEach((s) =>
@@ -509,7 +493,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       });
     },
 
-    // ── Assignments ─────────────────────────────────────────
+    // Assignments
     async fetchAssignments(cstId, periodId) {
       const server = await realDb.fetchAssignments(cstId, periodId);
       server.forEach((a) => assignmentIndex.set(a.id, { cstId, periodId }));
@@ -545,7 +529,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       });
     },
 
-    // ── Assignment grades ───────────────────────────────────
+    // Assignment grades
     async fetchStudentAssignmentGrades(assignmentIds, studentId) {
       if (!assignmentIds.length) return [];
       const serverIds = assignmentIds.filter((id) => id > 0);
@@ -620,7 +604,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       onWrite();
     },
 
-    // ── Period grades (server-computed view) ────────────────
+    // Period grades (server-computed view)
     async fetchPeriodGrades(cstId, periodId) {
       const server = await realDb.fetchPeriodGrades(cstId, periodId);
       if (!dirtyPeriodsFor(cstId, [periodId]).has(periodId)) return server;
@@ -653,7 +637,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       return out;
     },
 
-    // ── Attendance ──────────────────────────────────────────
+    // Attendance
     async fetchAttendanceSheet(classId, cstId, date) {
       const sheet = await realDb.fetchAttendanceSheet(classId, cstId, date);
       sheet.forEach((row) =>
@@ -774,7 +758,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       return out;
     },
 
-    // ── Schedule ────────────────────────────────────────────
+    // Schedule
     async fetchScheduleByClass(classId) {
       const server = await realDb.fetchScheduleByClass(classId);
       const rows = applyDelta(server, schedules, (e) => e.class_id === classId);
@@ -793,7 +777,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       );
     },
 
-    // ── Discipline ──────────────────────────────────────────
+    // Discipline
     async fetchStudentDiscipline(studentId) {
       // Single student's discipline records.
       const server = await realDb.fetchStudentDiscipline(studentId);
@@ -833,7 +817,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       recordUpdate(discipline, id, payload);
     },
 
-    // ── Conducta ────────────────────────────────────────────
+    // Conducta
     async fetchPeriodConduct(classId, periodId) {
       const server = await realDb.fetchPeriodConduct(classId, periodId);
       let rows = server;
@@ -965,7 +949,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       onWrite();
     },
 
-    // ── Posted period grades (student_grades) ───────────────
+    // Posted period grades (student_grades)
     async fetchPostedGrades(cstId, periodId) {
       const server = await realDb.fetchPostedGrades(cstId, periodId);
       const out = [];
@@ -1093,7 +1077,7 @@ export function wrapDbForDemo(realDb, { onWrite = () => {} } = {}) {
       onWrite();
     },
 
-    // ── Grade categories ────────────────────────────────────
+    // Grade categories
     async fetchCategories(cstId) {
       const server = await realDb.fetchCategories(cstId);
       server.forEach((c) => categoryIndex.set(c.id, cstId));

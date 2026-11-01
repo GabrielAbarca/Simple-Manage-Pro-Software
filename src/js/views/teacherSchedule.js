@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherSchedule.js — the class workspace's Schedule tab (read-only).
-//  Timetables are authored in the admin console's Schedules tab, the only
-//  surface that checks for double-booked teachers and rooms across
-//  sections; here a teacher just reads their week.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";

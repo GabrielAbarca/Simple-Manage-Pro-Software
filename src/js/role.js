@@ -1,17 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  role.js — auth-role resolution and portal routing.
-//
-//  The app has one portal per profiles.role value:
-//    admin   → /admin.html    (admin console — school setup & operation)
-//    teacher → /teacher.html  (teacher console — classes & gradebook)
-//    student → /              (student dashboard)
-//  Entry points resolve the signed-in user's role with fetchRole()
-//  and send strangers to their own portal via portalPath(). Roles
-//  live in profiles.role (one row per auth user); a missing profile
-//  row resolves to null and routes like a student (students are
-//  matched by students.auth_user_id, not by profiles).
-// ─────────────────────────────────────────────────────────────────
-
 import { supabase } from "./supabaseClient.js";
 
 /** @typedef {"admin" | "teacher" | "student"} Role */

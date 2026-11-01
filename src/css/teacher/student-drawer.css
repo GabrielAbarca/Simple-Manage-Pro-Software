@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Student detail drawer ────────────────────────────────────── */
+  /* Student detail drawer */
   .drawer-overlay {
     position: fixed;
     inset: 0;
@@ -155,7 +155,7 @@
     color: var(--color-dark);
   }
 
-  /* ─── Read-only note (Subjects toolbar) ───────────────────────── */
+  /* Read-only note (Subjects toolbar) */
   .readonly-note {
     display: inline-flex;
     align-items: center;

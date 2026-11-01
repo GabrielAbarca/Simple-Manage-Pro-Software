@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  templateItems.js — the overlay that edits one grade-component
-//  scheme's components. Split out of admin.js.
-//
-//  The owning table passes an `onChange` callback rather than being
-//  imported back: this module never has to know which screen opened
-//  it, and the two stay free of a circular import.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { state } from "../state.js";

@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherFormat.js — pure display/formatting helpers shared across the
-//  teacher console's views. No DOM access. Split out of teacher.js.
-// ─────────────────────────────────────────────────────────────────
 import { t, formatDate as i18nFormatDate } from "./i18n.js";
 import { dayKey } from "./scheduleLogic.js";
 import { state } from "./teacherState.js";

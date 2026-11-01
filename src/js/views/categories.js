@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  categories.js — grade categories modal (item 8) and applying an
-//  admin-owned MEP component scheme to the current gradebook.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t } from "../i18n.js";
 import * as v from "../validate.js";
@@ -14,7 +10,7 @@ import { escapeHtml } from "../html.js";
 import { getGradebookState, loadGradebook } from "./gradebook.js";
 import { totalWeight, weightStatus, TARGET_WEIGHT } from "../gradingPeriods.js";
 
-// ── Grade categories modal (item 8) ────────────────────────────
+// Grade categories modal
 const categoriesOverlay = document.getElementById("categories-overlay");
 const categoriesTitle = document.getElementById("categories-title");
 const categoriesBody = document.getElementById("categories-body");
@@ -173,7 +169,7 @@ async function refreshAfterCategoryChange() {
   if (categoriesOverlay.classList.contains("active")) renderCategories();
 }
 
-// ── Apply an admin-owned MEP scheme to this gradebook ──────────
+// Apply an admin-owned MEP scheme to this gradebook
 // The admin defines reusable component schemes (console → Subjects →
 // Grade components); here a teacher copies one into this gradebook's
 // categories instead of retyping cotidiano/tareas/pruebas by hand. Only

@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Breadcrumb + class workspace header ──────────────────────── */
+  /* Breadcrumb + class workspace header */
   .breadcrumb-back {
     display: inline-flex;
     align-items: center;
@@ -46,7 +46,7 @@
     margin: 0.1rem 0 0;
   }
 
-  /* ─── Class sub-tabs ───────────────────────────────────────────── */
+  /* Class sub-tabs */
   .class-subtabs {
     display: flex;
     gap: 0.4rem;
@@ -83,7 +83,7 @@
     border-bottom-color: var(--color-primary-text);
   }
 
-  /* ─── Toolbar action cluster + link button ─────────────────────── */
+  /* Toolbar action cluster + link button */
   .toolbar-actions {
     display: flex;
     gap: 0.6rem;

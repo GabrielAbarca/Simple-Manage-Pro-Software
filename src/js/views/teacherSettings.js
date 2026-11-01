@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherSettings.js — read-only Settings view for the teacher context.
-//  Named to avoid colliding with the shared settings.js renderer, same as
-//  views/settingsView.js does for the student portal.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";

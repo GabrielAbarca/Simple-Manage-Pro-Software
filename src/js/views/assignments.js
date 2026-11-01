@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  assignments.js — assignment add/edit/delete forms and the Manage
-//  Assignments modal (the gradebook's assignment list). Reads gradebook
-//  context via gradebook.js's getGradebookState()/loadGradebook() rather
-//  than taking it as parameters (see gradebook.js's header comment).
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
@@ -20,7 +14,7 @@ import {
 } from "./gradebook.js";
 import { openColumnGrades } from "./columnGrades.js";
 
-// ── Gradebook: Manage Assignments modal ─────────────────────────
+// Gradebook: Manage Assignments modal
 const assignmentsOverlay = document.getElementById("assignments-overlay");
 const manageTitle = document.getElementById("manage-title");
 const manageBody = document.getElementById("manage-body");

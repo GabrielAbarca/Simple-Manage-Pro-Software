@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-//  Small shared UI helpers — shimmer skeleton placeholders used
-//  for loading states across the student portal and admin views.
-//  (Empty / error states stay as plain text or .empty-state.)
-// ─────────────────────────────────────────────────────────────
-
 /** Skeleton rows for a <tbody> while a table loads. */
 export function skeletonRows(rows = 4, cols = 4) {
   const cell = '<td><span class="skeleton skeleton-text"></span></td>';

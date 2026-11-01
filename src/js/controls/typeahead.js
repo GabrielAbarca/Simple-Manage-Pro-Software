@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  typeahead.js — type-to-jump resolution for the custom select.
-//
-//  DOM-free so it can be unit-tested (see dateUtils.js for why).
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * Resolve a typeahead buffer to an option index.
  *

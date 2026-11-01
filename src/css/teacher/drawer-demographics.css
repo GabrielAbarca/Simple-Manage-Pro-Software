@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Drawer demographics + header actions ─────────────────────── */
+  /* Drawer demographics + header actions */
   .drawer-header-actions {
     display: flex;
     align-items: center;
@@ -39,7 +39,7 @@
   .profile-photo > .material-symbols-outlined {
     color: var(--color-info-dark);
   }
-  /* ── Demo-mode badge (added by admin.js when DEMO_MODE is on) ── */
+  /* Demo-mode badge (added by admin.js when DEMO_MODE is on) */
   .demo-badge {
     align-self: center;
     margin-left: 0.5rem;

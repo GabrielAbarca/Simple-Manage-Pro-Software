@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  events.js — the school calendar students see in their portal:
-//  holidays, exam weeks, activities, parent meetings.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { state } from "../state.js";

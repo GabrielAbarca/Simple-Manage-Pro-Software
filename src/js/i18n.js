@@ -1,23 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  i18n — lightweight, dependency-free interface translation.
-//
-//  Spanish (Costa Rica) is what the interface DEFAULTS to — the app is
-//  built for Costa Rican schools. English remains the canonical base
-//  dictionary and the ultimate per-key fallback (es.js mirrors en.js,
-//  and a key missing from es resolves through en), which is a separate
-//  thing from which language a visitor gets. Language is PER-VIEW: each
-//  entry point calls initI18n(scope) with its own scope, and the
-//  choice is persisted under a namespaced localStorage key so the
-//  student and admin views never share state.
-//
-//  Mirrors theme.js: namespaced key, try/catch storage, init on load.
-//  Switching language reloads the page (setLang → location.reload) so
-//  every view re-renders cleanly in the new locale — no stale strings.
-//
-//  DB content (names, subject/class titles, stored values) is never
-//  translated; only UI chrome and app-generated messages route here.
-// ─────────────────────────────────────────────────────────────────
-
 import en from "./i18n/en.js";
 import es from "./i18n/es.js";
 
@@ -46,7 +26,7 @@ let currentScope = "student";
 // different language than the one the view is about to render in.
 let currentLang = "es";
 
-// ── Storage ───────────────────────────────────────────────────────
+// Storage
 function readStored(scope) {
   const key = STORAGE_KEYS[scope];
   if (!key) return null;
@@ -81,7 +61,7 @@ function resolveLang(scope) {
   return "es";
 }
 
-// ── Public API ────────────────────────────────────────────────────
+// Public API
 
 /** Resolve + activate this view's language. Call once, before rendering. */
 export function initI18n(scope) {
@@ -170,7 +150,7 @@ export function applyTranslations(root = document) {
   });
 }
 
-// ── Locale-aware formatting (Intl) ───────────────────────────────
+// Locale-aware formatting (Intl)
 
 /**
  * The BCP-47 tag for the active language ("en-US" / "es-CR").

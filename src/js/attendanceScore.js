@@ -1,20 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  attendanceScore.js — attendance as a grade, in one place.
-//
-//  REAC 2026 makes attendance 5% of every subject's grade. The score
-//  follows MEP's long-standing accumulation rule: three tardías count
-//  as one ausencia.
-//
-//  A justified absence ('excused') is left out of the calculation
-//  entirely rather than counted as a day attended — it neither helps nor
-//  hurts, which is the point of justifying it.
-//
-//  Pure on purpose: the SQL view public.student_period_grades computes
-//  the identical number server-side, and demoDb.js mirrors it through
-//  this module. Keep all three in step — a divergence here is a grade
-//  that changes depending on whether the demo overlay is in play.
-// ─────────────────────────────────────────────────────────────────
-
 /** Tardías that add up to one absence. MEP's traditional rule. */
 export const LATES_PER_ABSENCE = 3;
 

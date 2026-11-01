@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  subjects.js — the Subjects catalog section (global, read-only). The
-//  school's subject structure is registrar-managed, outside a teacher's
-//  role, so there's no add/edit/delete here.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { renderEmptyRow, renderErrorRow } from "../teacherTableHelpers.js";

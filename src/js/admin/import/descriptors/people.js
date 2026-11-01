@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  people.js — CSV import descriptors for the two people tables.
-//  Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../../i18n.js";
 import { state } from "../../state.js";
 import { data } from "../../data.js";

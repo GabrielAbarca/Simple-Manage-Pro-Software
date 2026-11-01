@@ -65,9 +65,7 @@
 
   <body>
     <div class="container">
-      <!-- ═══════════════════════════════════════════════════════
-             SIDEBAR
-        ═══════════════════════════════════════════════════════ -->
+      <!-- SIDEBAR -->
       <aside>
         <div class="top">
           <div class="logo">
@@ -182,11 +180,9 @@
         </div>
       </aside>
 
-      <!-- ═══════════════════════════════════════════════════════
-             MAIN
-        ═══════════════════════════════════════════════════════ -->
+      <!-- MAIN -->
       <main>
-        <!-- ─── OVERVIEW (landing) ───────────────────────────── -->
+        <!-- OVERVIEW (landing) -->
         <section class="view-section active" id="view-overview">
           <!-- Replaced with the school's own name once school_settings has
                one; the generic heading is the fallback. -->
@@ -317,7 +313,7 @@
           </div>
         </section>
 
-        <!-- ─── YEAR & PERIODS ───────────────────────────────── -->
+        <!-- YEAR & PERIODS -->
         <section class="view-section" id="view-yearperiods">
           <h1 data-i18n="console.heading.yearPeriods">
             School Year &amp; Periods
@@ -401,7 +397,7 @@
           </div>
         </section>
 
-        <!-- ─── GRADES & SECTIONS ────────────────────────────── -->
+        <!-- GRADES & SECTIONS -->
         <section class="view-section" id="view-gradessections">
           <h1 data-i18n="console.heading.gradesSections">
             Grade Levels &amp; Sections
@@ -514,7 +510,7 @@
           </div>
         </section>
 
-        <!-- ─── SUBJECTS ─────────────────────────────────────── -->
+        <!-- SUBJECTS -->
         <section class="view-section" id="view-subjects">
           <h1 data-i18n="console.heading.subjects">Subjects</h1>
           <div class="console-panel">
@@ -591,7 +587,7 @@
           </div>
         </section>
 
-        <!-- ─── SCHEDULES ────────────────────────────────────── -->
+        <!-- SCHEDULES -->
         <!-- Two sub-tabs (weekly editor / bell schedules) rendered by
              admin.js into #schedules-root, the way the settings rail is. -->
         <section class="view-section" id="view-schedules">
@@ -599,7 +595,7 @@
           <div id="schedules-root"></div>
         </section>
 
-        <!-- ─── TEACHERS ─────────────────────────────────────── -->
+        <!-- TEACHERS -->
         <section class="view-section" id="view-teachers">
           <h1 data-i18n="console.heading.teachers">Teachers</h1>
 
@@ -648,7 +644,7 @@
 
         </section>
 
-        <!-- ─── ASSIGNMENTS (subject + teacher per section) ───── -->
+        <!-- ASSIGNMENTS (subject + teacher per section) -->
         <section class="view-section" id="view-assignments">
           <h1 data-i18n="console.heading.assignments">Class Assignments</h1>
           <div class="console-panel">
@@ -680,7 +676,7 @@
           </div>
         </section>
 
-        <!-- ─── STUDENTS & ENROLLMENT ────────────────────────── -->
+        <!-- STUDENTS & ENROLLMENT -->
         <section class="view-section" id="view-students">
           <h1 data-i18n="console.heading.students">
             Students &amp; Enrollment
@@ -744,7 +740,7 @@
           </div>
         </section>
 
-        <!-- ─── EVENTS (the calendar students see) ───────────── -->
+        <!-- EVENTS (the calendar students see) -->
         <section class="view-section" id="view-events">
           <h1 data-i18n="console.heading.events">School Events</h1>
           <div class="console-panel">
@@ -781,7 +777,7 @@
           </div>
         </section>
 
-        <!-- ─── ACCOUNTS (login management) ──────────────────── -->
+        <!-- ACCOUNTS (login management) -->
         <section class="view-section" id="view-accounts">
           <h1 data-i18n="console.heading.accounts">User Accounts</h1>
           <div class="console-panel">
@@ -825,7 +821,7 @@
           </div>
         </section>
 
-        <!-- ─── SETTINGS (read-only) ─────────────────────────── -->
+        <!-- SETTINGS (read-only) -->
         <section class="view-section" id="view-settings">
           <h1 data-i18n="console.heading.settings">Settings</h1>
           <!-- School profile is admin-writable, so admin.js renders it rather
@@ -835,9 +831,7 @@
         </section>
       </main>
 
-      <!-- ═══════════════════════════════════════════════════════
-             RIGHT PANEL
-        ═══════════════════════════════════════════════════════ -->
+      <!-- RIGHT PANEL -->
       <div class="right">
         <div class="top">
           <button
@@ -900,9 +894,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         GUARDIANS OVERLAY — a student's encargados
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- GUARDIANS OVERLAY — a student's encargados -->
     <!-- Before the shared form and confirm dialogs on purpose: overlays
          share one z-index, so those, opened from here, must come later. -->
     <div class="modal-overlay" id="guardians-overlay">
@@ -947,9 +939,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         GENERIC MODAL — add/edit forms
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- GENERIC MODAL — add/edit forms -->
     <div class="modal-overlay" id="modal-overlay">
       <div
         class="modal"
@@ -995,9 +985,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         CONFIRM DELETE MODAL
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- CONFIRM DELETE MODAL -->
     <div class="modal-overlay" id="confirm-overlay">
       <div
         class="modal modal-sm"
@@ -1036,9 +1024,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         CSV IMPORT MODAL — roster bulk import (multi-step, JS-driven)
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- CSV IMPORT MODAL — roster bulk import (multi-step, JS-driven) -->
     <div class="modal-overlay" id="import-overlay">
       <div
         class="modal modal-lg"
@@ -1066,9 +1052,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         GRADE-COMPONENT TEMPLATE ITEMS — a scheme's components (JS-driven)
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- GRADE-COMPONENT TEMPLATE ITEMS — a scheme's components (JS-driven) -->
     <div class="modal-overlay" id="template-items-overlay">
       <div
         class="modal modal-lg"
@@ -1094,9 +1078,7 @@
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         TOAST CONTAINER
-    ═══════════════════════════════════════════════════════════════ -->
+    <!-- TOAST CONTAINER -->
     <!-- Live region: toasts are how every save and every failure is
          reported, and without this they were announced to nobody. -->
     <div

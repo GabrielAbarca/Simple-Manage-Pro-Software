@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  index.js — wires every screen's "Import CSV" button to the entity
-//  it imports. Importing this module is what activates the wizard.
-// ─────────────────────────────────────────────────────────────────
 import { openImportModal } from "./wizard.js";
 
 const IMPORT_BUTTONS = {

@@ -120,14 +120,14 @@
     color: var(--color-primary-text);
   }
 
-  /* ─── Sidebar divider (shared by both surfaces) ───────────────── */
+  /* Sidebar divider (shared by both surfaces) */
   .sidebar-divider {
     height: 1px;
     background: var(--color-light);
     margin: 1.4rem 1.6rem;
   }
 
-  /* ─── Sidebar cross-link CTA (student ⇆ admin) — matched pair ──── */
+  /* Sidebar cross-link CTA (student ⇆ admin) — matched pair */
   aside .sidebar a.nav-cta {
     margin: 0.5rem 1.2rem;
     height: auto;

@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  overview.js — the console's landing screen: who is signed in, which
-//  year is active, and seven count cards over the school. Split out of
-//  admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn, formatDate } from "../../i18n.js";
 import { state } from "../state.js";
 import { data } from "../data.js";

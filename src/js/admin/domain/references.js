@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  references.js — lazy loaders for the reference lists screens share.
-//  Split out of admin.js.
-//
-//  Each screen can now be the first thing a director opens, so none of
-//  them may assume another screen already populated the list it names
-//  records from. These fetch once and then serve from state.
-// ─────────────────────────────────────────────────────────────────
 import { state } from "../state.js";
 import { data } from "../data.js";
 

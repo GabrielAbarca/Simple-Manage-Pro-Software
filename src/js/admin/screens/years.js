@@ -1,12 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  years.js — the school-years half of the Year & Periods screen.
-//  Split out of admin.js.
-//
-//  Every structural table hangs off school_years, so this is where the
-//  console is most careful: activating a year warns when its grading
-//  weights do not add up, and deleting one refuses outright while
-//  anything still depends on it.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { totalWeight, weightStatus } from "../../gradingPeriods.js";

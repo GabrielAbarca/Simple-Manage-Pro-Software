@@ -1,5 +1,5 @@
 @layer controls {
-  /* ── Date field ───────────────────────────────────────────────── */
+  /* Date field */
   .smp-date__field {
     padding: 0.6rem 0.9rem;
     cursor: text;
@@ -121,7 +121,7 @@
     cursor: not-allowed;
   }
 
-  /* ── Touch: hand the controls back to the OS ──────────────────── */
+  /* Touch: hand the controls back to the OS */
   /* Nothing to restore on the native control: the clip above never applies
      here, so it is still the one the surface rules styled. Take the overlay
      out and the OS control is simply what is left. */
@@ -135,7 +135,7 @@
     }
   }
 
-  /* ── Touch: one floor under every text control ────────────────── */
+  /* Touch: one floor under every text control */
   /* `--tap-target` is the single place a touch-target size is written down,
      but it reached only buttons: every <select> and <input> is sized by the
      padding its surface happens to use — a dozen surfaces, eleven different

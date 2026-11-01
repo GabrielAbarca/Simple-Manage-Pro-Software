@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  rooms.js — the rooms table on the Grades & Sections screen.
-//  Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { state } from "../state.js";

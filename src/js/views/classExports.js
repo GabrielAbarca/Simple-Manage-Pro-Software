@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  classExports.js — the class workspace's exports: the gradebook of
-//  the period on screen, and the subject's attendance for the year.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";

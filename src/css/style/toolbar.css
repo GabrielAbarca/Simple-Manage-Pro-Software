@@ -40,7 +40,7 @@
       box-shadow var(--duration-micro) var(--ease-out);
   }
 
-  /* ─── Shared focus ring for form controls (mirrors the login input ring) ──
+  /* Shared focus ring for form controls (mirrors the login input ring)
    Form controls get this softer border+ring instead of the global outline —
    `outline: none` here is legitimate because the ring IS the replacement.
    The console selects below (.panel-actions, .map-row, .sched-field) were

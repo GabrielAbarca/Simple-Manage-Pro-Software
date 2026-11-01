@@ -1,29 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  select.js — the app's own dropdown, over the browser's <select>.
-//
-//  A <select>'s option list is drawn by the operating system. It cannot
-//  be styled, it ignores the app's type scale and spacing, and before
-//  `color-scheme` landed it ignored dark mode outright. That list is the
-//  last thing in the app the design system did not own.
-//
-//  ENHANCE, NEVER REPLACE. The native <select> stays in the DOM with its
-//  id, name and <option>s, and remains the single source of truth:
-//    • FormData and the modal submit path read it,
-//    • validate.js rules run against it,
-//    • the demo-mode delta layer writes through it,
-//    • and the e2e suite drives it with page.selectOption().
-//  It is visually clipped, never `display: none` — a spike confirmed
-//  Playwright still acts on an opacity:0 control but not a hidden one.
-//  If this module ever throws, what is left behind is a working select.
-//
-//  Touch devices keep the OS picker: a wheel picker beats any custom
-//  list on a phone, and both Material and HIG keep them.
-//
-//  Keyboard follows the APG select-only combobox pattern — focus stays
-//  on the trigger and the active option is tracked with
-//  aria-activedescendant, rather than moving DOM focus into the list.
-// ─────────────────────────────────────────────────────────────────
-
 import { showPopover } from "./popover.js";
 import { resolveTypeahead } from "./typeahead.js";
 

@@ -1,19 +1,3 @@
-// ═══════════════════════════════════════════════════════════════
-//  teacher.js — Simple Manage Pro | Teacher Console
-//
-//  Thin bootstrap: resolves the teacher session/identity, wires
-//  theme/i18n/controls, and hands section switching to teacherNav.js.
-//  Every section/tab lives in its own module — see
-//  .claude/ARCHITECTURE_MAP.md for the full map:
-//   - teacherAuth.js / teacherState.js: session guard + shared state
-//   - teacherData/*: the data layer (Supabase queries), split by domain
-//   - teacherFeedback.js / teacherModal.js / teacherTableHelpers.js /
-//     teacherFormat.js: shared UI kit
-//   - teacherNav.js: sidebar section switching + cross-portal links
-//   - views/*: My Classes, class workspace + its sub-tabs (roster,
-//     gradebook, attendance, schedule), subjects, settings, Today
-// ═══════════════════════════════════════════════════════════════
-
 import "./errorHandler.js";
 import "./speedInsights.js";
 import { resolveTeacherSession } from "./teacherAuth.js";
@@ -33,12 +17,12 @@ import { loadSubjects } from "./views/subjects.js";
 import { loadSettings } from "./views/teacherSettings.js";
 import { openClassTab } from "./views/classWorkspace.js";
 
-// ── AUTH GUARD + TEACHER IDENTITY ────────────────────────────────
+// AUTH GUARD + TEACHER IDENTITY
 const { session, role } = await resolveTeacherSession();
 state.session = session;
 state.role = role;
 
-// ── NAVIGATION ────────────────────────────────────────────────
+// NAVIGATION
 const closeNav = initSidebarToggle();
 
 initTeacherNav(
@@ -82,7 +66,7 @@ document.querySelectorAll(".class-subtab").forEach((btn) => {
   );
 });
 
-// ── INIT ──────────────────────────────────────────────────────
+// INIT
 if (DEMO_MODE) {
   const logo = document.querySelector("aside .logo");
   if (logo) {

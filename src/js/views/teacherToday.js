@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherToday.js — the Today start page (item 7): the teacher's classes
-//  for the current day, with quick actions into attendance/gradebook.
-// ─────────────────────────────────────────────────────────────────
 import { t, formatDate as i18nFormatDate } from "../i18n.js";
 import { skeletonCards } from "../ui.js";
 import { db } from "../teacherData/index.js";

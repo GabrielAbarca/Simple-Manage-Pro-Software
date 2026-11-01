@@ -1,7 +1,5 @@
 @layer page {
-  /* ═══════════════════════════════════════════════════════════════
-   WIDE MODAL + per-student grade entry + manage assignments
-═══════════════════════════════════════════════════════════════════ */
+  /* WIDE MODAL + per-student grade entry + manage assignments */
   .modal-lg {
     width: min(960px, 95vw);
   }

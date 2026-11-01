@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  bells.js — the bell-schedules sub-tab: the reusable time-block
-//  templates and the blocks inside one of them. Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import * as sched from "../../scheduleLogic.js";

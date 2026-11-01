@@ -168,7 +168,7 @@ if (DEMO_MODE) {
   if (demoNotice) demoNotice.style.display = "block";
 }
 
-// ── Password recovery ─────────────────────────────────────────────
+// Password recovery
 // Runs before the "already signed in → portal" redirect: a recovery link
 // carries a real session, so that redirect would otherwise swallow the flow.
 

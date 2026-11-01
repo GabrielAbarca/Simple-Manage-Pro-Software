@@ -1,4 +1,4 @@
-// ── Identity / context ──────────────────────────────────────────
+// Identity / context
 import { supabase } from "../supabaseClient.js";
 import { DEMO_MODE } from "../demoMode.js";
 import { state } from "../teacherState.js";

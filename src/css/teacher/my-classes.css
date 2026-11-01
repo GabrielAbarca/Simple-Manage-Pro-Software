@@ -1,17 +1,16 @@
 @layer page {
-  /* ═══════════════════════════════════════════════════════════════
-   CLASS-FIRST WORKSPACE — the My Classes card grid; the workspace
+  /* CLASS-FIRST WORKSPACE — the My Classes card grid; the workspace
    itself continues in ./class-workspace.css.
-═══════════════════════════════════════════════════════════════ */
+*/
 
-  /* ─── Section subtitle ─────────────────────────────────────────── */
+  /* Section subtitle */
   .view-subtitle {
     color: var(--color-dark-variant);
     font-size: 0.88rem;
     margin: 0.2rem 0 1.4rem;
   }
 
-  /* ─── My Classes card grid ─────────────────────────────────────── */
+  /* My Classes card grid */
   .myclasses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

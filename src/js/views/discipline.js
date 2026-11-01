@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  discipline.js — discipline record add/edit forms (item 2), opened from
-//  the Conduct tab. Takes the student and a save callback as parameters
-//  rather than reaching into the tab's state, so this module has no
-//  dependency on views/conduct.js.
-//
-//  The points a teacher enters here ARE the conducta deduction (see
-//  conduct.js). `severity` is kept for the register and carries no weight,
-//  which the form says out loud so nobody expects it to move the grade.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import * as v from "../validate.js";
 import { db } from "../teacherData/index.js";

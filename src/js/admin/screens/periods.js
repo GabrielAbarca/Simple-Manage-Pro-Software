@@ -1,11 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  periods.js — the grading-periods half of the Year & Periods screen.
-//  Split out of admin.js.
-//
-//  A year is only correctly weighted at exactly 100%. Going over is
-//  blocked inline; falling short only warns, so a director can build
-//  the year up one period at a time.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import * as v from "../../validate.js";
 import {

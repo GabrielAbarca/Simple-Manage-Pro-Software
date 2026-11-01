@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  studentDrawer.js — the student-360 read-only detail drawer, opened
-//  from the roster. Discipline records are filed and edited from the
-//  Conduct tab; the drawer still loads them for the print trigger, which
-//  passes the loaded data into progressReport.js so that module never
-//  imports this one back.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../dialog.js";
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
@@ -21,7 +14,7 @@ import { isConductPassing } from "../promotion.js";
 import { escapeHtml } from "../html.js";
 import { printStudentReport } from "./progressReport.js";
 
-// ── Student drawer ─────────────────────────────────────────────
+// Student drawer
 const drawerOverlay = document.getElementById("drawer-overlay");
 const drawerTitle = document.getElementById("drawer-title");
 const drawerBody = document.getElementById("drawer-body");
@@ -207,7 +200,7 @@ function renderDrawerConduct(live, posted) {
     <p class="drawer-muted">${tn("admin.drawer.conductIncidents", live.incident_count, { count: live.incident_count, points: Number(live.deduction ?? 0) })}</p>`;
 }
 
-// Print progress report from the open student drawer (item 6).
+// Print progress report from the open student drawer.
 document.getElementById("drawer-print").addEventListener("click", () => {
   if (!_drawerStudent) return;
   printStudentReport(

@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  assignments.js — who teaches which subject in which section.
-//  Split out of admin.js.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { state } from "../state.js";
 import { data } from "../data.js";

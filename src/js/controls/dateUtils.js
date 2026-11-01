@@ -1,15 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  dateUtils.js — the date logic behind the custom picker, with no DOM.
-//
-//  Split out so it can be unit-tested directly. The component itself
-//  reaches the DOM through popover.js, which touches `document` at
-//  import time; importing that into a Node test environment would fail,
-//  and the project deliberately ships no jsdom. Keeping the arithmetic
-//  here means the parts most likely to be subtly wrong — locale field
-//  order, month-grid boundaries, DST-safe ISO handling — are the parts
-//  that are cheapest to test.
-// ─────────────────────────────────────────────────────────────────
-
 /** @param {Date} d @returns {string} yyyy-mm-dd in LOCAL time */
 export function toIso(d) {
   const p = (n) => String(n).padStart(2, "0");

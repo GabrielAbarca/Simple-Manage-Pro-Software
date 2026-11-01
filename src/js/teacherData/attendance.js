@@ -1,4 +1,4 @@
-// ── Attendance + absence summary (item 3) ────────────────────────
+// Attendance + absence summary
 //
 // Attendance is per SUBJECT, not per day: `attendance` is unique on
 // (student_id, class_subject_teacher_id, date), so two teachers sharing a
@@ -81,7 +81,7 @@ export async function upsertAttendance(classId, cstId, date, rows, recordedBy) {
   if (error) throw error;
 }
 
-// ── Absence summary (item 3) ────────────────────────────────
+// Absence summary
 /** Rows asked for per request; the API answers at most 1000 at a time. */
 const PAGE = 1000;
 

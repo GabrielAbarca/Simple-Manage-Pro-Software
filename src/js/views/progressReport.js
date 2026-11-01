@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  progressReport.js — printable per-student progress report (item 6),
-//  triggered from the student drawer's print button. Takes the student and
-//  the already-loaded attendance/discipline rows as parameters instead of
-//  reading the drawer's private state.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn, formatDate as i18nFormatDate } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";

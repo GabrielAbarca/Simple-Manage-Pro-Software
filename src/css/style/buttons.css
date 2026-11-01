@@ -1,5 +1,5 @@
 @layer base {
-  /* ─── Buttons (shared by both surfaces) ───────────────────────── */
+  /* Buttons (shared by both surfaces) */
   /* The root font-size floor is 12.5px, so the old `0.65rem 1.3rem` padding
    produced a ~30px-tall button on a phone — and `.btn-sm`, which is what the
    admin console uses for every panel action, came out at ~22px. WCAG 2.5.5

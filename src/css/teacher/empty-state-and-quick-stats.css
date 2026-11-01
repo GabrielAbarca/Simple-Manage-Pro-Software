@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Empty state (matched family with .panel-empty) ───────────── */
+  /* Empty state (matched family with .panel-empty) */
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@
     color: var(--color-info-dark);
   }
 
-  /* ─── Right-panel quick stats list ─────────────────────────────── */
+  /* Right-panel quick stats list */
   .quickstat-list {
     list-style: none;
     display: flex;

@@ -1,5 +1,5 @@
 @layer page {
-  /* ─── Attendance status buttons ──────────────────────────────── */
+  /* Attendance status buttons */
   .attendance-status-group {
     display: flex;
     flex-wrap: wrap;

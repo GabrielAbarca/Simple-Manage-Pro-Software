@@ -1,24 +1,3 @@
-// ═══════════════════════════════════════════════════════════════
-//  admin.js — Simple Manage Pro | Admin Console
-//
-//  The school director/coordinator portal: where a school gets
-//  configured and operated. Role-gated, bilingual, demo-overlay safe.
-//
-//  Thin bootstrap: resolves the admin session, wires theme/i18n/
-//  controls, and hands section switching to admin/nav.js. Everything
-//  else lives under src/js/admin/ — see .claude/ARCHITECTURE_MAP.md
-//  for the full map:
-//   - admin/auth.js, admin/state.js, admin/data.js: session guard,
-//     shared state, and the demo-aware data gateway
-//   - admin/ui/*: toast + confirm, the generic form modal, table
-//     helpers, value formatting
-//   - admin/domain/*: school profile, id→name lookups, enums and CSV
-//     coercions, reference-list loaders, the login button
-//   - admin/screens/*: one module per sidebar screen
-//   - admin/schedules/*: the schedules tab and its two sub-tabs
-//   - admin/import/*: the CSV import wizard and its entity descriptors
-// ═══════════════════════════════════════════════════════════════
-
 import "./errorHandler.js";
 import "./speedInsights.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
@@ -47,12 +26,12 @@ import { loadSchedulesTab } from "./admin/schedules/index.js";
 // Side-effect import: wires every screen's "Import CSV" button.
 import "./admin/import/index.js";
 
-// ── AUTH GUARD + ROLE GATE ──────────────────────────────────────
+// AUTH GUARD + ROLE GATE
 const { session, role } = await resolveAdminSession();
 state.session = session;
 state.role = role;
 
-// ── NAVIGATION ──────────────────────────────────────────────────
+// NAVIGATION
 const closeNav = initSidebarToggle();
 
 initAdminNav(
@@ -85,7 +64,7 @@ applyTranslations();
 // takes its month names, field order and week start from the active locale.
 initControls();
 
-// ── INIT ────────────────────────────────────────────────────────
+// INIT
 if (DEMO_MODE) {
   const logo = document.querySelector("aside .logo");
   if (logo) {

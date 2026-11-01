@@ -1,13 +1,9 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherModal.js — the generic add/edit form modal shared by every
-//  create/edit flow in the teacher console. Split out of teacher.js.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "./dialog.js";
 import { t } from "./i18n.js";
 import * as v from "./validate.js";
 import { showToast, errorText, openConfirm } from "./teacherFeedback.js";
 
-// ── Generic Modal ──────────────────────────────────────────────
+// Generic Modal
 const modalOverlay = document.getElementById("modal-overlay");
 const modalTitle = document.getElementById("modal-title");
 const modalForm = /** @type {HTMLFormElement} */ (

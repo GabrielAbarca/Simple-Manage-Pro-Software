@@ -1,14 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  atRisk.js — the one rule for flagging a student at risk over
-//  attendance, shared by the teacher console and the admin overview so
-//  the two never disagree about who is at risk.
-//
-//  A missed lesson is an absence or a tardía in one subject. A student
-//  is at risk once any single subject reaches the threshold. A row with
-//  no subject (recorded before attendance was per subject, or whose
-//  assignment was deleted) belongs to no subject and is not counted.
-// ─────────────────────────────────────────────────────────────────
-
 /** Missed lessons in one subject at which a student is flagged. */
 export const AT_RISK_MISSED_LESSONS = 5;
 

@@ -1,14 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  csv.js — dependency-free CSV/TSV parsing for the roster import, and
-//  the serializer behind the console's exports.
-//
-//  Handles quoted fields (commas/newlines inside quotes), escaped
-//  quotes ("" → "), CRLF or LF line endings, and auto-detects the
-//  delimiter (comma, semicolon or tab — the three a spreadsheet export
-//  produces). Returns the header row plus data rows as objects keyed by
-//  header, so the import UI can map columns by name.
-// ─────────────────────────────────────────────────────────────────
-
 /**
  * Guess the delimiter from the first line by counting candidates
  * outside quotes. Comma wins ties.

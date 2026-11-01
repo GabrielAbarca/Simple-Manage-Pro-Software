@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  format.js — value coercion and date formatting shared by
-//  every admin console screen. Split out of admin.js's UI helpers.
-// ─────────────────────────────────────────────────────────────────
 import { formatDate } from "../../i18n.js";
 
 export function num(v) {

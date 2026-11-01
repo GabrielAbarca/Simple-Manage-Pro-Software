@@ -1,4 +1,4 @@
-/* ── Cascade layers ─────────────────────────────────────────────────
+/* Cascade layers
    The Vite build does NOT preserve the <link rel="stylesheet"> order
    authored in the HTML (production ships admin.css BEFORE style.css),
    so page overrides at equal specificity used to lose in prod but win
@@ -46,7 +46,7 @@
     pointer-events: none;
   }
 
-  /* ── Legibility scrim ─────────────────────────────────────────────
+  /* Legibility scrim
    The panel gradient runs to #a78bfa, which is light enough that even
    pure white text only reached 2.72:1 against it — and the pink half of
    the wordmark sat at 1.36:1 over the middle of the gradient, effectively

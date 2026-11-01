@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  myClasses.js — "My Classes" landing: the teacher's subject-sections as
-//  cards, each opening into the class workspace.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
 import { skeletonCardItems } from "../ui.js";
 import { db } from "../teacherData/index.js";

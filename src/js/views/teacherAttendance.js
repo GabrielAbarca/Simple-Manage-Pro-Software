@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherAttendance.js — the class workspace's Attendance tab: the daily
-//  sheet plus the at-risk absence summary (item 3) shown above it.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
 import { AT_RISK_MISSED_LESSONS } from "../atRisk.js";
 import { skeletonRows, skeletonBlock } from "../ui.js";
@@ -182,7 +178,7 @@ async function saveAttendance() {
   }
 }
 
-// ── Absence summary (item 3) ────────────────────────────────
+// Absence summary
 
 async function loadAbsenceSummary() {
   const container = document.getElementById("absence-summary");

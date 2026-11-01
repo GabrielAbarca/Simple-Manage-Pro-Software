@@ -1,12 +1,8 @@
-// ─────────────────────────────────────────────────────────────────
-//  teacherFeedback.js — toast notices, write-failure text, and the shared
-//  confirm dialog. Split out of teacher.js's UI-helpers section.
-// ─────────────────────────────────────────────────────────────────
 import { t } from "./i18n.js";
 import { mapDbError } from "./dbErrors.js";
 import { registerDialog } from "./dialog.js";
 
-// ── Toast ──────────────────────────────────────────────────────
+// Toast
 const toastContainer = document.getElementById("toast-container");
 
 export function showToast(message, type = "success") {
@@ -31,7 +27,7 @@ export function errorText(err) {
   return t(mapDbError(err).key);
 }
 
-// ── Confirm Modal ──────────────────────────────────────────────
+// Confirm Modal
 const confirmOverlay = document.getElementById("confirm-overlay");
 const confirmTitle = document.getElementById("confirm-title");
 const confirmMessage = document.getElementById("confirm-message");

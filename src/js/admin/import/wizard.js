@@ -1,10 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  wizard.js — the three-step CSV import dialog: paste or upload,
-//  map columns, preview and commit. Split out of admin.js.
-//
-//  One wizard drives every structure table; what differs per entity
-//  lives in the descriptors under ./descriptors/.
-// ─────────────────────────────────────────────────────────────────
 import { registerDialog } from "../../dialog.js";
 import { t } from "../../i18n.js";
 import { parseCsv, autoMap } from "../../csv.js";

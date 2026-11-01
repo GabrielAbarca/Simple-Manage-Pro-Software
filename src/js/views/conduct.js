@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  views/conduct.js — the class workspace's Conduct tab: each student's
-//  conducta for a period, and the discipline records behind it.
-//  The arithmetic lives in ../conduct.js and the live mark comes from the
-//  student_period_conduct view; this module only renders.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { renderErrorBlock } from "../teacherTableHelpers.js";

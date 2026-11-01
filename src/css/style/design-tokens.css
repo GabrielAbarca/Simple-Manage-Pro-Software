@@ -1,6 +1,6 @@
 @layer base {
   :root {
-    /* ── Native control theming ───────────────────────────────────────
+    /* Native control theming
      Tells the browser which palette to render its OWN UI in: the date
      picker's indicator and calendar, number spin buttons, the <select>
      option list, autofill highlighting, form control internals and
@@ -50,7 +50,7 @@
     --color-suspension: #f97316;
     --color-suspension-bg: rgba(249, 115, 22, 0.12);
 
-    /* ── Accessible text + fill shades (WCAG 2.1 AA) ──────────────────
+    /* Accessible text + fill shades (WCAG 2.1 AA)
      The brand hues above are chosen for identity and stay exactly as they
      are — they still paint every ring, bar, dot and active state. What they
      could never do is carry TEXT: #7380ec on white is 3.48:1, #41f1b6 is
@@ -77,7 +77,7 @@
     --color-info-text: #06738e; /* worst of 4 backgrounds: 4.54 */
     --color-suspension-text: #af4b05; /* worst of 4 backgrounds: 4.51 */
 
-    /* ── Borders, split by role ───────────────────────────────────────
+    /* Borders, split by role
      WCAG 1.4.11 asks 3:1 only of boundaries needed to IDENTIFY a control.
      Table hairlines and card dividers are decorative and stay on the old
      tint; form-control boundaries are not, and no alpha of that tint can
@@ -136,7 +136,7 @@
     --shadow-md: 0 1rem 2rem var(--color-light);
     --box-shadow: 0 2rem 3rem var(--color-light);
 
-    /* ── Motion scale ────────────────────────────────────────────────
+    /* Motion scale
      Durations are tiered by what the motion is FOR, not picked per
      component. Everything used to run at one 300ms setting, which is
      the right length for a modal and three times too long for a hover:
@@ -182,7 +182,7 @@
     --surface-hover: rgba(255, 255, 255, 0.08);
     --box-shadow: 0 2rem 3rem var(--color-light);
 
-    /* Brighten readable status shades for dark surfaces (G4) */
+    /* Brighten readable status shades for dark surfaces */
     --color-success-dark: #41f1b6;
     --color-warning-dark: #ffcf7a;
     --color-info: #38bdf8;

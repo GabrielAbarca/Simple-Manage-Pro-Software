@@ -1,11 +1,10 @@
 @layer base {
-  /* ═══════════════════════════════════════════════════════════════
-   [STUDENT] STUDENT-PORTAL VIEWS
+  /* [STUDENT] STUDENT-PORTAL VIEWS
    The components below (student info bar, dashboard progress cards,
    teacher cards, attendance summary, events timeline, settings,
    period selector, score/status helpers) are rendered only by
    index.html. The admin console uses admin.css instead.
-═══════════════════════════════════════════════════════════════ */
+*/
 
   .student-info-bar {
     display: flex;

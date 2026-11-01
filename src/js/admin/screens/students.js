@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  students.js — the student roster and enrollment. Split out of
-//  admin.js. The CSV roster import lives under admin/import/.
-// ─────────────────────────────────────────────────────────────────
 import { t, tn } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { state } from "../state.js";

@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  Español (Costa Rica) — mirrors en.js key-for-key, module for module
-//  (see i18n/en.js and its own es/ sibling directory). Built from the
-//  canonical English base. Professional, school-appropriate phrasing.
-// ─────────────────────────────────────────────────────────────────
-
 import common from "./es/common.js";
 import a11y from "./es/a11y.js";
 import validation from "./es/validation.js";

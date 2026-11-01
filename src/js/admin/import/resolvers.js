@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  resolvers.js — name → id lookups for CSV import. A spreadsheet
-//  names a grade, a teacher or a room the way a person would; these
-//  turn that into the foreign key the row needs, or null when nothing
-//  matches (which the caller reports as a skipped line).
-// ─────────────────────────────────────────────────────────────────
 import { state } from "../state.js";
 
 export function resolveGradeLevel(raw) {

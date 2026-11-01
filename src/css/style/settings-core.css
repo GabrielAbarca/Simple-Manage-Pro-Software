@@ -1,12 +1,11 @@
 @layer base {
-  /* ═══════════════════════════════════════════════════════════════
-   [SHARED] SETTINGS
+  /* [SHARED] SETTINGS
    Rendered by src/js/settings.js into #settings-root on BOTH the
    student portal (index.html) and the teacher console (admin.html).
    Demo build: read-only — inputs are disabled/greyed and action
    buttons are inert. Vertical left rail collapses to a horizontal
    strip at the app's 768px breakpoint.
-═══════════════════════════════════════════════════════════════ */
+*/
   .settings {
     display: grid;
     grid-template-columns: 13rem 1fr;
@@ -15,7 +14,7 @@
     align-items: start;
   }
 
-  /* ── Left rail ── */
+  /* Left rail */
   .settings-rail {
     display: flex;
     flex-direction: column;
@@ -62,7 +61,7 @@
     outline-offset: 2px;
   }
 
-  /* ── Panels ── */
+  /* Panels */
   .settings-panels {
     min-width: 0;
   }
@@ -78,7 +77,7 @@
     display: flex;
   }
 
-  /* ── Demo banner ── */
+  /* Demo banner */
   .settings-demo-banner {
     display: flex;
     align-items: center;
@@ -95,7 +94,7 @@
     font-size: 1.2rem;
   }
 
-  /* ── Identity strip ── */
+  /* Identity strip */
   .settings-identity {
     display: flex;
     align-items: center;
@@ -140,7 +139,7 @@
     color: var(--color-dark-variant);
   }
 
-  /* ── Cards ── */
+  /* Cards */
   .settings-card {
     background: var(--color-white);
     padding: var(--card-padding);
@@ -154,7 +153,7 @@
     margin-bottom: var(--space-3);
   }
 
-  /* ── Fields ── */
+  /* Fields */
   .settings-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -230,7 +229,7 @@
     color: var(--color-success-text);
   }
 
-  /* ── Change-password form (live outside demo mode) ── */
+  /* Change-password form (live outside demo mode) */
   .settings-password-form {
     margin-top: var(--space-2);
     padding-top: var(--space-2);

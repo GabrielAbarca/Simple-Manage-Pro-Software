@@ -1,35 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-//  SETTINGS — one shared, read-only renderer for both contexts.
-//
-//  index.html (student) and admin.html (teacher) share the SAME
-//  structure but feed DIFFERENT data. Rather than duplicate markup,
-//  each context resolves its own record, normalizes it into the
-//  adapter shape below, and calls renderSettings(rootEl, adapter).
-//
-//  DEMO SCOPE: display only. Everything in Account & Profile is
-//  natively `disabled` (greyed inputs + inert buttons); Preferences is
-//  a styled shell (Language stub is a no-op).
-//
-//  The one exception is "Change password" in the Login security card,
-//  which is live outside demo mode — a signed-in user otherwise has no
-//  way to change their own password and has to go through the
-//  forgot-password email loop. It routes through auth.updatePassword,
-//  which is itself demo-gated, and the button stays disabled in demo so
-//  the shared account's public password cannot be moved.
-//
-//  Adapter shape:
-//    {
-//      context: "student" | "teacher",
-//      identity: {
-//        displayName, subtitle, avatarIcon,
-//        roleBadge: { text, className }
-//      },
-//      personal: [ { label, value, icon }, ... ],
-//      username,   // account login identity (email)
-//      email       // shown in Login security
-//    }
-// ─────────────────────────────────────────────────────────────────
-
 import { t, getLang, setLang } from "./i18n.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { updatePassword } from "./auth.js";
@@ -214,7 +182,7 @@ function bindChangePassword(rootEl) {
   });
 }
 
-// ── Account & Profile ────────────────────────────────────────────
+// Account & Profile
 function renderAccount(adapter) {
   const id = adapter.identity ?? {};
   const badge = id.roleBadge ?? { text: "", className: "badge-primary" };
@@ -322,7 +290,7 @@ function renderAccount(adapter) {
     </div>`;
 }
 
-// ── Preferences (shell only) ─────────────────────────────────────
+// Preferences (shell only)
 function renderPreferences() {
   // Reflect this view's active language on the segmented control. Language
   // names stay in their own language (English / Español), never translated.
@@ -346,7 +314,7 @@ function renderPreferences() {
     </div>`;
 }
 
-// ── Help (static) ────────────────────────────────────────────────
+// Help (static)
 function renderHelp() {
   const faqs = [
     { q: t("settings.help.faq1q"), a: t("settings.help.faq1a") },
@@ -382,7 +350,7 @@ function renderHelp() {
     </div>`;
 }
 
-// ── More info (static) ───────────────────────────────────────────
+// More info (static)
 function renderMoreInfo() {
   return `
     <div class="settings-card">

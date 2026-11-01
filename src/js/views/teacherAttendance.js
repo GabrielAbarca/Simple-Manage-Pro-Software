@@ -3,7 +3,7 @@ import { AT_RISK_MISSED_LESSONS } from "../atRisk.js";
 import { skeletonRows, skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { showToast, errorText } from "../teacherFeedback.js";
+import { showToast, errorText } from "../feedback.js";
 import { renderErrorRow, renderErrorBlock } from "../teacherTableHelpers.js";
 import { escapeHtml } from "../html.js";
 import { openAttendanceExport } from "./classExports.js";

@@ -100,7 +100,6 @@ export default {
     saveChanges: "Guardar cambios",
   },
   confirm: {
-    title: "¿Eliminar elemento?",
     message: "Esta acción no se puede deshacer.",
     deleteStudent:
       '¿Eliminar a "{name}"? Esto elimina su registro de forma permanente y no se puede deshacer.',

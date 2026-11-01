@@ -5,6 +5,7 @@ export default {
   save: "Guardar",
   cancel: "Cancelar",
   confirm: "Confirmar",
+  confirmTitle: "¿Eliminar elemento?",
   continue: "Continuar",
   delete: "Eliminar",
   edit: "Editar",

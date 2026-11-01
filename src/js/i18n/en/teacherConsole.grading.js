@@ -100,7 +100,6 @@ export default {
     saveChanges: "Save Changes",
   },
   confirm: {
-    title: "Delete item?",
     message: "This action cannot be undone.",
     deleteStudent:
       'Delete "{name}"? This removes their record permanently and cannot be undone.',

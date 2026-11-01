@@ -1,7 +1,7 @@
 import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { renderErrorBlock } from "../teacherTableHelpers.js";
-import { showToast } from "../teacherFeedback.js";
+import { showToast } from "../feedback.js";
 import { state } from "../teacherState.js";
 import { getCurrentPeriodId } from "../teacherFormat.js";
 import { db } from "../teacherData/index.js";

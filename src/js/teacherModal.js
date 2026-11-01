@@ -1,7 +1,7 @@
 import { registerDialog } from "./dialog.js";
 import { t } from "./i18n.js";
 import * as v from "./validate.js";
-import { showToast, errorText, openConfirm } from "./teacherFeedback.js";
+import { showToast, errorText, openConfirm } from "./feedback.js";
 
 // Generic Modal
 const modalOverlay = document.getElementById("modal-overlay");

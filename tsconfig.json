@@ -51,7 +51,6 @@
     "src/js/views/events.js",
     "src/js/views/settingsView.js",
     "src/js/teacherNav.js",
-    "src/js/teacherFeedback.js",
     "src/js/teacherData/index.js",
     "src/js/views/teacherToday.js",
     "src/js/views/myClasses.js",

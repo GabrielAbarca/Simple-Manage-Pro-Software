@@ -1,7 +1,7 @@
-import { registerDialog } from "../../dialog.js";
-import { t } from "../../i18n.js";
-import { mapDbError } from "../../dbErrors.js";
-import { escapeHtml } from "../../html.js";
+import { registerDialog } from "./dialog.js";
+import { t } from "./i18n.js";
+import { mapDbError } from "./dbErrors.js";
+import { escapeHtml } from "./html.js";
 
 const toastContainer = document.getElementById("toast-container");
 
@@ -31,7 +31,9 @@ export function errorText(err) {
 const confirmOverlay = document.getElementById("confirm-overlay");
 const confirmTitle = document.getElementById("confirm-title");
 const confirmMessage = document.getElementById("confirm-message");
-const confirmDeleteBtn = document.getElementById("confirm-delete");
+const confirmDeleteBtn = /** @type {HTMLButtonElement} */ (
+  document.getElementById("confirm-delete")
+);
 const confirmCancelBtn = document.getElementById("confirm-cancel");
 let confirmHandler = null;
 
@@ -46,7 +48,7 @@ let confirmHandler = null;
  */
 export function openConfirm(message, onConfirm, opts = {}) {
   const danger = opts.danger !== false;
-  confirmTitle.textContent = opts.title ?? t("console.confirm.title");
+  confirmTitle.textContent = opts.title ?? t("common.confirmTitle");
   confirmMessage.textContent = message;
   confirmDeleteBtn.textContent = opts.confirmLabel ?? t("common.delete");
   confirmDeleteBtn.classList.toggle("btn-danger", danger);

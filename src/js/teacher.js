@@ -10,7 +10,7 @@ import { initControls } from "./controls/index.js";
 import { initI18n, applyTranslations, t } from "./i18n.js";
 import { initTeacherNav, showSection } from "./teacherNav.js";
 import { resolveTeacherContext } from "./teacherContext.js";
-import { showToast } from "./teacherFeedback.js";
+import { showToast } from "./feedback.js";
 import { loadToday } from "./views/teacherToday.js";
 import { loadMyClasses } from "./views/myClasses.js";
 import { loadSubjects } from "./views/subjects.js";

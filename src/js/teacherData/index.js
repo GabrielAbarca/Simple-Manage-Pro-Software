@@ -1,7 +1,7 @@
 import { DEMO_MODE } from "../demoMode.js";
 import { wrapDbForDemo } from "../demoDb.js";
 import { t } from "../i18n.js";
-import { showToast } from "../teacherFeedback.js";
+import { showToast } from "../feedback.js";
 import * as identity from "./identity.js";
 import * as classes from "./classes.js";
 import * as students from "./students.js";

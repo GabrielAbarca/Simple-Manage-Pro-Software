@@ -8,7 +8,7 @@ import { t } from "../../i18n.js";
 import * as sched from "../../scheduleLogic.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../ui/feedback.js";
 import { iconBtn, optionsFrom } from "../ui/tables.js";
 import {

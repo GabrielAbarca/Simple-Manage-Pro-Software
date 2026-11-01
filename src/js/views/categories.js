@@ -9,7 +9,8 @@ import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { openModal } from "../teacherModal.js";
 import { showToast, openConfirm, errorText } from "../teacherFeedback.js";
-import { makeActionBtn, escapeHtml } from "../teacherTableHelpers.js";
+import { makeActionBtn } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { getGradebookState, loadGradebook } from "./gradebook.js";
 import { totalWeight, weightStatus, TARGET_WEIGHT } from "../gradingPeriods.js";
 

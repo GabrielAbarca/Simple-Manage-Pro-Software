@@ -17,7 +17,8 @@ import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { showToast, errorText } from "../teacherFeedback.js";
-import { renderErrorBlock, escapeHtml } from "../teacherTableHelpers.js";
+import { renderErrorBlock } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { conductCellHtml, getCurrentPeriodId } from "../teacherFormat.js";
 
 const pcOverlay = document.getElementById("post-conduct-overlay");

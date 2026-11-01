@@ -4,7 +4,8 @@ import {
   fetchDashboardStats,
 } from "../supabaseQueries.js";
 import { state, getEvents, getGradingPeriods } from "../studentState.js";
-import { scoreHtml, statusLabel, escapeHtml } from "./viewHelpers.js";
+import { scoreHtml, statusLabel } from "./viewHelpers.js";
+import { escapeHtml } from "../html.js";
 import { bandClass } from "../promotion.js";
 import { upcomingEvents } from "../upcomingEvents.js";
 

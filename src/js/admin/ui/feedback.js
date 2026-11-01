@@ -9,7 +9,7 @@
 import { registerDialog } from "../../dialog.js";
 import { t } from "../../i18n.js";
 import { mapDbError } from "../../dbErrors.js";
-import { escapeHtml } from "./format.js";
+import { escapeHtml } from "../../html.js";
 
 const toastContainer = document.getElementById("toast-container");
 

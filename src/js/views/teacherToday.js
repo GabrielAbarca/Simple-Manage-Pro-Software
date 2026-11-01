@@ -7,11 +7,8 @@ import { skeletonCards } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { jsDayToDow } from "../scheduleLogic.js";
-import {
-  renderErrorBlock,
-  renderContextGap,
-  escapeHtml,
-} from "../teacherTableHelpers.js";
+import { renderErrorBlock, renderContextGap } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { resolveTeacherContext, hasTeacherContext } from "../teacherContext.js";
 import { className } from "../teacherFormat.js";
 import { openClassWorkspace } from "./classWorkspace.js";

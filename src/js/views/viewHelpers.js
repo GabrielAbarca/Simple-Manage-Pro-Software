@@ -11,26 +11,3 @@ export function statusLabel(status) {
 export function scoreHtml(score) {
   return `<span class="${bandClass(score, state.school)}">${score}</span>`;
 }
-
-/**
- * Escape a value for interpolation into an HTML template string.
- *
- * The teacher console has its own copy in teacherTableHelpers.js, but that
- * module pulls in teacherAuth/teacherState — importing it from a student view
- * would drag the teacher console's auth into the student bundle.
- * @param {unknown} value
- * @returns {string}
- */
-export function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
-}

@@ -11,7 +11,7 @@
 import { t } from "../../i18n.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { renderErrorBlock } from "../ui/tables.js";
 import { getSchedTab, setSchedTab, registerRepaint } from "./tabState.js";
 import { currentSchedSection } from "./helpers.js";

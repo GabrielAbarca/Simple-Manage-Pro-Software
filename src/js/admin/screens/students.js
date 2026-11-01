@@ -6,7 +6,8 @@ import { t, tn } from "../../i18n.js";
 import * as v from "../../validate.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml, num, nullable, todayIso } from "../ui/format.js";
+import { num, nullable, todayIso } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../ui/feedback.js";
 import { openModal } from "../ui/modal.js";
 import {

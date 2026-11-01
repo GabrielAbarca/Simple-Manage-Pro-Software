@@ -12,7 +12,8 @@ import * as v from "../../validate.js";
 import { totalWeight, weightStatus } from "../../gradingPeriods.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml, fmtDate } from "../ui/format.js";
+import { fmtDate } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import {
   showToast,
   errorText,

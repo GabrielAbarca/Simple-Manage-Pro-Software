@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────
 import { t } from "../../i18n.js";
 import { errorState, errorRow } from "../../ui.js";
-import { escapeHtml } from "./format.js";
+import { escapeHtml } from "../../html.js";
 
 export function renderMessageRow(tbodyId, colspan, message) {
   const tbody = document.getElementById(tbodyId);

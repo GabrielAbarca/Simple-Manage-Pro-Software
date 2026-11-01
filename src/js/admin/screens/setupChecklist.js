@@ -6,7 +6,7 @@
 import { t, tn } from "../../i18n.js";
 import { state } from "../state.js";
 import { showSection } from "../nav.js";
-import { escapeHtml } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { setupSteps } from "../domain/setupSteps.js";
 import { openYearForm } from "./years.js";
 

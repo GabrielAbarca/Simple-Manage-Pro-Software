@@ -18,7 +18,7 @@ import {
   getCurrentPeriodId,
 } from "../teacherFormat.js";
 import { isConductPassing } from "../promotion.js";
-import { escapeHtml } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { printStudentReport } from "./progressReport.js";
 
 // ── Student drawer ─────────────────────────────────────────────

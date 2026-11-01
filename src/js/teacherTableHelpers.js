@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────
 //  teacherTableHelpers.js — parameterized table/list rendering helpers
-//  (empty state, error state, row action buttons, HTML escaping). Split
+//  (empty state, error state, row action buttons). Split
 //  out of teacher.js's UI-helpers section.
 // ─────────────────────────────────────────────────────────────────
 import { t } from "./i18n.js";
@@ -95,18 +95,4 @@ export function makeActionBtn(
     btn.addEventListener("click", onClick);
   }
   return btn;
-}
-
-export function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
 }

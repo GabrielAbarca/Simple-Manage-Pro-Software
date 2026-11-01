@@ -1,22 +1,8 @@
 // ─────────────────────────────────────────────────────────────────
-//  format.js — value escaping, coercion and date formatting shared by
+//  format.js — value coercion and date formatting shared by
 //  every admin console screen. Split out of admin.js's UI helpers.
 // ─────────────────────────────────────────────────────────────────
 import { formatDate } from "../../i18n.js";
-
-export function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
-}
 
 export function num(v) {
   return v === "" || v == null ? null : Number(v);

@@ -8,11 +8,8 @@ import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { bindAdminAction } from "../teacherAuth.js";
-import {
-  renderErrorBlock,
-  makeActionBtn,
-  escapeHtml,
-} from "../teacherTableHelpers.js";
+import { renderErrorBlock, makeActionBtn } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import {
   weightedOverall,
   gradeCellHtml,

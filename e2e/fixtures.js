@@ -127,8 +127,8 @@ export const studentFix = {
         },
       },
     },
-    // Sits between the old hardcoded 50 and the real MEP minimum of 70 — the
-    // exact score the portal used to call "Aprobado".
+    // Below the MEP minimum of 70 but above 50: a failing score that a
+    // hardcoded pass mark of 50 would call "Aprobado".
     {
       id: 502,
       student_id: 101,

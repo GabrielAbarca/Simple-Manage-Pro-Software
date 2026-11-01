@@ -195,8 +195,8 @@ export function closeModal() {
 
 /**
  * Close on explicit intent only (X / Cancel), confirming first when the form
- * carries unsaved edits. Clicking the backdrop deliberately does nothing —
- * it used to discard a half-filled form without warning.
+ * carries unsaved edits. Clicking the backdrop deliberately does nothing, so
+ * a stray click can't discard a half-filled form.
  */
 export function requestCloseModal() {
   if (!modalDirty) {

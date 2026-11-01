@@ -138,9 +138,9 @@
 
     /* Motion scale
      Durations are tiered by what the motion is FOR, not picked per
-     component. Everything used to run at one 300ms setting, which is
-     the right length for a modal and three times too long for a hover:
-     a pointer sweeping a grid left a trail of still-settling cards. */
+     component. One 300ms setting is the right length for a modal and
+     three times too long for a hover: a pointer sweeping a grid leaves a
+     trail of still-settling cards. */
     --duration-micro: 100ms; /* hover, toggle, focus — must feel instant */
     --duration-fast: 200ms; /* press, tooltip */
     --duration-base: 300ms; /* modal, dropdown, panel */

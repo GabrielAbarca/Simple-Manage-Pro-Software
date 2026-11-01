@@ -55,9 +55,9 @@
     opacity: 0.75;
   }
 
-  /* The tint here used to be --color-light, which is rgba(0,0,0,0.4) in dark
-   mode — a near-black square painted behind an already-dark icon, so hovering
-   turned the whole indicator into one solid block. --surface-hover moves away
+  /* Not --color-light: that is rgba(0,0,0,0.4) in dark mode, a near-black
+   square behind an already-dark icon that turns the whole indicator into one
+   solid block on hover. --surface-hover moves away
    from the surface in both themes. */
   input[type="date"]::-webkit-calendar-picker-indicator:hover,
   input[type="time"]::-webkit-calendar-picker-indicator:hover {

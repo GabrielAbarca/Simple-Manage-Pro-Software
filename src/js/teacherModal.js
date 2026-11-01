@@ -247,8 +247,7 @@ export function closeModal() {
 
 /**
  * Close on explicit intent only, confirming first when the form carries
- * unsaved edits. The X and Cancel both used to discard a half-filled form
- * without a word — the admin console already warns, this matches it.
+ * unsaved edits, the same as the admin console.
  */
 export function requestCloseModal() {
   if (!modalDirty) {

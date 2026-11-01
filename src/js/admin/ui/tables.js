@@ -19,8 +19,8 @@ export function renderEmptyRow(
 /**
  * A section that failed to load, with a way to try again.
  *
- * This used to route through renderMessageRow, which meant a failed fetch and
- * an empty table rendered as the SAME muted grey line. "No students yet" and
+ * Not routed through renderMessageRow: a failed fetch and an empty table
+ * would render as the SAME muted grey line. "No students yet" and
  * "we couldn't reach the server" mean opposite things to a director — one is
  * an invitation to add the first student, the other is a dropped connection —
  * and showing the first when the second happened is how an outage turns into

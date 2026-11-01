@@ -45,6 +45,4 @@
     background: var(--color-white);
     color: var(--color-dark);
   }
-
-  /* Buttons moved to style.css (shared button system) */
 }

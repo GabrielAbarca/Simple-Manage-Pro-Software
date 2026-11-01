@@ -45,8 +45,8 @@ test.describe("login", () => {
     expect(errors).toEqual([]);
   });
 
-  // Recovery links used to be swallowed: supabase-js consumed the tokens and
-  // the page redirected the fresh session straight to a portal.
+  // A recovery link must not be swallowed: if supabase-js consumes the tokens,
+  // the page redirects the fresh session straight to a portal.
   test("an expired recovery link explains itself instead of redirecting", async ({
     page,
     context,
@@ -322,10 +322,9 @@ test.describe("teacher console", () => {
     expect(writes).toEqual([]);
   });
 
-  // The split of teacher.js dropped the bootstrap's showSection("today"), so
-  // the tab that loads first sat on its static skeleton until the user clicked
-  // away and back. Nothing below clicks the sidebar: the grid must resolve on
-  // its own.
+  // Without the bootstrap's showSection("today"), the tab that loads first
+  // sits on its static skeleton until the user clicks away and back. Nothing
+  // below clicks the sidebar: the grid must resolve on its own.
   test("renders Today on first paint, without a tab switch", async ({
     page,
     context,
@@ -360,9 +359,9 @@ test.describe("teacher console", () => {
     expect(writes).toEqual([]);
   });
 
-  // A failed context resolve used to be terminal: showSection latched
-  // loaded.today before the loader ran, nothing re-resolved, and the grid
-  // blamed a missing teachers row for what was really a dead connection.
+  // A failed context resolve must stay retryable: if showSection latches
+  // loaded.today before the loader runs, nothing re-resolves, and the grid
+  // blames a missing teachers row for what is really a dead connection.
   test("a failed context resolve is retryable, not a dead end", async ({
     page,
     context,
@@ -946,8 +945,8 @@ test.describe("admin console", () => {
     await expect(page.locator("#stat-attendance-hint")).toHaveText(
       `${monthName} · 4 records`,
     );
-    // At-risk is a summary figure now — the per-student table it used to sit
-    // above was demoted off the dashboard.
+    // At-risk is a single summary figure; the dashboard has no per-student
+    // table.
     await expect(page.locator("#stat-atrisk")).toHaveText("1");
     await expect(page.locator("#stat-atrisk-hint")).toHaveText(
       "5 or more absences or lates in one subject this year",

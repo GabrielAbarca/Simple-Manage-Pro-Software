@@ -11,7 +11,7 @@ import { conductScore, conductDeduction } from "./conduct.js";
 //   · within a category: points earned ÷ points possible × 100 — NOT the
 //     average of each assignment's percentage. With mixed max_scores those
 //     diverge sharply (a 100-point exam and a 10-point quiz are not equal
-//     halves of a grade), and this file used to do the latter.
+//     halves of a grade).
 //   · categories combine weighted by grade_categories.weight, renormalised
 //     over only the categories carrying graded work
 //   · uncategorised work does not enter the weighted branch at all; it

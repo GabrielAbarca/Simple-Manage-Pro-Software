@@ -10,9 +10,9 @@ import {
 /**
  * Error and offline states.
  *
- * The failure these guard against is quiet: a query that fails used to render
- * as an empty state, so a student whose connection dropped was told "No grades
- * recorded yet". That reads as data loss, and during a demo it reads as a
+ * The failure these guard against is quiet: a failed query rendered as an
+ * empty state tells a student whose connection dropped "No grades recorded
+ * yet". That reads as data loss, and during a demo it reads as a
  * broken product.
  */
 

@@ -24,8 +24,8 @@ export function isDarkMode() {
 /**
  * Reflect the current mode in any toggler present on the page.
  *
- * The togglers are <button aria-pressed> (they used to be plain <div>s, which
- * made theme switching mouse-only). `aria-pressed` is what tells a screen
+ * The togglers are <button aria-pressed> so theme switching works from the
+ * keyboard, not just the mouse. `aria-pressed` is what tells a screen
  * reader which way the switch currently sits — the .active class only moves
  * the highlight visually, so both have to be kept in step here.
  */

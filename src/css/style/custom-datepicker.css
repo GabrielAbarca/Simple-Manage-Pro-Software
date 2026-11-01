@@ -5,8 +5,8 @@
     cursor: text;
   }
 
-  /* Sits over the right edge of the native input, where its own picker
-     indicator used to be (that one is hidden above). */
+  /* Sits over the right edge of the native input, in place of its own
+     picker indicator (hidden above). */
   .smp-date__button {
     position: absolute;
     top: 50%;

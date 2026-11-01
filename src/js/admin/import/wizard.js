@@ -244,7 +244,7 @@ async function commitImport(descriptor, valid) {
 }
 
 // Backdrop clicks are ignored here too — a pasted roster and its column
-// mapping are exactly the kind of work a stray click used to destroy.
+// mapping are exactly the kind of work a stray click would destroy.
 document
   .getElementById("import-close")
   .addEventListener("click", closeImportModal);

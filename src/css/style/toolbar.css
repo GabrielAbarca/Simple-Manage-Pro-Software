@@ -22,12 +22,9 @@
     color: var(--color-dark-variant);
   }
 
-  /* `appearance: auto` used to be restored here — it was this one select's
-   private workaround for the global reset stripping the dropdown arrow. The
-   controls layer now gives every select a chevron, so the workaround is dead
-   code (and would have painted a second, native arrow beside the new one).
-   font-family/font-size are likewise inherited from the shared control rules
-   and no longer restated. */
+  /* No `appearance: auto` here: the controls layer gives every select a
+   chevron, and the native arrow would paint a second one beside it.
+   font-family/font-size come from the shared control rules. */
   .period-selector select {
     padding: 0.6rem 0.9rem;
     border-radius: var(--border-radius-2);

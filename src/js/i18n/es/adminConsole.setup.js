@@ -142,7 +142,6 @@ export default {
       "El almacenamiento del perfil del colegio aún no está configurado en este proyecto — se usan las etiquetas predeterminadas.",
   },
   confirm: {
-    title: "¿Eliminar elemento?",
     message: "Esta acción no se puede deshacer.",
     discardTitle: "¿Descartar cambios?",
     discardMessage: "Tiene cambios sin guardar. ¿Desea descartarlos?",

@@ -2,7 +2,7 @@ import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { openModal } from "../teacherModal.js";
-import { showToast, openConfirm } from "../teacherFeedback.js";
+import { showToast, openConfirm } from "../feedback.js";
 import { className, genderOptions } from "../teacherFormat.js";
 import { loadRoster } from "./roster.js";
 

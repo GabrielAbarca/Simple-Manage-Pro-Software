@@ -4,7 +4,7 @@ import * as v from "../../validate.js";
 import { data } from "../data.js";
 import { nullable } from "../ui/format.js";
 import { escapeHtml } from "../../html.js";
-import { showToast, openConfirm } from "../ui/feedback.js";
+import { showToast, openConfirm } from "../../feedback.js";
 import { openModal } from "../ui/modal.js";
 import { iconBtn, tableRow, renderErrorBlock } from "../ui/tables.js";
 

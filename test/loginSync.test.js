@@ -20,7 +20,7 @@ vi.mock("../src/js/accounts.js", () => ({
   generateTempPassword: vi.fn(),
 }));
 vi.mock("../src/js/i18n.js", () => ({ t: (key) => key }));
-vi.mock("../src/js/admin/ui/feedback.js", () => feedback);
+vi.mock("../src/js/feedback.js", () => feedback);
 vi.mock("../src/js/admin/state.js", () => adminState);
 vi.mock("../src/js/admin/data.js", () => ({ data: {} }));
 vi.mock("../src/js/admin/ui/tables.js", () => ({ iconBtn: vi.fn() }));

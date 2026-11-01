@@ -4,6 +4,7 @@ export default {
   save: "Save",
   cancel: "Cancel",
   confirm: "Confirm",
+  confirmTitle: "Delete item?",
   continue: "Continue",
   delete: "Delete",
   edit: "Edit",

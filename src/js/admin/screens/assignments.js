@@ -3,7 +3,7 @@ import { state } from "../state.js";
 import { data } from "../data.js";
 import { num } from "../ui/format.js";
 import { escapeHtml } from "../../html.js";
-import { showToast, openConfirm } from "../ui/feedback.js";
+import { showToast, openConfirm } from "../../feedback.js";
 import { openModal } from "../ui/modal.js";
 import {
   renderMessageRow,

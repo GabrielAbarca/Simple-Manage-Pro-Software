@@ -3,7 +3,7 @@ import * as v from "../validate.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { openModal } from "../teacherModal.js";
-import { showToast } from "../teacherFeedback.js";
+import { showToast } from "../feedback.js";
 import { CONDUCT_MAX, conductAfter } from "../conduct.js";
 
 // Discipline severity options, built at call time so labels follow the language.

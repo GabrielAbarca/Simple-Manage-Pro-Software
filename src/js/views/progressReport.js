@@ -3,7 +3,7 @@ import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { formatDate, genderLabel } from "../teacherFormat.js";
 import { escapeHtml } from "../html.js";
-import { showToast } from "../teacherFeedback.js";
+import { showToast } from "../feedback.js";
 
 /**
  * @param {any} student

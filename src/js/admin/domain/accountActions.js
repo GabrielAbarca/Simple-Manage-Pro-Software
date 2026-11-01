@@ -8,7 +8,7 @@ import {
   listAccounts,
 } from "../../accounts.js";
 import { data } from "../data.js";
-import { showToast, openConfirm, openNotice } from "../ui/feedback.js";
+import { showToast, openConfirm, openNotice } from "../../feedback.js";
 import { state } from "../state.js";
 import { iconBtn } from "../ui/tables.js";
 import { openModal } from "../ui/modal.js";

@@ -141,7 +141,6 @@ export default {
       "School profile storage isn't set up on this project yet — default labels are in use.",
   },
   confirm: {
-    title: "Delete item?",
     message: "This action cannot be undone.",
     discardTitle: "Discard changes?",
     discardMessage: "You have unsaved changes. Do you want to discard them?",

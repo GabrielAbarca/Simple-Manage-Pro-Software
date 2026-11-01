@@ -10,7 +10,7 @@ import {
   errorText,
   openConfirm,
   openNotice,
-} from "../ui/feedback.js";
+} from "../../feedback.js";
 import { openModal } from "../ui/modal.js";
 import {
   renderMessageRow,

@@ -4,7 +4,7 @@ import { parseCsv, autoMap } from "../../csv.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
 import { escapeHtml } from "../../html.js";
-import { showToast, errorText } from "../ui/feedback.js";
+import { showToast, errorText } from "../../feedback.js";
 import { sectionName } from "../domain/lookups.js";
 import { IMPORT_DESCRIPTORS } from "./descriptors/index.js";
 import { buildImportRows } from "./rows.js";

@@ -7,7 +7,7 @@ import {
   isConductPassing,
 } from "../promotion.js";
 import { toIso } from "../controls/dateUtils.js";
-import { escapeHtml } from "./viewHelpers.js";
+import { escapeHtml } from "../html.js";
 
 export async function initConductView() {
   const root = document.getElementById("conduct-root");

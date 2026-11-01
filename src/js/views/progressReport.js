@@ -8,7 +8,7 @@ import { t, tn, formatDate as i18nFormatDate } from "../i18n.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { formatDate, genderLabel } from "../teacherFormat.js";
-import { escapeHtml } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { showToast } from "../teacherFeedback.js";
 
 /**

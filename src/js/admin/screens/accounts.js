@@ -19,7 +19,7 @@ import {
   generateTempPassword,
 } from "../../accounts.js";
 import { state } from "../state.js";
-import { escapeHtml } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../ui/feedback.js";
 import { openModal } from "../ui/modal.js";
 import {

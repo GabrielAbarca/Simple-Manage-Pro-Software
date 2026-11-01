@@ -11,7 +11,8 @@ import { t } from "../../i18n.js";
 import * as sched from "../../scheduleLogic.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml, num } from "../ui/format.js";
+import { num } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import {
   teacherName,
   roomName,

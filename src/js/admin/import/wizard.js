@@ -10,7 +10,7 @@ import { t } from "../../i18n.js";
 import { parseCsv, autoMap } from "../../csv.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
-import { escapeHtml } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
 import { showToast, errorText } from "../ui/feedback.js";
 import { sectionName } from "../domain/lookups.js";
 import { IMPORT_DESCRIPTORS } from "./descriptors/index.js";

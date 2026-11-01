@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────
 import { t } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
-import { escapeHtml } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { conductCellHtml, formatDate } from "../teacherFormat.js";
 import { isConductPassing, conductPassingScore } from "../promotion.js";
 

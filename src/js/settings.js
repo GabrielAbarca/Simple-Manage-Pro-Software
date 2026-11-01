@@ -34,20 +34,10 @@ import { t, getLang, setLang } from "./i18n.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { updatePassword } from "./auth.js";
 import { MIN_PASSWORD_LENGTH } from "./validate.js";
+import { escapeHtml } from "./html.js";
 
 // App version surfaced in "More info". Bump alongside package.json.
 const APP_VERSION = "1.0.0";
-
-// Local HTML-escape — values originate from the DB. Mirrors admin.js's escapeHtml.
-function esc(value) {
-  if (value === null || value === undefined) return "—";
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 // Settings sub-sections — the left rail. `render` builds each panel body.
 // `labelKey` resolves through t() at render time (after initI18n).
@@ -235,9 +225,9 @@ function renderAccount(adapter) {
       <label class="settings-field">
         <span class="settings-field-label">
           ${f.icon ? `<span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${f.icon}"></use></svg></span>` : ""}
-          ${esc(f.label)}
+          ${escapeHtml(f.label ?? "—")}
         </span>
-        <input type="text" value="${esc(f.value)}" disabled />
+        <input type="text" value="${escapeHtml(f.value ?? "—")}" disabled />
       </label>`,
     )
     .join("");
@@ -250,13 +240,13 @@ function renderAccount(adapter) {
 
     <div class="settings-identity">
       <div class="settings-avatar">
-        <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${esc(id.avatarIcon ?? "person")}"></use></svg></span>
+        <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${escapeHtml(id.avatarIcon ?? "person")}"></use></svg></span>
       </div>
       <div class="settings-identity-meta">
-        <h3>${esc(id.displayName)}</h3>
-        <p>${esc(id.subtitle)}</p>
+        <h3>${escapeHtml(id.displayName ?? "—")}</h3>
+        <p>${escapeHtml(id.subtitle ?? "—")}</p>
       </div>
-      <span class="badge ${esc(badge.className)}">${esc(badge.text)}</span>
+      <span class="badge ${escapeHtml(badge.className ?? "—")}">${escapeHtml(badge.text ?? "—")}</span>
     </div>
 
     <div class="settings-card">
@@ -274,7 +264,7 @@ function renderAccount(adapter) {
             <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-alternate_email"></use></svg></span>
             ${t("settings.account.username")}
           </span>
-          <input type="text" value="${esc(adapter.username)}" disabled />
+          <input type="text" value="${escapeHtml(adapter.username ?? "—")}" disabled />
         </label>
         <button type="button" class="btn btn-ghost" disabled>${t("settings.account.changeUsername")}</button>
       </div>
@@ -289,7 +279,7 @@ function renderAccount(adapter) {
             <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-mail"></use></svg></span>
             ${t("settings.account.email")}
           </span>
-          <input type="email" value="${esc(adapter.email)}" disabled />
+          <input type="email" value="${escapeHtml(adapter.email ?? "—")}" disabled />
         </label>
       </div>
       <div class="settings-row">
@@ -405,7 +395,7 @@ function renderMoreInfo() {
           <span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-deployed_code"></use></svg></span>
           ${t("settings.about.version")}
         </span>
-        <span class="badge badge-info">v${esc(APP_VERSION)} · Demo</span>
+        <span class="badge badge-info">v${escapeHtml(APP_VERSION)} · Demo</span>
       </div>
     </div>
 

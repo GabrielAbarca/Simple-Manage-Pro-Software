@@ -7,7 +7,8 @@ import { t, tn } from "../i18n.js";
 import { skeletonBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { showToast, errorText } from "../teacherFeedback.js";
-import { renderErrorBlock, escapeHtml } from "../teacherTableHelpers.js";
+import { renderErrorBlock } from "../teacherTableHelpers.js";
+import { escapeHtml } from "../html.js";
 import { formatDate } from "../teacherFormat.js";
 import { getGradebookState, loadGradebook } from "./gradebook.js";
 

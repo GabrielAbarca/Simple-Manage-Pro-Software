@@ -1,6 +1,6 @@
 import { t, formatDate } from "../i18n.js";
 import { getEvents } from "../studentState.js";
-import { escapeHtml } from "./viewHelpers.js";
+import { escapeHtml } from "../html.js";
 
 export async function initEventsView() {
   const events = await getEvents();

@@ -11,10 +11,8 @@ import {
   renderEmptyRow,
   renderErrorRow,
   iconBtn,
-  markSaved,
-  applySavedFlash,
-  tableRow,
-} from "../ui/tables.js";
+} from "../../ui.js";
+import { markSaved, applySavedFlash, tableRow } from "../ui/tables.js";
 
 export async function loadGradeLevels() {
   renderMessageRow("grades-body", 3, t("common.loading"));

@@ -1,6 +1,6 @@
 import { t } from "../i18n.js";
 import { db } from "../teacherData/index.js";
-import { renderEmptyRow, renderErrorRow } from "../teacherTableHelpers.js";
+import { renderEmptyRow, renderErrorRow } from "../ui.js";
 import { escapeHtml } from "../html.js";
 
 let _cachedSubjects = [];

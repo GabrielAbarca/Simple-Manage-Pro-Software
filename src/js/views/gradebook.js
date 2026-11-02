@@ -1,8 +1,7 @@
 import { t } from "../i18n.js";
-import { skeletonBlock } from "../ui.js";
+import { skeletonBlock, renderErrorBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { renderErrorBlock } from "../teacherTableHelpers.js";
 import { escapeHtml } from "../html.js";
 import { getCurrentPeriodId, gradeCellHtml } from "../teacherFormat.js";
 import {

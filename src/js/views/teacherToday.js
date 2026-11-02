@@ -1,9 +1,9 @@
 import { t, formatDate as i18nFormatDate } from "../i18n.js";
-import { skeletonCards } from "../ui.js";
+import { skeletonCards, renderErrorBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
 import { jsDayToDow } from "../scheduleLogic.js";
-import { renderErrorBlock, renderContextGap } from "../teacherTableHelpers.js";
+import { renderContextGap } from "../teacherTableHelpers.js";
 import { escapeHtml } from "../html.js";
 import { resolveTeacherContext, hasTeacherContext } from "../teacherContext.js";
 import { className } from "../teacherFormat.js";

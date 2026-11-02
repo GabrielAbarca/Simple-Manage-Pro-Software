@@ -11,10 +11,8 @@ import {
   renderEmptyRow,
   renderErrorRow,
   iconBtn,
-  markSaved,
-  applySavedFlash,
-  tableRow,
-} from "../ui/tables.js";
+} from "../../ui.js";
+import { markSaved, applySavedFlash, tableRow } from "../ui/tables.js";
 import { sectionName, sectionOptions } from "../domain/lookups.js";
 import { STUDENT_STATUSES, genderLabel } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";

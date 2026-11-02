@@ -4,7 +4,8 @@ import { state } from "../state.js";
 import { data } from "../data.js";
 import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../../feedback.js";
-import { iconBtn, optionsFrom } from "../ui/tables.js";
+import { iconBtn } from "../../ui.js";
+import { optionsFrom } from "../ui/tables.js";
 import {
   teacherName,
   roomName,

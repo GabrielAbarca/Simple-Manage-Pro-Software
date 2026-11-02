@@ -11,10 +11,8 @@ import {
   renderEmptyRow,
   renderErrorRow,
   iconBtn,
-  markSaved,
-  applySavedFlash,
-  tableRow,
-} from "../ui/tables.js";
+} from "../../ui.js";
+import { markSaved, applySavedFlash, tableRow } from "../ui/tables.js";
 import { openTemplateItems } from "./templateItems.js";
 
 const TEMPLATES_COLS = 5;

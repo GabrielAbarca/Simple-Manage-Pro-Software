@@ -6,7 +6,8 @@ import { nullable } from "../ui/format.js";
 import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../../feedback.js";
 import { openModal } from "../../modal.js";
-import { iconBtn, tableRow, renderErrorBlock } from "../ui/tables.js";
+import { iconBtn, renderErrorBlock } from "../../ui.js";
+import { tableRow } from "../ui/tables.js";
 
 const overlay = document.getElementById("guardians-overlay");
 const body = document.getElementById("guardians-body");

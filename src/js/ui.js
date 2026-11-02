@@ -1,3 +1,6 @@
+import { t } from "./i18n.js";
+import { escapeHtml } from "./html.js";
+
 /** Skeleton rows for a <tbody> while a table loads. */
 export function skeletonRows(rows = 4, cols = 4) {
   const cell = '<td><span class="skeleton skeleton-text"></span></td>';
@@ -56,6 +59,66 @@ export function errorState(message, retryLabel) {
  */
 export function errorRow(colspan, message, retryLabel) {
   return `<tr><td colspan="${colspan}">${errorState(message, retryLabel)}</td></tr>`;
+}
+
+export function renderMessageRow(tbodyId, colspan, message) {
+  const tbody = document.getElementById(tbodyId);
+  if (tbody)
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="loading-cell">${escapeHtml(message)}</td></tr>`;
+}
+
+export function renderEmptyRow(
+  tbodyId,
+  colspan,
+  message = t("common.noRecords"),
+) {
+  renderMessageRow(tbodyId, colspan, message);
+}
+
+/**
+ * A section that failed to load, with a way to try again.
+ *
+ * Not routed through renderMessageRow: a failed fetch and an empty table
+ * would render as the SAME muted grey line. "No students yet" and
+ * "we couldn't reach the server" mean opposite things to a director — one is
+ * an invitation to add the first student, the other is a dropped connection —
+ * and showing the first when the second happened is how an outage turns into
+ * a support call about missing records.
+ *
+ * Uses the same `.load-error` / `[data-retry]` markup as errorState and
+ * errorRow, so every surface fails identically.
+ *
+ * @param {string} tbodyId
+ * @param {number} colspan
+ * @param {() => any} [retry] re-runs the loader; the button is wired to it
+ */
+export function renderErrorRow(tbodyId, colspan, retry) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = errorRow(colspan, t("common.loadError"), t("common.retry"));
+  tbody
+    .querySelector("[data-retry]")
+    ?.addEventListener("click", () => retry?.());
+}
+
+/** The same failure notice for a container that is not a table body. */
+export function renderErrorBlock(host, retry) {
+  if (!host) return;
+  host.innerHTML = errorState(t("common.loadError"), t("common.retry"));
+  host
+    .querySelector("[data-retry]")
+    ?.addEventListener("click", () => retry?.());
+}
+
+export function iconBtn(icon, label, onClick, danger = false) {
+  const btn = document.createElement("button");
+  btn.className = `btn-icon${danger ? " danger" : ""}`;
+  btn.type = "button";
+  btn.title = label;
+  btn.setAttribute("aria-label", label);
+  btn.innerHTML = `<span class="material-symbols-outlined"><svg aria-hidden="true"><use href="#icon-${icon}"></use></svg></span>`;
+  btn.addEventListener("click", onClick);
+  return btn;
 }
 
 /** Wire the mobile nav drawer (open, close, scrim, Escape). Returns the closer. */

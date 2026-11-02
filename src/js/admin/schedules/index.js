@@ -2,7 +2,7 @@ import { t } from "../../i18n.js";
 import { state } from "../state.js";
 import { data } from "../data.js";
 import { escapeHtml } from "../../html.js";
-import { renderErrorBlock } from "../ui/tables.js";
+import { renderErrorBlock } from "../../ui.js";
 import { getSchedTab, setSchedTab, registerRepaint } from "./tabState.js";
 import { currentSchedSection } from "./helpers.js";
 import { renderEditorPanel } from "./editor.js";

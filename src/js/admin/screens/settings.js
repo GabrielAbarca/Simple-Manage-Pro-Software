@@ -6,7 +6,7 @@ import { fetchProfile } from "../auth.js";
 import { nullable } from "../ui/format.js";
 import { escapeHtml } from "../../html.js";
 import { showToast, errorText } from "../../feedback.js";
-import { renderErrorBlock } from "../ui/tables.js";
+import { renderErrorBlock } from "../../ui.js";
 import { loadSchoolSettings, applyIdLabels } from "../domain/schoolProfile.js";
 import { passingScore, conductPassingScore } from "../../promotion.js";
 

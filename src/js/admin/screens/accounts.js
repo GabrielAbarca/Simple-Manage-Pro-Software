@@ -16,10 +16,8 @@ import {
   renderEmptyRow,
   renderErrorRow,
   iconBtn,
-  markSaved,
-  applySavedFlash,
-  tableRow,
-} from "../ui/tables.js";
+} from "../../ui.js";
+import { markSaved, applySavedFlash, tableRow } from "../ui/tables.js";
 
 const ACCOUNTS_COLS = 5;
 

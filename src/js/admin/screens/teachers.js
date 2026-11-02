@@ -11,10 +11,8 @@ import {
   renderEmptyRow,
   renderErrorRow,
   iconBtn,
-  markSaved,
-  applySavedFlash,
-  tableRow,
-} from "../ui/tables.js";
+} from "../../ui.js";
+import { markSaved, applySavedFlash, tableRow } from "../ui/tables.js";
 import { TEACHER_STATUSES } from "../domain/enums.js";
 import { idLabel } from "../domain/schoolProfile.js";
 import { accountBtn, syncLoginWithStatus } from "../domain/accountActions.js";

@@ -1,8 +1,8 @@
 import { t, tn } from "../i18n.js";
-import { skeletonCardItems } from "../ui.js";
+import { skeletonCardItems, renderErrorBlock } from "../ui.js";
 import { db } from "../teacherData/index.js";
 import { state } from "../teacherState.js";
-import { renderErrorBlock, renderContextGap } from "../teacherTableHelpers.js";
+import { renderContextGap } from "../teacherTableHelpers.js";
 import { escapeHtml } from "../html.js";
 import { resolveTeacherContext, hasTeacherContext } from "../teacherContext.js";
 import { className } from "../teacherFormat.js";

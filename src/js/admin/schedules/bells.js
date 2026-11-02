@@ -6,7 +6,8 @@ import { data } from "../data.js";
 import { escapeHtml } from "../../html.js";
 import { showToast, openConfirm } from "../../feedback.js";
 import { openModal } from "../../modal.js";
-import { iconBtn, markSaved, tableRow } from "../ui/tables.js";
+import { iconBtn } from "../../ui.js";
+import { markSaved, tableRow } from "../ui/tables.js";
 import { repaint } from "./tabState.js";
 import { slotLabel, ensureBellBlocks } from "./helpers.js";
 

@@ -1,8 +1,8 @@
-import { t, formatDate } from "../i18n.js";
-import { fetchStudentProfile } from "../supabaseQueries.js";
-import { renderSettings } from "../settings.js";
-import { state } from "../studentState.js";
-import { statusLabel } from "./viewHelpers.js";
+import { t, formatDate } from "../../i18n.js";
+import { fetchStudentProfile } from "../data.js";
+import { renderSettings } from "../../settings.js";
+import { state } from "../state.js";
+import { statusLabel } from "./helpers.js";
 
 // Read-only Settings for the student context. Reuses the dashboard's
 // state.profile when available; otherwise fetches it on demand. Builds the

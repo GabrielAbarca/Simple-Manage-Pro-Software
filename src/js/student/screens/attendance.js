@@ -1,7 +1,7 @@
-import { t, formatDate } from "../i18n.js";
-import { fetchStudentAttendance } from "../supabaseQueries.js";
-import { state } from "../studentState.js";
-import { escapeHtml } from "../html.js";
+import { t, formatDate } from "../../i18n.js";
+import { fetchStudentAttendance } from "../data.js";
+import { state } from "../state.js";
+import { escapeHtml } from "../../html.js";
 
 export async function initAttendanceView() {
   const records = await fetchStudentAttendance(state.studentId);

@@ -2,7 +2,7 @@ import {
   fetchGradingPeriods,
   fetchEvents,
   fetchSchoolSettings,
-} from "./supabaseQueries.js";
+} from "./data.js";
 
 /**
  * Shared session state for the student portal views. A single mutable

@@ -1,6 +1,6 @@
-import { t } from "../i18n.js";
-import { fetchTeachers } from "../supabaseQueries.js";
-import { statusLabel } from "./viewHelpers.js";
+import { t } from "../../i18n.js";
+import { fetchTeachers } from "../data.js";
+import { statusLabel } from "./helpers.js";
 
 export async function initTeachersView() {
   const teachers = await fetchTeachers();

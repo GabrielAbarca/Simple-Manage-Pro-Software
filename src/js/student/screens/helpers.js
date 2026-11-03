@@ -1,6 +1,6 @@
-import { t } from "../i18n.js";
-import { state } from "../studentState.js";
-import { bandClass } from "../promotion.js";
+import { t } from "../../i18n.js";
+import { state } from "../state.js";
+import { bandClass } from "../../promotion.js";
 
 /** Student/teacher status label from the DB status value. */
 export function statusLabel(status) {

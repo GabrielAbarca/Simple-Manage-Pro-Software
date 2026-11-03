@@ -1,8 +1,8 @@
-import { getSession, signOut } from "./auth.js";
-import { fetchRole } from "./role.js";
-import { errorState, errorRow } from "./ui.js";
-import { t } from "./i18n.js";
-import { state } from "./studentState.js";
+import { getSession, signOut } from "../auth.js";
+import { fetchRole } from "../role.js";
+import { errorState, errorRow } from "../ui.js";
+import { t } from "../i18n.js";
+import { state } from "./state.js";
 
 // Where each view's failure notice goes, and whether it has to be a table row.
 // The dashboard's colspan is a function: its table is subject + one column per

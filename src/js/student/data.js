@@ -5,8 +5,8 @@
 // would render a dropped connection or an RLS denial as "No grades recorded
 // yet". The caller (main.js) is the
 // only consumer, and it turns a throw into a visible error state with a retry.
-import { supabase } from "./supabaseClient.js";
-import { nextOccurrence } from "./scheduleLogic.js";
+import { supabase } from "../supabaseClient.js";
+import { nextOccurrence } from "../scheduleLogic.js";
 
 export async function fetchStudentProfile(studentId) {
   const { data, error } = await supabase

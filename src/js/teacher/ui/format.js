@@ -1,7 +1,7 @@
-import { t, formatDate as i18nFormatDate } from "./i18n.js";
-import { dayKey } from "./scheduleLogic.js";
-import { state } from "./teacherState.js";
-import { bandClass, conductBandClass } from "./promotion.js";
+import { t, formatDate as i18nFormatDate } from "../../i18n.js";
+import { dayKey } from "../../scheduleLogic.js";
+import { state } from "../state.js";
+import { bandClass, conductBandClass } from "../../promotion.js";
 
 /**
  * Human-readable label for a class — "10th Grade — Section A".

@@ -1,7 +1,7 @@
-import { t } from "./i18n.js";
-import { renderErrorBlock, iconBtn } from "./ui.js";
-import { IS_ADMIN, applyAdminLock } from "./teacherAuth.js";
-import { state } from "./teacherState.js";
+import { t } from "../../i18n.js";
+import { renderErrorBlock, iconBtn } from "../../ui.js";
+import { IS_ADMIN, applyAdminLock } from "../auth.js";
+import { state } from "../state.js";
 
 /**
  * Render why a context-dependent section cannot draw. Three distinct states:

@@ -1,12 +1,12 @@
-import { registerDialog } from "../dialog.js";
-import { t } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { openModal } from "../modal.js";
-import { showToast, openConfirm } from "../feedback.js";
-import { makeActionBtn } from "../teacherTableHelpers.js";
-import { escapeHtml } from "../html.js";
-import { formatDate } from "../teacherFormat.js";
+import { registerDialog } from "../../dialog.js";
+import { t } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { openModal } from "../../modal.js";
+import { showToast, openConfirm } from "../../feedback.js";
+import { makeActionBtn } from "../ui/tables.js";
+import { escapeHtml } from "../../html.js";
+import { formatDate } from "../ui/format.js";
 import {
   getGradebookState,
   loadGradebook,

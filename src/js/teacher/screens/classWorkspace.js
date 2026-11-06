@@ -1,11 +1,11 @@
-import { state } from "../teacherState.js";
-import { showSection } from "../teacherNav.js";
-import { className } from "../teacherFormat.js";
+import { state } from "../state.js";
+import { showSection } from "../nav.js";
+import { className } from "../ui/format.js";
 import { renderRosterTab } from "./roster.js";
 import { renderGradebookTab } from "./gradebook.js";
 import { renderConductTab } from "./conduct.js";
-import { renderAttendanceTab } from "./teacherAttendance.js";
-import { renderScheduleTab } from "./teacherSchedule.js";
+import { renderAttendanceTab } from "./attendance.js";
+import { renderScheduleTab } from "./schedule.js";
 
 export function openClassWorkspace(cst, initialTab = "roster") {
   state.currentClass = {

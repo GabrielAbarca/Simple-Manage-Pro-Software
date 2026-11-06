@@ -1,7 +1,7 @@
 // Identity / context
-import { supabase } from "../supabaseClient.js";
-import { DEMO_MODE } from "../demoMode.js";
-import { state } from "../teacherState.js";
+import { supabase } from "../../supabaseClient.js";
+import { DEMO_MODE } from "../../demoMode.js";
+import { state } from "../state.js";
 
 export async function getTeacherId() {
   // Real mode: resolve the teacher from their linked auth user

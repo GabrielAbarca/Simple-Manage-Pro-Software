@@ -1,8 +1,8 @@
-import { t } from "../i18n.js";
-import { skeletonBlock } from "../ui.js";
-import { escapeHtml } from "../html.js";
-import { conductCellHtml, formatDate } from "../teacherFormat.js";
-import { isConductPassing, conductPassingScore } from "../promotion.js";
+import { t } from "../../i18n.js";
+import { skeletonBlock } from "../../ui.js";
+import { escapeHtml } from "../../html.js";
+import { conductCellHtml, formatDate } from "../ui/format.js";
+import { isConductPassing, conductPassingScore } from "../../promotion.js";
 
 const SEVERITY_BADGE = {
   low: "badge-neutral",

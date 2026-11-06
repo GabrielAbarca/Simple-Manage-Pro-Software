@@ -1,16 +1,16 @@
-import { t } from "../i18n.js";
-import { skeletonBlock, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { bindAdminAction } from "../teacherAuth.js";
-import { makeActionBtn } from "../teacherTableHelpers.js";
-import { escapeHtml } from "../html.js";
+import { t } from "../../i18n.js";
+import { skeletonBlock, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { bindAdminAction } from "../auth.js";
+import { makeActionBtn } from "../ui/tables.js";
+import { escapeHtml } from "../../html.js";
 import {
   weightedOverall,
   gradeCellHtml,
   conductCellHtml,
   getCurrentPeriodId,
-} from "../teacherFormat.js";
+} from "../ui/format.js";
 import { openStudentDrawer } from "./studentDrawer.js";
 import { openPostConduct } from "./postConduct.js";
 import {

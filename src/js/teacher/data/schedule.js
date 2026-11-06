@@ -1,5 +1,5 @@
 // Schedule (by class, and today's)
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 export async function fetchScheduleByClass(classId) {
   const { data, error } = await supabase

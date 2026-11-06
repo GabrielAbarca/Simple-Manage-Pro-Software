@@ -1,14 +1,14 @@
-import { t, tn } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { openModal } from "../modal.js";
-import { showToast } from "../feedback.js";
-import { exportTable, fileNamePart, formatField } from "../tableExport.js";
+import { t, tn } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { openModal } from "../../modal.js";
+import { showToast } from "../../feedback.js";
+import { exportTable, fileNamePart, formatField } from "../../tableExport.js";
 import {
   gradebookRows,
   attendanceSummaryRows,
   attendanceLogRows,
-} from "../classExportRows.js";
+} from "../../classExportRows.js";
 
 /** Today by the device's clock, as YYYY-MM-DD. */
 function localToday() {

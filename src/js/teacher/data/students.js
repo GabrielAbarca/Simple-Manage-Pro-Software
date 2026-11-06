@@ -1,5 +1,5 @@
 // Roster / students, student 360, and discipline
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 // Roster / students
 export async function fetchRoster(classId) {

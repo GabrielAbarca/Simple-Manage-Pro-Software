@@ -1,5 +1,5 @@
 // Shared reference data (for forms) + subjects catalog
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 export async function fetchSubjects() {
   const { data, error } = await supabase

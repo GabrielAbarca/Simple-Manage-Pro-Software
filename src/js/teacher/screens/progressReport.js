@@ -1,9 +1,9 @@
-import { t, tn, formatDate as i18nFormatDate } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { formatDate, genderLabel } from "../teacherFormat.js";
-import { escapeHtml } from "../html.js";
-import { showToast } from "../feedback.js";
+import { t, tn, formatDate as i18nFormatDate } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { formatDate, genderLabel } from "../ui/format.js";
+import { escapeHtml } from "../../html.js";
+import { showToast } from "../../feedback.js";
 
 /**
  * @param {any} student

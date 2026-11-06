@@ -1,9 +1,9 @@
-import { t } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { openModal } from "../modal.js";
-import { showToast, openConfirm } from "../feedback.js";
-import { className, genderOptions } from "../teacherFormat.js";
+import { t } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { openModal } from "../../modal.js";
+import { showToast, openConfirm } from "../../feedback.js";
+import { className, genderOptions } from "../ui/format.js";
 import { loadRoster } from "./roster.js";
 
 // Distinct class options across the teacher's subject-sections.

@@ -1,5 +1,5 @@
 // Assignments, scores, posted grades, and column entry (gradebook)
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 // Assignments (gradebook)
 export async function fetchAssignments(cstId, periodId) {

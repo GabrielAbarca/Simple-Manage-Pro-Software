@@ -1,6 +1,6 @@
-import { getSession } from "./auth.js";
-import { fetchRole, portalPath, haltForRedirect } from "./role.js";
-import { t } from "./i18n.js";
+import { getSession } from "../auth.js";
+import { fetchRole, portalPath, haltForRedirect } from "../role.js";
+import { t } from "../i18n.js";
 
 /**
  * Resolve the signed-in session and role for the teacher console, redirecting

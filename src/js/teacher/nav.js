@@ -1,6 +1,6 @@
-import { getSession, signOut } from "./auth.js";
-import { fetchStudentId } from "./role.js";
-import { state } from "./teacherState.js";
+import { getSession, signOut } from "../auth.js";
+import { fetchStudentId } from "../role.js";
+import { state } from "./state.js";
 
 const sections = document.querySelectorAll(".view-section");
 const navLinks = document.querySelectorAll(".sidebar a[data-page]");

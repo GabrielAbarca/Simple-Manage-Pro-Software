@@ -1,9 +1,9 @@
-import { t } from "../i18n.js";
-import { skeletonBlock, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { escapeHtml } from "../html.js";
-import { dayName } from "../teacherFormat.js";
+import { t } from "../../i18n.js";
+import { skeletonBlock, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { escapeHtml } from "../../html.js";
+import { dayName } from "../ui/format.js";
 
 export function renderScheduleTab(content) {
   content.innerHTML = `

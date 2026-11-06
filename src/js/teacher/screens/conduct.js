@@ -1,11 +1,11 @@
-import { t, tn } from "../i18n.js";
-import { skeletonBlock, renderErrorBlock } from "../ui.js";
-import { showToast } from "../feedback.js";
-import { state } from "../teacherState.js";
-import { getCurrentPeriodId } from "../teacherFormat.js";
-import { db } from "../teacherData/index.js";
-import { CONDUCT_MAX, groupRecordsByStudent } from "../conduct.js";
-import { conductPassingScore, isConductPassing } from "../promotion.js";
+import { t, tn } from "../../i18n.js";
+import { skeletonBlock, renderErrorBlock } from "../../ui.js";
+import { showToast } from "../../feedback.js";
+import { state } from "../state.js";
+import { getCurrentPeriodId } from "../ui/format.js";
+import { db } from "../data/index.js";
+import { CONDUCT_MAX, groupRecordsByStudent } from "../../conduct.js";
+import { conductPassingScore, isConductPassing } from "../../promotion.js";
 import {
   conductShellHtml,
   studentTableHtml,

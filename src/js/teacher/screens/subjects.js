@@ -1,7 +1,7 @@
-import { t } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { renderEmptyRow, renderErrorRow } from "../ui.js";
-import { escapeHtml } from "../html.js";
+import { t } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { renderEmptyRow, renderErrorRow } from "../../ui.js";
+import { escapeHtml } from "../../html.js";
 
 let _cachedSubjects = [];
 let subjectsFilter = { search: "" };

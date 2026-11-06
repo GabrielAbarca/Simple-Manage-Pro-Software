@@ -1,5 +1,5 @@
 // Grade categories + MEP component templates
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 export async function fetchCategories(cstId) {
   const { data, error } = await supabase

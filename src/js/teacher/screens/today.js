@@ -1,12 +1,12 @@
-import { t, formatDate as i18nFormatDate } from "../i18n.js";
-import { skeletonCards, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { jsDayToDow } from "../scheduleLogic.js";
-import { renderContextGap } from "../teacherTableHelpers.js";
-import { escapeHtml } from "../html.js";
-import { resolveTeacherContext, hasTeacherContext } from "../teacherContext.js";
-import { className } from "../teacherFormat.js";
+import { t, formatDate as i18nFormatDate } from "../../i18n.js";
+import { skeletonCards, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { jsDayToDow } from "../../scheduleLogic.js";
+import { renderContextGap } from "../ui/tables.js";
+import { escapeHtml } from "../../html.js";
+import { resolveTeacherContext, hasTeacherContext } from "../context.js";
+import { className } from "../ui/format.js";
 import { openClassWorkspace } from "./classWorkspace.js";
 
 export async function loadToday() {

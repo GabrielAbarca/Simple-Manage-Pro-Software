@@ -1,4 +1,4 @@
-import { state } from "./teacherState.js";
+import { state } from "./state.js";
 
 /**
  * @typedef {object} TeacherContextDb

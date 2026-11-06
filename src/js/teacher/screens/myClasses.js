@@ -1,11 +1,11 @@
-import { t, tn } from "../i18n.js";
-import { skeletonCardItems, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { renderContextGap } from "../teacherTableHelpers.js";
-import { escapeHtml } from "../html.js";
-import { resolveTeacherContext, hasTeacherContext } from "../teacherContext.js";
-import { className } from "../teacherFormat.js";
+import { t, tn } from "../../i18n.js";
+import { skeletonCardItems, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { renderContextGap } from "../ui/tables.js";
+import { escapeHtml } from "../../html.js";
+import { resolveTeacherContext, hasTeacherContext } from "../context.js";
+import { className } from "../ui/format.js";
 import { openClassWorkspace } from "./classWorkspace.js";
 
 export async function loadMyClasses() {

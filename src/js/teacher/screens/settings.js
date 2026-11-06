@@ -1,10 +1,10 @@
-import { t } from "../i18n.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { renderSettings } from "../settings.js";
-import { renderContextGap } from "../teacherTableHelpers.js";
-import { resolveTeacherContext } from "../teacherContext.js";
-import { formatDate } from "../teacherFormat.js";
+import { t } from "../../i18n.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { renderSettings } from "../../settings.js";
+import { renderContextGap } from "../ui/tables.js";
+import { resolveTeacherContext } from "../context.js";
+import { formatDate } from "../ui/format.js";
 
 // Read-only Settings for the teacher context. Resolves the demo teacher record
 // and builds the normalized adapter consumed by the shared renderer.

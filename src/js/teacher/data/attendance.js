@@ -4,7 +4,7 @@
 // (student_id, class_subject_teacher_id, date), so two teachers sharing a
 // section each keep their own register for the same day. Every function here
 // is therefore scoped by the class-subject-teacher id (`cstId`), not by class.
-import { supabase } from "../supabaseClient.js";
+import { supabase } from "../../supabaseClient.js";
 
 /**
  * The day's sheet for one class-subject: every active student in the section,

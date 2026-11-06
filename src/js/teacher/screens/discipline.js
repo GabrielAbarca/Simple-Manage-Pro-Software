@@ -1,10 +1,10 @@
-import { t } from "../i18n.js";
-import * as v from "../validate.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { openModal } from "../modal.js";
-import { showToast } from "../feedback.js";
-import { CONDUCT_MAX, conductAfter } from "../conduct.js";
+import { t } from "../../i18n.js";
+import * as v from "../../validate.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { openModal } from "../../modal.js";
+import { showToast } from "../../feedback.js";
+import { CONDUCT_MAX, conductAfter } from "../../conduct.js";
 
 // Discipline severity options, built at call time so labels follow the language.
 function disciplineSeverityOptions() {

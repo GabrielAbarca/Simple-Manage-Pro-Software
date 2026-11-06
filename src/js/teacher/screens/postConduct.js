@@ -1,11 +1,11 @@
-import { registerDialog } from "../dialog.js";
-import { t, tn } from "../i18n.js";
-import { skeletonBlock, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { state } from "../teacherState.js";
-import { showToast, errorText } from "../feedback.js";
-import { escapeHtml } from "../html.js";
-import { conductCellHtml, getCurrentPeriodId } from "../teacherFormat.js";
+import { registerDialog } from "../../dialog.js";
+import { t, tn } from "../../i18n.js";
+import { skeletonBlock, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { state } from "../state.js";
+import { showToast, errorText } from "../../feedback.js";
+import { escapeHtml } from "../../html.js";
+import { conductCellHtml, getCurrentPeriodId } from "../ui/format.js";
 
 const pcOverlay = document.getElementById("post-conduct-overlay");
 const pcTitle = document.getElementById("pc-title");

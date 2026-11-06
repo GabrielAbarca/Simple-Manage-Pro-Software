@@ -1,10 +1,10 @@
-import { registerDialog } from "../dialog.js";
-import { t, tn } from "../i18n.js";
-import { skeletonBlock, renderErrorBlock } from "../ui.js";
-import { db } from "../teacherData/index.js";
-import { showToast, errorText } from "../feedback.js";
-import { escapeHtml } from "../html.js";
-import { formatDate } from "../teacherFormat.js";
+import { registerDialog } from "../../dialog.js";
+import { t, tn } from "../../i18n.js";
+import { skeletonBlock, renderErrorBlock } from "../../ui.js";
+import { db } from "../data/index.js";
+import { showToast, errorText } from "../../feedback.js";
+import { escapeHtml } from "../../html.js";
+import { formatDate } from "../ui/format.js";
 import { getGradebookState, loadGradebook } from "./gradebook.js";
 
 const cgOverlay = document.getElementById("column-grades-overlay");

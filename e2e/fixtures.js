@@ -8,7 +8,7 @@ export const SUPA = "https://demo.supabase.co";
 export const REF = "demo";
 export const UID = "00000000-0000-4000-8000-000000000001";
 
-// The date the Attendance tab opens on. teacherAttendance.js derives it with
+// The date the Attendance tab opens on. teacher/screens/attendance.js derives it with
 // toISOString().split("T")[0] — UTC, not local — so it is computed the same
 // way here rather than with a local-time helper, or the two drift near
 // midnight and the seeded register lands on a day the tab never shows.

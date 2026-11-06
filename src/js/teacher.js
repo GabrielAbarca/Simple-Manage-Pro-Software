@@ -1,21 +1,21 @@
 import "./errorHandler.js";
 import "./speedInsights.js";
-import { resolveTeacherSession } from "./teacherAuth.js";
-import { state } from "./teacherState.js";
-import { db } from "./teacherData/index.js";
+import { resolveTeacherSession } from "./teacher/auth.js";
+import { state } from "./teacher/state.js";
+import { db } from "./teacher/data/index.js";
 import { DEMO_MODE } from "./demoMode.js";
 import { initTheme, bindThemeToggle } from "./theme.js";
 import { initSidebarToggle } from "./ui.js";
 import { initControls } from "./controls/index.js";
 import { initI18n, applyTranslations, t } from "./i18n.js";
-import { initTeacherNav, showSection } from "./teacherNav.js";
-import { resolveTeacherContext } from "./teacherContext.js";
+import { initTeacherNav, showSection } from "./teacher/nav.js";
+import { resolveTeacherContext } from "./teacher/context.js";
 import { showToast } from "./feedback.js";
-import { loadToday } from "./views/teacherToday.js";
-import { loadMyClasses } from "./views/myClasses.js";
-import { loadSubjects } from "./views/subjects.js";
-import { loadSettings } from "./views/teacherSettings.js";
-import { openClassTab } from "./views/classWorkspace.js";
+import { loadToday } from "./teacher/screens/today.js";
+import { loadMyClasses } from "./teacher/screens/myClasses.js";
+import { loadSubjects } from "./teacher/screens/subjects.js";
+import { loadSettings } from "./teacher/screens/settings.js";
+import { openClassTab } from "./teacher/screens/classWorkspace.js";
 
 // AUTH GUARD + TEACHER IDENTITY
 const { session, role } = await resolveTeacherSession();

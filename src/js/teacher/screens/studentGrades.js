@@ -6,7 +6,6 @@ import { state } from "../state.js";
 import { showToast, errorText } from "../../feedback.js";
 import { escapeHtml } from "../../html.js";
 import { formatDate, gradeStatus } from "../ui/format.js";
-import { getGradebookState, loadGradebook } from "./gradebook.js";
 
 const sgOverlay = document.getElementById("student-grades-overlay");
 const sgTitle = document.getElementById("sg-title");
@@ -42,13 +41,18 @@ sgBody.addEventListener("click", (e) => {
 
 let _studentGradesState = null;
 
-export async function openStudentGradesModal(student) {
-  const gbState = getGradebookState();
+export async function openStudentGradesModal(student, gradebook) {
+  const gbState = gradebook.getState();
   if (!gbState) return;
   const { assignments, periodId } = gbState;
   const periodName = state.periods.find((p) => p.id === periodId)?.name ?? "";
 
-  _studentGradesState = { student, assignments, gradeByAssignment: {} };
+  _studentGradesState = {
+    student,
+    assignments,
+    gradeByAssignment: {},
+    gradebook,
+  };
   sgTitle.textContent = `${student.first_name} ${student.last_name}`;
   sgBody.innerHTML = skeletonBlock();
   sgOverlay.classList.add("active");
@@ -66,7 +70,7 @@ export async function openStudentGradesModal(student) {
     );
   } catch (err) {
     console.error(err);
-    renderErrorBlock(sgBody, () => openStudentGradesModal(student));
+    renderErrorBlock(sgBody, () => openStudentGradesModal(student, gradebook));
     return;
   }
 
@@ -142,7 +146,8 @@ function closeStudentGradesModal() {
 
 async function saveStudentGrades() {
   if (!_studentGradesState) return;
-  const { student, assignments, gradeByAssignment } = _studentGradesState;
+  const { student, assignments, gradeByAssignment, gradebook } =
+    _studentGradesState;
   const maxMap = Object.fromEntries(
     assignments.map((a) => [a.id, Number(a.max_score)]),
   );
@@ -206,7 +211,7 @@ async function saveStudentGrades() {
       }),
     );
     closeStudentGradesModal();
-    loadGradebook(); // refresh current-period grade + completion from the view
+    gradebook.reload(); // refresh current-period grade + completion from the view
   } catch (err) {
     showToast(errorText(err), "error");
   } finally {

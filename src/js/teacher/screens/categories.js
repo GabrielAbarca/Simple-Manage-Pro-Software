@@ -7,7 +7,6 @@ import { openModal } from "../../modal.js";
 import { showToast, openConfirm, errorText } from "../../feedback.js";
 import { makeActionBtn } from "../ui/tables.js";
 import { escapeHtml } from "../../html.js";
-import { getGradebookState, loadGradebook } from "./gradebook.js";
 import {
   totalWeight,
   weightStatus,
@@ -19,6 +18,9 @@ const categoriesOverlay = document.getElementById("categories-overlay");
 const categoriesTitle = document.getElementById("categories-title");
 const categoriesBody = document.getElementById("categories-body");
 const categoriesTotal = document.getElementById("categories-total");
+
+// The gradebook this modal was opened from; its own buttons fire later.
+let activeGradebook = null;
 
 document
   .getElementById("categories-close")
@@ -33,8 +35,9 @@ document
   .getElementById("categories-apply-template")
   ?.addEventListener("click", () => openApplyTemplate());
 
-export function openCategoriesModal() {
+export function openCategoriesModal(gradebook) {
   if (!state.currentClass) return;
+  activeGradebook = gradebook;
   categoriesTitle.textContent = t("admin.categories.title", {
     subject: state.currentClass.subjectName,
     class: state.currentClass.className,
@@ -48,7 +51,7 @@ function closeCategoriesModal() {
 }
 
 function renderCategories() {
-  const cats = getGradebookState()?.categories ?? [];
+  const cats = activeGradebook.getState()?.categories ?? [];
   if (!cats.length) {
     categoriesBody.innerHTML = `<p class="drawer-muted">${t("admin.categories.empty")}</p>`;
     categoriesTotal.textContent = "";
@@ -121,7 +124,7 @@ function openCategoryForm(category = null) {
       },
     ],
     validate: (formData) => {
-      const cats = getGradebookState()?.categories ?? [];
+      const cats = activeGradebook.getState()?.categories ?? [];
       const total = totalWeight(cats, {
         excludeId: category?.id ?? null,
         extraWeight: Number(formData.weight),
@@ -169,7 +172,7 @@ function confirmDeleteCategory(category) {
 // Reload the gradebook (refetches categories + grades, since weighting changed)
 // and re-render the categories list if it's still open.
 async function refreshAfterCategoryChange() {
-  await loadGradebook();
+  await activeGradebook.reload();
   if (categoriesOverlay.classList.contains("active")) renderCategories();
 }
 
@@ -235,7 +238,7 @@ async function applyTemplate(templateId, templateName) {
     );
     return;
   }
-  const cats = getGradebookState()?.categories ?? [];
+  const cats = activeGradebook.getState()?.categories ?? [];
   const existing = new Set(
     cats.map((c) => String(c.name).trim().toLowerCase()),
   );

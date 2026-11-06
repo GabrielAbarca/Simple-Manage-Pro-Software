@@ -7,17 +7,15 @@ import { showToast, openConfirm } from "../../feedback.js";
 import { makeActionBtn } from "../ui/tables.js";
 import { escapeHtml } from "../../html.js";
 import { formatDate } from "../ui/format.js";
-import {
-  getGradebookState,
-  loadGradebook,
-  categoryOptions,
-} from "./gradebook.js";
 import { openColumnGrades } from "./columnGrades.js";
 
 // Gradebook: Manage Assignments modal
 const assignmentsOverlay = document.getElementById("assignments-overlay");
 const manageTitle = document.getElementById("manage-title");
 const manageBody = document.getElementById("manage-body");
+
+// The gradebook the Manage list was opened from; its own buttons fire later.
+let activeGradebook = null;
 
 document
   .getElementById("manage-close")
@@ -27,10 +25,18 @@ document
   .addEventListener("click", closeManageAssignments);
 document
   .getElementById("manage-add")
-  .addEventListener("click", () => openAddAssignment());
+  .addEventListener("click", () => openAddAssignment(activeGradebook));
 
-export function openAddAssignment() {
-  const { periodId } = getGradebookState();
+// Category dropdown options for the assignment form, from the loaded gradebook.
+function categoryOptions(gradebook) {
+  return (gradebook.getState()?.categories ?? []).map((c) => ({
+    value: c.id,
+    label: `${c.name} (${Number(c.weight)}%)`,
+  }));
+}
+
+export function openAddAssignment(gradebook) {
+  const { periodId } = gradebook.getState();
   openModal({
     title: t("admin.form.addAssignmentTitle", {
       subject: state.currentClass.subjectName,
@@ -59,7 +65,7 @@ export function openAddAssignment() {
         name: "category_id",
         label: t("admin.form.category"),
         type: "select",
-        options: categoryOptions(),
+        options: categoryOptions(gradebook),
         help: t("admin.form.categoryHelp"),
       },
       { name: "note", label: t("admin.form.note"), type: "textarea" },
@@ -75,7 +81,7 @@ export function openAddAssignment() {
         note: formData.note?.trim() || null,
       });
       showToast(t("admin.toast.assignmentCreated", { name: formData.name }));
-      loadGradebook();
+      gradebook.reload();
     },
   });
 }
@@ -112,7 +118,7 @@ export function openEditAssignment(assignment) {
         label: t("admin.form.category"),
         type: "select",
         value: assignment.category_id ?? "",
-        options: categoryOptions(),
+        options: categoryOptions(activeGradebook),
       },
       {
         name: "note",
@@ -130,7 +136,7 @@ export function openEditAssignment(assignment) {
         note: formData.note?.trim() || null,
       });
       showToast(t("admin.toast.assignmentUpdated", { name: formData.name }));
-      loadGradebook();
+      activeGradebook.reload();
     },
   });
 }
@@ -141,15 +147,16 @@ export function confirmDeleteAssignment(assignment) {
     async () => {
       await db.deleteAssignment(assignment.id);
       showToast(t("admin.toast.assignmentDeleted", { name: assignment.name }));
-      loadGradebook();
+      activeGradebook.reload();
     },
   );
 }
 
 // Assignment add/edit/delete moved here when the gradebook became student
 // rows. Reuses the same add/edit/delete flows; the generic form modal stacks
-// on top, and loadGradebook() re-renders this list while it's open.
-export function openManageAssignments() {
+// on top, and a gradebook reload re-renders this list while it's open.
+export function openManageAssignments(gradebook) {
+  activeGradebook = gradebook;
   renderManageAssignments();
   assignmentsOverlay.classList.add("active");
 }
@@ -159,7 +166,7 @@ function closeManageAssignments() {
 }
 
 function renderManageAssignments() {
-  const gbState = getGradebookState();
+  const gbState = activeGradebook.getState();
   const assignments = gbState?.assignments ?? [];
   const periodName =
     state.periods.find((p) => p.id === gbState?.periodId)?.name ?? "";
@@ -194,7 +201,7 @@ function renderManageAssignments() {
     actions.className = "manage-item-actions";
     actions.appendChild(
       makeActionBtn("edit_note", t("admin.manage.enterScores"), () =>
-        openColumnGrades(a),
+        openColumnGrades(a, activeGradebook),
       ),
     );
     actions.appendChild(

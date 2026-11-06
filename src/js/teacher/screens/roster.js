@@ -60,7 +60,9 @@ export function renderRosterTab(content) {
       </div>
     </div>`;
 
-  bindAdminAction(document.getElementById("btn-add-student"), openAddStudent);
+  bindAdminAction(document.getElementById("btn-add-student"), () =>
+    openAddStudent(loadRoster),
+  );
   document
     .getElementById("btn-post-conduct")
     ?.addEventListener("click", () => openPostConduct(loadRoster));
@@ -176,7 +178,7 @@ function renderRosterTable(students) {
         t("common.edit"),
         (e) => {
           e.stopPropagation();
-          openEditStudent(student);
+          openEditStudent(student, loadRoster);
         },
         false,
         true,
@@ -191,6 +193,7 @@ function renderRosterTable(students) {
           confirmDeleteStudent(
             student.id,
             `${student.first_name} ${student.last_name}`,
+            loadRoster,
           );
         },
         true,

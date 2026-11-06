@@ -19,17 +19,9 @@ let gradebookState = null; // { cstId, periodId, assignments, students, categori
 // gradebook the screen is no longer showing.
 let gradebookReady = false;
 
-export function getGradebookState() {
-  return gradebookState;
-}
-
-// Category dropdown options for the assignment form, from the loaded gradebook.
-export function categoryOptions() {
-  return (gradebookState?.categories ?? []).map((c) => ({
-    value: c.id,
-    label: `${c.name} (${Number(c.weight)}%)`,
-  }));
-}
+// Handed to every sub-feature this screen opens, so they read and reload the
+// gradebook without importing this module back.
+const gradebook = { getState: () => gradebookState, reload: loadGradebook };
 
 export function renderGradebookTab(content) {
   const periodOptions = state.periods
@@ -70,16 +62,16 @@ export function renderGradebookTab(content) {
 
   document
     .getElementById("btn-add-assignment")
-    .addEventListener("click", openAddAssignment);
+    .addEventListener("click", () => openAddAssignment(gradebook));
   document
     .getElementById("btn-manage-assignments")
-    .addEventListener("click", openManageAssignments);
+    .addEventListener("click", () => openManageAssignments(gradebook));
   document
     .getElementById("btn-categories")
-    .addEventListener("click", openCategoriesModal);
+    .addEventListener("click", () => openCategoriesModal(gradebook));
   document
     .getElementById("btn-post-grades")
-    .addEventListener("click", openPostGrades);
+    .addEventListener("click", () => openPostGrades(gradebook));
   document
     .getElementById("btn-export-gradebook")
     .addEventListener("click", () => {
@@ -171,7 +163,7 @@ function renderGradebook(assignments, students, periodGrades) {
   grid.querySelectorAll("tr.row-clickable").forEach((tr) => {
     tr.addEventListener("click", () => {
       const s = students.find((x) => String(x.id) === tr.dataset.student);
-      if (s) openStudentGradesModal(s);
+      if (s) openStudentGradesModal(s, gradebook);
     });
   });
 }

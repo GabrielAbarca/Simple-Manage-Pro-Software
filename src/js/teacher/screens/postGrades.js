@@ -6,7 +6,6 @@ import { state } from "../state.js";
 import { showToast, errorText } from "../../feedback.js";
 import { escapeHtml } from "../../html.js";
 import { gradeCellHtml, gradeBandClass } from "../ui/format.js";
-import { getGradebookState } from "./gradebook.js";
 import { totalWeight, weightStatus } from "../../gradingPeriods.js";
 
 // Post grades modal
@@ -23,8 +22,8 @@ pgSave.addEventListener("click", savePostGrades);
 
 let _postGradesState = null;
 
-export async function openPostGrades() {
-  const gbState = getGradebookState();
+export async function openPostGrades(gradebook) {
+  const gbState = gradebook.getState();
   if (!gbState) return;
   const { cstId, periodId, students, categories = [] } = gbState;
   const total = totalWeight(categories);
@@ -45,7 +44,7 @@ export async function openPostGrades() {
     ]);
   } catch (err) {
     console.error(err);
-    renderErrorBlock(pgBody, () => openPostGrades());
+    renderErrorBlock(pgBody, () => openPostGrades(gradebook));
     return;
   }
 

@@ -4,7 +4,6 @@ import { state } from "../state.js";
 import { openModal } from "../../modal.js";
 import { showToast, openConfirm } from "../../feedback.js";
 import { className, genderOptions } from "../ui/format.js";
-import { loadRoster } from "./roster.js";
 
 // Distinct class options across the teacher's subject-sections.
 function teacherClassOptions() {
@@ -21,7 +20,7 @@ function teacherClassOptions() {
   return opts;
 }
 
-export async function openAddStudent() {
+export async function openAddStudent(onSaved) {
   openModal({
     title: t("admin.form.addStudentTitle", {
       class: state.currentClass.className,
@@ -97,12 +96,12 @@ export async function openAddStudent() {
           name: `${formData.first_name} ${formData.last_name}`,
         }),
       );
-      loadRoster();
+      onSaved();
     },
   });
 }
 
-export function openEditStudent(student) {
+export function openEditStudent(student, onSaved) {
   openModal({
     title: t("admin.form.editStudentTitle"),
     submitLabel: t("admin.form.saveChanges"),
@@ -215,15 +214,15 @@ export function openEditStudent(student) {
           name: `${formData.first_name} ${formData.last_name}`,
         }),
       );
-      loadRoster();
+      onSaved();
     },
   });
 }
 
-export function confirmDeleteStudent(id, name) {
+export function confirmDeleteStudent(id, name, onSaved) {
   openConfirm(t("admin.confirm.deleteStudent", { name }), async () => {
     await db.deleteStudent(id);
     showToast(t("admin.toast.studentDeleted", { name }));
-    loadRoster();
+    onSaved();
   });
 }

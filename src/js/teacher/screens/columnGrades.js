@@ -5,7 +5,6 @@ import { db } from "../data/index.js";
 import { showToast, errorText } from "../../feedback.js";
 import { escapeHtml } from "../../html.js";
 import { formatDate } from "../ui/format.js";
-import { getGradebookState, loadGradebook } from "./gradebook.js";
 
 const cgOverlay = document.getElementById("column-grades-overlay");
 const cgTitle = document.getElementById("cg-title");
@@ -24,8 +23,8 @@ cgSave.addEventListener("click", saveColumnGrades);
 
 let _columnState = null;
 
-export async function openColumnGrades(assignment) {
-  const gbState = getGradebookState();
+export async function openColumnGrades(assignment, gradebook) {
+  const gbState = gradebook.getState();
   if (!gbState) return;
   const students = gbState.students; // active students only
   cgTitle.textContent = t("admin.cg.title", { assignment: assignment.name });
@@ -37,11 +36,11 @@ export async function openColumnGrades(assignment) {
     existing = await db.fetchAssignmentColumn(assignment.id);
   } catch (err) {
     console.error(err);
-    renderErrorBlock(cgBody, () => openColumnGrades(assignment));
+    renderErrorBlock(cgBody, () => openColumnGrades(assignment, gradebook));
     return;
   }
   const byStudent = Object.fromEntries(existing.map((g) => [g.student_id, g]));
-  _columnState = { assignment, byStudent };
+  _columnState = { assignment, byStudent, gradebook };
 
   if (!students.length) {
     cgBody.innerHTML = `<p class="drawer-muted">${t("admin.pg.noStudents")}</p>`;
@@ -96,7 +95,7 @@ function closeColumnGrades() {
 
 async function saveColumnGrades() {
   if (!_columnState) return;
-  const { assignment, byStudent } = _columnState;
+  const { assignment, byStudent, gradebook } = _columnState;
   const max = Number(assignment.max_score);
 
   const rows = [];
@@ -153,7 +152,7 @@ async function saveColumnGrades() {
       tn("admin.toast.scoresSaved", rows.length, { count: rows.length }),
     );
     closeColumnGrades();
-    loadGradebook();
+    gradebook.reload();
   } catch (err) {
     showToast(errorText(err), "error");
   } finally {

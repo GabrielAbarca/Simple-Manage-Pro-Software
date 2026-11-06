@@ -2,7 +2,7 @@
  * Shared session/navigation state for the teacher console. A single mutable
  * object rather than per-field getters/setters — every module imports the
  * same `state` reference and mutates it in place (same pattern as
- * studentState.js).
+ * student/state.js).
  * @type {{
  *   session: any,
  *   role: string | null,

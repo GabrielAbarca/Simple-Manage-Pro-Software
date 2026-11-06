@@ -1,11 +1,11 @@
-import { getSession, signOut } from "./auth.js";
+import { getSession, signOut } from "../auth.js";
 import {
   fetchRole,
   fetchStudentId,
   portalPath,
   haltForRedirect,
-} from "./role.js";
-import { supabase } from "./supabaseClient.js";
+} from "../role.js";
+import { supabase } from "../supabaseClient.js";
 
 /**
  * Resolve the signed-in user's student id for the student portal, redirecting

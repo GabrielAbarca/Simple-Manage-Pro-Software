@@ -1,7 +1,7 @@
-import { t, formatTime } from "../i18n.js";
-import { fetchStudentProfile, fetchClassSchedule } from "../supabaseQueries.js";
-import { DEFAULT_ACTIVE_DAYS, dayKeyShort } from "../scheduleLogic.js";
-import { state } from "../studentState.js";
+import { t, formatTime } from "../../i18n.js";
+import { fetchStudentProfile, fetchClassSchedule } from "../data.js";
+import { DEFAULT_ACTIVE_DAYS, dayKeyShort } from "../../scheduleLogic.js";
+import { state } from "../state.js";
 
 export async function initSchedule() {
   if (!state.classId) {

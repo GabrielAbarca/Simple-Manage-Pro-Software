@@ -58,7 +58,7 @@
           document.documentElement.classList.add("dark-theme-variables");
       } catch (e) {}
     </script>
-    <script src="/src/js/main.js" type="module" defer></script>
+    <script src="/src/js/student.js" type="module" defer></script>
     <title>Simple Manage Pro</title>
   </head>
 
@@ -141,7 +141,7 @@
 
           <div class="sidebar-divider"></div>
 
-          <!-- Both start hidden; main.js reveals each one only for a role the
+          <!-- Both start hidden; student/nav.js reveals each one only for a role the
                target portal accepts, so neither can bounce the caller. -->
           <a href="/admin" id="admin-console-link" class="nav-cta" hidden>
             <span class="material-symbols-outlined"
@@ -290,7 +290,7 @@
             <table id="dashboard-grade-table">
               <thead>
                 <!-- Columns are one per grading period + Average, filled in by
-                     main.js once the year's periods load. -->
+                     student/screens/dashboard.js once the year's periods load. -->
                 <tr id="dashboard-grade-head">
                   <th data-i18n="student.dash.subject">Subject</th>
                   <th data-i18n="student.dash.average">Average</th>

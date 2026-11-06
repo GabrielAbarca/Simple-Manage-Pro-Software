@@ -57,7 +57,7 @@ const {
   fetchStudentProfile,
   fetchEvents,
   fetchTeachers,
-} = await import("../src/js/supabaseQueries.js");
+} = await import("../src/js/student/data.js");
 
 function seed() {
   for (const k of Object.keys(fixtures)) delete fixtures[k];

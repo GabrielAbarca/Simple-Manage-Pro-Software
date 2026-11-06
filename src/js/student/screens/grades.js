@@ -1,9 +1,9 @@
-import { t } from "../i18n.js";
-import { fetchStudentProfile, fetchStudentGrades } from "../supabaseQueries.js";
-import { skeletonRows } from "../ui.js";
-import { state, getGradingPeriods } from "../studentState.js";
-import { scoreHtml } from "./viewHelpers.js";
-import { isPassing } from "../promotion.js";
+import { t } from "../../i18n.js";
+import { fetchStudentProfile, fetchStudentGrades } from "../data.js";
+import { skeletonRows } from "../../ui.js";
+import { state, getGradingPeriods } from "../state.js";
+import { scoreHtml } from "./helpers.js";
+import { isPassing } from "../../promotion.js";
 
 export async function initGrades() {
   if (!state.schoolYearId) {

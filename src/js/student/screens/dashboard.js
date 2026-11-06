@@ -1,13 +1,10 @@
-import { t, formatDate } from "../i18n.js";
-import {
-  fetchStudentProfile,
-  fetchDashboardStats,
-} from "../supabaseQueries.js";
-import { state, getEvents, getGradingPeriods } from "../studentState.js";
-import { scoreHtml, statusLabel } from "./viewHelpers.js";
-import { escapeHtml } from "../html.js";
-import { bandClass } from "../promotion.js";
-import { upcomingEvents } from "../upcomingEvents.js";
+import { t, formatDate } from "../../i18n.js";
+import { fetchStudentProfile, fetchDashboardStats } from "../data.js";
+import { state, getEvents, getGradingPeriods } from "../state.js";
+import { scoreHtml, statusLabel } from "./helpers.js";
+import { escapeHtml } from "../../html.js";
+import { bandClass } from "../../promotion.js";
+import { upcomingEvents } from "../../upcomingEvents.js";
 
 // Grade-bar fill per colour band, so the bar and the score beside it always
 // agree about where the school's pass mark sits.

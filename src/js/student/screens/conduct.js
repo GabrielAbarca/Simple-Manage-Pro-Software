@@ -1,13 +1,13 @@
-import { t, formatDate } from "../i18n.js";
-import { fetchStudentProfile, fetchOwnConduct } from "../supabaseQueries.js";
-import { state, getGradingPeriods } from "../studentState.js";
+import { t, formatDate } from "../../i18n.js";
+import { fetchStudentProfile, fetchOwnConduct } from "../data.js";
+import { state, getGradingPeriods } from "../state.js";
 import {
   conductBandClass,
   conductPassingScore,
   isConductPassing,
-} from "../promotion.js";
-import { toIso } from "../controls/dateUtils.js";
-import { escapeHtml } from "../html.js";
+} from "../../promotion.js";
+import { toIso } from "../../controls/dateUtils.js";
+import { escapeHtml } from "../../html.js";
 
 export async function initConductView() {
   const root = document.getElementById("conduct-root");

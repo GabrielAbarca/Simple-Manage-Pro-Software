@@ -25,13 +25,13 @@
   "include": ["src/js/**/*.js"],
   // The large view-controllers are DOM-glue and typed incrementally in a
   // later pass; the reusable logic layer (queries, demo DB, i18n, …) is checked.
-  // src/js/main.js is now a thin orchestrator (session bootstrap + wiring),
+  // src/js/student.js is now a thin orchestrator (session bootstrap + wiring),
   // but TS still walks a root file's imports and type-checks them even when
-  // those imported files are themselves excluded — so main.js has to stay
+  // those imported files are themselves excluded — so student.js has to stay
   // excluded too, or importing the DOM-glue view modules below would pull
-  // them back into the checked set. studentState.js/studentAuth.js/
-  // views/viewHelpers.js aren't affected: they're matched by the "include"
-  // glob directly and checked as their own root files regardless.
+  // them back into the checked set. student/state.js, student/auth.js and
+  // student/screens/helpers.js aren't affected: they're matched by the
+  // "include" glob directly and checked as their own root files regardless.
   "exclude": [
     "src/js/admin.js",
     // The admin console's modules (src/js/admin/**) are DOM glue, split out of
@@ -40,16 +40,16 @@
     // the checked logic layer and live at the flat top level.
     "src/js/admin/**",
     "src/js/teacher.js",
-    "src/js/main.js",
+    "src/js/student.js",
     "src/js/login.js",
-    "src/js/studentNav.js",
-    "src/js/views/dashboard.js",
-    "src/js/views/grades.js",
-    "src/js/views/schedule.js",
-    "src/js/views/teachers.js",
-    "src/js/views/attendance.js",
-    "src/js/views/events.js",
-    "src/js/views/settingsView.js",
+    "src/js/student/nav.js",
+    "src/js/student/screens/dashboard.js",
+    "src/js/student/screens/grades.js",
+    "src/js/student/screens/schedule.js",
+    "src/js/student/screens/teachers.js",
+    "src/js/student/screens/attendance.js",
+    "src/js/student/screens/events.js",
+    "src/js/student/screens/settings.js",
     "src/js/teacherNav.js",
     "src/js/teacherData/index.js",
     "src/js/views/teacherToday.js",

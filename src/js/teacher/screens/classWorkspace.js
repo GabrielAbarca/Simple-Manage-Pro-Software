@@ -1,0 +1,48 @@
+import { state } from "../state.js";
+import { showSection } from "../nav.js";
+import { className } from "../ui/format.js";
+import { renderRosterTab } from "./roster.js";
+import { renderGradebookTab } from "./gradebook.js";
+import { renderConductTab } from "./conduct.js";
+import { renderAttendanceTab } from "./attendance.js";
+import { renderScheduleTab } from "./schedule.js";
+
+export function openClassWorkspace(cst, initialTab = "roster") {
+  state.currentClass = {
+    cstId: cst.id,
+    classId: cst.class_id,
+    subjectId: cst.subject_id,
+    className: className(cst.classes),
+    subjectName: cst.subjects?.name ?? "—",
+    color: cst.subjects?.color || "var(--color-primary)",
+    gradeLevel: cst.classes?.grade_levels?.name ?? "",
+  };
+
+  document.getElementById("class-ws-title").textContent =
+    `${state.currentClass.subjectName} · ${state.currentClass.className}`;
+  // The title spells the grade out ("10th Grade — Section A"), so the
+  // subtitle carries the year alone.
+  document.getElementById("class-ws-subtitle").textContent =
+    state.activeYear.name;
+  document.getElementById("class-ws-dot").style.background =
+    state.currentClass.color;
+
+  showSection("class");
+  openClassTab(initialTab);
+}
+
+export function openClassTab(tab) {
+  document
+    .querySelectorAll(".class-subtab")
+    .forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+
+  const content = document.getElementById("class-tab-content");
+  const renderers = {
+    roster: renderRosterTab,
+    gradebook: renderGradebookTab,
+    conduct: renderConductTab,
+    attendance: renderAttendanceTab,
+    schedule: renderScheduleTab,
+  };
+  (renderers[tab] ?? renderRosterTab)(content);
+}

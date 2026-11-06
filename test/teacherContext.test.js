@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   resolveTeacherContext,
   hasTeacherContext,
-} from "../src/js/teacherContext.js";
-import { state } from "../src/js/teacherState.js";
+} from "../src/js/teacher/context.js";
+import { state } from "../src/js/teacher/state.js";
 
 const YEAR = { id: 1, name: "2025-2026", is_active: true };
 const PERIODS = [{ id: 1, name: "Period 1", period_order: 1 }];

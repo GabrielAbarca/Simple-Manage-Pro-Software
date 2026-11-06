@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// Chainable Supabase mock covering the shapes teacherData/attendance.js uses:
+// Chainable Supabase mock covering the shapes teacher/data/attendance.js uses:
 // from(table).select().eq().order() (thenable) and from(table).upsert(rows, opts).
 // `upserts` records every write so a test can assert the exact onConflict target
 // — the one thing that distinguishes a working save from a Postgres 42P10.
@@ -50,7 +50,7 @@ vi.mock("../src/js/supabaseClient.js", () => {
 });
 
 const { fetchAttendanceSheet, upsertAttendance, fetchCstAttendance } =
-  await import("../src/js/teacherData/attendance.js");
+  await import("../src/js/teacher/data/attendance.js");
 
 beforeEach(() => {
   for (const k of Object.keys(fixtures)) delete fixtures[k];

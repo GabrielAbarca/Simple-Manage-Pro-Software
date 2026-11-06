@@ -8,7 +8,7 @@ import { readFileSync } from "fs";
 // and—being in-document—lets every <use> icon inherit color via currentColor.
 const inlineSvgSprite = () => {
   const sprite = readFileSync(
-    resolve(__dirname, "src/icons/icons.svg"),
+    resolve(import.meta.dirname, "src/icons/icons.svg"),
     "utf8",
   ).trim();
   return {
@@ -84,23 +84,25 @@ export default defineConfig(({ mode }) => {
       outDir: "dist",
       emptyOutDir: true,
       target: "esnext",
-      rollupOptions: {
+      rolldownOptions: {
         input: {
-          main: resolve(__dirname, "index.html"),
-          login: resolve(__dirname, "login.html"),
-          admin: resolve(__dirname, "admin.html"),
-          teacher: resolve(__dirname, "teacher.html"),
-          privacy: resolve(__dirname, "privacy.html"),
-          terms: resolve(__dirname, "terms.html"),
-          notFound: resolve(__dirname, "404.html"),
+          main: resolve(import.meta.dirname, "index.html"),
+          login: resolve(import.meta.dirname, "login.html"),
+          admin: resolve(import.meta.dirname, "admin.html"),
+          teacher: resolve(import.meta.dirname, "teacher.html"),
+          privacy: resolve(import.meta.dirname, "privacy.html"),
+          terms: resolve(import.meta.dirname, "terms.html"),
+          notFound: resolve(import.meta.dirname, "404.html"),
         },
         output: {
           // Split the Supabase SDK into its own long-lived vendor chunk. It's the
           // heaviest dependency (~230 KB) and shared by every page; isolating it
           // means routine app-code changes no longer bust its immutable cache
           // entry across deploys — returning visitors keep the cached copy.
-          manualChunks(id) {
-            if (id.includes("node_modules/@supabase")) return "vendor-supabase";
+          codeSplitting: {
+            groups: [
+              { name: "vendor-supabase", test: /node_modules[\\/]@supabase/ },
+            ],
           },
         },
       },

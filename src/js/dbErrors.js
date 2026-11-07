@@ -7,6 +7,7 @@
  */
 const CODE_KEYS = {
   22001: "errors.db.tooLong", // value longer than the column allows
+  22023: "errors.db.notAllowedValue", // write RPC rejected the payload
   23502: "errors.db.missingRequired", // not-null violation
   23503: "errors.db.stillReferenced", // FK — the row is still in use
   23505: "errors.db.duplicate", // unique violation

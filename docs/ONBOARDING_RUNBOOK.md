@@ -148,6 +148,28 @@ and policyname like 'demo\_deny\_%';` which must return 3.
 > there are locked. A real school project must **not** have them — admins
 > need to write.
 
+### Write middleware (school projects)
+
+Teacher writes are moving from direct table writes to SECURITY DEFINER
+functions that check ownership on the server. These files are **not** in
+`school_schema.sql` yet, so every school project, new or existing, needs them
+applied by hand, in this order, **before** deploying the app version that
+calls them. A frontend that calls a function the project doesn't have gets
+`PGRST202`, and that save fails.
+
+1. [`supabase/schema/incremental_write_guards.sql`](../supabase/schema/incremental_write_guards.sql)
+   adds the `audit_log` table (admins read it, nobody writes it directly) and
+   the ownership guards the write functions call.
+2. [`supabase/schema/incremental_write_attendance.sql`](../supabase/schema/incremental_write_attendance.sql)
+   adds `save_attendance`. It refuses a colleague's subject, a student outside
+   the subject's class, an unknown status and a date outside the school year.
+
+Then run `rls_audit.sql`. Its section 5 covers `save_attendance` and is
+skipped on a project that doesn't have it yet.
+
+On the **demo project** the functions refuse every call (they detect the
+lockdown), and re-running `demo_lockdown.sql` also revokes EXECUTE on them.
+
 ### Keeping the demo read-only
 
 The demo lock is no longer something to remember by hand. Run

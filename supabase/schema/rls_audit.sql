@@ -122,6 +122,21 @@ exception
     raise notice 'PASS [%]  (blocked: unique_violation)', label;
 end $fn$;
 
+-- For the write RPCs, which refuse a malformed payload with a specific
+-- SQLSTATE instead of an RLS denial.
+create or replace function pg_temp._expect_sqlstate(label text, stmt text, want text)
+returns void language plpgsql as $fn$
+begin
+  execute stmt;
+  raise exception 'FAIL [%]: expected SQLSTATE % but the call succeeded — %', label, want, stmt;
+exception
+  when others then
+    if sqlstate <> want then
+      raise exception 'FAIL [%]: expected SQLSTATE %, got % (%) — %', label, want, sqlstate, sqlerrm, stmt;
+    end if;
+    raise notice 'PASS [%]  (rejected: %)', label, sqlstate;
+end $fn$;
+
 -- ── Fixture: one small fictional school ────────────────────────
 -- Runs as the session role, which owns the tables and therefore bypasses
 -- RLS — exactly how an admin-provisioned project gets seeded.
@@ -631,6 +646,89 @@ begin
                 (template_id, name, weight, item_order)
                 values (%s, ''Pruebas'', 40, 2)', ctemplate));
   end if;
+end $$;
+reset role;
+
+-- ═══════════════════════════════════════════════════════════════
+--  5. Write middleware — save_attendance
+--  Skipped until incremental_write_attendance.sql is applied.
+-- ═══════════════════════════════════════════════════════════════
+set local request.jwt.claims = '{"sub":"00000000-0000-4000-a000-000000007ea1","role":"authenticated"}';
+set local role authenticated;
+
+do $$
+declare
+  student_a int := (select v from _audit_fx where k = 'student_a');
+  student_b int := (select v from _audit_fx where k = 'student_b');
+  class_a   int := (select v from _audit_fx where k = 'class_a');
+  cst_a     int := (select v from _audit_fx where k = 'cst_a');
+  cst_a2    int := (select v from _audit_fx where k = 'cst_a2');
+  cst_b     int := (select v from _audit_fx where k = 'cst_b');
+  teacher   int := (select v from _audit_fx where k = 'teacher');
+  rpc_sql   text := 'select public.save_attendance(%s, date %L, %L::jsonb)';
+  demo_locked boolean := exists (
+    select 1 from pg_policies
+     where schemaname = 'public' and policyname = 'demo_deny_insert');
+begin
+  if to_regprocedure('public.save_attendance(integer, date, jsonb)') is null then
+    raise notice '--- save_attendance not installed: skipping write-middleware checks ---';
+    return;
+  end if;
+
+  if demo_locked then
+    perform pg_temp._expect_denied('demo refuses save_attendance even for its owner',
+      format(rpc_sql, cst_a, '2400-04-03',
+             jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'present'))));
+    return;
+  end if;
+
+  perform pg_temp._expect_allowed('teacher saves attendance through the RPC',
+    format(rpc_sql, cst_a, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'present'))));
+  perform pg_temp._expect_rows('the RPC stamps class and recorder from the server',
+    format('select 1 from public.attendance
+             where date = ''2400-04-03'' and student_id = %s
+               and class_id = %s and recorded_by = %s', student_a, class_a, teacher), 1);
+
+  perform pg_temp._expect_denied('RPC refuses a colleague''s subject in a shared section',
+    format(rpc_sql, cst_a2, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'absent'))));
+  perform pg_temp._expect_denied('RPC refuses a student outside the CST''s class',
+    format(rpc_sql, cst_a, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_b, 'status', 'absent'))));
+  perform pg_temp._expect_denied('RPC refuses another class''s subject',
+    format(rpc_sql, cst_b, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_b, 'status', 'absent'))));
+
+  perform pg_temp._expect_sqlstate('RPC rejects an unknown status',
+    format(rpc_sql, cst_a, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'gone'))), '22023');
+  perform pg_temp._expect_sqlstate('RPC rejects the same student twice',
+    format(rpc_sql, cst_a, '2400-04-03',
+           jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'late'),
+                             jsonb_build_object('student_id', student_a, 'status', 'absent'))), '22023');
+  perform pg_temp._expect_sqlstate('RPC rejects a date outside the school year',
+    format(rpc_sql, cst_a, '2399-12-31',
+           jsonb_build_array(jsonb_build_object('student_id', student_a, 'status', 'present'))), '22023');
+end $$;
+reset role;
+
+set local request.jwt.claims = '{"sub":"00000000-0000-4000-a000-00000000c0a1","role":"authenticated"}';
+set local role authenticated;
+
+do $$
+begin
+  if to_regprocedure('public.save_attendance(integer, date, jsonb)') is null then
+    return;
+  end if;
+  perform pg_temp._expect_denied('student cannot call save_attendance',
+    format('select public.save_attendance(%s, date ''2400-04-03'', %L::jsonb)',
+           (select v from _audit_fx where k = 'cst_a'),
+           jsonb_build_array(jsonb_build_object(
+             'student_id', (select v from _audit_fx where k = 'student_a'),
+             'status', 'absent'))));
+  perform pg_temp._expect_rows('nobody but an admin reads the audit log',
+    'select 1 from public.audit_log', 0);
 end $$;
 reset role;
 

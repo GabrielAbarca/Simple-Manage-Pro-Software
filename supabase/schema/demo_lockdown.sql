@@ -87,6 +87,31 @@ begin
   raise notice 'demo lockdown: locked % tables (% policies)', locked, locked * 3;
 end $$;
 
+-- ── Write RPCs ─────────────────────────────────────────────────
+-- The write functions from incremental_write_*.sql are SECURITY DEFINER, so
+-- they run as the table owner and the restrictive policies above never see
+-- them. Each one already refuses on a project with this lockdown
+-- (assert_not_demo), and this revokes EXECUTE as well. They are found by the
+-- 'smp:write-rpc' comment, so a new one is covered by re-running this file.
+do $$
+declare
+  fn regprocedure;
+  revoked int := 0;
+begin
+  for fn in
+    select p.oid::regprocedure
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and obj_description(p.oid, 'pg_proc') = 'smp:write-rpc'
+  loop
+    execute format('revoke execute on function %s from anon, authenticated, public;', fn);
+    revoked := revoked + 1;
+  end loop;
+
+  raise notice 'demo lockdown: revoked EXECUTE on % write function(s)', revoked;
+end $$;
+
 -- ── Self-verification ──────────────────────────────────────────
 -- Fails loudly rather than reporting a half-applied lock.
 do $$

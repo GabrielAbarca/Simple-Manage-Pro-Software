@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Chainable Supabase mock covering the shapes teacher/data/attendance.js uses:
-// from(table).select().eq().order() (thenable) and from(table).upsert(rows, opts).
-// `upserts` records every write so a test can assert the exact onConflict target
-// — the one thing that distinguishes a working save from a Postgres 42P10.
-const { fixtures, calls, upserts, errors } = vi.hoisted(() => ({
+// from(table).select().eq().order() (thenable) for reads, rpc(fn, args) for the
+// save. `writes` records every write of either kind, so a test can prove the
+// save never touches the table directly.
+const { fixtures, calls, rpcs, writes, errors } = vi.hoisted(() => ({
   fixtures: /** @type {Record<string, any[]>} */ ({}),
   calls: /** @type {Array<{ table: string, filters: any[] }>} */ ([]),
-  upserts: /** @type {Array<{ table: string, rows: any[], opts: any }>} */ ([]),
+  rpcs: /** @type {Array<{ fn: string, args: any }>} */ ([]),
+  writes: /** @type {string[]} */ ([]),
   errors: /** @type {Record<string, {message: string} | undefined>} */ ({}),
 }));
 
@@ -38,15 +39,20 @@ vi.mock("../src/js/supabaseClient.js", () => {
       range: (from, to) => ((range = [from, to]), b),
       order: () => b,
       eq: (col, val) => (filters.push(["eq", col, val]), b),
-      upsert: (rows, opts) => {
-        upserts.push({ table, rows, opts });
-        return Promise.resolve({ error: errors[table] ?? null });
+      upsert: () => {
+        writes.push(`upsert ${table}`);
+        return Promise.resolve({ error: null });
       },
       then: (onF, onR) => resolve().then(onF, onR),
     };
     return b;
   }
-  return { supabase: { from: (table) => make(table) } };
+  const rpc = (fn, args) => {
+    rpcs.push({ fn, args });
+    writes.push(`rpc ${fn}`);
+    return Promise.resolve({ error: errors[`rpc:${fn}`] ?? null });
+  };
+  return { supabase: { from: (table) => make(table), rpc } };
 });
 
 const { fetchAttendanceSheet, upsertAttendance, fetchCstAttendance } =
@@ -56,7 +62,8 @@ beforeEach(() => {
   for (const k of Object.keys(fixtures)) delete fixtures[k];
   for (const k of Object.keys(errors)) delete errors[k];
   calls.length = 0;
-  upserts.length = 0;
+  rpcs.length = 0;
+  writes.length = 0;
   fixtures.students = [
     {
       id: 101,
@@ -92,7 +99,7 @@ beforeEach(() => {
 });
 
 describe("upsertAttendance — the per-subject write path", () => {
-  it("upserts on the constraint the schema actually has", async () => {
+  it("saves through the save_attendance RPC, never a direct table write", async () => {
     await upsertAttendance(
       21,
       11,
@@ -100,44 +107,27 @@ describe("upsertAttendance — the per-subject write path", () => {
       [{ id: 101, status: "absent" }],
       7,
     );
-    // Exact string: the shipped bug was onConflict "student_id,class_id,date",
-    // a constraint incremental_attendance_by_subject.sql drops. PostgREST
-    // forwards it verbatim and Postgres answers 42P10.
-    expect(upserts[0].opts).toEqual({
-      onConflict: "student_id,class_subject_teacher_id,date",
-    });
+    expect(writes).toEqual(["rpc save_attendance"]);
+    expect(rpcs[0].args.p_cst).toBe(11);
+    expect(rpcs[0].args.p_date).toBe("2026-09-07");
   });
 
-  it("stamps every row with the subject and the section", async () => {
+  it("sends only what the server cannot derive", async () => {
     await upsertAttendance(
       21,
       11,
       "2026-09-07",
       [
         { id: 101, status: "absent", notes: "sick" },
-        { id: 102, status: "present" },
+        { id: 102, status: "present", notes: "" },
       ],
       7,
     );
-    expect(upserts[0].rows).toEqual([
-      {
-        student_id: 101,
-        class_id: 21,
-        class_subject_teacher_id: 11,
-        date: "2026-09-07",
-        status: "absent",
-        notes: "sick",
-        recorded_by: 7,
-      },
-      {
-        student_id: 102,
-        class_id: 21,
-        class_subject_teacher_id: 11,
-        date: "2026-09-07",
-        status: "present",
-        notes: null,
-        recorded_by: 7,
-      },
+    // class_id and recorded_by come from the CST and the caller's session on
+    // the server. Sending them would invite the browser to choose them again.
+    expect(rpcs[0].args.p_rows).toEqual([
+      { student_id: 101, status: "absent", notes: "sick" },
+      { student_id: 102, status: "present", notes: null },
     ]);
   });
 
@@ -153,11 +143,11 @@ describe("upsertAttendance — the per-subject write path", () => {
         7,
       ),
     ).rejects.toThrow(/class_subject_teacher_id/);
-    expect(upserts).toHaveLength(0);
+    expect(writes).toHaveLength(0);
   });
 
-  it("propagates a write error", async () => {
-    errors.attendance = { message: "denied" };
+  it("propagates a refusal from the server unchanged", async () => {
+    errors["rpc:save_attendance"] = { code: "42501", message: "not permitted" };
     await expect(
       upsertAttendance(
         21,
@@ -166,7 +156,7 @@ describe("upsertAttendance — the per-subject write path", () => {
         [{ id: 101, status: "absent" }],
         7,
       ),
-    ).rejects.toMatchObject({ message: "denied" });
+    ).rejects.toMatchObject({ code: "42501" });
   });
 });
 

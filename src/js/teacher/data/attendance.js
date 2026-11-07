@@ -53,30 +53,38 @@ export async function fetchAttendanceSheet(classId, cstId, date) {
 /**
  * Save the day's register for one class-subject.
  *
- * @param {number} classId
+ * Goes through the `save_attendance` RPC (incremental_write_attendance.sql),
+ * which derives the section and the recorder on the server. `_classId` and
+ * `_recordedBy` stay in the signature because the demo overlay still uses
+ * them to build its local rows.
+ *
+ * @param {number} _classId
  * @param {number} cstId class_subject_teachers.id
  * @param {string} date YYYY-MM-DD
  * @param {Array<{ id: number, status: string, notes?: string | null }>} rows
- * @param {number | null} [recordedBy] teachers.id of whoever took the register
+ * @param {number | null} [_recordedBy]
  */
-export async function upsertAttendance(classId, cstId, date, rows, recordedBy) {
+export async function upsertAttendance(
+  _classId,
+  cstId,
+  date,
+  rows,
+  _recordedBy,
+) {
   // A null cstId does not upsert: the unique index treats NULLs as distinct, so
   // every save would insert another unattributable row instead of replacing the
   // previous one. Fail loudly rather than silently duplicating the register.
   if (cstId == null) {
     throw new Error("upsertAttendance: missing class_subject_teacher_id");
   }
-  const payload = rows.map((r) => ({
-    student_id: r.id,
-    class_id: classId,
-    class_subject_teacher_id: cstId,
-    date,
-    status: r.status,
-    notes: r.notes || null,
-    recorded_by: recordedBy ?? null,
-  }));
-  const { error } = await supabase.from("attendance").upsert(payload, {
-    onConflict: "student_id,class_subject_teacher_id,date",
+  const { error } = await supabase.rpc("save_attendance", {
+    p_cst: cstId,
+    p_date: date,
+    p_rows: rows.map((r) => ({
+      student_id: r.id,
+      status: r.status,
+      notes: r.notes || null,
+    })),
   });
   if (error) throw error;
 }

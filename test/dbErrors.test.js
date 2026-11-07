@@ -7,6 +7,7 @@ const pgError = (code, message) => ({ code, message, details: null });
 describe("mapDbError", () => {
   it("maps the constraint violations a console write can provoke", () => {
     expect(mapDbError(pgError("22001")).key).toBe("errors.db.tooLong");
+    expect(mapDbError(pgError("22023")).key).toBe("errors.db.notAllowedValue");
     expect(mapDbError(pgError("23502")).key).toBe("errors.db.missingRequired");
     expect(mapDbError(pgError("23503")).key).toBe("errors.db.stillReferenced");
     expect(mapDbError(pgError("23505")).key).toBe("errors.db.duplicate");

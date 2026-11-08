@@ -1,24 +1,19 @@
 import { describe, it, expect } from "vitest";
-import {
-  LOGIN_PATH,
-  parseRecoveryUrl,
-  recoveryRedirectUrl,
-} from "../src/js/recovery.js";
+import { parseRecoveryUrl, recoveryRedirectUrl } from "../src/js/recovery.js";
+import { LOGIN_PATH } from "../src/js/paths.js";
 
 describe("recoveryRedirectUrl", () => {
   it("targets the login entry point on the given origin", () => {
     expect(recoveryRedirectUrl("http://localhost:3000")).toBe(
-      "http://localhost:3000/login.html",
+      "http://localhost:3000/",
     );
     expect(recoveryRedirectUrl("https://smp-web-page.vercel.app")).toBe(
-      "https://smp-web-page.vercel.app/login.html",
+      "https://smp-web-page.vercel.app/",
     );
   });
 
-  it("keeps the explicit .html path the app's redirects use", () => {
-    // role.js routes to /admin.html, /teacher.html; recovery must match so
-    // Vite's dev server serves it and Vercel's cleanUrls 308s it.
-    expect(LOGIN_PATH).toBe("/login.html");
+  it("sends the recovery link to the site root, where the login page lives", () => {
+    expect(LOGIN_PATH).toBe("/");
   });
 });
 

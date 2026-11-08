@@ -70,7 +70,7 @@ export async function fetchStudentId(userId) {
 export function portalPath(role) {
   if (role === "admin") return "/admin.html";
   if (role === "teacher") return "/teacher.html";
-  return "/";
+  return "/student.html";
 }
 
 /**

@@ -34,7 +34,7 @@ describe("security headers", () => {
     expect(pages).toEqual(
       expect.arrayContaining([
         "index.html",
-        "login.html",
+        "student.html",
         "teacher.html",
         "admin.html",
         "privacy.html",

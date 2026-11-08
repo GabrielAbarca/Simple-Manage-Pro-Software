@@ -28,7 +28,7 @@ whether or not the address has an account. That is intentional: a message like
 "no such user" turns the login form into a way to discover who attends the
 school.
 
-The emailed link returns to `/login.html`, which recognises it and asks for a
+The emailed link returns to `/`, which recognises it and asks for a
 new password. Both link formats are handled: the `#access_token` form and the
 `?token_hash` form. The second matters because corporate mail scanners follow
 links before the recipient does, and the first format is consumed when they do

@@ -86,8 +86,8 @@ export default defineConfig(({ mode }) => {
       target: "esnext",
       rolldownOptions: {
         input: {
-          main: resolve(import.meta.dirname, "index.html"),
-          login: resolve(import.meta.dirname, "login.html"),
+          student: resolve(import.meta.dirname, "student.html"),
+          login: resolve(import.meta.dirname, "index.html"),
           admin: resolve(import.meta.dirname, "admin.html"),
           teacher: resolve(import.meta.dirname, "teacher.html"),
           privacy: resolve(import.meta.dirname, "privacy.html"),

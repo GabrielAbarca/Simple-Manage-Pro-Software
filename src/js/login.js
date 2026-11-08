@@ -118,7 +118,7 @@ bindThemeToggle(themeToggler);
 // Demo sandbox: this deploy is a single shared profile. Prefill and lock the
 // credentials so visitors sign in with one click. Gated on DEMO_MODE → a real
 // build is untouched. (The sign-up switch is hidden for every build, in the
-// markup — see login.html.)
+// markup — see index.html.)
 if (DEMO_MODE) {
   inputEmail.value = DEMO_CREDENTIALS.email;
   inputPassword.value = DEMO_CREDENTIALS.password;

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Simple Manage Pro — Portal del estudiante: notas, asistencia, horario e información de clases."
+      content="Inicie sesión en Simple Manage Pro, el sistema de gestión del colegio: notas, asistencia, horarios y expedientes en un solo lugar."
     />
     <meta name="theme-color" content="#7380ec" />
     <link rel="canonical" href="https://demo.simplemanagepro.com/" />
@@ -14,10 +14,10 @@
     <meta property="og:url" content="https://demo.simplemanagepro.com/" />
     <meta property="og:site_name" content="Simple Manage Pro" />
     <meta property="og:locale" content="es_CR" />
-    <meta property="og:title" content="Simple Manage Pro — Portal del estudiante" />
+    <meta property="og:title" content="Simple Manage Pro — El sistema de gestión del colegio" />
     <meta
       property="og:description"
-      content="Portal del estudiante con notas, asistencia, horario e información de clases."
+      content="Notas, asistencia, horarios y expedientes en un solo lugar."
     />
     <meta
       property="og:image"
@@ -30,10 +30,10 @@
       content="Simple Manage Pro — El sistema de gestión del colegio."
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Simple Manage Pro — Portal del estudiante" />
+    <meta name="twitter:title" content="Simple Manage Pro — El sistema de gestión del colegio" />
     <meta
       name="twitter:description"
-      content="Portal del estudiante con notas, asistencia, horario e información de clases."
+      content="Notas, asistencia, horarios y expedientes en un solo lugar."
     />
     <meta
       name="twitter:image"
@@ -47,9 +47,11 @@
       crossorigin
     />
     <link rel="stylesheet" href="/src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/login.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="manifest" href="/site.webmanifest" />
     <script>
       // Apply the saved theme before first paint (avoids a light-mode flash).
@@ -58,472 +60,324 @@
           document.documentElement.classList.add("dark-theme-variables");
       } catch (e) {}
     </script>
-    <script src="/src/js/student.js" type="module" defer></script>
-    <title>Simple Manage Pro</title>
+    <script src="/src/js/login.js" type="module" defer></script>
+    <title>Iniciar sesión — Simple Manage Pro</title>
   </head>
-
-  <body>
-    <div class="container">
-      <aside>
-        <div class="top">
-          <div class="logo">
-            <img
-              src="/apple-touch-icon.png"
-              alt=""
-              width="32"
-              height="32"
-            />
-            <h2>SIMPLE <span class="danger">MANAGE PRO</span></h2>
-          </div>
-          <div
-            class="close"
-            id="close-btn"
-            role="button"
-            tabindex="0"
-            aria-label="Close menu"
-            data-i18n-aria-label="common.closeMenu"
-          >
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-close"></use></svg
-            ></span>
-          </div>
+  <body id="login-body">
+    <div class="login-wrapper">
+      <div class="brand-panel">
+        <div class="brand-bg-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
         </div>
-        <div class="sidebar">
-          <a href="/" data-page="dashboard" class="active">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-dashboard"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.dashboard">Dashboard</h3>
-          </a>
-          <a href="/" data-page="grades">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-school"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.grades">Grades</h3>
-          </a>
-          <a href="/" data-page="schedule">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true">
-                <use href="#icon-calendar_month"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.schedule">Schedule</h3>
-          </a>
-          <a href="/" data-page="teachers">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-groups"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.teachers">Teachers</h3>
-          </a>
-          <a href="/" data-page="attendance">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-fact_check"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.attendance">Attendance</h3>
-          </a>
-          <a href="/" data-page="conduct">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-gavel"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.conduct">Conduct</h3>
-          </a>
-          <a href="/" data-page="events">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-event"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.events">Events</h3>
-          </a>
-          <a href="/" data-page="settings">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-settings"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.settings">Settings</h3>
-          </a>
-
-          <div class="sidebar-divider"></div>
-
-          <!-- Both start hidden; student/nav.js reveals each one only for a role the
-               target portal accepts, so neither can bounce the caller. -->
-          <a href="/admin" id="admin-console-link" class="nav-cta" hidden>
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true">
-                <use href="#icon-admin_panel_settings"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.adminConsole">Admin Console</h3>
-          </a>
-          <a href="/teacher" id="teacher-portal-link" class="nav-cta" hidden>
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true">
-                <use href="#icon-co_present"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.teacherConsole">Teacher Console</h3>
-          </a>
-          <a href="/login.html" id="logout-btn">
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-logout"></use></svg
-            ></span>
-            <h3 data-i18n="student.nav.logout">Logout</h3>
-          </a>
+        <div class="brand-content">
+          <img
+            src="/apple-touch-icon.png"
+            alt=""
+            class="brand-logo"
+            width="180"
+            height="180"
+          />
+          <h1 class="brand-title">SIMPLE <span>MANAGE PRO</span></h1>
+          <p class="brand-tagline">
+            <span data-i18n="login.tagline1"
+              >Your student portal for grades,</span
+            ><br /><span data-i18n="login.tagline2"
+              >attendance, schedule & more.</span
+            >
+          </p>
+          <ul class="brand-features">
+            <li>
+              <span class="material-symbols-outlined"
+                ><svg aria-hidden="true"><use href="#icon-school"></use></svg
+              ></span>
+              <span data-i18n="login.feature1"
+                >Real-time academic performance</span
+              >
+            </li>
+            <li>
+              <span class="material-symbols-outlined"
+                ><svg aria-hidden="true">
+                  <use href="#icon-calendar_month"></use></svg
+              ></span>
+              <span data-i18n="login.feature2">Weekly class schedule</span>
+            </li>
+            <li>
+              <span class="material-symbols-outlined"
+                ><svg aria-hidden="true">
+                  <use href="#icon-fact_check"></use></svg
+              ></span>
+              <span data-i18n="login.feature3">Attendance tracking</span>
+            </li>
+            <li>
+              <span class="material-symbols-outlined"
+                ><svg aria-hidden="true"><use href="#icon-gavel"></use></svg
+              ></span>
+              <span data-i18n="login.feature4">Conduct and discipline</span>
+            </li>
+          </ul>
         </div>
-      </aside>
+      </div>
 
-      <main>
-        <section class="view-section active" id="view-dashboard">
-          <h1 data-i18n="student.heading.dashboard">Dashboard</h1>
+      <div class="auth-panel">
+        <button
+          type="button"
+          class="login-theme-toggler"
+          id="login-theme-toggler"
+          title="Toggle dark mode"
+          data-i18n-title="login.toggleTheme"
+          aria-pressed="false"
+          aria-label="Dark mode"
+          data-i18n-aria-label="common.darkMode"
+        >
+          <span class="material-symbols-outlined active" id="theme-icon-light"
+            ><svg aria-hidden="true"><use href="#icon-light_mode"></use></svg
+          ></span>
+          <span class="material-symbols-outlined" id="theme-icon-dark"
+            ><svg aria-hidden="true"><use href="#icon-dark_mode"></use></svg
+          ></span>
+        </button>
+
+        <div class="auth-card" id="auth-card">
+          <div class="auth-card-header">
+            <div class="auth-avatar">
+              <span class="material-symbols-outlined" id="auth-avatar-icon"
+                ><svg aria-hidden="true"><use href="#icon-lock"></use></svg
+              ></span>
+            </div>
+            <h2 id="auth-title" data-i18n="login.welcomeTitle">Welcome back</h2>
+            <p id="auth-subtitle" data-i18n="login.welcomeSubtitle">
+              Sign in to your account to continue
+            </p>
+          </div>
 
           <div
-            class="student-info-bar clickable-card"
-            id="student-info-bar"
-            role="button"
-            tabindex="0"
-            aria-label="Go to Settings"
-            data-i18n-aria-label="student.aria.goToSettings"
+            class="auth-toast"
+            id="auth-toast"
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+          <p
+            class="demo-notice"
+            id="demo-notice"
+            style="display: none"
+            data-i18n="login.demoNotice"
           >
-            <div class="student-avatar">
-              <span class="material-symbols-outlined"
-                ><svg aria-hidden="true"><use href="#icon-person"></use></svg
-              ></span>
-            </div>
-            <div class="student-details">
-              <h3 id="student-name">Loading...</h3>
-              <p id="student-class">—</p>
-            </div>
-            <div class="student-meta">
-              <span class="badge badge-primary" id="student-year">—</span>
-              <span class="badge badge-success" id="student-status">—</span>
-            </div>
-          </div>
+            Live demo — credentials are prefilled, just sign in.
+          </p>
 
-          <div class="dashboard">
-            <div
-              class="assistance clickable-card"
-              id="card-attendance"
-              role="button"
-              tabindex="0"
-              aria-label="Go to Attendance"
-              data-i18n-aria-label="student.aria.goToAttendance"
-            >
-              <span class="material-symbols-outlined"
-                ><svg aria-hidden="true"><use href="#icon-handshake"></use></svg
-              ></span>
-              <div class="middle">
-                <div class="left">
-                  <h3 data-i18n="student.cards.attendance">Attendance</h3>
-                  <h1 id="attendance-fraction">—/—</h1>
-                </div>
-                <div class="progress">
-                  <svg>
-                    <circle
-                      cx="38"
-                      cy="38"
-                      r="37"
-                      id="circle-attendance"
-                    ></circle>
-                  </svg>
-                  <div class="number">
-                    <p id="attendance-pct">—</p>
-                  </div>
-                </div>
-              </div>
-              <small
-                class="text-muted"
-                data-i18n="student.cards.currentSchoolYear"
-                >current school year</small
+          <form id="auth-form" novalidate>
+            <div class="form-group" id="group-name" style="display: none">
+              <label for="input-name" data-i18n="login.fullName"
+                >Full Name</label
               >
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true"><use href="#icon-person"></use></svg
+                ></span>
+                <input
+                  type="text"
+                  id="input-name"
+                  name="name"
+                  placeholder="María Rojas Vargas"
+                  data-i18n-placeholder="login.fullNamePlaceholder"
+                  autocomplete="name"
+                />
+              </div>
+              <span class="field-error" id="error-name"></span>
             </div>
 
-            <div
-              class="grade clickable-card"
-              id="card-grade"
-              role="button"
-              tabindex="0"
-              aria-label="Go to Grades"
-              data-i18n-aria-label="student.aria.goToGrades"
-            >
-              <span class="material-symbols-outlined"
-                ><svg aria-hidden="true"><use href="#icon-grade"></use></svg
-              ></span>
-              <div class="middle">
-                <div class="left">
-                  <h3 data-i18n="student.cards.gradeAverage">Grade Average</h3>
-                  <h1 id="grade-avg">—</h1>
-                </div>
-                <div class="progress">
-                  <svg>
-                    <circle cx="38" cy="38" r="37" id="circle-grade"></circle>
-                  </svg>
-                  <div class="number">
-                    <p id="grade-pct">—</p>
-                  </div>
-                </div>
-              </div>
-              <small
-                class="text-muted"
-                data-i18n="student.cards.currentSchoolYear"
-                >current school year</small
+            <div class="form-group" id="group-email">
+              <label for="input-email" data-i18n="login.emailAddress"
+                >Email Address</label
               >
-            </div>
-
-            <div
-              class="next-class-card clickable-card"
-              id="card-next-class"
-              role="button"
-              tabindex="0"
-              aria-label="Go to Schedule"
-              data-i18n-aria-label="student.aria.goToSchedule"
-            >
-              <span class="material-symbols-outlined"
-                ><svg aria-hidden="true"><use href="#icon-schedule"></use></svg
-              ></span>
-              <div class="middle">
-                <div class="left">
-                  <h3 data-i18n="student.cards.nextClass">Next Class</h3>
-                  <h1 id="next-class-subject">—</h1>
-                </div>
-                <div class="next-class-info"></div>
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true"><use href="#icon-mail"></use></svg
+                ></span>
+                <input
+                  type="email"
+                  id="input-email"
+                  name="email"
+                  placeholder="you@example.com"
+                  data-i18n-placeholder="login.emailPlaceholder"
+                  autocomplete="email"
+                  required
+                />
               </div>
-              <small class="text-muted" id="next-class-day">—</small>
+              <span class="field-error" id="error-email"></span>
             </div>
-          </div>
 
-          <div class="recent-activity">
-            <h2 data-i18n="student.dash.gradeOverview">Grade Overview</h2>
-            <table id="dashboard-grade-table">
-              <thead>
-                <!-- Columns are one per grading period + Average, filled in by
-                     student/screens/dashboard.js once the year's periods load. -->
-                <tr id="dashboard-grade-head">
-                  <th data-i18n="student.dash.subject">Subject</th>
-                  <th data-i18n="student.dash.average">Average</th>
-                </tr>
-              </thead>
-              <tbody id="dashboard-grades-body">
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+            <div class="form-group" id="group-password">
+              <label for="input-password" data-i18n="login.password"
+                >Password</label
+              >
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true"><use href="#icon-lock"></use></svg
+                ></span>
+                <input
+                  type="password"
+                  id="input-password"
+                  name="password"
+                  placeholder="••••••••"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  id="toggle-password"
+                  aria-label="Show password"
+                  data-i18n-aria-label="login.showPassword"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    id="toggle-password-icon"
+                    ><svg aria-hidden="true">
+                      <use href="#icon-visibility"></use></svg
+                  ></span>
+                </button>
+              </div>
+              <span class="field-error" id="error-password"></span>
+              <div class="forgot-row" id="forgot-row">
+                <button
+                  type="button"
+                  class="btn-switch"
+                  id="btn-forgot"
+                  data-i18n="login.forgotPassword"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            </div>
 
-        <section class="view-section" id="view-grades">
-          <h1 data-i18n="student.heading.grades">Grades</h1>
-          <div class="view-toolbar">
-            <div class="period-selector">
+            <div class="form-group" id="group-confirm" style="display: none">
+              <label for="input-confirm" data-i18n="login.confirmPassword"
+                >Confirm Password</label
+              >
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true">
+                    <use href="#icon-lock_reset"></use></svg
+                ></span>
+                <input
+                  type="password"
+                  id="input-confirm"
+                  name="confirm"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                />
+              </div>
+              <span class="field-error" id="error-confirm"></span>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-submit">
+              <span class="btn-text" id="btn-text" data-i18n="login.signIn"
+                >Sign In</span
+              >
+              <span
+                class="btn-spinner"
+                id="btn-spinner"
+                style="display: none"
+              ></span>
+            </button>
+          </form>
+
+          <!-- Shown in place of #auth-form when the page is opened from a
+               password-recovery email (see recovery.js). -->
+          <form id="recovery-form" novalidate style="display: none">
+            <div class="form-group">
+              <label for="input-new-password" data-i18n="login.recovery.newPassword"
+                >New Password</label
+              >
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true"><use href="#icon-lock"></use></svg
+                ></span>
+                <input
+                  type="password"
+                  id="input-new-password"
+                  name="new-password"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
+              <span class="field-error" id="error-new-password"></span>
+            </div>
+
+            <div class="form-group">
               <label
-                for="period-select"
-                data-i18n="student.grades.gradingPeriod"
-                >Grading Period:</label
+                for="input-confirm-new"
+                data-i18n="login.recovery.confirmPassword"
+                >Confirm New Password</label
               >
-              <select id="period-select">
-                <option value="all" data-i18n="student.grades.allPeriods">
-                  All Periods
-                </option>
-              </select>
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined input-icon"
+                  ><svg aria-hidden="true">
+                    <use href="#icon-lock_reset"></use></svg
+                ></span>
+                <input
+                  type="password"
+                  id="input-confirm-new"
+                  name="confirm-new-password"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  required
+                />
+              </div>
+              <span class="field-error" id="error-confirm-new"></span>
             </div>
-          </div>
-          <div class="recent-activity">
-            <table id="grades-table">
-              <thead>
-                <tr>
-                  <th data-i18n="student.grades.subject">Subject</th>
-                  <th data-i18n="student.grades.code">Code</th>
-                  <th data-i18n="student.grades.teacher">Teacher</th>
-                  <th data-i18n="student.grades.score">Score</th>
-                  <th data-i18n="student.grades.status">Status</th>
-                  <th data-i18n="student.grades.period">Period</th>
-                </tr>
-              </thead>
-              <tbody id="grades-body">
-                <tr class="skeleton-row">
-                  <td colspan="6">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="6">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="6">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="6">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot id="grades-footer"></tfoot>
-            </table>
-          </div>
-        </section>
 
-        <section class="view-section" id="view-schedule">
-          <h1 data-i18n="student.heading.schedule">Weekly Schedule</h1>
-          <div class="schedule-wrapper">
-            <div class="schedule-grid" id="schedule-grid">
-              <div class="skeleton skeleton-card skeleton-span"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="view-section" id="view-teachers">
-          <h1 data-i18n="student.heading.teachers">Teachers</h1>
-          <div class="teacher-cards" id="teacher-cards">
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-          </div>
-        </section>
-
-        <section class="view-section" id="view-attendance">
-          <h1 data-i18n="student.heading.attendance">Attendance</h1>
-          <div class="attendance-summary" id="attendance-summary"></div>
-          <div class="recent-activity">
-            <table id="attendance-table">
-              <thead>
-                <tr>
-                  <th data-i18n="student.attendance.date">Date</th>
-                  <th data-i18n="student.attendance.subject">Subject</th>
-                  <th data-i18n="student.attendance.status">Status</th>
-                  <th data-i18n="student.attendance.recordedBy">Recorded By</th>
-                  <th data-i18n="student.attendance.notes">Notes</th>
-                </tr>
-              </thead>
-              <tbody id="attendance-body">
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-                <tr class="skeleton-row">
-                  <td colspan="5">
-                    <span class="skeleton skeleton-text"></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="view-section" id="view-conduct">
-          <h1 data-i18n="student.heading.conduct">Conduct</h1>
-          <div id="conduct-root">
-            <div class="skeleton-block">
-              <span class="skeleton skeleton-line"></span>
-              <span class="skeleton skeleton-line"></span>
-            </div>
-          </div>
-        </section>
-
-        <section class="view-section" id="view-events">
-          <h1 data-i18n="student.heading.events">School Events</h1>
-          <div class="events-timeline" id="events-timeline">
-            <div class="skeleton-block">
-              <span class="skeleton skeleton-line"></span>
-              <span class="skeleton skeleton-line"></span>
-              <span class="skeleton skeleton-line"></span>
-            </div>
-          </div>
-        </section>
-
-        <section class="view-section" id="view-settings">
-          <h1 data-i18n="student.heading.settings">Settings</h1>
-          <div id="settings-root"></div>
-        </section>
-      </main>
-
-      <div class="right">
-        <div class="top">
-          <button
-            id="menu-btn"
-            aria-label="Open menu"
-            data-i18n-aria-label="common.openMenu"
-          >
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-menu"></use></svg
-            ></span>
-          </button>
-          <button
-            type="button"
-            class="theme-toggler"
-            aria-pressed="false"
-            aria-label="Dark mode"
-            data-i18n-aria-label="common.darkMode"
-          >
-            <span class="material-symbols-outlined active"
-              ><svg aria-hidden="true"><use href="#icon-light_mode"></use></svg
-            ></span>
-            <span class="material-symbols-outlined"
-              ><svg aria-hidden="true"><use href="#icon-dark_mode"></use></svg
-            ></span>
-          </button>
-          <div class="profile">
-            <div class="info">
-              <p>
-                <span data-i18n="student.welcome">Welcome,</span>
-                <b id="welcome-name">...</b>
-              </p>
-            </div>
-            <div class="profile-photo">
-              <span class="material-symbols-outlined"
-                ><svg aria-hidden="true"><use href="#icon-person"></use></svg
+            <button type="submit" class="btn-submit" id="btn-recovery-submit">
+              <span
+                class="btn-text"
+                id="btn-recovery-text"
+                data-i18n="login.recovery.submit"
+                >Update password</span
+              >
+              <span
+                class="btn-spinner"
+                id="btn-recovery-spinner"
+                style="display: none"
               ></span>
-            </div>
-          </div>
-        </div>
+            </button>
+          </form>
 
-        <div class="recent-updates">
-          <h2 data-i18n="student.panel.upcomingEvents">Upcoming Events</h2>
-          <div
-            class="updates-card clickable-card"
-            id="upcoming-events-card"
-            role="button"
-            tabindex="0"
-            aria-label="Go to Events"
-            data-i18n-aria-label="student.aria.goToEvents"
-          >
-            <div class="skeleton-block">
-              <span class="skeleton skeleton-line"></span>
-              <span class="skeleton skeleton-line"></span>
-            </div>
+          <!-- No SMP deployment offers self-registration: the demo runs on one
+               shared account, and a school's logins are issued from the admin
+               console (Create login → the admin-users Edge Function), which
+               also links the account to its teacher or student record. A
+               self-registered account would authenticate but map to nobody.
+               Hidden here rather than removed so the path is one attribute
+               away if that ever changes. The real enforcement is Supabase
+               Auth's "allow new users to sign up", which must stay off. -->
+          <div class="auth-switch" hidden>
+            <p id="switch-text" data-i18n="login.noAccount">
+              Don't have an account?
+            </p>
+            <button
+              type="button"
+              class="btn-switch"
+              id="btn-switch"
+              data-i18n="login.signUp"
+            >
+              Sign Up
+            </button>
           </div>
-        </div>
 
-        <div class="subjects-analytics">
-          <h2 data-i18n="student.panel.subjectPerformance">
-            Subject Performance
-          </h2>
-          <div id="subject-analytics-list"></div>
+          <nav class="auth-legal">
+            <a href="/privacy.html" data-i18n="login.privacy">Privacy policy</a>
+            <span aria-hidden="true">·</span>
+            <a href="/terms.html" data-i18n="login.terms">Terms of service</a>
+          </nav>
+          <p class="auth-support">
+            <span data-i18n="login.support">Need help?</span>
+            <a href="mailto:contact@gzelaya.com">contact@gzelaya.com</a>
+          </p>
         </div>
       </div>
     </div>

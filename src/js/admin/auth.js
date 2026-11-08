@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient.js";
 import { getSession } from "../auth.js";
 import { fetchRole, portalPath, haltForRedirect } from "../role.js";
+import { LOGIN_PATH } from "../paths.js";
 import { state } from "./state.js";
 
 /**
@@ -12,7 +13,7 @@ import { state } from "./state.js";
  */
 export async function resolveAdminSession() {
   const session = await getSession();
-  if (!session) haltForRedirect("/login.html", "Unauthenticated");
+  if (!session) haltForRedirect(LOGIN_PATH, "Unauthenticated");
 
   const role = await fetchRole();
   if (role !== "admin") haltForRedirect(portalPath(role), "Unauthorized");

@@ -19,7 +19,7 @@ test("change password is offered but locked in demo mode, and writes nothing", a
     [`sb-${REF}-auth-token`, sessionSeed()],
   );
 
-  await page.goto("/");
+  await page.goto("/student.html");
   await page.click('aside .sidebar a[data-page="settings"]');
 
   const button = page.locator("#settings-change-password");
@@ -42,7 +42,7 @@ test("settings links out to the privacy policy and terms", async ({
     [`sb-${REF}-auth-token`, sessionSeed()],
   );
 
-  await page.goto("/");
+  await page.goto("/student.html");
   await page.click('aside .sidebar a[data-page="settings"]');
   await page.click('.settings-rail-item[data-section="moreinfo"]');
 

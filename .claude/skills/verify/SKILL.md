@@ -5,7 +5,7 @@ description: Verify Simple Manage Pro changes by driving the real app in a brows
 
 # Verifying Simple Manage Pro changes
 
-Static Vite multi-page app — `login.html`, `index.html` (student),
+Static Vite multi-page app — `index.html` (login), `student.html`,
 `teacher.html`, `admin.html`, plus `privacy.html`, `terms.html` and
 `404.html` — against a Supabase backend. No real backend or `.env` is
 needed to verify: the e2e harness mocks it.

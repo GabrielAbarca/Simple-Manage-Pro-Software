@@ -426,7 +426,7 @@ async function openStudentConduct(page, context, fix, lang) {
     [`sb-${REF}-auth-token`, sessionSeed()],
   );
   const errors = trackErrors(page);
-  await page.goto("/");
+  await page.goto("/student.html");
   await page.click('aside a[data-page="conduct"]');
   return { writes, errors };
 }
@@ -552,7 +552,7 @@ test.describe("student portal conducta", () => {
         ([key, value]) => localStorage.setItem(key, value),
         [`sb-${REF}-auth-token`, sessionSeed()],
       );
-      await page.goto("/");
+      await page.goto("/student.html");
       await page.click('aside a[data-page="conduct"]');
       const retry = page.locator("#conduct-root [data-retry]");
       await expect(retry).toBeVisible();

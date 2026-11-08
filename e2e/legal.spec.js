@@ -107,14 +107,14 @@ test("the two pages link to each other and back to sign-in", async ({
   await page.click('.legal-footer a[href="/privacy.html"]');
   await expect(page).toHaveURL(/\/privacy\.html$/);
 
-  await page.click('.legal-footer a[href="/login.html"]');
-  await expect(page).toHaveURL(/\/login\.html$/);
+  await page.click('.legal-footer a[href="/"]');
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test("the login page links to both policies without signing in", async ({
   page,
 }) => {
-  await page.goto("/login.html");
+  await page.goto("/");
 
   const privacy = page.locator('.auth-legal a[href="/privacy.html"]');
   const terms = page.locator('.auth-legal a[href="/terms.html"]');

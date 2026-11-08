@@ -51,12 +51,12 @@ describe("portalPath", () => {
   it("maps each role to its portal", () => {
     expect(portalPath("admin")).toBe("/admin.html");
     expect(portalPath("teacher")).toBe("/teacher.html");
-    expect(portalPath("student")).toBe("/");
+    expect(portalPath("student")).toBe("/student.html");
   });
 
   it("routes missing roles like a student", () => {
-    expect(portalPath(null)).toBe("/");
-    expect(portalPath(undefined)).toBe("/");
+    expect(portalPath(null)).toBe("/student.html");
+    expect(portalPath(undefined)).toBe("/student.html");
   });
 });
 

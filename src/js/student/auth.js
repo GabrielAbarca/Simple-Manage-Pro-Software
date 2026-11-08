@@ -5,6 +5,7 @@ import {
   portalPath,
   haltForRedirect,
 } from "../role.js";
+import { LOGIN_PATH } from "../paths.js";
 import { supabase } from "../supabaseClient.js";
 
 /**
@@ -17,10 +18,10 @@ import { supabase } from "../supabaseClient.js";
  */
 export async function resolveStudentSession() {
   const session = await getSession();
-  if (!session) haltForRedirect("/login.html", "Unauthenticated");
+  if (!session) haltForRedirect(LOGIN_PATH, "Unauthenticated");
   const user = session?.user;
 
-  if (!user) haltForRedirect("/login.html", "Unauthenticated");
+  if (!user) haltForRedirect(LOGIN_PATH, "Unauthenticated");
 
   const linkedStudentId = await fetchStudentId(user.id);
 
@@ -47,7 +48,7 @@ export async function resolveStudentSession() {
 
   console.error("[SMP] No student profile linked to this account.");
   await signOut();
-  haltForRedirect("/login.html", "No student profile linked");
+  haltForRedirect(LOGIN_PATH, "No student profile linked");
 }
 
 /**
@@ -58,7 +59,7 @@ export async function resolveStudentSession() {
 export function bindSessionWatchers() {
   supabase.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT") {
-      window.location.replace("/login.html");
+      window.location.replace(LOGIN_PATH);
     }
   });
 

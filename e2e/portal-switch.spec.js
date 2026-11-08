@@ -73,9 +73,11 @@ test.describe("teacher console portal links", () => {
     await page.goto("/teacher.html");
     await page.locator("#student-portal-link").click();
     // The real check is that it stays there rather than bouncing back.
-    await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
+    await page.waitForURL((url) => url.pathname === "/student.html", {
+      timeout: 15_000,
+    });
     await page.waitForTimeout(1500);
-    expect(new URL(page.url()).pathname).toBe("/");
+    expect(new URL(page.url()).pathname).toBe("/student.html");
   });
 });
 
@@ -84,7 +86,7 @@ test.describe("student portal portal links", () => {
     await routeSupabase(context, adminWhoIsAlsoAStudent);
     await seedSession(context);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await expect(page.locator("#admin-console-link")).toBeVisible();
     await expect(page.locator("#teacher-portal-link")).toBeVisible();
   });
@@ -98,7 +100,7 @@ test.describe("student portal portal links", () => {
     });
     await seedSession(context);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.waitForSelector("#logout-btn");
     await expect(page.locator("#admin-console-link")).toBeHidden();
     // Previously ungated: a student saw this and got bounced on click.

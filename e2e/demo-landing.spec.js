@@ -29,7 +29,7 @@ test.describe("demo first impression", () => {
     );
 
     // Already signed in: visiting the login page re-runs the same redirect.
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.waitForURL("**/admin.html", { timeout: 15_000 });
     expect(new URL(page.url()).pathname).toBe("/admin.html");
   });
@@ -49,8 +49,10 @@ test.describe("demo first impression", () => {
       [`sb-${REF}-auth-token`, sessionSeed()],
     );
 
-    await page.goto("/login.html");
-    await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
+    await page.goto("/");
+    await page.waitForURL((url) => url.pathname === "/student.html", {
+      timeout: 15_000,
+    });
   });
 });
 
@@ -67,7 +69,7 @@ test.describe("default language", () => {
       }),
     );
 
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.waitForSelector("#auth-form");
 
     await expect(page.locator("html")).toHaveAttribute("lang", "es");
@@ -87,7 +89,7 @@ test.describe("default language", () => {
       }),
     );
 
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.waitForSelector("#auth-form");
     await expect(page.locator("html")).toHaveAttribute("lang", "es");
 

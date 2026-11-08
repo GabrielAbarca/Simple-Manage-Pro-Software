@@ -1,5 +1,6 @@
 import { getSession, signOut } from "../auth.js";
 import { fetchRole } from "../role.js";
+import { LOGIN_PATH } from "../paths.js";
 import { errorState, errorRow } from "../ui.js";
 import { t } from "../i18n.js";
 import { state } from "./state.js";
@@ -142,7 +143,7 @@ export function initNav(views, closeNav) {
     logoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       await signOut();
-      window.location.replace("/login.html");
+      window.location.replace(LOGIN_PATH);
     });
   }
 
@@ -163,7 +164,7 @@ async function initCrossPortalLinks() {
       // enough for it to expire, and the target's guard would only bounce
       // the user to a login page without explaining why.
       if (!(await getSession())) {
-        window.location.replace("/login.html");
+        window.location.replace(LOGIN_PATH);
         return;
       }
       window.location.href = path;

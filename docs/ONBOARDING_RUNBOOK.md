@@ -253,9 +253,8 @@ that default is where every password-recovery email lands until it's changed:
 
 Only allow-listed URLs are honoured as redirect targets, and that allow-list is
 the boundary that keeps the `redirectTo` the console sends from being an open
-redirect. Skipping this leaves recovery links pointing at `/`, the student
-dashboard, which consumes the token and signs the user in with no way to set a
-password.
+redirect. Skipping this leaves recovery links pointing at Supabase's default
+Site URL, `http://localhost:3000`, which is not the school's deployment.
 
 Optional, and worth it for schools on enterprise mail: some scanners pre-fetch
 links and burn the single-use token, so the recipient gets
@@ -264,7 +263,7 @@ template (Authentication → Emails) to a token-hash link avoids it — nothing 
 spent until the page itself exchanges the token:
 
 ```html
-<a href="{{ .SiteURL }}/login.html?token_hash={{ .TokenHash }}&type=recovery">
+<a href="{{ .SiteURL }}/?token_hash={{ .TokenHash }}&type=recovery">
   Reset password
 </a>
 ```
@@ -348,9 +347,9 @@ project's anon key, `VITE_DEMO_MODE=false`) and sign in with the test admin.
   see [ACCOUNT_RECOVERY.md §5](ACCOUNT_RECOVERY.md).
 - **Password recovery:** anyone can start one from the login page's **Forgot
   password?**, and an admin can send one for a specific login from the console.
-  Either way the emailed link comes back to `/login`, which detects it and asks
+  Either way the emailed link comes back to `/`, which detects it and asks
   for a new password. Both paths depend on §5's URL configuration — without it
-  the link lands on the student dashboard instead. Full matrix, including the
+  the link lands on Supabase's default Site URL instead. Full matrix, including the
   locked-out-administrator case, in
   [ACCOUNT_RECOVERY.md](ACCOUNT_RECOVERY.md).
 - **Two administrators, always.** Provision a second admin account during

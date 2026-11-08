@@ -30,8 +30,8 @@ exist); this is a flat multi-page app.
 
 | Portal  | HTML entry     | Controller          | Lines |
 | ------- | -------------- | ------------------- | ----- |
-| Login   | `login.html`   | `src/js/login.js`   | 523   |
-| Student | `index.html`   | `src/js/main.js`    | 80    |
+| Login   | `index.html`   | `src/js/login.js`   | 523   |
+| Student | `student.html` | `src/js/student.js` | 80    |
 | Teacher | `teacher.html` | `src/js/teacher.js` | 122   |
 | Admin   | `admin.html`   | `src/js/admin.js`   | 105   |
 

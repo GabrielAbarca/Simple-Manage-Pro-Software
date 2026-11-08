@@ -12,13 +12,13 @@ const MAILTO = "mailto:contact@gzelaya.com";
 test("the login page shows a support contact without signing in", async ({
   page,
 }) => {
-  await page.goto("/login.html");
+  await page.goto("/");
   await expect(page.locator(`.auth-support a[href="${MAILTO}"]`)).toBeVisible();
 });
 
 test("the admin top bar links to support", async ({ page, context }) => {
   await routeSupabase(context, consoleFix);
-  await page.goto("/login.html");
+  await page.goto("/");
   await page.evaluate(
     ([key, value]) => localStorage.setItem(key, value),
     [`sb-${REF}-auth-token`, sessionSeed()],
@@ -36,7 +36,7 @@ test("the admin support link leaves the theme toggle and photo at full size", as
 }) => {
   await routeSupabase(context, consoleFix);
   await seedLang(context, "es");
-  await page.goto("/login.html");
+  await page.goto("/");
   await page.evaluate(
     ([key, value]) => localStorage.setItem(key, value),
     [`sb-${REF}-auth-token`, sessionSeed()],

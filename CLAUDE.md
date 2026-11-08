@@ -72,7 +72,9 @@ CI (`.github/workflows/ci.yml`) mirrors `lint` → `typecheck` → `test` → `b
 ## Architecture
 
 See `.claude/ARCHITECTURE_MAP.md` for a full file-by-file navigation map
-(portals, data layer, flagged large files). Summary below.
+(portals, data layer, flagged large files). **⚠ That map is outdated** — it
+predates the portal restructure; read the notice at its top and verify every
+path against the tree before relying on it. Summary below.
 
 `src/js/` splits into two layers:
 
@@ -85,8 +87,8 @@ See `.claude/ARCHITECTURE_MAP.md` for a full file-by-file navigation map
     Consumed by `src/js/admin/` — the admin console's own directory of ~40
     modules (UI kit, domain helpers, one per screen, the schedules tab and
     the CSV import wizard). It is the only portal with a directory of its
-    own; see `.claude/ARCHITECTURE_MAP.md` for the layout and the
-    no-import-cycles rule that goes with it.
+    own; see `.claude/ARCHITECTURE_MAP.md` (outdated — verify paths) for
+    the layout and the no-import-cycles rule that goes with it.
   - `csv.js` — dependency-free CSV/TSV parsing + header auto-mapping for the
     admin console's roster import.
   - `accounts.js` — login-account management: calls the `admin-users` Edge

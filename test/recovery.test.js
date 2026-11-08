@@ -15,9 +15,7 @@ describe("recoveryRedirectUrl", () => {
     );
   });
 
-  it("keeps the explicit .html path the app's redirects use", () => {
-    // role.js routes to /admin.html, /teacher.html; recovery must match so
-    // Vite's dev server serves it and Vercel's cleanUrls 308s it.
+  it("sends the recovery link to the site root, where the login page lives", () => {
     expect(LOGIN_PATH).toBe("/");
   });
 });

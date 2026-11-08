@@ -108,7 +108,7 @@ test("the two pages link to each other and back to sign-in", async ({
   await expect(page).toHaveURL(/\/privacy\.html$/);
 
   await page.click('.legal-footer a[href="/"]');
-  await expect(page).toHaveURL(/\/login\.html$/);
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test("the login page links to both policies without signing in", async ({

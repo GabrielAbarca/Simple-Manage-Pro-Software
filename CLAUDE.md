@@ -42,8 +42,8 @@ Four HTML entry points, each with its own controller in `src/js/`:
 
 | Page           | Purpose                              | Controller   |
 | -------------- | ------------------------------------ | ------------ |
-| `login.html`   | Sign-in / sign-up, role routing      | `login.js`   |
-| `index.html`   | Student dashboard                    | `main.js`    |
+| `index.html`   | Sign-in / sign-up, role routing      | `login.js`   |
+| `student.html` | Student dashboard                    | `student.js` |
 | `teacher.html` | Teacher console (classes, gradebook) | `teacher.js` |
 | `admin.html`   | Admin console (school setup & CRUD)  | `admin.js`   |
 

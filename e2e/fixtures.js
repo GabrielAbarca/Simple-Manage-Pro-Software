@@ -52,7 +52,7 @@ const teacher = {
   status: "active",
 };
 
-// Student-portal fixtures (index.html).
+// Student-portal fixtures (student.html).
 export const studentFix = {
   students: [
     {

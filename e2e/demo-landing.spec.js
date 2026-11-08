@@ -50,7 +50,9 @@ test.describe("demo first impression", () => {
     );
 
     await page.goto("/");
-    await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
+    await page.waitForURL((url) => url.pathname === "/student.html", {
+      timeout: 15_000,
+    });
   });
 });
 

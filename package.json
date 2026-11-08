@@ -9,8 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.{js,css}\" \"*.{js,json}\" \"test/**/*.js\" \"e2e/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.{js,css}\" \"*.{js,json}\"",
+    "format": "prettier --write \"src/**/*.{js,ts,css}\" \"*.{js,json}\" \"test/**/*.{js,ts}\" \"e2e/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts,css}\" \"*.{js,json}\"",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -22,6 +22,9 @@
   "lint-staged": {
     "*.{js,mjs}": [
       "eslint --fix",
+      "prettier --write"
+    ],
+    "*.ts": [
       "prettier --write"
     ],
     "*.{css,json,md}": [

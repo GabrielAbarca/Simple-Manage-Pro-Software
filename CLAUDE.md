@@ -62,7 +62,7 @@ npm run preview       # preview the build
 npm run lint          # ESLint (flat config)
 npm run format        # Prettier — write
 npm run format:check  # Prettier — check only
-npm run typecheck     # tsc --noEmit over checkJs + JSDoc
+npm run typecheck     # tsc --noEmit over checkJs + JSDoc and .ts files
 npm test              # Vitest unit tests (test/)
 npm run test:e2e      # Playwright e2e (e2e/)
 ```
@@ -159,7 +159,12 @@ These are non-negotiable. They override default agent behavior.
 
 - **Formatting**: Prettier is the source of truth (`.prettierrc.json`); don't hand-format against it.
 - **Linting**: ESLint 10 flat config (`eslint.config.js`).
-- **Typing**: JSDoc + `checkJs` (loose strictness, no `.ts` migration). Add JSDoc to new logic-layer code; the three view controllers are typed incrementally.
+- **Typing**: JSDoc + `checkJs` (loose strictness) with **incremental `.ts`** — no wholesale migration.
+  - New logic-layer modules may be written in `.ts`. Convert an existing `.js` file only when you are already substantially rewriting it; otherwise add JSDoc. `src/js/projectRef.ts` is the reference example.
+  - Import `.ts` modules with the explicit extension (`import { x } from "./foo.ts"`); `allowImportingTsExtensions` is on and Vite/Vitest resolve it.
+  - Keep `.ts` files out of the paths `tsconfig.json` excludes (`src/js/admin/**`, `src/js/*/screens/**`, `nav.js`, the page controllers) — an excluded `.ts` file is transpiled but never type-checked.
+  - ESLint does **not** lint `.ts`: the repo's TypeScript 7 can't run typescript-eslint (which needs TS < 6.1). `.ts` is covered by `npm run typecheck` (with `noUnusedLocals`) and Prettier.
+  - The view controllers are typed incrementally.
 - **Tests**: unit tests in `test/` (Vitest); e2e in `e2e/` (Playwright, self-contained with a dummy Supabase env — no real backend needed).
 
 ## Verification

@@ -132,7 +132,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 | `npm run preview`   | Preview the production build locally                         |
 | `npm run lint`      | Lint the codebase with ESLint                                |
 | `npm run format`    | Format with Prettier (`npm run format:check` to verify only) |
-| `npm run typecheck` | Type-check the JS via JSDoc + TypeScript `checkJs`           |
+| `npm run typecheck` | Type-check JSDoc (`checkJs`) and incremental `.ts` files     |
 | `npm test`          | Run the Vitest unit suite                                    |
 | `npm run test:e2e`  | Run the Playwright end-to-end suite                          |
 
@@ -142,13 +142,13 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 Quality gates run automatically in **CI** (GitHub Actions) on every push and pull request to `main` / `development`, and locally through a **husky** pre-commit hook (`lint-staged`).
 
-| Gate            | Tooling                                                           |
-| --------------- | ----------------------------------------------------------------- |
-| **Formatting**  | Prettier                                                          |
-| **Linting**     | ESLint (flat config)                                              |
-| **Type safety** | JSDoc + TypeScript `checkJs` — no compile step                    |
-| **Unit tests**  | Vitest — query/aggregation, i18n and demo-sandbox logic (`test/`) |
-| **End-to-end**  | Playwright — login, student, teacher and admin portals (`e2e/`)   |
+| Gate            | Tooling                                                                |
+| --------------- | ---------------------------------------------------------------------- |
+| **Formatting**  | Prettier                                                               |
+| **Linting**     | ESLint (flat config)                                                   |
+| **Type safety** | JSDoc `checkJs` + incremental `.ts` — Vite strips types, no `tsc` emit |
+| **Unit tests**  | Vitest — query/aggregation, i18n and demo-sandbox logic (`test/`)      |
+| **End-to-end**  | Playwright — login, student, teacher and admin portals (`e2e/`)        |
 
 The end-to-end suite is fully self-contained: it boots the app with placeholder environment variables and mocks Supabase at the network layer, so it needs no real backend or credentials — and it verifies the demo sandbox's **zero-write** guarantee.
 

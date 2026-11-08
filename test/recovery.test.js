@@ -8,17 +8,17 @@ import {
 describe("recoveryRedirectUrl", () => {
   it("targets the login entry point on the given origin", () => {
     expect(recoveryRedirectUrl("http://localhost:3000")).toBe(
-      "http://localhost:3000/login.html",
+      "http://localhost:3000/",
     );
     expect(recoveryRedirectUrl("https://smp-web-page.vercel.app")).toBe(
-      "https://smp-web-page.vercel.app/login.html",
+      "https://smp-web-page.vercel.app/",
     );
   });
 
   it("keeps the explicit .html path the app's redirects use", () => {
     // role.js routes to /admin.html, /teacher.html; recovery must match so
     // Vite's dev server serves it and Vercel's cleanUrls 308s it.
-    expect(LOGIN_PATH).toBe("/login.html");
+    expect(LOGIN_PATH).toBe("/");
   });
 });
 

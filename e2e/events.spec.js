@@ -99,7 +99,7 @@ test("event text reaches the student portal as text, not markup", async ({
     ],
   });
   await signIn(context);
-  await page.goto("/");
+  await page.goto("/student.html");
   await expect(page.locator("#upcoming-events-card")).toContainText(
     "<img src=x",
   );

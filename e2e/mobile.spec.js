@@ -30,7 +30,7 @@ test.describe("mobile — student portal", () => {
     await routeSupabase(context, studentFix);
     await seedSession(context);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.waitForFunction(
       () =>
         document.getElementById("welcome-name")?.textContent?.includes("Ana"),

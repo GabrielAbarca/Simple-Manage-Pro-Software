@@ -12,7 +12,7 @@ import { state } from "./state.js";
  */
 export async function resolveAdminSession() {
   const session = await getSession();
-  if (!session) haltForRedirect("/login.html", "Unauthenticated");
+  if (!session) haltForRedirect("/", "Unauthenticated");
 
   const role = await fetchRole();
   if (role !== "admin") haltForRedirect(portalPath(role), "Unauthorized");

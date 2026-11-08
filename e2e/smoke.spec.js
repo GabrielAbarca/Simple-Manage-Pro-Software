@@ -27,7 +27,7 @@ test.describe("login", () => {
     await routeSupabase(context, {});
     const errors = trackErrors(page);
 
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.waitForSelector("#auth-form");
 
     await expect(page.locator("#input-email")).not.toHaveValue("");
@@ -55,7 +55,7 @@ test.describe("login", () => {
     const errors = trackErrors(page);
 
     await page.goto(
-      "/login.html#error=access_denied&error_code=otp_expired" +
+      "/#error=access_denied&error_code=otp_expired" +
         "&error_description=Email+link+is+invalid+or+has+expired&sb=",
     );
     await page.waitForSelector("#auth-form");
@@ -65,7 +65,7 @@ test.describe("login", () => {
     // Still on the sign-in card, and the spent token is out of the URL.
     await expect(page.locator("#recovery-form")).toBeHidden();
     expect(new URL(page.url()).hash).toBe("");
-    expect(new URL(page.url()).pathname).toBe("/login.html");
+    expect(new URL(page.url()).pathname).toBe("/");
 
     expect(errors).toEqual([]);
   });
@@ -78,7 +78,7 @@ test.describe("login", () => {
     const errors = trackErrors(page);
 
     await page.goto(
-      "/login.html#access_token=" +
+      "/#access_token=" +
         accessTokenSeed() +
         "&refresh_token=fake-refresh&expires_in=3600" +
         "&token_type=bearer&type=recovery",
@@ -90,7 +90,7 @@ test.describe("login", () => {
       "Cree una contraseña nueva",
     );
     // Not redirected to a portal — the whole point of the fix.
-    expect(new URL(page.url()).pathname).toBe("/login.html");
+    expect(new URL(page.url()).pathname).toBe("/");
 
     // Demo mode must refuse the write rather than touch the shared account.
     await page.fill("#input-new-password", "new-password-1");
@@ -111,7 +111,7 @@ test.describe("login", () => {
     const writes = await routeSupabase(context, {});
 
     await page.goto(
-      "/login.html#access_token=" +
+      "/#access_token=" +
         accessTokenSeed() +
         "&refresh_token=fake-refresh&expires_in=3600" +
         "&token_type=bearer&type=recovery",
@@ -130,7 +130,7 @@ test.describe("login", () => {
 
   test("forgot-password is hidden in demo mode", async ({ page, context }) => {
     await routeSupabase(context, {});
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.waitForSelector("#auth-form");
     await expect(page.locator("#forgot-row")).toBeHidden();
   });
@@ -179,7 +179,7 @@ test.describe("student portal", () => {
       [`sb-${REF}-auth-token`, sessionSeed()],
     );
     const errors = trackErrors(page);
-    await page.goto("/");
+    await page.goto("/student.html");
     const card = page.locator("#upcoming-events-card");
     await expect(card).toContainText("Exam week");
     await expect(card).toContainText("Assembly today");
@@ -200,7 +200,7 @@ test.describe("student portal", () => {
     );
     const errors = trackErrors(page);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.waitForFunction(
       () =>
         document.getElementById("welcome-name")?.textContent?.includes("Ana"),
@@ -239,7 +239,7 @@ test.describe("student portal", () => {
     );
     const errors = trackErrors(page);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.waitForFunction(
       () =>
         document.getElementById("welcome-name")?.textContent?.includes("Ana"),
@@ -276,7 +276,7 @@ test.describe("student portal", () => {
     );
     const errors = trackErrors(page);
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.waitForFunction(
       () =>
         document.getElementById("welcome-name")?.textContent?.includes("Ana"),
@@ -518,7 +518,7 @@ test.describe("teacher console", () => {
     await routeSupabase(context, teacherFix);
     // Seeded once, deliberately not via addInitScript: re-seeding on every
     // navigation would put the session back and mask the bounce.
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.evaluate(
       ([key, value]) => localStorage.setItem(key, value),
       [`sb-${REF}-auth-token`, sessionSeed()],
@@ -534,7 +534,7 @@ test.describe("teacher console", () => {
     await page.click("#logout-btn");
     await expect
       .poll(() => new URL(page.url()).pathname, { timeout: 10_000 })
-      .toBe("/login.html");
+      .toBe("/");
   });
 });
 
@@ -544,7 +544,7 @@ test.describe("admin console", () => {
     context,
   }) => {
     await routeSupabase(context, consoleFix);
-    await page.goto("/login.html");
+    await page.goto("/");
     await page.evaluate(
       ([key, value]) => localStorage.setItem(key, value),
       [`sb-${REF}-auth-token`, sessionSeed()],
@@ -557,13 +557,13 @@ test.describe("admin console", () => {
       { timeout: 10_000 },
     );
 
-    // The button is an <a href="/login.html">; the handler must stop the
+    // The button is an <a href="/">; the handler must stop the
     // browser following it until signOut() has cleared the session, or the
     // admin role gate routes straight back to /admin.html.
     await page.click("#logout-btn");
     await expect
       .poll(() => new URL(page.url()).pathname, { timeout: 10_000 })
-      .toBe("/login.html");
+      .toBe("/");
   });
 
   test("loads the shell, does academic-structure CRUD, and never writes", async ({

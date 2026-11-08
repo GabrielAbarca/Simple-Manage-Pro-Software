@@ -61,7 +61,7 @@ export function initTeacherNav(pageLoaders, closeNav) {
     ?.addEventListener("click", async (e) => {
       e.preventDefault();
       await signOut();
-      window.location.replace("/login.html");
+      window.location.replace("/");
     });
 
   initCrossPortalLinks();
@@ -82,7 +82,7 @@ async function initCrossPortalLinks() {
     },
     {
       id: "student-portal-link",
-      path: "/",
+      path: "/student.html",
       allowed: (await fetchStudentId(state.session.user.id)) != null,
     },
   ];
@@ -94,7 +94,7 @@ async function initCrossPortalLinks() {
     link.addEventListener("click", async (e) => {
       e.preventDefault();
       if (!(await getSession())) {
-        window.location.replace("/login.html");
+        window.location.replace("/");
         return;
       }
       window.location.href = path;

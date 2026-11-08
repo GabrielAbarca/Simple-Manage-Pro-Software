@@ -142,7 +142,7 @@ export function initNav(views, closeNav) {
     logoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       await signOut();
-      window.location.replace("/login.html");
+      window.location.replace("/");
     });
   }
 
@@ -163,7 +163,7 @@ async function initCrossPortalLinks() {
       // enough for it to expire, and the target's guard would only bounce
       // the user to a login page without explaining why.
       if (!(await getSession())) {
-        window.location.replace("/login.html");
+        window.location.replace("/");
         return;
       }
       window.location.href = path;

@@ -264,7 +264,7 @@ template (Authentication → Emails) to a token-hash link avoids it — nothing 
 spent until the page itself exchanges the token:
 
 ```html
-<a href="{{ .SiteURL }}/login.html?token_hash={{ .TokenHash }}&type=recovery">
+<a href="{{ .SiteURL }}/index.html?token_hash={{ .TokenHash }}&type=recovery">
   Reset password
 </a>
 ```

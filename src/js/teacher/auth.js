@@ -12,7 +12,7 @@ import { t } from "../i18n.js";
  */
 export async function resolveTeacherSession() {
   const session = await getSession();
-  if (!session) haltForRedirect("/login.html", "Unauthenticated");
+  if (!session) haltForRedirect("/", "Unauthenticated");
 
   const role = await fetchRole();
   if (role !== "teacher" && role !== "admin") {

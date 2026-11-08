@@ -43,7 +43,7 @@ test.describe("failed queries", () => {
       }),
     );
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.click('aside .sidebar a[data-page="grades"]');
 
     const gradesView = page.locator("#view-grades");
@@ -70,7 +70,7 @@ test.describe("failed queries", () => {
       }),
     );
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.click('aside .sidebar a[data-page="grades"]');
 
     const gradesView = page.locator("#view-grades");
@@ -100,7 +100,7 @@ test.describe("failed queries", () => {
       }),
     );
 
-    await page.goto("/");
+    await page.goto("/student.html");
     await page.click('aside .sidebar a[data-page="events"]');
     await expect(page.locator("#view-events .load-error")).toBeVisible();
 
@@ -116,7 +116,7 @@ test.describe("offline notice", () => {
     context,
   }) => {
     await asStudent(context);
-    await page.goto("/");
+    await page.goto("/student.html");
 
     const banner = page.locator('[role="status"]', {
       hasText: /offline|conexión/i,
@@ -137,7 +137,7 @@ test.describe("offline notice", () => {
     context,
   }) => {
     await asStudent(context);
-    await page.goto("/");
+    await page.goto("/student.html");
 
     const banner = page.locator('[role="status"]', {
       hasText: /offline|conexión/i,

@@ -1,9 +1,4 @@
-/**
- * Login entry point. Explicit .html path per the app's cross-page redirect
- * convention (see role.js) — Vercel's cleanUrls 308s it to /login, and Vite's
- * dev server serves it directly.
- */
-export const LOGIN_PATH = "/login.html";
+export const LOGIN_PATH = "/";
 
 /**
  * @typedef {{ kind: "none" }

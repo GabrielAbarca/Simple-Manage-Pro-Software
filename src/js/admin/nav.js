@@ -52,7 +52,7 @@ export function initAdminNav(pageLoaders, closeNav) {
     ?.addEventListener("click", async (e) => {
       e.preventDefault();
       await signOut();
-      window.location.replace("/login.html");
+      window.location.replace("/");
     });
 
   document.querySelector(".profile-photo")?.addEventListener("click", () => {

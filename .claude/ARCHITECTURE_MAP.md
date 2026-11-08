@@ -1,5 +1,20 @@
 # ARCHITECTURE_MAP.md
 
+> **⚠ OUTDATED — do not trust paths in this file without checking the tree.**
+>
+> Last refreshed Oct 7, 2026, before the portal restructure (#129 student,
+> #130 teacher). Known-stale references:
+>
+> | Map says              | Now                                                     |
+> | --------------------- | ------------------------------------------------------- |
+> | `src/js/views/`       | `src/js/student/screens/` and `src/js/teacher/screens/` |
+> | `src/js/teacherData/` | `src/js/teacher/data/`                                  |
+> | `src/js/main.js`      | `src/js/student.js`                                     |
+> | "no per-portal dirs"  | `src/js/admin/`, `src/js/student/`, `src/js/teacher/`   |
+>
+> Line counts, module counts and the feature map below may be stale too. Use
+> `ls`/`grep` on `src/js/` as the source of truth until this map is rewritten.
+
 A navigation map for AI agents (and humans) working in this repo, so a session
 can find the right file without reading the whole tree. See root `CLAUDE.md`
 for conventions and hard rules; this file is structure only.

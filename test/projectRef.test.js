@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { refFromUrl, assertExpectedRef } from "../src/js/projectRef.js";
+import { refFromUrl, assertExpectedRef } from "../src/js/projectRef.ts";
 
 describe("refFromUrl", () => {
   it("reads the project ref out of a Supabase URL", () => {

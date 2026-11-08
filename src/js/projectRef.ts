@@ -17,11 +17,8 @@
  * The project ref embedded in a Supabase URL — the first hostname label of
  * `https://<ref>.supabase.co`. Returns null for anything unparseable, since a
  * malformed URL is the client's problem to report, not this module's.
- *
- * @param {string} url
- * @returns {string | null}
  */
-export function refFromUrl(url) {
+export function refFromUrl(url: string): string | null {
   if (typeof url !== "string" || url.trim() === "") return null;
   try {
     const { hostname } = new URL(url);
@@ -37,11 +34,13 @@ export function refFromUrl(url) {
  * project. No-op when `expectedRef` is empty, which is the default everywhere
  * except a deployment that opts in.
  *
- * @param {string} url the configured VITE_SUPABASE_URL
- * @param {string | undefined} expectedRef the configured VITE_EXPECTED_PROJECT_REF
- * @returns {void}
+ * @param url the configured VITE_SUPABASE_URL
+ * @param expectedRef the configured VITE_EXPECTED_PROJECT_REF
  */
-export function assertExpectedRef(url, expectedRef) {
+export function assertExpectedRef(
+  url: string,
+  expectedRef: string | undefined,
+): void {
   const expected = typeof expectedRef === "string" ? expectedRef.trim() : "";
   if (!expected) return;
 

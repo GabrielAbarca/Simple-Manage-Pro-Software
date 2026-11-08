@@ -12,6 +12,8 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "noUnusedLocals": true,
 
     // Pragmatic strictness for incremental JS typing: still catches unknown
     // properties, wrong argument counts and type mismatches, without drowning
@@ -22,7 +24,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/js/**/*.js"],
+  "include": ["src/js/**/*.js", "src/js/**/*.ts"],
   // Screens that already pass the checker; listed so the screens glob below
   // doesn't drop them.
   "files": [

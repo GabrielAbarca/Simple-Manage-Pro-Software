@@ -1,5 +1,6 @@
 import { getSession } from "../auth.js";
 import { fetchRole, portalPath, haltForRedirect } from "../role.js";
+import { LOGIN_PATH } from "../paths.js";
 import { t } from "../i18n.js";
 
 /**
@@ -12,7 +13,7 @@ import { t } from "../i18n.js";
  */
 export async function resolveTeacherSession() {
   const session = await getSession();
-  if (!session) haltForRedirect("/", "Unauthenticated");
+  if (!session) haltForRedirect(LOGIN_PATH, "Unauthenticated");
 
   const role = await fetchRole();
   if (role !== "teacher" && role !== "admin") {

@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {
-  LOGIN_PATH,
-  parseRecoveryUrl,
-  recoveryRedirectUrl,
-} from "../src/js/recovery.js";
+import { parseRecoveryUrl, recoveryRedirectUrl } from "../src/js/recovery.js";
+import { LOGIN_PATH } from "../src/js/paths.js";
 
 describe("recoveryRedirectUrl", () => {
   it("targets the login entry point on the given origin", () => {

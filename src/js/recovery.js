@@ -1,4 +1,4 @@
-export const LOGIN_PATH = "/";
+import { LOGIN_PATH } from "./paths.js";
 
 /**
  * @typedef {{ kind: "none" }

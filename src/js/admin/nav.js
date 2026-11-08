@@ -1,4 +1,5 @@
 import { signOut } from "../auth.js";
+import { LOGIN_PATH } from "../paths.js";
 import { state } from "./state.js";
 
 const sections = document.querySelectorAll(".view-section");
@@ -52,7 +53,7 @@ export function initAdminNav(pageLoaders, closeNav) {
     ?.addEventListener("click", async (e) => {
       e.preventDefault();
       await signOut();
-      window.location.replace("/");
+      window.location.replace(LOGIN_PATH);
     });
 
   document.querySelector(".profile-photo")?.addEventListener("click", () => {

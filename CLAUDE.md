@@ -72,23 +72,30 @@ CI (`.github/workflows/ci.yml`) mirrors `lint` → `typecheck` → `test` → `b
 ## Architecture
 
 See `.claude/ARCHITECTURE_MAP.md` for a full file-by-file navigation map
-(portals, data layer, flagged large files). **⚠ That map is outdated** — it
-predates the portal restructure; read the notice at its top and verify every
-path against the tree before relying on it. Summary below.
+(portals, feature map, shared modules, flagged large files). Summary below.
+
+Each portal has its own directory under `src/js/` with the same skeleton:
+`auth.js` (on-load guard), `state.js`, `nav.js`, a data layer, and
+`screens/`:
+
+| Portal  | Directory         | Data layer                                                              |
+| ------- | ----------------- | ----------------------------------------------------------------------- |
+| Student | `src/js/student/` | `student/data.js` (read-only)                                           |
+| Teacher | `src/js/teacher/` | `teacher/data/` (one file per domain, composed into `db` by `index.js`) |
+| Admin   | `src/js/admin/`   | `admin/data.js` over `adminData.js` / `adminDemoDb.js`                  |
 
 `src/js/` splits into two layers:
 
-- **View controllers** — `admin.js`, `teacher.js`, `main.js`, `login.js`. DOM glue, and all four are now thin bootstraps over per-screen modules (`src/js/admin/`, `src/js/views/`). These are **excluded from `typecheck`** (see `tsconfig.json`) and typed incrementally; keep them thin and push logic down into the layer below.
+- **View controllers** — `admin.js`, `teacher.js`, `student.js`, `login.js`. DOM glue, and the three portal controllers are thin bootstraps over their portal directory (`src/js/admin/`, `src/js/student/`, `src/js/teacher/`). Controllers, `*/nav.js`, `*/screens/**` and `src/js/admin/**` are **excluded from `typecheck`** (see `tsconfig.json`) and typed incrementally; keep them thin and push logic down into the layer below.
 - **Logic layer** (type-checked, prefer JSDoc on new code):
   - `supabaseClient.js` — the Supabase client. **Throws if `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are missing.**
-  - `supabaseQueries.js` — student/teacher data fetching.
+  - `student/data.js` and `teacher/data/*.js` — each portal's Supabase queries.
   - `adminData.js` — admin console data layer: a generic table `Gateway`
-    (Supabase-backed) + `createAdminData(gateway)` declarative CRUD methods.
-    Consumed by `src/js/admin/` — the admin console's own directory of ~40
-    modules (UI kit, domain helpers, one per screen, the schedules tab and
-    the CSV import wizard). It is the only portal with a directory of its
-    own; see `.claude/ARCHITECTURE_MAP.md` (outdated — verify paths) for
-    the layout and the no-import-cycles rule that goes with it.
+    (Supabase-backed) + `createAdminData(gateway)` declarative CRUD methods,
+    consumed by `src/js/admin/` through `admin/data.js`.
+  - `modal.js` + `modalFields.js`, `feedback.js`, `dialog.js`, `html.js`
+    (`escapeHtml`) — the form/dialog/toast kit shared by the teacher and admin
+    consoles.
   - `csv.js` — dependency-free CSV/TSV parsing + header auto-mapping for the
     admin console's roster import.
   - `accounts.js` — login-account management: calls the `admin-users` Edge
